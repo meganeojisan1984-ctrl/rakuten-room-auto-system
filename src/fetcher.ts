@@ -145,6 +145,7 @@ async function fetchRanking(genreId?: string): Promise<RakutenItem[]> {
     headers: { Referer: "https://github.com", Origin: "https://github.com" },
   });
 
+  console.log("[fetcher] APIレスポンス構造:", JSON.stringify(response.data).slice(0, 500));
   const items = response.data.RankingResult.items.map((i) => i.Item);
   return convertRankingItems(items);
 }
