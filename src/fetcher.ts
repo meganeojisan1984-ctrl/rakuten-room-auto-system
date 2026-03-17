@@ -3,6 +3,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 const RAKUTEN_APP_ID = process.env.RAKUTEN_APP_ID ?? "";
+const RAKUTEN_ACCESS_KEY = process.env.RAKUTEN_ACCESS_KEY ?? "";
 const MAX_PRICE = parseInt(process.env.MAX_PRICE ?? "10000", 10);
 const TARGET_GENRE = process.env.TARGET_GENRE ?? "general";
 
@@ -127,6 +128,7 @@ function detectBonusInfo(item: RakutenRankingApiItem | RakutenApiItem): {
 async function fetchRanking(genreId?: string): Promise<RakutenItem[]> {
   const params: Record<string, string | number> = {
     applicationId: RAKUTEN_APP_ID,
+    accessKey: RAKUTEN_ACCESS_KEY,
     formatVersion: 2,
     hits: 30,
     page: 1,
@@ -137,7 +139,7 @@ async function fetchRanking(genreId?: string): Promise<RakutenItem[]> {
 
   const response = await axios.get<{
     RankingResult: { items: Array<{ Item: RakutenRankingApiItem }> };
-  }>("https://app.rakuten.co.jp/services/api/IchibaItem/Ranking/20220601", {
+  }>("https://openapi.rakuten.co.jp/ichibaranking/api/IchibaItem/Ranking/20220601", {
     params,
     timeout: 15000,
   });
@@ -152,6 +154,7 @@ async function fetchRanking(genreId?: string): Promise<RakutenItem[]> {
 async function fetchItemSearch(keyword: string, minPrice?: number, maxPrice?: number, genreId?: string): Promise<RakutenItem[]> {
   const params: Record<string, string | number> = {
     applicationId: RAKUTEN_APP_ID,
+    accessKey: RAKUTEN_ACCESS_KEY,
     formatVersion: 2,
     hits: 30,
     sort: "-reviewCount",
@@ -165,7 +168,7 @@ async function fetchItemSearch(keyword: string, minPrice?: number, maxPrice?: nu
 
   const response = await axios.get<{
     Items: Array<{ Item: RakutenApiItem }>;
-  }>("https://app.rakuten.co.jp/services/api/IchibaItem/Search/20220601", {
+  }>("https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20220601", {
     params,
     timeout: 15000,
   });
