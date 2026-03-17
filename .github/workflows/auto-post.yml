@@ -1,0 +1,79 @@
+name: 楽天ROOM 自動投稿
+
+on:
+  schedule:
+    # 日本時間への変換 (JST = UTC+9)
+    # JST 00:00 → UTC 15:00 (前日)
+    - cron: "0 15 * * *"
+    # JST 09:00 → UTC 00:00
+    - cron: "0 0 * * *"
+    # JST 12:00 → UTC 03:00
+    - cron: "0 3 * * *"
+    # JST 21:00 → UTC 12:00
+    - cron: "0 12 * * *"
+    # JST 23:00 → UTC 14:00
+    - cron: "0 14 * * *"
+  # 手動実行も可能
+  workflow_dispatch:
+    inputs:
+      target_genre:
+        description: "ターゲットジャンル (general/furusato/electronics/1000yen)"
+        required: false
+        default: "general"
+      post_count:
+        description: "投稿数"
+        required: false
+        default: "3"
+
+jobs:
+  auto-post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Node.js のセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: 依存関係をインストール
+        run: npm ci
+
+      - name: Playwright Chromium をインストール
+        run: npx playwright install chromium --with-deps
+
+      - name: 自動投稿を実行
+        env:
+          CI: "true"
+          RAKUTEN_APP_ID: ${{ secrets.RAKUTEN_APP_ID }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          ROOM_COOKIE: ${{ secrets.ROOM_COOKIE }}
+          TARGET_GENRE: ${{ github.event.inputs.target_genre || vars.TARGET_GENRE || 'general' }}
+          POST_COUNT: ${{ github.event.inputs.post_count || vars.POST_COUNT || '3' }}
+          MAX_PRICE: ${{ vars.MAX_PRICE || '10000' }}
+          GENRE_ID_FURUSATO: ${{ vars.GENRE_ID_FURUSATO || '553066' }}
+          GENRE_ID_ELECTRONICS: ${{ vars.GENRE_ID_ELECTRONICS || '215783' }}
+        run: npx tsx src/main.ts
+
+      - name: エラースクリーンショットをアップロード（失敗時）
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: error-screenshot-${{ github.run_id }}
+          path: error.png
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: 実行ログをアップロード
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: run-log-${{ github.run_id }}
+          path: "*.log"
+          retention-days: 3
+          if-no-files-found: ignore
