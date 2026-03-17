@@ -142,7 +142,7 @@ async function fetchRanking(genreId?: string): Promise<RakutenItem[]> {
   }>("https://openapi.rakuten.co.jp/ichibaranking/api/IchibaItem/Ranking/20220601", {
     params,
     timeout: 15000,
-    headers: { Referer: "https://github.com" },
+    headers: { Referer: "https://github.com", Origin: "https://github.com" },
   });
 
   const items = response.data.RankingResult.items.map((i) => i.Item);
@@ -172,7 +172,7 @@ async function fetchItemSearch(keyword: string, minPrice?: number, maxPrice?: nu
   }>("https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20220601", {
     params,
     timeout: 15000,
-    headers: { Referer: "https://github.com" },
+    headers: { Referer: "https://github.com", Origin: "https://github.com" },
   });
 
   const items = response.data.Items.map((i) => i.Item);
