@@ -138,15 +138,14 @@ async function fetchRanking(genreId?: string): Promise<RakutenItem[]> {
   console.log(`[fetcher] ランキングAPI取得中 (ジャンルID: ${genreId || "全体"})`);
 
   const response = await axios.get<{
-    RankingResult: { items: Array<{ Item: RakutenRankingApiItem }> };
+    Items: Array<RakutenRankingApiItem>;
   }>("https://openapi.rakuten.co.jp/ichibaranking/api/IchibaItem/Ranking/20220601", {
     params,
     timeout: 15000,
     headers: { Referer: "https://github.com", Origin: "https://github.com" },
   });
 
-  console.log("[fetcher] APIレスポンス構造:", JSON.stringify(response.data).slice(0, 500));
-  const items = response.data.RankingResult.items.map((i) => i.Item);
+  const items = response.data.Items ?? [];
   return convertRankingItems(items);
 }
 
@@ -186,17 +185,17 @@ function convertRankingItems(items: RakutenRankingApiItem[]): RakutenItem[] {
     return {
       itemName: item.itemName,
       itemCode: item.itemCode,
-      itemPrice: item.itemPrice,
+      itemPrice: typeof item.itemPrice === "string" ? parseInt(item.itemPrice, 10) : item.itemPrice,
       itemUrl: item.itemUrl,
-      itemCaption: item.itemCaption,
-      imageUrl: item.mediumImageUrls[0]?.imageUrl ?? "",
-      shopName: item.shopName,
-      pointRate: item.pointRate,
+      itemCaption: item.itemCaption ?? "",
+      imageUrl: item.mediumImageUrls?.[0]?.imageUrl ?? "",
+      shopName: item.shopName ?? "",
+      pointRate: item.pointRate ?? 1,
       pointRateStartTime: item.pointRateStartTime || undefined,
       pointRateEndTime: item.pointRateEndTime || undefined,
       hasCoupon,
       hasPointBonus,
-      availability: item.availability,
+      availability: item.availability ?? 1,
       endTime: item.endTime || undefined,
     };
   });
