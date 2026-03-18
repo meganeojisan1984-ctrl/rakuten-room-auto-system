@@ -25,6 +25,9 @@ on:
         required: false
         default: "3"
 
+permissions:
+  contents: write
+
 jobs:
   auto-post:
     runs-on: ubuntu-latest
