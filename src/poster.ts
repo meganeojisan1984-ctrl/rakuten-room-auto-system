@@ -15,7 +15,7 @@ const SELECTORS = {
   // 投稿フォームのテキストエリア
   captionInput: 'textarea[name="description"], textarea.room-caption, textarea[placeholder*="コメント"], textarea[placeholder*="感想"]',
   // 投稿ボタン
-  postButton: 'button[type="submit"].room-post, button.post-btn, input[type="submit"][value*="投稿"]',
+  postButton: ':text("投稿する"), :text("シェアする"), :text("ROOMに投稿"), button[type="submit"], input[type="submit"]',
   // ログイン要求のセレクタ
   loginForm: 'form[action*="login"], input[name="u"]',
   // CAPTCHA
@@ -110,7 +110,9 @@ async function postSingleItem(
 
     // 投稿ボタンをクリック
     const postBtn = await postPage.waitForSelector(SELECTORS.postButton, { timeout: 10000 }).catch(async () => {
-      await postPage.screenshot({ path: SCREENSHOT_PATH }).catch(() => {});
+      await postPage.screenshot({ path: SCREENSHOT_PATH, fullPage: true }).catch(() => {});
+      const formHtml = await postPage.evaluate(() => document.body.innerHTML.slice(0, 3000)).catch(() => "");
+      console.error("[poster] 投稿フォームHTML:", formHtml);
       await notifyDomError("投稿ボタンが見つかりません");
       throw new Error("投稿ボタンが見つかりません");
     });
