@@ -1,40 +1,41 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 import * as dotenv from "dotenv";
 import type { RakutenItem } from "./fetcher";
 dotenv.config();
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY ?? "";
-const MODEL_NAME = "gemini-2.0-flash-lite";
+const GROQ_API_KEY = process.env.GROQ_API_KEY ?? "";
+const MODEL_NAME = "llama-3.3-70b-versatile";
 
-// Free Tier制限対策: リクエスト間隔 (ms)
-const REQUEST_INTERVAL_MS = 4000; // 15RPM制限に対応 (60秒/15 = 4秒)
+// レート制限対策: リクエスト間隔 (ms)
+const REQUEST_INTERVAL_MS = 2000;
 const MAX_RETRIES = 3;
-const RETRY_BASE_DELAY_MS = 10000;
+const RETRY_BASE_DELAY_MS = 5000;
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/**
- * Exponential Backoffでリトライ
- */
 async function generateWithRetry(
-  genAI: GoogleGenerativeAI,
+  client: Groq,
   prompt: string,
   attempt: number = 0
 ): Promise<string> {
   try {
-    const model = genAI.getGenerativeModel({ model: MODEL_NAME }, { apiVersion: "v1" });
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
-    if (!text) throw new Error("Gemini APIからの応答が空です");
+    const completion = await client.chat.completions.create({
+      model: MODEL_NAME,
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 512,
+      temperature: 0.8,
+    });
+    const text = completion.choices[0]?.message?.content ?? "";
+    if (!text) throw new Error("Groq APIからの応答が空です");
     return text;
   } catch (err: unknown) {
     const errorMsg = String(err);
     const isRateLimit =
       errorMsg.includes("429") ||
-      errorMsg.includes("RESOURCE_EXHAUSTED") ||
-      errorMsg.includes("rate limit");
+      errorMsg.includes("rate_limit") ||
+      errorMsg.includes("Rate limit");
 
     if (isRateLimit && attempt < MAX_RETRIES) {
       const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt);
@@ -42,15 +43,12 @@ async function generateWithRetry(
         `[generator] レート制限に達しました。${delay / 1000}秒後にリトライ (${attempt + 1}/${MAX_RETRIES})`
       );
       await sleep(delay);
-      return generateWithRetry(genAI, prompt, attempt + 1);
+      return generateWithRetry(client, prompt, attempt + 1);
     }
     throw err;
   }
 }
 
-/**
- * 商品情報からプロモーション文を生成するプロンプトを構築
- */
 function buildPrompt(item: RakutenItem): string {
   const bonusInfo: string[] = [];
   if (item.hasPointBonus) {
@@ -82,26 +80,20 @@ function buildPrompt(item: RakutenItem): string {
 投稿文のみを出力してください（前置きや説明は不要です）:`;
 }
 
-/**
- * 1つの商品に対してGeminiで紹介文を生成
- */
 export async function generateCaption(item: RakutenItem): Promise<string> {
-  if (!GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY が未設定です");
+  if (!GROQ_API_KEY) {
+    throw new Error("GROQ_API_KEY が未設定です");
   }
 
-  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+  const client = new Groq({ apiKey: GROQ_API_KEY });
   const prompt = buildPrompt(item);
 
   console.log(`[generator] 「${item.itemName.slice(0, 30)}...」の紹介文を生成中`);
-  const caption = await generateWithRetry(genAI, prompt);
+  const caption = await generateWithRetry(client, prompt);
   console.log("[generator] 紹介文生成完了");
   return caption.trim();
 }
 
-/**
- * 複数商品に対してレート制限を考慮しながら紹介文を一括生成
- */
 export async function generateCaptions(
   items: RakutenItem[]
 ): Promise<Array<{ item: RakutenItem; caption: string }>> {
@@ -116,10 +108,8 @@ export async function generateCaptions(
       results.push({ item, caption });
     } catch (err) {
       console.error(`[generator] 商品「${item.itemName.slice(0, 30)}」の生成失敗:`, err);
-      // 失敗した商品はスキップ
     }
 
-    // 最後の商品以外はレート制限対策のウェイト
     if (i < items.length - 1) {
       console.log(`[generator] レート制限対策: ${REQUEST_INTERVAL_MS / 1000}秒待機...`);
       await sleep(REQUEST_INTERVAL_MS);
