@@ -146,16 +146,30 @@ async function fetchRanking(genreId?: string): Promise<RakutenItem[]> {
 
   console.log(`[fetcher] ランキングAPI取得中 (ジャンルID: ${genreId || "全体"})`);
 
-  const response = await axios.get<{
-    Items: Array<RakutenRankingApiItem>;
-  }>("https://openapi.rakuten.co.jp/ichibaranking/api/IchibaItem/Ranking/20220601", {
-    params,
-    timeout: 15000,
-    headers: { Referer: "https://github.com", Origin: "https://github.com" },
-  });
+  try {
+    const response = await axios.get<{
+      Items: Array<RakutenRankingApiItem>;
+    }>("https://openapi.rakuten.co.jp/ichibaranking/api/IchibaItem/Ranking/20220601", {
+      params,
+      timeout: 15000,
+      headers: { Referer: "https://github.com", Origin: "https://github.com" },
+    });
 
-  const items = response.data.Items ?? [];
-  return convertRankingItems(items);
+    const items = response.data.Items ?? [];
+    return convertRankingItems(items);
+  } catch (err: unknown) {
+    const status = (err as { response?: { status?: number } })?.response?.status;
+    if (genreId && (status === 404 || status === 400)) {
+      console.warn(`[fetcher] ジャンルID ${genreId} が無効 (${status})、全体ランキングで再試行`);
+      delete params.genreId;
+      const fallback = await axios.get<{ Items: Array<RakutenRankingApiItem> }>(
+        "https://openapi.rakuten.co.jp/ichibaranking/api/IchibaItem/Ranking/20220601",
+        { params, timeout: 15000, headers: { Referer: "https://github.com", Origin: "https://github.com" } }
+      );
+      return convertRankingItems(fallback.data.Items ?? []);
+    }
+    throw err;
+  }
 }
 
 /**
