@@ -84,12 +84,22 @@ async function postSingleItem(
       throw new Error("「ROOMに追加」ボタンが見つかりません");
     });
 
-    await addBtn.click();
+    // 新しいタブが開く場合に備えて待機
+    const [newPageOrNull] = await Promise.all([
+      context.waitForEvent("page", { timeout: 5000 }).catch(() => null),
+      addBtn.click(),
+    ]);
+
+    const postPage = newPageOrNull ?? page;
+    if (newPageOrNull) {
+      console.log("[poster] 新しいタブで投稿フォームが開きました");
+      await postPage.waitForLoadState("load", { timeout: 15000 });
+    }
     console.log("[poster] ROOMに追加ボタンをクリックしました");
 
     // 投稿フォームの表示を待機
-    const captionEl = await page.waitForSelector(SELECTORS.captionInput, { timeout: 15000 }).catch(async () => {
-      await page.screenshot({ path: SCREENSHOT_PATH });
+    const captionEl = await postPage.waitForSelector(SELECTORS.captionInput, { timeout: 15000 }).catch(async () => {
+      await postPage.screenshot({ path: SCREENSHOT_PATH }).catch(() => {});
       await notifyDomError("投稿フォームのテキストエリアが見つかりません");
       throw new Error("投稿フォームが見つかりません");
     });
@@ -99,8 +109,8 @@ async function postSingleItem(
     console.log("[poster] 紹介文を入力しました");
 
     // 投稿ボタンをクリック
-    const postBtn = await page.waitForSelector(SELECTORS.postButton, { timeout: 10000 }).catch(async () => {
-      await page.screenshot({ path: SCREENSHOT_PATH });
+    const postBtn = await postPage.waitForSelector(SELECTORS.postButton, { timeout: 10000 }).catch(async () => {
+      await postPage.screenshot({ path: SCREENSHOT_PATH }).catch(() => {});
       await notifyDomError("投稿ボタンが見つかりません");
       throw new Error("投稿ボタンが見つかりません");
     });
@@ -108,12 +118,11 @@ async function postSingleItem(
     await postBtn.click();
     console.log("[poster] 投稿ボタンをクリックしました");
 
-    // 投稿完了を待機 (URLの変化またはサクセスメッセージ)
+    // 投稿完了を待機
     await Promise.race([
-      page.waitForSelector(SELECTORS.successMessage, { timeout: 15000 }),
-      page.waitForURL((url) => url.href.includes("/room/"), { timeout: 15000 }),
+      postPage.waitForSelector(SELECTORS.successMessage, { timeout: 15000 }),
+      postPage.waitForURL((url) => url.href.includes("/room/"), { timeout: 15000 }),
     ]).catch(async () => {
-      // タイムアウトしても完了している場合があるのでエラーにしない
       console.warn("[poster] 投稿完了確認タイムアウト（投稿自体は成功している可能性あり）");
     });
 
