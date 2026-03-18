@@ -13,9 +13,9 @@ const SELECTORS = {
   // 商品ページの「ROOMに追加」ボタン
   addToRoomButton: ':text("ROOMに投稿"), :text("ROOMに追加"), a[data-ga-label="add_to_room"], button[data-ga-label="add_to_room"], .btn-add-room, a.add-to-room',
   // 投稿フォームのテキストエリア
-  captionInput: 'textarea[name="description"], textarea.room-caption, textarea[placeholder*="コメント"], textarea[placeholder*="感想"]',
-  // 投稿ボタン
-  postButton: ':text("投稿する"), :text("シェアする"), :text("ROOMに投稿"), button[type="submit"], input[type="submit"]',
+  captionInput: 'textarea[placeholder*="コメント"], textarea[placeholder*="感想"], textarea[name="description"], textarea.room-caption, textarea',
+  // 投稿ボタン（楽天ROOMの「完了」ボタンを最優先）
+  postButton: ':text("完了"), :text("投稿する"), :text("シェアする"), :text("ROOMに投稿"), button[type="submit"], input[type="submit"]',
   // ログイン要求のセレクタ
   loginForm: 'form[action*="login"], input[name="u"]',
   // CAPTCHA
