@@ -120,6 +120,14 @@ async function postSingleItem(
     await postBtn.click();
     console.log("[poster] 投稿ボタンをクリックしました");
 
+    // 投稿直後のスクリーンショット（デバッグ用）
+    await postPage.waitForTimeout(3000);
+    await postPage.screenshot({ path: SCREENSHOT_PATH, fullPage: true }).catch(() => {});
+    console.log("[poster] 投稿後スクリーンショット保存: error.png");
+    const afterHtml = await postPage.evaluate(() => document.body.innerHTML.slice(0, 3000)).catch(() => "");
+    console.log("[poster] 投稿後ページHTML:", afterHtml);
+    console.log("[poster] 投稿後URL:", postPage.url());
+
     // 投稿完了を待機
     await Promise.race([
       postPage.waitForSelector(SELECTORS.successMessage, { timeout: 15000 }),
