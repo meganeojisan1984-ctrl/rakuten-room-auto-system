@@ -4,7 +4,7 @@ import type { RakutenItem } from "./fetcher";
 dotenv.config();
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY ?? "";
-const MODEL_NAME = "gemini-2.0-flash";
+const MODEL_NAME = "gemini-1.5-flash";
 
 // Free Tier制限対策: リクエスト間隔 (ms)
 const REQUEST_INTERVAL_MS = 4000; // 15RPM制限に対応 (60秒/15 = 4秒)
