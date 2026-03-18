@@ -4,7 +4,7 @@ import type { RakutenItem } from "./fetcher";
 dotenv.config();
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY ?? "";
-const MODEL_NAME = "gemini-2.0-flash";
+const MODEL_NAME = "gemini-1.5-flash";
 
 // Free Tier制限対策: リクエスト間隔 (ms)
 const REQUEST_INTERVAL_MS = 4000; // 15RPM制限に対応 (60秒/15 = 4秒)
@@ -24,7 +24,7 @@ async function generateWithRetry(
   attempt: number = 0
 ): Promise<string> {
   try {
-    const model = genAI.getGenerativeModel({ model: MODEL_NAME });
+    const model = genAI.getGenerativeModel({ model: MODEL_NAME }, { apiVersion: "v1" });
     const result = await model.generateContent(prompt);
     const text = result.response.text();
     if (!text) throw new Error("Gemini APIからの応答が空です");
