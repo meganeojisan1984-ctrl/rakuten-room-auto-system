@@ -7,9 +7,18 @@ const RAKUTEN_ACCESS_KEY = process.env.RAKUTEN_ACCESS_KEY ?? "";
 const MAX_PRICE = parseInt(process.env.MAX_PRICE ?? "10000", 10);
 const TARGET_GENRE = process.env.TARGET_GENRE ?? "general";
 
-// ジャンルID設定
+// SNS注目ジャンル定義（毎回ランダム選択）
+const SNS_GENRES = [
+  { name: "高機能・高級家電", genreId: "215783", maxPrice: 100000 },
+  { name: "美容・コスメ（機能性重視）", genreId: "216131", maxPrice: 50000 },
+  { name: "ファッション・バッグ・靴", genreId: "503912", maxPrice: 80000 },
+  { name: "ウェルネス・健康グッズ", genreId: "101213", maxPrice: 30000 },
+  { name: "便利雑貨・悩み解決グッズ", genreId: "215684", maxPrice: 20000 },
+];
+
+// ジャンルID設定（後方互換）
 const GENRE_IDS: Record<string, string> = {
-  general: process.env.GENRE_ID_GENERAL ?? "",
+  general: "",
   furusato: process.env.GENRE_ID_FURUSATO ?? "553066",
   electronics: process.env.GENRE_ID_ELECTRONICS ?? "215783",
   "1000yen": "",
@@ -232,10 +241,24 @@ export async function fetchItems(count: number = 5): Promise<RakutenItem[]> {
   }
 
   let rawItems: RakutenItem[] = [];
-  const priceOverride = GENRE_PRICE_OVERRIDES[TARGET_GENRE];
-  const minPrice = priceOverride?.min;
-  const maxPrice = priceOverride?.max ?? MAX_PRICE;
-  const genreId = GENRE_IDS[TARGET_GENRE] || undefined;
+  let maxPrice = MAX_PRICE;
+  let minPrice: number | undefined;
+  let genreId: string | undefined;
+  let selectedGenreName = "全体";
+
+  // generalの場合はSNSジャンルからランダム選択
+  if (TARGET_GENRE === "general" || !TARGET_GENRE) {
+    const selected = SNS_GENRES[Math.floor(Math.random() * SNS_GENRES.length)]!;
+    genreId = selected.genreId;
+    maxPrice = selected.maxPrice;
+    selectedGenreName = selected.name;
+    console.log(`[fetcher] SNSジャンル選択: ${selectedGenreName}`);
+  } else {
+    const priceOverride = GENRE_PRICE_OVERRIDES[TARGET_GENRE];
+    minPrice = priceOverride?.min;
+    maxPrice = priceOverride?.max ?? MAX_PRICE;
+    genreId = GENRE_IDS[TARGET_GENRE] || undefined;
+  }
 
   try {
     if (TARGET_GENRE === "1000yen") {
@@ -249,13 +272,10 @@ export async function fetchItems(count: number = 5): Promise<RakutenItem[]> {
 
   // フィルタリング
   let filtered = rawItems.filter((item) => {
-    // 在庫チェック
     if (item.availability !== 1) return false;
-    // 販売期間チェック
     if (item.endTime) {
       if (new Date(item.endTime) < new Date()) return false;
     }
-    // 価格フィルタ（ふるさと納税は上限なし）
     if (TARGET_GENRE !== "furusato") {
       if (item.itemPrice > maxPrice) return false;
     }
