@@ -54,8 +54,8 @@ async function postSingleItem(
     // 商品URLへアクセス
     console.log(`[poster] 商品URLへアクセス: ${item.itemUrl}`);
     await page.goto(item.itemUrl, {
-      waitUntil: "load",
-      timeout: 30000,
+      waitUntil: "domcontentloaded",
+      timeout: 60000,
     });
     await page.waitForTimeout(2000);
 
