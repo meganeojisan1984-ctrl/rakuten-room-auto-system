@@ -159,6 +159,15 @@ async function fetchRanking(genreId?: string): Promise<RakutenItem[]> {
     return convertRankingItems(items);
   } catch (err: unknown) {
     const status = (err as { response?: { status?: number } })?.response?.status;
+    if (status === 429) {
+      console.warn("[fetcher] 楽天API レート制限 (429)、60秒待機して再試行...");
+      await new Promise((r) => setTimeout(r, 60000));
+      const retry = await axios.get<{ Items: Array<RakutenRankingApiItem> }>(
+        "https://openapi.rakuten.co.jp/ichibaranking/api/IchibaItem/Ranking/20220601",
+        { params, timeout: 15000, headers: { Referer: "https://github.com", Origin: "https://github.com" } }
+      );
+      return convertRankingItems(retry.data.Items ?? []);
+    }
     if (genreId && (status === 404 || status === 400)) {
       console.warn(`[fetcher] ジャンルID ${genreId} が無効 (${status})、全体ランキングで再試行`);
       delete params.genreId;
