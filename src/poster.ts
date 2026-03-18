@@ -104,15 +104,27 @@ async function postSingleItem(
       throw new Error("投稿フォームが見つかりません");
     });
 
-    // 紹介文を入力（React対応: ネイティブセッターでstateを強制更新）
+    // 紹介文を入力（AngularJS対応）
     await captionEl.click();
+    const ngModel = await postPage.evaluate(() => {
+      return document.querySelector("textarea")?.getAttribute("ng-model") ?? "";
+    });
+    console.log(`[poster] textarea ng-model: ${ngModel}`);
     await postPage.evaluate((text) => {
       const textarea = document.querySelector("textarea");
       if (!textarea) return;
-      const nativeSetter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")?.set;
-      nativeSetter?.call(textarea, text);
+      textarea.value = text;
       textarea.dispatchEvent(new Event("input", { bubbles: true }));
       textarea.dispatchEvent(new Event("change", { bubbles: true }));
+      // AngularJS scope更新
+      const win = window as unknown as { angular?: { element: (el: Element) => { scope: () => unknown; triggerHandler: (e: string) => void } } };
+      if (win.angular) {
+        const el = win.angular.element(textarea);
+        el.triggerHandler("input");
+        el.triggerHandler("change");
+        const scope = el.scope() as { $apply?: () => void };
+        scope?.$apply?.();
+      }
     }, caption);
     await postPage.waitForTimeout(500);
     const enteredText = await captionEl.inputValue().catch(() => "");
