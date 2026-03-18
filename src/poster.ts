@@ -123,25 +123,34 @@ async function postSingleItem(
     });
     console.log(`[poster] textarea ng-model: "${ngModelAttr}"`);
 
+    // AngularJSスコープを直接更新（$parentを含む全親を検索）
     await postPage.evaluate((text) => {
       const textarea = document.querySelector("textarea");
       if (!textarea) return;
-      // ng-model="$parent.content" なので $parent スコープを更新
-      const win = window as unknown as { angular?: { element: (el: Element) => { scope: () => { $parent: { content: string; $apply: () => void } }; triggerHandler: (e: string) => void } } };
+      const win = window as unknown as { angular?: { element: (el: Element) => { scope: () => Record<string, unknown>; triggerHandler: (e: string) => void } } };
       if (win.angular) {
         const angEl = win.angular.element(textarea);
-        const scope = angEl.scope();
-        scope.$parent.content = text;
-        scope.$parent.$apply();
+        let scope = angEl.scope() as Record<string, unknown> & { $parent?: Record<string, unknown>; $apply?: () => void };
+        // contentプロパティを持つスコープを上位まで検索
+        while (scope) {
+          if ("content" in scope) {
+            scope["content"] = text;
+            (scope.$apply ?? (() => {}))();
+            break;
+          }
+          if (!scope.$parent) break;
+          scope = scope.$parent as typeof scope;
+        }
         angEl.triggerHandler("input");
-        angEl.triggerHandler("change");
       }
-      textarea.value = text;
-      textarea.dispatchEvent(new Event("input", { bubbles: true }));
-      textarea.dispatchEvent(new Event("change", { bubbles: true }));
     }, caption);
+    await postPage.waitForTimeout(300);
 
+    // 確実に入力するためキーボード入力も実行
+    await captionLocator.click({ clickCount: 3 }); // 全選択
+    await postPage.keyboard.type(caption, { delay: 15 });
     await postPage.waitForTimeout(500);
+
     const enteredText = await captionLocator.inputValue().catch(() => "");
     console.log(`[poster] 紹介文を入力しました (${enteredText.length}文字)`);
 
