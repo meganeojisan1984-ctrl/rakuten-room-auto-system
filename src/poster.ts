@@ -77,7 +77,9 @@ async function postSingleItem(
     // 「ROOMに追加」ボタンをクリック
     console.log("[poster] ROOMに追加ボタンを探しています...");
     const addBtn = await page.waitForSelector(SELECTORS.addToRoomButton, { timeout: 15000 }).catch(async () => {
-      await page.screenshot({ path: SCREENSHOT_PATH });
+      await page.screenshot({ path: SCREENSHOT_PATH, fullPage: true });
+      const bodyHtml = await page.evaluate(() => document.body.innerHTML.slice(0, 3000));
+      console.error("[poster] ページHTML(先頭3000文字):", bodyHtml);
       await notifyDomError("「ROOMに追加」ボタンが見つかりません。UIが変更された可能性があります");
       throw new Error("「ROOMに追加」ボタンが見つかりません");
     });
