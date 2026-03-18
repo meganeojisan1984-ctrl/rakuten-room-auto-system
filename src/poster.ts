@@ -11,7 +11,7 @@ const SCREENSHOT_PATH = path.join(process.cwd(), "error.png");
 // セレクタ定数 (楽天ROOMのDOM変更時はここを更新)
 const SELECTORS = {
   // 商品ページの「ROOMに追加」ボタン
-  addToRoomButton: ':text("ROOMに追加"), a[data-ga-label="add_to_room"], button[data-ga-label="add_to_room"], .btn-add-room, a.add-to-room',
+  addToRoomButton: ':text("ROOMに投稿"), :text("ROOMに追加"), a[data-ga-label="add_to_room"], button[data-ga-label="add_to_room"], .btn-add-room, a.add-to-room',
   // 投稿フォームのテキストエリア
   captionInput: 'textarea[name="description"], textarea.room-caption, textarea[placeholder*="コメント"], textarea[placeholder*="感想"]',
   // 投稿ボタン
