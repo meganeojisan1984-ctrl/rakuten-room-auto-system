@@ -123,28 +123,23 @@ async function postSingleItem(
     });
     console.log(`[poster] textarea ng-model: "${ngModelAttr}"`);
 
-    await postPage.evaluate(({ text, ngModel }) => {
+    await postPage.evaluate((text) => {
       const textarea = document.querySelector("textarea");
       if (!textarea) return;
-      // AngularJSのscope経由でng-modelを更新
-      const win = window as unknown as { angular?: { element: (el: Element) => { scope: () => Record<string, unknown>; triggerHandler: (e: string) => void } } };
-      if (win.angular && ngModel) {
+      // ng-model="$parent.content" なので $parent スコープを更新
+      const win = window as unknown as { angular?: { element: (el: Element) => { scope: () => { $parent: { content: string; $apply: () => void } }; triggerHandler: (e: string) => void } } };
+      if (win.angular) {
         const angEl = win.angular.element(textarea);
         const scope = angEl.scope();
-        const keys = ngModel.split(".");
-        let obj = scope;
-        for (let i = 0; i < keys.length - 1; i++) {
-          obj = obj[keys[i] as string] as Record<string, unknown>;
-        }
-        obj[keys[keys.length - 1] as string] = text;
-        (scope as unknown as { $apply: () => void }).$apply();
+        scope.$parent.content = text;
+        scope.$parent.$apply();
         angEl.triggerHandler("input");
         angEl.triggerHandler("change");
       }
       textarea.value = text;
       textarea.dispatchEvent(new Event("input", { bubbles: true }));
       textarea.dispatchEvent(new Event("change", { bubbles: true }));
-    }, { text: caption, ngModel: ngModelAttr });
+    }, caption);
 
     await postPage.waitForTimeout(500);
     const enteredText = await captionLocator.inputValue().catch(() => "");
