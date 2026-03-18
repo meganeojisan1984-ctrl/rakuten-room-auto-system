@@ -97,45 +97,63 @@ async function postSingleItem(
     }
     console.log("[poster] ROOMに追加ボタンをクリックしました");
 
-    // 投稿フォームの表示を待機
-    const captionEl = await postPage.waitForSelector(SELECTORS.captionInput, { timeout: 15000 }).catch(async () => {
-      await postPage.screenshot({ path: SCREENSHOT_PATH }).catch(() => {});
+    // AngularJSの初期化完了を待機
+    await postPage.waitForFunction(() => {
+      const win = window as unknown as { angular?: { element: (el: Element) => { injector: () => unknown } } };
+      return win.angular?.element(document.body).injector() !== undefined;
+    }, { timeout: 15000 }).catch(() => {
+      console.warn("[poster] AngularJS初期化タイムアウト、処理続行");
+    });
+    await postPage.waitForTimeout(2000);
+
+    // フォーム読み込み確認スクリーンショット
+    await postPage.screenshot({ path: SCREENSHOT_PATH }).catch(() => {});
+    console.log("[poster] フォーム確認スクリーンショット保存");
+
+    // テキストエリアを取得
+    const captionLocator = postPage.locator("textarea").first();
+    await captionLocator.waitFor({ state: "visible", timeout: 15000 }).catch(async () => {
       await notifyDomError("投稿フォームのテキストエリアが見つかりません");
       throw new Error("投稿フォームが見つかりません");
     });
 
-    // 紹介文を入力（AngularJS対応）
-    await captionEl.click();
-    const ngModel = await postPage.evaluate(() => {
+    // ng-modelを取得してAngularJSのscopeを直接更新
+    const ngModelAttr = await postPage.evaluate(() => {
       return document.querySelector("textarea")?.getAttribute("ng-model") ?? "";
     });
-    console.log(`[poster] textarea ng-model: ${ngModel}`);
-    await postPage.evaluate((text) => {
+    console.log(`[poster] textarea ng-model: "${ngModelAttr}"`);
+
+    await postPage.evaluate(({ text, ngModel }) => {
       const textarea = document.querySelector("textarea");
       if (!textarea) return;
+      // AngularJSのscope経由でng-modelを更新
+      const win = window as unknown as { angular?: { element: (el: Element) => { scope: () => Record<string, unknown>; triggerHandler: (e: string) => void } } };
+      if (win.angular && ngModel) {
+        const angEl = win.angular.element(textarea);
+        const scope = angEl.scope();
+        const keys = ngModel.split(".");
+        let obj = scope;
+        for (let i = 0; i < keys.length - 1; i++) {
+          obj = obj[keys[i] as string] as Record<string, unknown>;
+        }
+        obj[keys[keys.length - 1] as string] = text;
+        (scope as unknown as { $apply: () => void }).$apply();
+        angEl.triggerHandler("input");
+        angEl.triggerHandler("change");
+      }
       textarea.value = text;
       textarea.dispatchEvent(new Event("input", { bubbles: true }));
       textarea.dispatchEvent(new Event("change", { bubbles: true }));
-      // AngularJS scope更新
-      const win = window as unknown as { angular?: { element: (el: Element) => { scope: () => unknown; triggerHandler: (e: string) => void } } };
-      if (win.angular) {
-        const el = win.angular.element(textarea);
-        el.triggerHandler("input");
-        el.triggerHandler("change");
-        const scope = el.scope() as { $apply?: () => void };
-        scope?.$apply?.();
-      }
-    }, caption);
+    }, { text: caption, ngModel: ngModelAttr });
+
     await postPage.waitForTimeout(500);
-    const enteredText = await captionEl.inputValue().catch(() => "");
+    const enteredText = await captionLocator.inputValue().catch(() => "");
     console.log(`[poster] 紹介文を入力しました (${enteredText.length}文字)`);
 
-    // 投稿ボタンをクリック
-    const postBtn = await postPage.waitForSelector(SELECTORS.postButton, { timeout: 10000 }).catch(async () => {
+    // 投稿ボタン（完了）をクリック
+    const postBtn = await postPage.waitForSelector(':text("完了")', { timeout: 10000 }).catch(async () => {
       await postPage.screenshot({ path: SCREENSHOT_PATH, fullPage: true }).catch(() => {});
-      const formHtml = await postPage.evaluate(() => document.body.innerHTML.slice(0, 3000)).catch(() => "");
-      console.error("[poster] 投稿フォームHTML:", formHtml);
-      await notifyDomError("投稿ボタンが見つかりません");
+      await notifyDomError("投稿ボタン(完了)が見つかりません");
       throw new Error("投稿ボタンが見つかりません");
     });
 
