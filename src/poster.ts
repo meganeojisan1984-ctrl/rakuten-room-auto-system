@@ -11,7 +11,7 @@ const SCREENSHOT_PATH = path.join(process.cwd(), "error.png");
 // セレクタ定数 (楽天ROOMのDOM変更時はここを更新)
 const SELECTORS = {
   // 商品ページの「ROOMに追加」ボタン
-  addToRoomButton: 'a[data-ga-label="add_to_room"], button[data-ga-label="add_to_room"], .btn-add-room, a.add-to-room',
+  addToRoomButton: ':text("ROOMに追加"), a[data-ga-label="add_to_room"], button[data-ga-label="add_to_room"], .btn-add-room, a.add-to-room',
   // 投稿フォームのテキストエリア
   captionInput: 'textarea[name="description"], textarea.room-caption, textarea[placeholder*="コメント"], textarea[placeholder*="感想"]',
   // 投稿ボタン
@@ -54,9 +54,10 @@ async function postSingleItem(
     // 商品URLへアクセス
     console.log(`[poster] 商品URLへアクセス: ${item.itemUrl}`);
     await page.goto(item.itemUrl, {
-      waitUntil: "domcontentloaded",
+      waitUntil: "load",
       timeout: 30000,
     });
+    await page.waitForTimeout(2000);
 
     // CAPTCHA検知
     const captchaEl = await page.$(SELECTORS.captcha);
