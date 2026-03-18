@@ -7,13 +7,30 @@ const RAKUTEN_ACCESS_KEY = process.env.RAKUTEN_ACCESS_KEY ?? "";
 const MAX_PRICE = parseInt(process.env.MAX_PRICE ?? "10000", 10);
 const TARGET_GENRE = process.env.TARGET_GENRE ?? "general";
 
-// SNS注目ジャンル定義（毎回ランダム選択）
+// SNS注目ジャンル定義（主婦・ファミリー層 + Z世代向け）
 const SNS_GENRES = [
-  { name: "高機能・高級家電", genreId: "215783", maxPrice: 100000 },
-  { name: "美容・コスメ（機能性重視）", genreId: "216131", maxPrice: 50000 },
-  { name: "ファッション・バッグ・靴", genreId: "503912", maxPrice: 80000 },
-  { name: "ウェルネス・健康グッズ", genreId: "101213", maxPrice: 30000 },
-  { name: "便利雑貨・悩み解決グッズ", genreId: "215684", maxPrice: 20000 },
+  // 主婦・ファミリー層向け
+  { name: "生活家電・調理家電（時短・高機能）", genreId: "215783", maxPrice: 100000 },
+  { name: "インテリア・寝具・収納", genreId: "215697", maxPrice: 50000 },
+  { name: "キッチン用品・調理器具・食器", genreId: "216129", maxPrice: 30000 },
+  { name: "日用品雑貨・掃除用品", genreId: "215684", maxPrice: 10000 },
+  { name: "食品・スイーツ・お取り寄せ", genreId: "100227", maxPrice: 10000 },
+  { name: "ベビー・キッズ・マタニティ", genreId: "216119", maxPrice: 30000 },
+  { name: "美容・スキンケア・ドクターズコスメ", genreId: "216131", maxPrice: 30000 },
+  { name: "レディースファッション・小物", genreId: "100371", maxPrice: 30000 },
+  { name: "防災・アウトドア・ポータブル電源", genreId: "101070", maxPrice: 80000 },
+  { name: "ふるさと納税・返礼品", genreId: "553066", maxPrice: 100000 },
+  // Z世代向け
+  { name: "PC・スマホ周辺機器・ガジェット", genreId: "215783", maxPrice: 50000 },
+  { name: "韓国コスメ・トレンド美容", genreId: "216131", maxPrice: 10000 },
+  { name: "パーソナルカラー・体型別ファッション", genreId: "100371", maxPrice: 20000 },
+  { name: "推し活・オタ活グッズ", genreId: "215684", maxPrice: 20000 },
+  { name: "ウェルネス・スリープテック・セルフケア", genreId: "101213", maxPrice: 20000 },
+  { name: "インテリア・間接照明・韓国インテリア", genreId: "215697", maxPrice: 30000 },
+  { name: "ギフト・プレゼント・プチ贅沢", genreId: "100227", maxPrice: 10000 },
+  { name: "ダイエット・フィットネス・プロテイン", genreId: "101213", maxPrice: 20000 },
+  { name: "旅行・トラベルグッズ", genreId: "101070", maxPrice: 20000 },
+  { name: "ホビー・カメラ・映像制作機器", genreId: "101281", maxPrice: 80000 },
 ];
 
 // ジャンルID設定（後方互換）
@@ -258,7 +275,7 @@ function convertSearchItems(items: RakutenApiItem[]): RakutenItem[] {
 /**
  * ターゲットジャンルに基づき商品を取得・フィルタリングして返す
  */
-export async function fetchItems(count: number = 5): Promise<RakutenItem[]> {
+export async function fetchItems(count: number = 5, excludeCodes: Set<string> = new Set()): Promise<RakutenItem[]> {
   if (!RAKUTEN_APP_ID) {
     throw new Error("RAKUTEN_APP_ID が未設定です");
   }
@@ -303,6 +320,7 @@ export async function fetchItems(count: number = 5): Promise<RakutenItem[]> {
       if (item.itemPrice > maxPrice) return false;
     }
     if (minPrice !== undefined && item.itemPrice < minPrice) return false;
+    if (excludeCodes.has(item.itemCode)) return false; // 投稿済みを除外
     return true;
   });
 

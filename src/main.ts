@@ -1,10 +1,29 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 
+import * as fs from "fs";
+import * as path from "path";
 import { fetchItems } from "./fetcher";
 import { generateCaptions } from "./generator";
 import { postItems } from "./poster";
 import { notifyError } from "./notifiers";
+
+const POSTED_ITEMS_FILE = path.join(process.cwd(), "posted_items.json");
+const MAX_HISTORY = 500; // 保持する最大件数
+
+function loadPostedCodes(): Set<string> {
+  try {
+    const data = JSON.parse(fs.readFileSync(POSTED_ITEMS_FILE, "utf-8"));
+    return new Set<string>(data.postedItemCodes ?? []);
+  } catch {
+    return new Set<string>();
+  }
+}
+
+function savePostedCodes(codes: Set<string>): void {
+  const arr = [...codes].slice(-MAX_HISTORY);
+  fs.writeFileSync(POSTED_ITEMS_FILE, JSON.stringify({ postedItemCodes: arr }, null, 2));
+}
 
 const POST_COUNT = parseInt(process.env.POST_COUNT ?? "3", 10);
 
@@ -14,11 +33,14 @@ async function main(): Promise<void> {
   console.log(`ターゲットジャンル: ${process.env.TARGET_GENRE ?? "general"}`);
   console.log(`投稿数: ${POST_COUNT}件\n`);
 
+  const postedCodes = loadPostedCodes();
+  console.log(`[main] 投稿済み商品数: ${postedCodes.size}件（除外対象）`);
+
   // Step 1: 楽天APIから商品を取得
   let items;
   try {
     console.log("--- [1/3] 商品取得中 ---");
-    items = await fetchItems(POST_COUNT);
+    items = await fetchItems(POST_COUNT, postedCodes);
     if (items.length === 0) {
       throw new Error("フィルタリング後に使用可能な商品が0件でした");
     }
@@ -73,6 +95,16 @@ async function main(): Promise<void> {
       .map((r) => `- ${r.itemName.slice(0, 30)}: ${r.error ?? "不明なエラー"}`)
       .join("\n");
     console.error("失敗した商品:\n" + errors);
+  }
+
+  // 成功した商品を投稿済みリストに追加して保存
+  const successCodes = captionedItems
+    .filter((_, i) => results[i]?.success)
+    .map((c) => c.item.itemCode);
+  for (const code of successCodes) postedCodes.add(code);
+  if (successCodes.length > 0) {
+    savePostedCodes(postedCodes);
+    console.log(`[main] 投稿済みリストを更新: ${successCodes.length}件追加`);
   }
 
   // 全件失敗の場合は異常終了
