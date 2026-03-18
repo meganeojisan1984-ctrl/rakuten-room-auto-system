@@ -104,9 +104,19 @@ async function postSingleItem(
       throw new Error("投稿フォームが見つかりません");
     });
 
-    // 紹介文を入力
-    await captionEl.fill(caption);
-    console.log("[poster] 紹介文を入力しました");
+    // 紹介文を入力（React対応: ネイティブセッターでstateを強制更新）
+    await captionEl.click();
+    await postPage.evaluate((text) => {
+      const textarea = document.querySelector("textarea");
+      if (!textarea) return;
+      const nativeSetter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")?.set;
+      nativeSetter?.call(textarea, text);
+      textarea.dispatchEvent(new Event("input", { bubbles: true }));
+      textarea.dispatchEvent(new Event("change", { bubbles: true }));
+    }, caption);
+    await postPage.waitForTimeout(500);
+    const enteredText = await captionEl.inputValue().catch(() => "");
+    console.log(`[poster] 紹介文を入力しました (${enteredText.length}文字)`);
 
     // 投稿ボタンをクリック
     const postBtn = await postPage.waitForSelector(SELECTORS.postButton, { timeout: 10000 }).catch(async () => {
