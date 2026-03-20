@@ -4,33 +4,29 @@ dotenv.config();
 
 const RAKUTEN_APP_ID = process.env.RAKUTEN_APP_ID ?? "";
 const RAKUTEN_ACCESS_KEY = process.env.RAKUTEN_ACCESS_KEY ?? "";
-const MAX_PRICE = parseInt(process.env.MAX_PRICE ?? "10000", 10);
+const MAX_PRICE = parseInt(process.env.MAX_PRICE ?? "3000", 10);
+const MIN_PRICE = parseInt(process.env.MIN_PRICE ?? "1000", 10);
 const TARGET_GENRE = process.env.TARGET_GENRE ?? "general";
 
-// SNS注目ジャンル定義（主婦・ファミリー層 + Z世代向け）
-const SNS_GENRES = [
-  // 主婦・ファミリー層向け
-  { name: "生活家電・調理家電（時短・高機能）", genreId: "215783", maxPrice: 100000 },
-  { name: "インテリア・寝具・収納", genreId: "215697", maxPrice: 50000 },
-  { name: "キッチン用品・調理器具・食器", genreId: "216129", maxPrice: 30000 },
-  { name: "日用品雑貨・掃除用品", genreId: "215684", maxPrice: 10000 },
-  { name: "食品・スイーツ・お取り寄せ", genreId: "100227", maxPrice: 10000 },
-  { name: "ベビー・キッズ・マタニティ", genreId: "216119", maxPrice: 30000 },
-  { name: "美容・スキンケア・ドクターズコスメ", genreId: "216131", maxPrice: 30000 },
-  { name: "レディースファッション・小物", genreId: "100371", maxPrice: 30000 },
-  { name: "防災・アウトドア・ポータブル電源", genreId: "101070", maxPrice: 80000 },
-  { name: "ふるさと納税・返礼品", genreId: "553066", maxPrice: 100000 },
-  // Z世代向け
-  { name: "PC・スマホ周辺機器・ガジェット", genreId: "215783", maxPrice: 50000 },
-  { name: "韓国コスメ・トレンド美容", genreId: "216131", maxPrice: 10000 },
-  { name: "パーソナルカラー・体型別ファッション", genreId: "100371", maxPrice: 20000 },
-  { name: "推し活・オタ活グッズ", genreId: "215684", maxPrice: 20000 },
-  { name: "ウェルネス・スリープテック・セルフケア", genreId: "101213", maxPrice: 20000 },
-  { name: "インテリア・間接照明・韓国インテリア", genreId: "215697", maxPrice: 30000 },
-  { name: "ギフト・プレゼント・プチ贅沢", genreId: "100227", maxPrice: 10000 },
-  { name: "ダイエット・フィットネス・プロテイン", genreId: "101213", maxPrice: 20000 },
-  { name: "旅行・トラベルグッズ", genreId: "101070", maxPrice: 20000 },
-  { name: "ホビー・カメラ・映像制作機器", genreId: "101281", maxPrice: 80000 },
+// メインジャンル: QOLが向上する家事用品（投稿の6〜7割）
+// 条件: 商品数多い・注目度高い・悩みが明確・消耗品&買い替え需要あり
+const MAIN_GENRES = [
+  { name: "日用品雑貨・掃除・洗濯用品", genreId: "215684", minPrice: 1000, maxPrice: 3000 },
+  { name: "整理収納・片付けグッズ", genreId: "215697", minPrice: 1000, maxPrice: 3000 },
+  { name: "掃除用品・消耗品", genreId: "215684", minPrice: 1000, maxPrice: 3000 },
+  { name: "洗濯・衣類ケアグッズ", genreId: "215684", minPrice: 1000, maxPrice: 3000 },
+  { name: "キッチン消耗品・日用品", genreId: "216129", minPrice: 1000, maxPrice: 3000 },
+  { name: "バス・トイレ用品", genreId: "215684", minPrice: 1000, maxPrice: 3000 },
+  { name: "家事効率化グッズ", genreId: "215684", minPrice: 1000, maxPrice: 3000 },
+];
+
+// サブジャンル: メインジャンル関連・同悩みの延長・使用シーン重複
+const SUB_GENRES = [
+  { name: "ハイエンド・スタイリッシュ家電", genreId: "215783", minPrice: 1000, maxPrice: 3000 },
+  { name: "時短ガジェット・小型家電", genreId: "215783", minPrice: 1000, maxPrice: 3000 },
+  { name: "キッチン便利グッズ・調理器具", genreId: "216129", minPrice: 1000, maxPrice: 3000 },
+  { name: "生活必需品・補充消耗品", genreId: "215684", minPrice: 1000, maxPrice: 3000 },
+  { name: "省エネ・節約家電小物", genreId: "215783", minPrice: 1000, maxPrice: 3000 },
 ];
 
 // ジャンルID設定（後方互換）
@@ -41,10 +37,10 @@ const GENRE_IDS: Record<string, string> = {
   "1000yen": "",
 };
 
-// 1000円ポッキリの価格設定
+// ジャンル別価格設定（デフォルトは1000〜3000円）
 const GENRE_PRICE_OVERRIDES: Record<string, { min: number; max: number }> = {
   "1000yen": { min: 900, max: 1100 },
-  furusato: { min: 1000, max: 100000 },
+  furusato: { min: 2000, max: 30000 },
 };
 
 export interface RakutenItem {
@@ -286,16 +282,20 @@ export async function fetchItems(count: number = 5, excludeCodes: Set<string> = 
   let genreId: string | undefined;
   let selectedGenreName = "全体";
 
-  // generalの場合はSNSジャンルからランダム選択
+  // generalの場合はメイン(6〜7割)/サブ(3〜4割)ジャンルからランダム選択
   if (TARGET_GENRE === "general" || !TARGET_GENRE) {
-    const selected = SNS_GENRES[Math.floor(Math.random() * SNS_GENRES.length)]!;
+    // メインを6〜7割、サブを3〜4割の比率で選択
+    const useMain = Math.random() < 0.65;
+    const pool = useMain ? MAIN_GENRES : SUB_GENRES;
+    const selected = pool[Math.floor(Math.random() * pool.length)]!;
     genreId = selected.genreId;
+    minPrice = selected.minPrice;
     maxPrice = selected.maxPrice;
-    selectedGenreName = selected.name;
-    console.log(`[fetcher] SNSジャンル選択: ${selectedGenreName}`);
+    selectedGenreName = `${useMain ? "メイン" : "サブ"}: ${selected.name}`;
+    console.log(`[fetcher] ジャンル選択: ${selectedGenreName}`);
   } else {
     const priceOverride = GENRE_PRICE_OVERRIDES[TARGET_GENRE];
-    minPrice = priceOverride?.min;
+    minPrice = priceOverride?.min ?? MIN_PRICE;
     maxPrice = priceOverride?.max ?? MAX_PRICE;
     genreId = GENRE_IDS[TARGET_GENRE] || undefined;
   }
@@ -310,15 +310,13 @@ export async function fetchItems(count: number = 5, excludeCodes: Set<string> = 
     throw new Error(`楽天APIエラー: ${String(err)}`);
   }
 
-  // フィルタリング
+  // フィルタリング: 価格帯1000〜3000円・販売中・投稿済み除外
   let filtered = rawItems.filter((item) => {
     if (item.availability !== 1) return false;
     if (item.endTime) {
       if (new Date(item.endTime) < new Date()) return false;
     }
-    if (TARGET_GENRE !== "furusato") {
-      if (item.itemPrice > maxPrice) return false;
-    }
+    if (item.itemPrice > maxPrice) return false;
     if (minPrice !== undefined && item.itemPrice < minPrice) return false;
     if (excludeCodes.has(item.itemCode)) return false; // 投稿済みを除外
     return true;

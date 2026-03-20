@@ -3,16 +3,16 @@ name: 楽天ROOM 自動投稿
 on:
   schedule:
     # 日本時間への変換 (JST = UTC+9)
-    # JST 00:00 → UTC 15:00 (前日)
-    - cron: "0 15 * * *"
-    # JST 09:00 → UTC 00:00
-    - cron: "0 0 * * *"
+    # JST 08:00 → UTC 23:00 (前日)
+    - cron: "0 23 * * *"
     # JST 12:00 → UTC 03:00
     - cron: "0 3 * * *"
-    # JST 21:00 → UTC 12:00
-    - cron: "0 12 * * *"
-    # JST 23:00 → UTC 14:00
-    - cron: "0 14 * * *"
+    # JST 16:00 → UTC 07:00
+    - cron: "0 7 * * *"
+    # JST 20:00 → UTC 11:00
+    - cron: "0 11 * * *"
+    # JST 22:00 → UTC 13:00
+    - cron: "0 13 * * *"
   # 手動実行も可能
   workflow_dispatch:
     inputs:
@@ -23,7 +23,7 @@ on:
       post_count:
         description: "投稿数"
         required: false
-        default: "3"
+        default: "1"
 
 permissions:
   contents: write
@@ -62,8 +62,9 @@ jobs:
           X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
           X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
           TARGET_GENRE: ${{ github.event.inputs.target_genre || vars.TARGET_GENRE || 'general' }}
-          POST_COUNT: ${{ github.event.inputs.post_count || vars.POST_COUNT || '3' }}
-          MAX_PRICE: ${{ vars.MAX_PRICE || '10000' }}
+          POST_COUNT: ${{ github.event.inputs.post_count || vars.POST_COUNT || '1' }}
+          MAX_PRICE: ${{ vars.MAX_PRICE || '3000' }}
+          MIN_PRICE: ${{ vars.MIN_PRICE || '1000' }}
           GENRE_ID_FURUSATO: ${{ vars.GENRE_ID_FURUSATO || '553066' }}
           GENRE_ID_ELECTRONICS: ${{ vars.GENRE_ID_ELECTRONICS || '215783' }}
         run: npx tsx src/main.ts
