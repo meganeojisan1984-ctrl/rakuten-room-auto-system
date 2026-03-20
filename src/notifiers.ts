@@ -70,6 +70,18 @@ export async function notifyDomError(errorMessage: string): Promise<void> {
 }
 
 /**
+ * X APIクレジット枯渇通知
+ */
+export async function notifyXCreditsDepleted(): Promise<void> {
+  const message =
+    "⚠️ **【要対応】X APIクレジット残高不足**\n" +
+    "X（Twitter）への投稿がクレジット不足（402エラー）で失敗しました。\n" +
+    "X Developer Portal ( https://developer.x.com ) でプリペイドクレジットをチャージしてください。\n" +
+    "チャージするまでX投稿はスキップされます。";
+  await sendToDiscord(message);
+}
+
+/**
  * 汎用エラー通知
  */
 export async function notifyError(title: string, errorMessage: string): Promise<void> {

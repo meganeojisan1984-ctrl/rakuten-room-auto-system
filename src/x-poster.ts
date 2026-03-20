@@ -1,5 +1,6 @@
 import { TwitterApi } from "twitter-api-v2";
 import * as dotenv from "dotenv";
+import { notifyXCreditsDepleted } from "./notifiers";
 dotenv.config();
 
 const X_API_KEY = process.env.X_API_KEY ?? "";
@@ -60,8 +61,12 @@ export async function postToX(
     return true;
   } catch (err: unknown) {
     const errMsg = String(err);
+    // クレジット枯渇（402）はDiscord通知
+    if (errMsg.includes("402") || errMsg.includes("CreditsDepleted")) {
+      console.warn("[x-poster] X APIクレジット残高不足。Developer Portalでチャージが必要です");
+      await notifyXCreditsDepleted();
     // レート制限（429）は警告レベルに留める
-    if (errMsg.includes("429") || errMsg.includes("Rate limit")) {
+    } else if (errMsg.includes("429") || errMsg.includes("Rate limit")) {
       console.warn("[x-poster] X APIレート制限に達しました。次回の実行時に再試行されます");
     } else {
       console.error("[x-poster] X(Twitter)投稿失敗:", err);
