@@ -57,6 +57,10 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           ROOM_COOKIE: ${{ secrets.ROOM_COOKIE }}
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
           TARGET_GENRE: ${{ github.event.inputs.target_genre || vars.TARGET_GENRE || 'general' }}
           POST_COUNT: ${{ github.event.inputs.post_count || vars.POST_COUNT || '3' }}
           MAX_PRICE: ${{ vars.MAX_PRICE || '10000' }}
