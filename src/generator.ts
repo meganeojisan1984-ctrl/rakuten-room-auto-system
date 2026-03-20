@@ -89,6 +89,29 @@ function buildPrompt(item: RakutenItem): string {
 投稿文のみを出力してください（前置き・説明・タイトル等は一切不要です）:`;
 }
 
+function buildXPrompt(item: RakutenItem): string {
+  return `あなたはフォロワー10万人超えのインフルエンサーです。X（旧Twitter）で「認識→共感→購買」の購買プロセスに沿った投稿文を日本語で生成してください。
+
+【商品情報】
+- 商品名: ${item.itemName}
+- 価格: ${item.itemPrice.toLocaleString()}円
+- 商品説明: ${item.itemCaption.slice(0, 200)}
+
+【必須の3ステップ構成（この順番で書く）】
+1. 【認識】読者が「あ、これ私のことだ」と思う悩みや状況を1〜2行で提示する。絵文字で冒頭から引きつけること
+2. 【共感】「私もずっとそうでした」「わかりすぎる」など、投稿者自身の体験として共感を示す1行
+3. 【購買】この商品で状況が変わったことを伝え、「詳しくはこちら」「チェックしてみて」などで購買行動を促す1〜2行。末尾にハッシュタグ
+
+【絶対に守るルール】
+1. 全体で200〜230文字以内（URLを別途付けるため短めに抑える）
+2. 広告感・自動生成感ゼロ。リアルな体験談口調で書く
+3. 絵文字を使って感情の強弱・テンポをつける
+4. ハッシュタグは末尾に2〜3個（#楽天ROOM を必ず含める）
+5. 改行を入れてスマホで読みやすいリズムにする
+
+投稿文のみを出力してください（前置き・説明・タイトル等は一切不要）:`;
+}
+
 export async function generateCaption(item: RakutenItem): Promise<string> {
   if (!GROQ_API_KEY) {
     throw new Error("GROQ_API_KEY が未設定です");
@@ -105,8 +128,8 @@ export async function generateCaption(item: RakutenItem): Promise<string> {
 
 export async function generateCaptions(
   items: RakutenItem[]
-): Promise<Array<{ item: RakutenItem; caption: string }>> {
-  const results: Array<{ item: RakutenItem; caption: string }> = [];
+): Promise<Array<{ item: RakutenItem; caption: string; xCaption: string }>> {
+  const results: Array<{ item: RakutenItem; caption: string; xCaption: string }> = [];
 
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
@@ -114,7 +137,15 @@ export async function generateCaptions(
 
     try {
       const caption = await generateCaption(item);
-      results.push({ item, caption });
+
+      await sleep(REQUEST_INTERVAL_MS);
+
+      const client = new Groq({ apiKey: GROQ_API_KEY });
+      console.log(`[generator] 「${item.itemName.slice(0, 30)}...」のX用投稿文を生成中`);
+      const xCaption = await generateWithRetry(client, buildXPrompt(item));
+      console.log("[generator] X用投稿文生成完了");
+
+      results.push({ item, caption, xCaption: xCaption.trim() });
     } catch (err) {
       console.error(`[generator] 商品「${item.itemName.slice(0, 30)}」の生成失敗:`, err);
     }

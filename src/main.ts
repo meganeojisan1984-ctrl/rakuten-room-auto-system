@@ -96,7 +96,7 @@ async function main(): Promise<void> {
       const captioned = captionedItems[i];
       if (!result?.success || !captioned) continue;
 
-      await postToX(captioned.item.itemName, captioned.item.itemUrl, captioned.caption);
+      await postToX(captioned.item.itemName, captioned.item.itemUrl, captioned.xCaption);
 
       // 連続投稿時はレート制限対策で間隔を空ける
       if (i < results.length - 1) {
