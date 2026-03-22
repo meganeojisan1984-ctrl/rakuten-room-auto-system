@@ -36,7 +36,7 @@ on:
       influencer_ids:
         description: "参照インフルエンサーID（カンマ区切り）"
         required: false
-        default: "_2b6017e5e7,_9adbb0f109,_marika_family,_f585583974"
+        default: "room_2b6017e5e7,room_9adbb0f109,room_marika_family,room_f585583974"
 
 jobs:
   auto-follow:
@@ -63,7 +63,7 @@ jobs:
           ROOM_COOKIE: ${{ secrets.ROOM_COOKIE }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           MAX_FOLLOWS: ${{ github.event.inputs.max_follows || vars.MAX_FOLLOWS || '100' }}
-          INFLUENCER_IDS: ${{ github.event.inputs.influencer_ids || vars.INFLUENCER_IDS || '_2b6017e5e7,_9adbb0f109,_marika_family,_f585583974' }}
+          INFLUENCER_IDS: ${{ github.event.inputs.influencer_ids || vars.INFLUENCER_IDS || 'room_2b6017e5e7,room_9adbb0f109,room_marika_family,room_f585583974' }}
         run: npx tsx src/run_follow.ts
 
       - name: エラースクリーンショット（失敗時）

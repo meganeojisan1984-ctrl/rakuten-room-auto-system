@@ -10,8 +10,8 @@ const ROOM_URL = "https://room.rakuten.co.jp";
 
 const SELECTORS = {
   followButton: 'button:has-text("フォロー"), [class*="follow-btn"]:not([class*="following"])',
-  // 楽天ROOMユーザーIDは /_xxxxxxxx 形式
-  userLinks: 'a[href^="/_"]',
+  // 楽天ROOMユーザーIDは /room_xxxxxxxx 形式
+  userLinks: 'a[href^="/room_"]',
 };
 
 /**

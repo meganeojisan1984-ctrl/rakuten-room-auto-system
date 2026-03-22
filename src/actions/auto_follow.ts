@@ -10,18 +10,18 @@ const ROOM_URL = "https://room.rakuten.co.jp";
 
 // フォロー対象: 人気インフルエンサーのROOM ID
 const DEFAULT_INFLUENCER_IDS = [
-  "_2b6017e5e7",
-  "_9adbb0f109",
-  "_marika_family",
-  "_f585583974",
+  "room_2b6017e5e7",
+  "room_9adbb0f109",
+  "room_marika_family",
+  "room_f585583974",
 ];
 
 const SELECTORS = {
   followerItems: '.follower-item, [class*="follower"], [class*="user-item"]',
   followButton: 'button:has-text("フォロー"), [class*="follow-btn"]:not([class*="following"])',
   followingButton: 'button:has-text("フォロー中"), [class*="following"]',
-  // 楽天ROOMユーザーIDは /_xxxxxxxx 形式
-  userLinks: 'a[href^="/_"]',
+  // 楽天ROOMユーザーIDは /room_xxxxxxxx 形式
+  userLinks: 'a[href^="/room_"]',
 };
 
 /**
@@ -71,7 +71,7 @@ async function collectFollowers(
     await randomSleep(3000, 5000);
 
     // Step3: ユーザーカードが表示されるまで待機
-    await page.waitForSelector('a[href^="/_"]', { timeout: 15000 }).catch(() => {
+    await page.waitForSelector('a[href^="/room_"]', { timeout: 15000 }).catch(() => {
       console.log(`[auto_follow] ユーザーカード待機タイムアウト`);
     });
 
