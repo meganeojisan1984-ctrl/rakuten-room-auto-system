@@ -35,45 +35,21 @@ async function collectFollowers(
 ): Promise<string[]> {
   const urls: string[] = [];
   try {
-    // Step1: プロフィールページに遷移してAngularJSを起動
-    await page.goto(`${ROOM_URL}/${influencerId}`, {
-      waitUntil: "networkidle",
-      timeout: 45000,
+    // Step1: フォロワーページに直接遷移 (domcontentloaded + 手動待機)
+    await page.goto(`${ROOM_URL}/${influencerId}/followers`, {
+      waitUntil: "domcontentloaded",
+      timeout: 30000,
     });
-    await randomSleep(2000, 3000);
-    console.log(`[auto_follow] プロフィールURL: ${page.url()}, リンク数: ${await page.locator("a[href]").count()}`);
+    // AngularJSの描画を待機 (networkidleは使わない: バックグラウンドポーリングで永遠に待つため)
+    await randomSleep(6000, 8000);
+    console.log(`[auto_follow] URL: ${page.url()}, 全リンク数: ${await page.locator("a[href]").count()}, /room_リンク数: ${await page.locator('a[href^="/room_"]').count()}`);
 
-    // Step2: フォロワータブ/リンクを探してクリック (SPA内ナビゲーション)
-    const followerTabSelectors = [
-      `a[href="/${influencerId}/followers"]`,
-      `a[href*="followers"]`,
-      `a:has-text("フォロワー")`,
-      `[ng-click*="followers"]`,
-    ];
-    let tabClicked = false;
-    for (const sel of followerTabSelectors) {
-      const tab = page.locator(sel).first();
-      if (await tab.isVisible().catch(() => false)) {
-        await tab.click();
-        tabClicked = true;
-        console.log(`[auto_follow] フォロワータブクリック: ${sel}`);
-        break;
-      }
+    // Step2: AngularJSがまだ描画中なら追加待機
+    const roomLinkCount = await page.locator('a[href^="/room_"]').count();
+    if (roomLinkCount === 0) {
+      console.log(`[auto_follow] 追加待機中...`);
+      await randomSleep(5000, 7000);
     }
-    if (!tabClicked) {
-      // タブが見つからない場合は直接URLに遷移（フォールバック）
-      console.log(`[auto_follow] タブ未発見、URLで直接遷移`);
-      await page.goto(`${ROOM_URL}/${influencerId}/followers`, {
-        waitUntil: "networkidle",
-        timeout: 45000,
-      });
-    }
-    await randomSleep(3000, 5000);
-
-    // Step3: ユーザーカードが表示されるまで待機
-    await page.waitForSelector('a[href^="/room_"]', { timeout: 15000 }).catch(() => {
-      console.log(`[auto_follow] ユーザーカード待機タイムアウト`);
-    });
 
     // Step4: ユーザーリンクを収集
     const links = await page.locator(SELECTORS.userLinks).all();
