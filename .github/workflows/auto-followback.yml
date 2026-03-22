@@ -1,0 +1,48 @@
+name: 楽天ROOM フォロー返し
+
+on:
+  schedule:
+    # 毎時00分 (フォロー返しは1時間おき)
+    - cron: "0 * * * *"
+  workflow_dispatch:
+    inputs:
+      max_followbacks:
+        description: "最大フォロー返し数"
+        required: false
+        default: "30"
+
+jobs:
+  auto-followback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: 依存関係をインストール
+        run: npm ci
+
+      - name: Playwright Chromium をインストール
+        run: npx playwright install chromium --with-deps
+
+      - name: フォロー返しを実行
+        env:
+          CI: "true"
+          ROOM_COOKIE: ${{ secrets.ROOM_COOKIE }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          MAX_FOLLOWBACKS: ${{ github.event.inputs.max_followbacks || vars.MAX_FOLLOWBACKS || '30' }}
+        run: npx tsx src/run_followback.ts
+
+      - name: エラースクリーンショット（失敗時）
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: followback-error-${{ github.run_id }}
+          path: error.png
+          retention-days: 7
+          if-no-files-found: ignore

@@ -1,0 +1,130 @@
+/**
+ * auto_followback.ts - 自動フォロー返し機能
+ * 自分をフォローしているユーザーを自動的にフォロー返しする
+ */
+import { createBrowserContext, validateSession } from "../core/browser";
+import { randomSleep } from "../utils/helpers";
+import { addLog } from "../api/server";
+
+const ROOM_URL = "https://room.rakuten.co.jp";
+
+const SELECTORS = {
+  followButton: 'button:has-text("フォロー"), [class*="follow-btn"]:not([class*="following"])',
+  userLinks: 'a[href^="/"][href*="_"]',
+};
+
+/**
+ * ログイン中ユーザーのROOM IDを取得
+ */
+async function getMyUserId(page: import("playwright").Page): Promise<string> {
+  await page.goto(`${ROOM_URL}/my`, { waitUntil: "domcontentloaded", timeout: 30000 });
+  const url = page.url();
+  // URLは https://room.rakuten.co.jp/_xxxxxx 形式
+  const match = url.replace(ROOM_URL, "").match(/^\/?([^/]+)/);
+  return match?.[1] ?? "";
+}
+
+/**
+ * フォロワー一覧からユーザーURLを収集
+ */
+async function collectMyFollowers(
+  page: import("playwright").Page,
+  myId: string,
+  limit: number
+): Promise<string[]> {
+  const urls: string[] = [];
+  try {
+    await page.goto(`${ROOM_URL}/${myId}/followers`, {
+      waitUntil: "domcontentloaded",
+      timeout: 30000,
+    });
+    await randomSleep(2000, 3000);
+
+    const links = await page.locator(SELECTORS.userLinks).all();
+    for (const link of links) {
+      const href = await link.getAttribute("href");
+      if (href && !urls.includes(href) && href !== `/${myId}`) {
+        urls.push(href);
+        if (urls.length >= limit) break;
+      }
+    }
+  } catch (err) {
+    console.warn("[auto_followback] フォロワー収集失敗:", err);
+  }
+  return urls;
+}
+
+/**
+ * フォロー返し実行
+ * @param maxFollowbacks 最大フォロー返し数
+ * @param headless ヘッドレス実行フラグ
+ */
+export async function runAutoFollowback(
+  maxFollowbacks: number = 30,
+  headless: boolean = true
+): Promise<void> {
+  console.log(`[auto_followback] フォロー返し開始 (最大${maxFollowbacks}件)`);
+  addLog("auto_followback", "info", `フォロー返し開始 (最大${maxFollowbacks}件)`);
+
+  const { browser, context } = await createBrowserContext(headless);
+  let followbackCount = 0;
+
+  try {
+    if (!(await validateSession(context))) {
+      addLog("auto_followback", "error", "セッション無効: Cookie更新が必要です");
+      return;
+    }
+
+    const page = await context.newPage();
+
+    // 自分のROOM IDを取得
+    const myId = await getMyUserId(page);
+    if (!myId) {
+      addLog("auto_followback", "error", "自分のユーザーIDを取得できませんでした");
+      return;
+    }
+    console.log(`[auto_followback] 自分のID: ${myId}`);
+
+    // フォロワー一覧を取得
+    const followerUrls = await collectMyFollowers(page, myId, maxFollowbacks * 3);
+    console.log(`[auto_followback] フォロワー ${followerUrls.length}人を収集`);
+
+    for (const userUrl of followerUrls) {
+      if (followbackCount >= maxFollowbacks) break;
+
+      try {
+        const fullUrl = userUrl.startsWith("http") ? userUrl : `${ROOM_URL}${userUrl}`;
+        await page.goto(fullUrl, { waitUntil: "domcontentloaded", timeout: 20000 });
+        await randomSleep(1500, 3000);
+
+        // フォローボタンがあるか確認（既フォロー済みは「フォロー中」になっているためスキップ）
+        const followBtn = page.locator(SELECTORS.followButton).first();
+        const isVisible = await followBtn.isVisible().catch(() => false);
+        if (!isVisible) {
+          console.log(`[auto_followback] フォロー済みまたはボタンなし: ${userUrl}`);
+          continue;
+        }
+
+        await followBtn.scrollIntoViewIfNeeded();
+        await randomSleep(500, 1000);
+        await followBtn.click();
+        followbackCount++;
+        console.log(`[auto_followback] フォロー返し! ${userUrl} (${followbackCount}/${maxFollowbacks})`);
+
+        await randomSleep(2000, 5000);
+      } catch (err) {
+        console.warn(`[auto_followback] スキップ: ${userUrl} - ${err}`);
+      }
+    }
+
+    addLog("auto_followback", "info", `フォロー返し完了: ${followbackCount}件`);
+    console.log(`[auto_followback] 完了: ${followbackCount}件フォロー返し`);
+  } catch (err) {
+    const msg = String(err);
+    console.error("[auto_followback] エラー:", msg);
+    addLog("auto_followback", "error", msg);
+    throw err;
+  } finally {
+    await browser.close();
+  }
+}

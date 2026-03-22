@@ -2,18 +2,41 @@ name: 楽天ROOM 自動フォロー
 
 on:
   schedule:
-    # JST 11:00 → UTC 02:00
-    - cron: "0 2 * * *"
+    # 2時間おき12回 (いいねと時間をずらす: UTC奇数時)
+    # JST 10:00 → UTC 01:00
+    - cron: "0 1 * * *"
+    # JST 12:00 → UTC 03:00
+    - cron: "0 3 * * *"
+    # JST 14:00 → UTC 05:00
+    - cron: "0 5 * * *"
+    # JST 16:00 → UTC 07:00
+    - cron: "0 7 * * *"
+    # JST 18:00 → UTC 09:00
+    - cron: "0 9 * * *"
+    # JST 20:00 → UTC 11:00
+    - cron: "0 11 * * *"
+    # JST 22:00 → UTC 13:00
+    - cron: "0 13 * * *"
+    # JST 00:00 → UTC 15:00
+    - cron: "0 15 * * *"
+    # JST 02:00 → UTC 17:00
+    - cron: "0 17 * * *"
+    # JST 04:00 → UTC 19:00
+    - cron: "0 19 * * *"
+    # JST 06:00 → UTC 21:00
+    - cron: "0 21 * * *"
+    # JST 08:00 → UTC 23:00
+    - cron: "0 23 * * *"
   workflow_dispatch:
     inputs:
       max_follows:
-        description: "最大フォロー数"
+        description: "最大フォロー数（1時間に100件以内）"
         required: false
-        default: "10"
+        default: "100"
       influencer_ids:
         description: "参照インフルエンサーID（カンマ区切り）"
         required: false
-        default: "room_official"
+        default: "_2b6017e5e7,_9adbb0f109,_marika_family,_f585583974"
 
 jobs:
   auto-follow:
@@ -39,8 +62,8 @@ jobs:
           CI: "true"
           ROOM_COOKIE: ${{ secrets.ROOM_COOKIE }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          MAX_FOLLOWS: ${{ github.event.inputs.max_follows || vars.MAX_FOLLOWS || '10' }}
-          INFLUENCER_IDS: ${{ github.event.inputs.influencer_ids || vars.INFLUENCER_IDS || 'room_official' }}
+          MAX_FOLLOWS: ${{ github.event.inputs.max_follows || vars.MAX_FOLLOWS || '100' }}
+          INFLUENCER_IDS: ${{ github.event.inputs.influencer_ids || vars.INFLUENCER_IDS || '_2b6017e5e7,_9adbb0f109,_marika_family,_f585583974' }}
         run: npx tsx src/run_follow.ts
 
       - name: エラースクリーンショット（失敗時）

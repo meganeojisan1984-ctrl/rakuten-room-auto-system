@@ -2,10 +2,31 @@ name: 楽天ROOM 自動いいね
 
 on:
   schedule:
-    # JST 10:30 → UTC 01:30
-    - cron: "30 1 * * *"
+    # 2時間おき12回 (フォローと時間をずらす: UTC偶数時+30分)
+    # JST 09:30 → UTC 00:30
+    - cron: "30 0 * * *"
+    # JST 11:30 → UTC 02:30
+    - cron: "30 2 * * *"
+    # JST 13:30 → UTC 04:30
+    - cron: "30 4 * * *"
+    # JST 15:30 → UTC 06:30
+    - cron: "30 6 * * *"
+    # JST 17:30 → UTC 08:30
+    - cron: "30 8 * * *"
     # JST 19:30 → UTC 10:30
     - cron: "30 10 * * *"
+    # JST 21:30 → UTC 12:30
+    - cron: "30 12 * * *"
+    # JST 23:30 → UTC 14:30
+    - cron: "30 14 * * *"
+    # JST 01:30 → UTC 16:30
+    - cron: "30 16 * * *"
+    # JST 03:30 → UTC 18:30
+    - cron: "30 18 * * *"
+    # JST 05:30 → UTC 20:30
+    - cron: "30 20 * * *"
+    # JST 07:30 → UTC 22:30
+    - cron: "30 22 * * *"
   workflow_dispatch:
     inputs:
       max_likes:
