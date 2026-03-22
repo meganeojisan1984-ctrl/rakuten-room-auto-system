@@ -42,34 +42,21 @@ export async function runAutoLike(maxLikes: number = 20, headless: boolean = tru
 
     const page = await context.newPage();
 
-    // タイムライン（フィード）を開く - 複数URLを試す
-    const timelineUrls = [
-      `${ROOM_URL}/timeline`,
-      `${ROOM_URL}/`,
-      `${ROOM_URL}/my`,
-    ];
-    let loaded = false;
-    for (const url of timelineUrls) {
-      try {
-        await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
-        console.log(`[auto_like] ページURL: ${page.url()}`);
-        loaded = true;
-        break;
-      } catch { continue; }
-    }
-    if (!loaded) throw new Error("タイムラインページを開けませんでした");
-    await randomSleep(3000, 5000);
+    // タイムライン（フィード）を開く - リダイレクト完了まで待機
+    await page.goto(`${ROOM_URL}/`, { waitUntil: "networkidle", timeout: 45000 });
+    await randomSleep(2000, 3000);
+    console.log(`[auto_like] ページURL: ${page.url()}`);
 
     // デバッグ: ページ上の全ボタン・リンクのclassを確認
     const debugInfo = await page.evaluate(() => {
-      const buttons = Array.from(document.querySelectorAll("button, a[ng-click]"));
-      return buttons.slice(0, 20).map((el) => ({
+      const buttons = Array.from(document.querySelectorAll("button, a[ng-click], [ng-click]"));
+      return buttons.slice(0, 30).map((el) => ({
         tag: el.tagName,
-        class: el.className,
+        class: el.className.toString().slice(0, 60),
         ngClick: el.getAttribute("ng-click") ?? "",
         text: el.textContent?.trim().slice(0, 20) ?? "",
       }));
-    });
+    }).catch(() => []);
     console.log("[auto_like] ページ上の要素サンプル:", JSON.stringify(debugInfo, null, 2));
 
     // スクロールしながらいいね
