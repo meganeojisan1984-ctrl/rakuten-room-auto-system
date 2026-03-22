@@ -8,10 +8,12 @@ import { addLog } from "../api/server";
 
 const ROOM_URL = "https://room.rakuten.co.jp";
 
-// フォロー対象: 人気インフルエンサーのROOM ID（設定可能）
+// フォロー対象: 人気インフルエンサーのROOM ID
 const DEFAULT_INFLUENCER_IDS = [
-  // 楽天ROOMの人気ユーザーID例（実際のIDに変更してください）
-  "room_official",
+  "_2b6017e5e7",
+  "_9adbb0f109",
+  "_marika_family",
+  "_f585583974",
 ];
 
 const SELECTORS = {
