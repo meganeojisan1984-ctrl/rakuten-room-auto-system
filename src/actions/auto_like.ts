@@ -9,12 +9,19 @@ import { addLog } from "../api/server";
 const ROOM_URL = "https://room.rakuten.co.jp";
 
 const SELECTORS = {
-  // タイムラインの投稿アイテム
-  timelineItems: ".room-item, .post-item, [class*='item'], article",
-  // いいねボタン (ハートアイコン)
-  likeButton: '[class*="like"], [class*="heart"], [aria-label*="いいね"], [title*="いいね"], .btn-like, button[class*="fav"]',
-  // いいね済みの判定
-  likedButton: '[class*="liked"], [class*="active"][class*="like"], .liked',
+  // いいねボタン - 楽天ROOM AngularJS UI
+  likeButton: [
+    'button[ng-click*="like"]',
+    'button[ng-click*="Like"]',
+    'button[ng-click*="fav"]',
+    'a[ng-click*="like"]',
+    'a[ng-click*="fav"]',
+    '[class*="like-btn"]',
+    '[class*="btn-like"]',
+    '[class*="heart"]',
+    '[class*="like"]:not([class*="liked"])',
+    'button[class*="good"]',
+  ].join(", "),
 };
 
 /**
@@ -35,12 +42,35 @@ export async function runAutoLike(maxLikes: number = 20, headless: boolean = tru
 
     const page = await context.newPage();
 
-    // タイムライン（フィード）を開く
-    await page.goto(`${ROOM_URL}/timeline`, {
-      waitUntil: "domcontentloaded",
-      timeout: 30000,
+    // タイムライン（フィード）を開く - 複数URLを試す
+    const timelineUrls = [
+      `${ROOM_URL}/timeline`,
+      `${ROOM_URL}/`,
+      `${ROOM_URL}/my`,
+    ];
+    let loaded = false;
+    for (const url of timelineUrls) {
+      try {
+        await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
+        console.log(`[auto_like] ページURL: ${page.url()}`);
+        loaded = true;
+        break;
+      } catch { continue; }
+    }
+    if (!loaded) throw new Error("タイムラインページを開けませんでした");
+    await randomSleep(3000, 5000);
+
+    // デバッグ: ページ上の全ボタン・リンクのclassを確認
+    const debugInfo = await page.evaluate(() => {
+      const buttons = Array.from(document.querySelectorAll("button, a[ng-click]"));
+      return buttons.slice(0, 20).map((el) => ({
+        tag: el.tagName,
+        class: el.className,
+        ngClick: el.getAttribute("ng-click") ?? "",
+        text: el.textContent?.trim().slice(0, 20) ?? "",
+      }));
     });
-    await randomSleep(2000, 4000);
+    console.log("[auto_like] ページ上の要素サンプル:", JSON.stringify(debugInfo, null, 2));
 
     // スクロールしながらいいね
     for (let scrollPass = 0; scrollPass < 5 && likeCount < maxLikes; scrollPass++) {
