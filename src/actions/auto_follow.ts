@@ -25,7 +25,8 @@ const SELECTORS = {
 };
 
 /**
- * 指定ユーザーのフォロワー一覧ページからユーザーを収集
+ * 指定ユーザーのフォロワー一覧からユーザーを収集
+ * SPAのため: プロフィールページを開いてからフォロワータブをクリック
  */
 async function collectFollowers(
   page: import("playwright").Page,
@@ -34,28 +35,49 @@ async function collectFollowers(
 ): Promise<string[]> {
   const urls: string[] = [];
   try {
-    await page.goto(`${ROOM_URL}/${influencerId}/followers`, {
+    // Step1: プロフィールページに遷移してAngularJSを起動
+    await page.goto(`${ROOM_URL}/${influencerId}`, {
       waitUntil: "networkidle",
       timeout: 45000,
     });
+    await randomSleep(2000, 3000);
+    console.log(`[auto_follow] プロフィールURL: ${page.url()}, リンク数: ${await page.locator("a[href]").count()}`);
+
+    // Step2: フォロワータブ/リンクを探してクリック (SPA内ナビゲーション)
+    const followerTabSelectors = [
+      `a[href="/${influencerId}/followers"]`,
+      `a[href*="followers"]`,
+      `a:has-text("フォロワー")`,
+      `[ng-click*="followers"]`,
+    ];
+    let tabClicked = false;
+    for (const sel of followerTabSelectors) {
+      const tab = page.locator(sel).first();
+      if (await tab.isVisible().catch(() => false)) {
+        await tab.click();
+        tabClicked = true;
+        console.log(`[auto_follow] フォロワータブクリック: ${sel}`);
+        break;
+      }
+    }
+    if (!tabClicked) {
+      // タブが見つからない場合は直接URLに遷移（フォールバック）
+      console.log(`[auto_follow] タブ未発見、URLで直接遷移`);
+      await page.goto(`${ROOM_URL}/${influencerId}/followers`, {
+        waitUntil: "networkidle",
+        timeout: 45000,
+      });
+    }
     await randomSleep(3000, 5000);
 
-    // デバッグ: ページ上のリンクを確認（/_で始まるユーザーリンクのみ）
-    const allLinks = await page.evaluate(() =>
-      Array.from(document.querySelectorAll("a[href]"))
-        .map((a) => a.getAttribute("href") ?? "")
-        .filter(Boolean)
-        .slice(0, 30)
-    ).catch(() => [] as string[]);
-    const userHrefs = allLinks.filter((h) => h.startsWith("/_"));
-    console.log(`[auto_follow] URL: ${page.url()}, 全リンク${allLinks.length}件, ユーザーリンク候補${userHrefs.length}件:`, userHrefs.slice(0, 5));
-    // 全リンクのhref先頭パターンをデバッグ
-    const patterns = [...new Set(allLinks.map((h) => h.slice(0, 30)))];
-    console.log(`[auto_follow] リンクパターン:`, patterns.slice(0, 8));
+    // Step3: ユーザーカードが表示されるまで待機
+    await page.waitForSelector('a[href^="/_"]', { timeout: 15000 }).catch(() => {
+      console.log(`[auto_follow] ユーザーカード待機タイムアウト`);
+    });
 
-    // ユーザーリンクを収集
+    // Step4: ユーザーリンクを収集
     const links = await page.locator(SELECTORS.userLinks).all();
-    console.log(`[auto_follow] ユーザーリンク検出: ${links.length}件`);
+    console.log(`[auto_follow] ユーザーリンク検出: ${links.length}件 (${influencerId})`);
     for (const link of links.slice(0, limit)) {
       const href = await link.getAttribute("href");
       if (href && !urls.includes(href)) urls.push(href);
