@@ -123,57 +123,64 @@ async function postSingleItem(
     });
     console.log(`[poster] textarea ng-model: "${ngModelAttr}"`);
 
-    // AngularJSスコープを直接更新（$parentを含む全親を検索）
+    // テキスト入力: Angularスコープ更新 + キーボード入力の二段階
     await postPage.evaluate((text) => {
       const textarea = document.querySelector("textarea");
       if (!textarea) return;
+      // Angularスコープに直接セット
       const win = window as unknown as { angular?: { element: (el: Element) => { scope: () => Record<string, unknown>; triggerHandler: (e: string) => void } } };
       if (win.angular) {
         const angEl = win.angular.element(textarea);
-        let scope = angEl.scope() as Record<string, unknown> & { $parent?: Record<string, unknown>; $apply?: () => void; $root?: { $digest?: () => void } };
+        let scope = angEl.scope() as Record<string, unknown> & { $parent?: Record<string, unknown>; $root?: { $digest?: () => void } };
         while (scope) {
-          if ("content" in scope) {
-            scope["content"] = text;
-            break;
-          }
+          if ("content" in scope) { scope["content"] = text; break; }
           if (!scope.$parent) break;
           scope = scope.$parent as typeof scope;
         }
-        // $digest を強制実行してAngularJSのバインディングを更新
         try { scope.$root?.$digest?.(); } catch {}
         angEl.triggerHandler("input");
         angEl.triggerHandler("change");
       }
-      // DOMにも直接書き込む
-      const nativeInputSetter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")?.set;
-      nativeInputSetter?.call(textarea, text);
+      // DOM値も直接書き込む
+      const setter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")?.set;
+      setter?.call(textarea, text);
       textarea.dispatchEvent(new Event("input", { bubbles: true }));
       textarea.dispatchEvent(new Event("change", { bubbles: true }));
     }, caption);
     await postPage.waitForTimeout(500);
 
+    // 0文字の場合はキーボードで入力（フォールバック）
     const enteredText = await captionLocator.inputValue().catch(() => "");
-    console.log(`[poster] 紹介文を入力しました (${enteredText.length}文字)`);
+    if (enteredText.length === 0) {
+      console.log("[poster] Angular入力失敗、キーボード入力で再試行...");
+      await captionLocator.click({ force: true });
+      await postPage.keyboard.press("Control+a");
+      await postPage.keyboard.type(caption, { delay: 10 });
+      await postPage.waitForTimeout(500);
+    }
+    const finalText = await captionLocator.inputValue().catch(() => "");
+    console.log(`[poster] 紹介文を入力しました (${finalText.length}文字)`);
 
-    // 投稿ボタン（完了）をクリック
-    const postBtn = await postPage.waitForSelector(':text("完了")', { timeout: 10000 }).catch(async () => {
+    // 投稿ボタン（完了）: Locatorを使ってforce:trueでオーバーレイを回避
+    const postBtnLocator = postPage.locator('button:has-text("完了"), a:has-text("完了")').first();
+    const postBtnVisible = await postBtnLocator.isVisible({ timeout: 10000 }).catch(() => false);
+    if (!postBtnVisible) {
       await postPage.screenshot({ path: SCREENSHOT_PATH, fullPage: true }).catch(() => {});
       await notifyDomError("投稿ボタン(完了)が見つかりません");
       throw new Error("投稿ボタンが見つかりません");
-    });
+    }
 
-    // オーバーレイを閉じてからクリック（ヘッダーの<div class="background">対策）
-    await postPage.keyboard.press("Escape").catch(() => {});
-    await postPage.waitForTimeout(500);
+    // JS直接クリック → Locator force:true の順で試行
     await postPage.evaluate(() => {
-      const btn = [...document.querySelectorAll<HTMLElement>("button, input[type='submit'], a")].find(
+      const btn = Array.from(document.querySelectorAll<HTMLElement>("button, a")).find(
         (el) => el.textContent?.trim() === "完了"
       );
       if (btn) btn.click();
     }).catch(() => {});
-    // JSクリックで失敗した場合にforce:trueでフォールバック
-    await postBtn.click({ force: true }).catch(() => {});
-    console.log("[poster] 投稿ボタンをクリックしました");
+    await postPage.waitForTimeout(1000);
+    // Locator force:true（ElementHandleではなくLocatorなので確実にオーバーレイを無視できる）
+    await postBtnLocator.click({ force: true, timeout: 5000 }).catch(() => {});
+    console.log("[poster] 投稿ボタンをクリックしました (Locator force:true)");
 
     // 投稿直後のスクリーンショット（デバッグ用）
     await postPage.waitForTimeout(3000);
