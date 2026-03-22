@@ -62,8 +62,8 @@ jobs:
           X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
           TARGET_GENRE: ${{ github.event.inputs.target_genre || vars.TARGET_GENRE || 'general' }}
           POST_COUNT: ${{ github.event.inputs.post_count || vars.POST_COUNT || '1' }}
-          MAX_PRICE: ${{ vars.MAX_PRICE || '3000' }}
-          MIN_PRICE: ${{ vars.MIN_PRICE || '1000' }}
+          MAX_PRICE: ${{ vars.MAX_PRICE || '5000' }}
+          MIN_PRICE: ${{ vars.MIN_PRICE || '2000' }}
           GENRE_ID_FURUSATO: ${{ vars.GENRE_ID_FURUSATO || '553066' }}
           GENRE_ID_ELECTRONICS: ${{ vars.GENRE_ID_ELECTRONICS || '215783' }}
         run: npx tsx src/main.ts
