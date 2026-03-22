@@ -9,7 +9,8 @@ import { addLog } from "../api/server";
 const ROOM_URL = "https://room.rakuten.co.jp";
 
 const SELECTORS = {
-  followButton: 'button:has-text("フォロー"), [class*="follow-btn"]:not([class*="following"])',
+  // 楽天ROOMのフォローボタン (auto_followと同じ)
+  followButton: 'button:has-text("フォローする")',
   // 楽天ROOMユーザーIDは /room_xxxxxxxx 形式
   userLinks: 'a[href^="/room_"]',
 };
@@ -64,10 +65,15 @@ async function collectMyFollowers(
     }
 
     const links = await page.locator(SELECTORS.userLinks).all();
+    console.log(`[auto_followback] ユーザーリンク検出: ${links.length}件`);
     for (const link of links) {
       const href = await link.getAttribute("href");
-      if (href && !urls.includes(href) && href !== `/${myId}`) {
-        urls.push(href);
+      if (!href) continue;
+      // /room_xxxxxxxx/items などからユーザーID部分のみ取得
+      const match = href.match(/^(\/room_[^/?#]+)/);
+      const cleanHref = match?.[1] ?? href;
+      if (cleanHref && !urls.includes(cleanHref) && cleanHref !== `/${myId}`) {
+        urls.push(cleanHref);
         if (urls.length >= limit) break;
       }
     }
@@ -117,8 +123,13 @@ export async function runAutoFollowback(
 
       try {
         const fullUrl = userUrl.startsWith("http") ? userUrl : `${ROOM_URL}${userUrl}`;
-        await page.goto(fullUrl, { waitUntil: "domcontentloaded", timeout: 20000 });
-        await randomSleep(1500, 3000);
+        await page.goto(fullUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
+        await randomSleep(6000, 8000);
+        // Angular未描画なら追加待機
+        const ngCount = await page.locator("[ng-click], button").count();
+        if (ngCount === 0) {
+          await randomSleep(5000, 7000);
+        }
 
         // フォローボタンがあるか確認（既フォロー済みは「フォロー中」になっているためスキップ）
         const followBtn = page.locator(SELECTORS.followButton).first();
