@@ -1,9 +1,7 @@
 name: 楽天ROOM 自動投稿削除
 
 on:
-  schedule:
-    # JST 毎週日曜 03:00 → UTC 土曜 18:00
-    - cron: "0 18 * * 6"
+  # schedule停止中 (手動実行のみ)
   workflow_dispatch:
     inputs:
       max_deletes:

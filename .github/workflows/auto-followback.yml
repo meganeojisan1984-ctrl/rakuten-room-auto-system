@@ -2,8 +2,8 @@ name: 楽天ROOM フォロー返し
 
 on:
   schedule:
-    # 毎時00分 (フォロー返しは1時間おき)
-    - cron: "0 * * * *"
+    # 毎時30分 (例: 6:30, 7:30, 8:30...)
+    - cron: "30 * * * *"
   workflow_dispatch:
     inputs:
       max_followbacks:
