@@ -17,9 +17,8 @@ const DEFAULT_INFLUENCER_IDS = [
 ];
 
 const SELECTORS = {
-  followerItems: '.follower-item, [class*="follower"], [class*="user-item"]',
-  followButton: 'button:has-text("フォロー"), [class*="follow-btn"]:not([class*="following"])',
-  followingButton: 'button:has-text("フォロー中"), [class*="following"]',
+  // 楽天ROOMのフォローボタンは class="button--1P0_8..." text="フォローする"
+  followButton: 'button:has-text("フォローする")',
   // 楽天ROOMユーザーIDは /room_xxxxxxxx 形式
   userLinks: 'a[href^="/room_"]',
 };
@@ -114,18 +113,6 @@ export async function runAutoFollow(
             console.log(`[auto_follow] 追加待機中 (${userUrl})`);
             await randomSleep(5000, 7000);
           }
-
-          // デバッグ: ページ上のボタン・ng-click要素を確認
-          const debugElements = await page.evaluate(() => {
-            const els = Array.from(document.querySelectorAll("button, a[ng-click], [ng-click]"));
-            return els.slice(0, 20).map((el) => ({
-              tag: el.tagName,
-              class: el.className?.toString().slice(0, 60) ?? "",
-              ngClick: el.getAttribute("ng-click") ?? "",
-              text: el.textContent?.trim().slice(0, 20) ?? "",
-            }));
-          }).catch(() => []);
-          console.log(`[auto_follow] ng-click要素数: ${ngCount}, サンプル:`, JSON.stringify(debugElements.slice(0, 5), null, 2));
 
           // フォローボタンを探す
           const followBtn = page.locator(SELECTORS.followButton).first();
