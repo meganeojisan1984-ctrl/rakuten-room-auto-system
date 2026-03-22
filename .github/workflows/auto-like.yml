@@ -1,0 +1,50 @@
+name: 楽天ROOM 自動いいね
+
+on:
+  schedule:
+    # JST 10:30 → UTC 01:30
+    - cron: "30 1 * * *"
+    # JST 19:30 → UTC 10:30
+    - cron: "30 10 * * *"
+  workflow_dispatch:
+    inputs:
+      max_likes:
+        description: "最大いいね数"
+        required: false
+        default: "30"
+
+jobs:
+  auto-like:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: 依存関係をインストール
+        run: npm ci
+
+      - name: Playwright Chromium をインストール
+        run: npx playwright install chromium --with-deps
+
+      - name: 自動いいねを実行
+        env:
+          CI: "true"
+          ROOM_COOKIE: ${{ secrets.ROOM_COOKIE }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          MAX_LIKES: ${{ github.event.inputs.max_likes || '30' }}
+        run: npx tsx src/run_like.ts
+
+      - name: エラースクリーンショット（失敗時）
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: like-error-${{ github.run_id }}
+          path: error.png
+          retention-days: 7
+          if-no-files-found: ignore

@@ -1,0 +1,53 @@
+name: 楽天ROOM 自動フォロー
+
+on:
+  schedule:
+    # JST 11:00 → UTC 02:00
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+    inputs:
+      max_follows:
+        description: "最大フォロー数"
+        required: false
+        default: "10"
+      influencer_ids:
+        description: "参照インフルエンサーID（カンマ区切り）"
+        required: false
+        default: "room_official"
+
+jobs:
+  auto-follow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: 依存関係をインストール
+        run: npm ci
+
+      - name: Playwright Chromium をインストール
+        run: npx playwright install chromium --with-deps
+
+      - name: 自動フォローを実行
+        env:
+          CI: "true"
+          ROOM_COOKIE: ${{ secrets.ROOM_COOKIE }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          MAX_FOLLOWS: ${{ github.event.inputs.max_follows || vars.MAX_FOLLOWS || '10' }}
+          INFLUENCER_IDS: ${{ github.event.inputs.influencer_ids || vars.INFLUENCER_IDS || 'room_official' }}
+        run: npx tsx src/run_follow.ts
+
+      - name: エラースクリーンショット（失敗時）
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: follow-error-${{ github.run_id }}
+          path: error.png
+          retention-days: 7
+          if-no-files-found: ignore

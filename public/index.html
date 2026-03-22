@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>楽天ROOM 自動化ダッシュボード</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <h1>🛒 楽天ROOM 自動化システム</h1>
+      <div class="status-bar">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">接続中...</span>
+        <span class="time" id="currentTime"></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- ── タスクカード群 ── -->
+    <section class="section">
+      <h2 class="section-title">⚙️ タスク設定</h2>
+      <div class="cards">
+
+        <!-- 自動投稿 -->
+        <div class="card" id="card-auto_post">
+          <div class="card-header">
+            <div class="card-icon">📦</div>
+            <div class="card-info">
+              <h3>自動コレ投稿</h3>
+              <p class="card-desc">楽天ランキングから商品を自動取得して投稿</p>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="toggle-auto_post" data-key="auto_post.enabled" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="card-body">
+            <div class="field">
+              <label>スケジュール (cron式)</label>
+              <input type="text" id="schedule-auto_post" data-key="auto_post.schedule"
+                placeholder="例: 0 9,12,21 * * *" />
+              <span class="hint">日本時間で動作 | 毎日9・12・21時: <code>0 9,12,21 * * *</code></span>
+            </div>
+            <div class="field">
+              <label>1回の投稿数</label>
+              <input type="number" id="count-auto_post" data-key="auto_post.count" min="1" max="10" />
+            </div>
+            <button class="btn btn-run" onclick="runTask('auto_post')">▶ 今すぐ実行</button>
+          </div>
+        </div>
+
+        <!-- 自動いいね -->
+        <div class="card" id="card-auto_like">
+          <div class="card-header">
+            <div class="card-icon">❤️</div>
+            <div class="card-info">
+              <h3>自動いいね</h3>
+              <p class="card-desc">タイムラインの投稿に自動でいいねする</p>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="toggle-auto_like" data-key="auto_like.enabled" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="card-body">
+            <div class="field">
+              <label>スケジュール (cron式)</label>
+              <input type="text" id="schedule-auto_like" data-key="auto_like.schedule"
+                placeholder="例: 30 10,19 * * *" />
+            </div>
+            <div class="field">
+              <label>最大いいね数</label>
+              <input type="number" id="maxLikes-auto_like" data-key="auto_like.maxLikes" min="1" max="100" />
+            </div>
+            <button class="btn btn-run" onclick="runTask('auto_like')">▶ 今すぐ実行</button>
+          </div>
+        </div>
+
+        <!-- 自動フォロー -->
+        <div class="card" id="card-auto_follow">
+          <div class="card-header">
+            <div class="card-icon">👥</div>
+            <div class="card-info">
+              <h3>自動フォロー</h3>
+              <p class="card-desc">人気インフルエンサーのフォロワーを自動フォロー</p>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="toggle-auto_follow" data-key="auto_follow.enabled" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="card-body">
+            <div class="field">
+              <label>スケジュール (cron式)</label>
+              <input type="text" id="schedule-auto_follow" data-key="auto_follow.schedule"
+                placeholder="例: 0 11 * * *" />
+            </div>
+            <div class="field">
+              <label>最大フォロー数</label>
+              <input type="number" id="maxFollows-auto_follow" data-key="auto_follow.maxFollows" min="1" max="50" />
+            </div>
+            <div class="field">
+              <label>参照インフルエンサーID（カンマ区切り）</label>
+              <input type="text" id="influencerIds-auto_follow" data-key="auto_follow.influencerIds"
+                placeholder="例: user_a,user_b" />
+            </div>
+            <button class="btn btn-run" onclick="runTask('auto_follow')">▶ 今すぐ実行</button>
+          </div>
+        </div>
+
+        <!-- 自動削除 -->
+        <div class="card" id="card-auto_delete">
+          <div class="card-header">
+            <div class="card-icon">🗑️</div>
+            <div class="card-info">
+              <h3>自動投稿削除</h3>
+              <p class="card-desc">マイページの過去投稿を一括削除</p>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="toggle-auto_delete" data-key="auto_delete.enabled" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="card-body">
+            <div class="field">
+              <label>スケジュール (cron式)</label>
+              <input type="text" id="schedule-auto_delete" data-key="auto_delete.schedule"
+                placeholder="例: 0 3 * * 0" />
+              <span class="hint">毎週日曜3時: <code>0 3 * * 0</code></span>
+            </div>
+            <div class="field">
+              <label>最大削除数 (0=全件)</label>
+              <input type="number" id="maxDeletes-auto_delete" data-key="auto_delete.maxDeletes" min="0" max="500" />
+            </div>
+            <button class="btn btn-run btn-danger" onclick="runTask('auto_delete')">▶ 今すぐ実行</button>
+          </div>
+        </div>
+
+      </div><!-- /cards -->
+    </section>
+
+    <!-- ── グローバル設定 ── -->
+    <section class="section">
+      <h2 class="section-title">🌐 グローバル設定</h2>
+      <div class="global-settings">
+        <label class="toggle-row">
+          <span>ヘッドレスモード（バックグラウンド実行）</span>
+          <label class="toggle">
+            <input type="checkbox" id="toggle-headless" data-key="headless" />
+            <span class="toggle-slider"></span>
+          </label>
+        </label>
+        <p class="hint">オフにするとブラウザが画面に表示されます（デバッグ用）</p>
+      </div>
+      <button class="btn btn-save" id="saveBtn" onclick="saveSettings()">💾 設定を保存</button>
+      <span class="save-msg" id="saveMsg"></span>
+    </section>
+
+    <!-- ── 実行ログ ── -->
+    <section class="section">
+      <div class="log-header">
+        <h2 class="section-title">📋 実行ログ</h2>
+        <button class="btn btn-sm" onclick="clearLogs()">🗑 ログ消去</button>
+      </div>
+      <div class="log-container" id="logContainer">
+        <div class="log-empty">ログがありません</div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
