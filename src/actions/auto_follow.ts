@@ -107,6 +107,18 @@ export async function runAutoFollow(
           await page.goto(fullUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
           await randomSleep(4000, 6000); // AngularJS描画待機
 
+          // デバッグ: ページ上のボタン・ng-click要素を確認
+          const debugElements = await page.evaluate(() => {
+            const els = Array.from(document.querySelectorAll("button, a[ng-click], [ng-click]"));
+            return els.slice(0, 20).map((el) => ({
+              tag: el.tagName,
+              class: el.className?.toString().slice(0, 60) ?? "",
+              ngClick: el.getAttribute("ng-click") ?? "",
+              text: el.textContent?.trim().slice(0, 20) ?? "",
+            }));
+          }).catch(() => []);
+          console.log(`[auto_follow] ページ要素サンプル (${userUrl}):`, JSON.stringify(debugElements, null, 2));
+
           // フォローボタンを探す
           const followBtn = page.locator(SELECTORS.followButton).first();
           const isVisible = await followBtn.isVisible().catch(() => false);
