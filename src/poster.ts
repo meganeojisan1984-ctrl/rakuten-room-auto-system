@@ -146,8 +146,14 @@ async function postSingleItem(
     }, caption);
     await postPage.waitForTimeout(300);
 
-    // 確実に入力するためキーボード入力も実行
-    await captionLocator.click({ clickCount: 3 }); // 全選択
+    // ヘッダーオーバーレイを回避してJavaScriptで直接フォーカス・入力
+    await postPage.evaluate(() => {
+      const el = document.querySelector<HTMLTextAreaElement>("textarea");
+      if (el) { el.focus(); el.select(); }
+    });
+    await postPage.waitForTimeout(300);
+    // force:true でオーバーレイを無視してクリック
+    await captionLocator.click({ clickCount: 3, force: true });
     await postPage.keyboard.type(caption, { delay: 15 });
     await postPage.waitForTimeout(500);
 
