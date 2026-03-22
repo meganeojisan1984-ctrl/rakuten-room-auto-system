@@ -20,7 +20,8 @@ const SELECTORS = {
   followerItems: '.follower-item, [class*="follower"], [class*="user-item"]',
   followButton: 'button:has-text("フォロー"), [class*="follow-btn"]:not([class*="following"])',
   followingButton: 'button:has-text("フォロー中"), [class*="following"]',
-  userLinks: 'a[href*="/room/"], a[href*="/user/"]',
+  // 楽天ROOMユーザーIDは /_xxxxxxxx 形式
+  userLinks: 'a[href^="/_"]',
 };
 
 /**
@@ -39,8 +40,18 @@ async function collectFollowers(
     });
     await randomSleep(2000, 3000);
 
+    // デバッグ: ページ上の全リンクを確認
+    const allLinks = await page.evaluate(() =>
+      Array.from(document.querySelectorAll("a[href]"))
+        .map((a) => a.getAttribute("href") ?? "")
+        .filter(Boolean)
+        .slice(0, 20)
+    ).catch(() => [] as string[]);
+    console.log(`[auto_follow] ページリンクサンプル (${influencerId}):`, allLinks.slice(0, 10));
+
     // ユーザーリンクを収集
     const links = await page.locator(SELECTORS.userLinks).all();
+    console.log(`[auto_follow] ユーザーリンク検出: ${links.length}件`);
     for (const link of links.slice(0, limit)) {
       const href = await link.getAttribute("href");
       if (href && !urls.includes(href)) urls.push(href);
