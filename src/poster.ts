@@ -130,31 +130,26 @@ async function postSingleItem(
       const win = window as unknown as { angular?: { element: (el: Element) => { scope: () => Record<string, unknown>; triggerHandler: (e: string) => void } } };
       if (win.angular) {
         const angEl = win.angular.element(textarea);
-        let scope = angEl.scope() as Record<string, unknown> & { $parent?: Record<string, unknown>; $apply?: () => void };
-        // contentプロパティを持つスコープを上位まで検索
+        let scope = angEl.scope() as Record<string, unknown> & { $parent?: Record<string, unknown>; $apply?: () => void; $root?: { $digest?: () => void } };
         while (scope) {
           if ("content" in scope) {
             scope["content"] = text;
-            (scope.$apply ?? (() => {}))();
             break;
           }
           if (!scope.$parent) break;
           scope = scope.$parent as typeof scope;
         }
+        // $digest を強制実行してAngularJSのバインディングを更新
+        try { scope.$root?.$digest?.(); } catch {}
         angEl.triggerHandler("input");
+        angEl.triggerHandler("change");
       }
+      // DOMにも直接書き込む
+      const nativeInputSetter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")?.set;
+      nativeInputSetter?.call(textarea, text);
+      textarea.dispatchEvent(new Event("input", { bubbles: true }));
+      textarea.dispatchEvent(new Event("change", { bubbles: true }));
     }, caption);
-    await postPage.waitForTimeout(300);
-
-    // ヘッダーオーバーレイを回避してJavaScriptで直接フォーカス・入力
-    await postPage.evaluate(() => {
-      const el = document.querySelector<HTMLTextAreaElement>("textarea");
-      if (el) { el.focus(); el.select(); }
-    });
-    await postPage.waitForTimeout(300);
-    // force:true でオーバーレイを無視してクリック
-    await captionLocator.click({ clickCount: 3, force: true });
-    await postPage.keyboard.type(caption, { delay: 15 });
     await postPage.waitForTimeout(500);
 
     const enteredText = await captionLocator.inputValue().catch(() => "");
@@ -167,7 +162,17 @@ async function postSingleItem(
       throw new Error("投稿ボタンが見つかりません");
     });
 
-    await postBtn.click();
+    // オーバーレイを閉じてからクリック（ヘッダーの<div class="background">対策）
+    await postPage.keyboard.press("Escape").catch(() => {});
+    await postPage.waitForTimeout(500);
+    await postPage.evaluate(() => {
+      const btn = [...document.querySelectorAll<HTMLElement>("button, input[type='submit'], a")].find(
+        (el) => el.textContent?.trim() === "完了"
+      );
+      if (btn) btn.click();
+    }).catch(() => {});
+    // JSクリックで失敗した場合にforce:trueでフォールバック
+    await postBtn.click({ force: true }).catch(() => {});
     console.log("[poster] 投稿ボタンをクリックしました");
 
     // 投稿直後のスクリーンショット（デバッグ用）
