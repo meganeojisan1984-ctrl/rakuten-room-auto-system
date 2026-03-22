@@ -16,13 +16,30 @@ const SELECTORS = {
 
 /**
  * ログイン中ユーザーのROOM IDを取得
+ * トップページのナビゲーションから /room_xxxxxxxx リンクを探す
  */
 async function getMyUserId(page: import("playwright").Page): Promise<string> {
-  await page.goto(`${ROOM_URL}/my`, { waitUntil: "domcontentloaded", timeout: 30000 });
-  const url = page.url();
-  // URLは https://room.rakuten.co.jp/_xxxxxx 形式
-  const match = url.replace(ROOM_URL, "").match(/^\/?([^/]+)/);
-  return match?.[1] ?? "";
+  // 環境変数で直接指定されている場合は優先使用
+  if (process.env.ROOM_USER_ID) return process.env.ROOM_USER_ID;
+
+  // トップページ (AngularJSが確実に起動するページ) から自分のIDを取得
+  await page.goto(`${ROOM_URL}/`, { waitUntil: "domcontentloaded", timeout: 30000 });
+  await randomSleep(6000, 8000);
+
+  // ナビゲーション内の自分のプロフィールリンクを探す
+  const profileLinks = await page.evaluate(() =>
+    Array.from(document.querySelectorAll('a[href^="/room_"]'))
+      .map((a) => a.getAttribute("href") ?? "")
+      .filter(Boolean)
+  ).catch(() => [] as string[]);
+
+  console.log(`[auto_followback] プロフィールリンク候補:`, profileLinks.slice(0, 5));
+
+  // /room_xxxxxxxx 形式のIDを取得 (最初に見つかった自分のプロフィールリンク)
+  // ヘッダーや「マイページ」リンクを優先的に探す
+  const myLink = profileLinks.find((h) => h.match(/^\/room_[^/]+$/));
+  const match = myLink?.match(/^(\/room_[^/]+)/);
+  return match?.[1]?.replace("/", "") ?? "";
 }
 
 /**
@@ -39,7 +56,12 @@ async function collectMyFollowers(
       waitUntil: "domcontentloaded",
       timeout: 30000,
     });
-    await randomSleep(2000, 3000);
+    await randomSleep(6000, 8000);
+    const roomLinkCount = await page.locator('a[href^="/room_"]').count();
+    if (roomLinkCount === 0) {
+      console.log(`[auto_followback] 追加待機中...`);
+      await randomSleep(5000, 7000);
+    }
 
     const links = await page.locator(SELECTORS.userLinks).all();
     for (const link of links) {
