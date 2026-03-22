@@ -105,7 +105,15 @@ export async function runAutoFollow(
         try {
           const fullUrl = userUrl.startsWith("http") ? userUrl : `${ROOM_URL}${userUrl}`;
           await page.goto(fullUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
-          await randomSleep(4000, 6000); // AngularJS描画待機
+          // AngularJS描画待機 (フォロワーページと同じパターン)
+          await randomSleep(6000, 8000);
+
+          // Angular未描画なら追加待機
+          const ngCount = await page.locator("[ng-click]").count();
+          if (ngCount === 0) {
+            console.log(`[auto_follow] 追加待機中 (${userUrl})`);
+            await randomSleep(5000, 7000);
+          }
 
           // デバッグ: ページ上のボタン・ng-click要素を確認
           const debugElements = await page.evaluate(() => {
@@ -117,7 +125,7 @@ export async function runAutoFollow(
               text: el.textContent?.trim().slice(0, 20) ?? "",
             }));
           }).catch(() => []);
-          console.log(`[auto_follow] ページ要素サンプル (${userUrl}):`, JSON.stringify(debugElements, null, 2));
+          console.log(`[auto_follow] ng-click要素数: ${ngCount}, サンプル:`, JSON.stringify(debugElements.slice(0, 5), null, 2));
 
           // フォローボタンを探す
           const followBtn = page.locator(SELECTORS.followButton).first();
