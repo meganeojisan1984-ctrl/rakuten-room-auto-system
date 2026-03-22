@@ -124,7 +124,23 @@ export async function runAutoFollow(
 
           await followBtn.scrollIntoViewIfNeeded();
           await randomSleep(500, 1000);
-          await followBtn.click();
+
+          // JSクリックでオーバーレイを回避してからforce:trueでフォールバック
+          await page.evaluate(() => {
+            const btn = Array.from(document.querySelectorAll<HTMLElement>("button")).find(
+              (el) => el.textContent?.trim() === "フォローする"
+            );
+            if (btn) btn.click();
+          }).catch(() => {});
+          await randomSleep(1000, 2000);
+
+          // クリック後にボタンが消えたか確認（消えていれば成功）
+          const stillVisible = await followBtn.isVisible().catch(() => false);
+          if (stillVisible) {
+            await followBtn.click({ force: true }).catch(() => {});
+            await randomSleep(1000, 1500);
+          }
+
           followCount++;
           console.log(`[auto_follow] フォロー! ${userUrl} (${followCount}/${maxFollows})`);
 

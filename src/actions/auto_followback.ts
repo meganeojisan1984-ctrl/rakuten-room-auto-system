@@ -141,7 +141,24 @@ export async function runAutoFollowback(
 
         await followBtn.scrollIntoViewIfNeeded();
         await randomSleep(500, 1000);
-        await followBtn.click();
+
+        // JSクリックでオーバーレイを回避してからforce:trueでフォールバック
+        await page.evaluate(() => {
+          const btn = Array.from(document.querySelectorAll<HTMLElement>("button")).find(
+            (el) => el.textContent?.trim() === "フォローする"
+          );
+          if (btn) btn.click();
+        }).catch(() => {});
+        await randomSleep(1000, 2000);
+
+        // クリック後にボタンが消えたか確認（消えていれば成功）
+        const stillVisible = await followBtn.isVisible().catch(() => false);
+        if (stillVisible) {
+          // まだ表示されていればforce:trueで再試行
+          await followBtn.click({ force: true }).catch(() => {});
+          await randomSleep(1000, 1500);
+        }
+
         followbackCount++;
         console.log(`[auto_followback] フォロー返し! ${userUrl} (${followbackCount}/${maxFollowbacks})`);
 
