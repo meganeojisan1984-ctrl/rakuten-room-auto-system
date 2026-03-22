@@ -51,12 +51,16 @@ async function collectFollowers(
       await randomSleep(5000, 7000);
     }
 
-    // Step4: ユーザーリンクを収集
+    // Step4: ユーザーリンクを収集 (ユーザーID部分のみ抽出: /room_xxxxxxxx)
     const links = await page.locator(SELECTORS.userLinks).all();
     console.log(`[auto_follow] ユーザーリンク検出: ${links.length}件 (${influencerId})`);
     for (const link of links.slice(0, limit)) {
       const href = await link.getAttribute("href");
-      if (href && !urls.includes(href)) urls.push(href);
+      if (!href) continue;
+      // /room_xxxxxxxx/items などからユーザーID部分のみ取得
+      const match = href.match(/^(\/room_[^/?#]+)/);
+      const cleanHref = match?.[1] ?? href;
+      if (cleanHref && !urls.includes(cleanHref)) urls.push(cleanHref);
     }
   } catch (err) {
     console.warn(`[auto_follow] フォロワー収集失敗 (${influencerId}):`, err);
@@ -100,8 +104,8 @@ export async function runAutoFollow(
 
         try {
           const fullUrl = userUrl.startsWith("http") ? userUrl : `${ROOM_URL}${userUrl}`;
-          await page.goto(fullUrl, { waitUntil: "domcontentloaded", timeout: 20000 });
-          await randomSleep(1500, 3000);
+          await page.goto(fullUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
+          await randomSleep(4000, 6000); // AngularJS描画待機
 
           // フォローボタンを探す
           const followBtn = page.locator(SELECTORS.followButton).first();
