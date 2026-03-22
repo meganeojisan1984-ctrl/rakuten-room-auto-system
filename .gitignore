@@ -6,3 +6,4 @@ error.png
 *.log
 data/database.sqlite
 data/session.json
+posted_items.json
