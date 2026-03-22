@@ -35,19 +35,23 @@ async function collectFollowers(
   const urls: string[] = [];
   try {
     await page.goto(`${ROOM_URL}/${influencerId}/followers`, {
-      waitUntil: "domcontentloaded",
-      timeout: 30000,
+      waitUntil: "networkidle",
+      timeout: 45000,
     });
-    await randomSleep(2000, 3000);
+    await randomSleep(3000, 5000);
 
-    // デバッグ: ページ上の全リンクを確認
+    // デバッグ: ページ上のリンクを確認（/_で始まるユーザーリンクのみ）
     const allLinks = await page.evaluate(() =>
       Array.from(document.querySelectorAll("a[href]"))
         .map((a) => a.getAttribute("href") ?? "")
         .filter(Boolean)
-        .slice(0, 20)
+        .slice(0, 30)
     ).catch(() => [] as string[]);
-    console.log(`[auto_follow] ページリンクサンプル (${influencerId}):`, allLinks.slice(0, 10));
+    const userHrefs = allLinks.filter((h) => h.startsWith("/_"));
+    console.log(`[auto_follow] URL: ${page.url()}, 全リンク${allLinks.length}件, ユーザーリンク候補${userHrefs.length}件:`, userHrefs.slice(0, 5));
+    // 全リンクのhref先頭パターンをデバッグ
+    const patterns = [...new Set(allLinks.map((h) => h.slice(0, 30)))];
+    console.log(`[auto_follow] リンクパターン:`, patterns.slice(0, 8));
 
     // ユーザーリンクを収集
     const links = await page.locator(SELECTORS.userLinks).all();
