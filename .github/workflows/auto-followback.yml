@@ -36,6 +36,7 @@ jobs:
           ROOM_COOKIE: ${{ secrets.ROOM_COOKIE }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           MAX_FOLLOWBACKS: ${{ github.event.inputs.max_followbacks || vars.MAX_FOLLOWBACKS || '30' }}
+          ROOM_USER_ID: room_sho_qoltime
         run: npx tsx src/run_followback.ts
 
       - name: エラースクリーンショット（失敗時）
