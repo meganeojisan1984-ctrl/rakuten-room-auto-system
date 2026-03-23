@@ -40,11 +40,26 @@ export async function runAutoLike(maxLikes: number = 20, headless: boolean = tru
     await randomSleep(6000, 8000);
     console.log(`[auto_like] ページURL: ${page.url()}`);
 
+    // プロフィール設定ポップアップなどを閉じる
+    await page.keyboard.press("Escape").catch(() => {});
+    await randomSleep(1000, 2000);
+
     // 商品カードが描画されるまで待機
-    const itemCount = await page.locator(SELECTORS.itemCard).count();
+    let itemCount = await page.locator(SELECTORS.itemCard).count();
     if (itemCount === 0) {
       console.log("[auto_like] 商品カード未描画、追加待機中...");
       await randomSleep(5000, 7000);
+      itemCount = await page.locator(SELECTORS.itemCard).count();
+    }
+    // まだ0なら「すべて」タブをクリックして全商品を表示
+    if (itemCount === 0) {
+      console.log("[auto_like] 「すべて」タブをクリックして全商品表示を試みます...");
+      await page.evaluate(() => {
+        const allTab = Array.from(document.querySelectorAll<HTMLElement>("[ng-click*='setGenre']"))
+          .find((el) => el.textContent?.trim() === "すべて");
+        if (allTab) allTab.click();
+      }).catch(() => {});
+      await randomSleep(4000, 6000);
     }
     console.log(`[auto_like] 商品カード数: ${await page.locator(SELECTORS.itemCard).count()}`);
 

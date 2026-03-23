@@ -11,22 +11,22 @@ const TARGET_GENRE = process.env.TARGET_GENRE ?? "general";
 // メインジャンル: QOLが向上する家事用品（投稿の6〜7割）
 // 条件: 商品数多い・注目度高い・悩みが明確・消耗品&買い替え需要あり
 const MAIN_GENRES = [
-  { name: "日用品雑貨・掃除・洗濯用品", genreId: "215684", minPrice: 1000, maxPrice: 3000 },
-  { name: "整理収納・片付けグッズ", genreId: "215697", minPrice: 1000, maxPrice: 3000 },
-  { name: "掃除用品・消耗品", genreId: "215684", minPrice: 1000, maxPrice: 3000 },
-  { name: "洗濯・衣類ケアグッズ", genreId: "215684", minPrice: 1000, maxPrice: 3000 },
-  { name: "キッチン消耗品・日用品", genreId: "216129", minPrice: 1000, maxPrice: 3000 },
-  { name: "バス・トイレ用品", genreId: "215684", minPrice: 1000, maxPrice: 3000 },
-  { name: "家事効率化グッズ", genreId: "215684", minPrice: 1000, maxPrice: 3000 },
+  { name: "日用品雑貨・掃除・洗濯用品", genreId: "215684", minPrice: 2000, maxPrice: 5000 },
+  { name: "整理収納・片付けグッズ", genreId: "215697", minPrice: 2000, maxPrice: 5000 },
+  { name: "掃除用品・消耗品", genreId: "215684", minPrice: 2000, maxPrice: 5000 },
+  { name: "洗濯・衣類ケアグッズ", genreId: "215684", minPrice: 2000, maxPrice: 5000 },
+  { name: "キッチン消耗品・日用品", genreId: "216129", minPrice: 2000, maxPrice: 5000 },
+  { name: "バス・トイレ用品", genreId: "215684", minPrice: 2000, maxPrice: 5000 },
+  { name: "家事効率化グッズ", genreId: "215684", minPrice: 2000, maxPrice: 5000 },
 ];
 
 // サブジャンル: メインジャンル関連・同悩みの延長・使用シーン重複
 const SUB_GENRES = [
-  { name: "ハイエンド・スタイリッシュ家電", genreId: "215783", minPrice: 1000, maxPrice: 3000 },
-  { name: "時短ガジェット・小型家電", genreId: "215783", minPrice: 1000, maxPrice: 3000 },
-  { name: "キッチン便利グッズ・調理器具", genreId: "216129", minPrice: 1000, maxPrice: 3000 },
-  { name: "生活必需品・補充消耗品", genreId: "215684", minPrice: 1000, maxPrice: 3000 },
-  { name: "省エネ・節約家電小物", genreId: "215783", minPrice: 1000, maxPrice: 3000 },
+  { name: "ハイエンド・スタイリッシュ家電", genreId: "215783", minPrice: 2000, maxPrice: 5000 },
+  { name: "時短ガジェット・小型家電", genreId: "215783", minPrice: 2000, maxPrice: 5000 },
+  { name: "キッチン便利グッズ・調理器具", genreId: "216129", minPrice: 2000, maxPrice: 5000 },
+  { name: "生活必需品・補充消耗品", genreId: "215684", minPrice: 2000, maxPrice: 5000 },
+  { name: "省エネ・節約家電小物", genreId: "215783", minPrice: 2000, maxPrice: 5000 },
 ];
 
 // ジャンルID設定（後方互換）

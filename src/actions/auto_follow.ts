@@ -104,14 +104,14 @@ export async function runAutoFollow(
         try {
           const fullUrl = userUrl.startsWith("http") ? userUrl : `${ROOM_URL}${userUrl}`;
           await page.goto(fullUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
-          // AngularJS描画待機 (フォロワーページと同じパターン)
-          await randomSleep(6000, 8000);
+          // プロフィールページはフォロワーページより描画が速い (3〜4s で十分)
+          await randomSleep(3000, 4000);
 
           // Angular未描画なら追加待機
           const ngCount = await page.locator("[ng-click]").count();
           if (ngCount === 0) {
             console.log(`[auto_follow] 追加待機中 (${userUrl})`);
-            await randomSleep(5000, 7000);
+            await randomSleep(3000, 4000);
           }
 
           // フォローボタンを探す
