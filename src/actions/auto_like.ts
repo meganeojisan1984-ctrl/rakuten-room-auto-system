@@ -31,17 +31,20 @@ async function likeOnPage(
   remaining: number,
   maxLikes: number
 ): Promise<number> {
-  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 45000 });
+  // /items サフィックスなしのプロフィールルートで試みる（SPA内部ルーティング対応）
+  const rootUrl = url.replace(/\/items$/, "");
+  await page.goto(rootUrl, { waitUntil: "domcontentloaded", timeout: 45000 });
   await randomSleep(8000, 10000);
   console.log(`[auto_like] ページ: ${page.url()}`);
+
+  // JSコンソールエラーを捕捉
+  const consoleErrors: string[] = [];
+  page.on("console", (msg) => { if (msg.type() === "error") consoleErrors.push(msg.text().slice(0, 100)); });
 
   // ng-click要素数をデバッグ出力
   const ngClickCount = await page.locator("[ng-click]").count();
   console.log(`[auto_like] ng-click要素数: ${ngClickCount}`);
-
-  // like(item)ボタン候補を広めのセレクタで探す
-  const likeAlt = await page.locator('[ng-click*="like"]').count();
-  console.log(`[auto_like] like系ng-click要素数: ${likeAlt}`);
+  if (consoleErrors.length > 0) console.log("[auto_like] JSエラー:", consoleErrors.slice(0, 3));
 
   // 商品カードが描画されるまで待機
   let itemCount = await page.locator(SELECTORS.itemCard).count();
@@ -52,14 +55,12 @@ async function likeOnPage(
   }
   console.log(`[auto_like] 商品カード数: ${itemCount}`);
 
-  // ページHTML冒頭をデバッグ出力（ng-clickパターン確認用）
+  // ページHTML冒頭をデバッグ出力
   if (itemCount === 0) {
-    const ngClickSamples = await page.evaluate(() => {
-      return Array.from(document.querySelectorAll("[ng-click]"))
-        .slice(0, 10)
-        .map((el) => ({ ngClick: el.getAttribute("ng-click"), tag: el.tagName, cls: el.className.slice(0, 40) }));
-    });
-    console.log("[auto_like] ng-click要素サンプル:", JSON.stringify(ngClickSamples));
+    const bodySnippet = await page.evaluate(() => document.body?.innerHTML?.slice(0, 500) ?? "");
+    console.log("[auto_like] bodyHTML先頭:", bodySnippet);
+    const finalUrl = page.url();
+    console.log("[auto_like] 最終URL:", finalUrl);
     return 0;
   }
 
