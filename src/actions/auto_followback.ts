@@ -64,6 +64,15 @@ async function collectMyFollowers(
       await randomSleep(5000, 7000);
     }
 
+    // 無限スクロールで追加読み込み (最大10回)
+    for (let scroll = 0; scroll < 10 && urls.length < limit; scroll++) {
+      const before = await page.locator(SELECTORS.userLinks).count();
+      await page.evaluate(() => window.scrollBy(0, window.innerHeight * 3));
+      await randomSleep(2000, 3000);
+      const after = await page.locator(SELECTORS.userLinks).count();
+      if (after === before) break;
+    }
+
     const links = await page.locator(SELECTORS.userLinks).all();
     console.log(`[auto_followback] ユーザーリンク検出: ${links.length}件`);
     for (const link of links) {
