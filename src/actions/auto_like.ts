@@ -32,8 +32,16 @@ async function likeOnPage(
   maxLikes: number
 ): Promise<number> {
   await page.goto(url, { waitUntil: "domcontentloaded", timeout: 45000 });
-  await randomSleep(6000, 8000);
+  await randomSleep(8000, 10000);
   console.log(`[auto_like] ページ: ${page.url()}`);
+
+  // ng-click要素数をデバッグ出力
+  const ngClickCount = await page.locator("[ng-click]").count();
+  console.log(`[auto_like] ng-click要素数: ${ngClickCount}`);
+
+  // like(item)ボタン候補を広めのセレクタで探す
+  const likeAlt = await page.locator('[ng-click*="like"]').count();
+  console.log(`[auto_like] like系ng-click要素数: ${likeAlt}`);
 
   // 商品カードが描画されるまで待機
   let itemCount = await page.locator(SELECTORS.itemCard).count();
@@ -43,7 +51,17 @@ async function likeOnPage(
     itemCount = await page.locator(SELECTORS.itemCard).count();
   }
   console.log(`[auto_like] 商品カード数: ${itemCount}`);
-  if (itemCount === 0) return 0;
+
+  // ページHTML冒頭をデバッグ出力（ng-clickパターン確認用）
+  if (itemCount === 0) {
+    const ngClickSamples = await page.evaluate(() => {
+      return Array.from(document.querySelectorAll("[ng-click]"))
+        .slice(0, 10)
+        .map((el) => ({ ngClick: el.getAttribute("ng-click"), tag: el.tagName, cls: el.className.slice(0, 40) }));
+    });
+    console.log("[auto_like] ng-click要素サンプル:", JSON.stringify(ngClickSamples));
+    return 0;
+  }
 
   let liked = 0;
   // スクロールしながらいいね
