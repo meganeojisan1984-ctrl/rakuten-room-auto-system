@@ -50,13 +50,21 @@ async function collectFollowers(
       await randomSleep(5000, 7000);
     }
 
-    // Step3: 無限スクロールで追加読み込み (最大10回スクロール)
-    for (let scroll = 0; scroll < 10 && urls.length < limit; scroll++) {
+    // Step3: 無限スクロールで追加読み込み (DOM上のリンク数がlimitに達するか、新しいリンクが増えなくなるまで)
+    let noNewCount = 0;
+    for (let scroll = 0; scroll < 50; scroll++) {
       const before = await page.locator(SELECTORS.userLinks).count();
+      if (before >= limit) break; // 十分な数が集まったら終了
       await page.evaluate(() => window.scrollBy(0, window.innerHeight * 3));
       await randomSleep(2000, 3000);
       const after = await page.locator(SELECTORS.userLinks).count();
-      if (after === before) break; // 新しいユーザーが読み込まれなければ終了
+      if (after === before) {
+        noNewCount++;
+        if (noNewCount >= 2) break; // 2回連続で増えなければページ末尾に達したと判断
+      } else {
+        noNewCount = 0;
+      }
+      console.log(`[auto_follow] スクロール${scroll + 1}: ${after}件 (${influencerId})`);
     }
 
     // Step4: ユーザーリンクを収集 (ユーザーID部分のみ抽出: /room_xxxxxxxx)

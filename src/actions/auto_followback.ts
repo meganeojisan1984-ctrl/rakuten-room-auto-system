@@ -64,13 +64,21 @@ async function collectMyFollowers(
       await randomSleep(5000, 7000);
     }
 
-    // 無限スクロールで追加読み込み (最大10回)
-    for (let scroll = 0; scroll < 10 && urls.length < limit; scroll++) {
+    // 無限スクロールで追加読み込み (DOM上のリンク数がlimitに達するか、末尾まで)
+    let noNewCount = 0;
+    for (let scroll = 0; scroll < 50; scroll++) {
       const before = await page.locator(SELECTORS.userLinks).count();
+      if (before >= limit) break;
       await page.evaluate(() => window.scrollBy(0, window.innerHeight * 3));
       await randomSleep(2000, 3000);
       const after = await page.locator(SELECTORS.userLinks).count();
-      if (after === before) break;
+      if (after === before) {
+        noNewCount++;
+        if (noNewCount >= 2) break; // 2回連続で増えなければページ末尾
+      } else {
+        noNewCount = 0;
+      }
+      console.log(`[auto_followback] スクロール${scroll + 1}: ${after}件`);
     }
 
     const links = await page.locator(SELECTORS.userLinks).all();
