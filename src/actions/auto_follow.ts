@@ -7,7 +7,7 @@ import { randomSleep } from "../utils/helpers";
 import { addLog } from "../api/server";
 
 const ROOM_URL = "https://room.rakuten.co.jp";
-const PARALLEL_PAGES = 2;
+const PARALLEL_PAGES = 4;
 
 /** 1時間あたりの最大フォロー数 (アカウント停止防止の絶対上限) */
 const MAX_FOLLOWS_PER_HOUR = 100;
@@ -199,10 +199,10 @@ async function followWorker(
         waitUntil: "domcontentloaded",
         timeout: 30000,
       });
-      await randomSleep(3000, 4000);
+      await randomSleep(2000, 3000);
 
       if ((await page.locator("[ng-click]").count()) === 0) {
-        await randomSleep(3000, 4000);
+        await randomSleep(1500, 2500);
       }
 
       const followBtn = page.locator(SELECTORS.followButton).first();
@@ -237,7 +237,7 @@ async function followWorker(
       console.log(`[auto_follow][p${pageId}] フォロー! ${userUrl} (${state.followCount}/${maxFollows})`);
       addLog("auto_follow", "info", `フォロー: ${state.followCount}/${maxFollows}`);
 
-      await randomSleep(2000, 4000);
+      await randomSleep(1500, 2500);
     } catch (err) {
       console.warn(`[auto_follow][p${pageId}] スキップ: ${userUrl} - ${err}`);
     }
