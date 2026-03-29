@@ -1,10 +1,11 @@
 /**
  * auto_post.ts - 自動コレ（投稿）機能
- * 既存の fetcher.ts / generator.ts / poster.ts を活用
+ * 楽天ROOM投稿 → X(Twitter) 2段階スレッド投稿
  */
 import { fetchItems } from "../fetcher";
 import { generateCaptions, type PostType } from "../generator";
 import { postItems } from "../poster";
+import { postToX } from "../x-poster";
 import { addLog } from "../api/server";
 import * as fs from "fs";
 import * as path from "path";
@@ -57,19 +58,19 @@ export async function runAutoPost(postCount: number = 1, headless: boolean = tru
       return;
     }
 
-    // 紹介文生成
+    // 紹介文生成（ROOM用 + X親投稿用）
     const captionedItems = await generateCaptions(items, postType);
     if (captionedItems.length === 0) {
       addLog("auto_post", "error", "紹介文の生成に失敗しました");
       return;
     }
 
-    // ROOM投稿
+    // 楽天ROOM投稿
     const results = await postItems(captionedItems, headless);
 
     const succeeded = results.filter((r) => r.success).length;
     const failed = results.filter((r) => !r.success).length;
-    addLog("auto_post", "info", `投稿完了 成功:${succeeded}件 失敗:${failed}件`);
+    addLog("auto_post", "info", `ROOM投稿完了 成功:${succeeded}件 失敗:${failed}件`);
 
     // 投稿済みリスト更新
     const successCodes = captionedItems
@@ -78,7 +79,26 @@ export async function runAutoPost(postCount: number = 1, headless: boolean = tru
     for (const code of successCodes) postedCodes.add(code);
     saveState(postedCodes, (postTypeIndex + 1) % 3);
 
-    console.log(`[auto_post] 完了 成功:${succeeded} 失敗:${failed}`);
+    // X(Twitter) 2段階スレッド投稿（ROOM投稿が成功した商品のみ）
+    let xPosted = 0;
+    for (let i = 0; i < captionedItems.length; i++) {
+      if (!results[i]?.success) continue;
+
+      const { item, xParentCaption } = captionedItems[i]!;
+      const ok = await postToX(
+        item.itemName,
+        item.itemUrl,
+        xParentCaption,
+        item.imageUrl || undefined
+      );
+      if (ok) xPosted++;
+    }
+
+    if (xPosted > 0) {
+      addLog("auto_post", "info", `X投稿完了: ${xPosted}件（スレッド形式）`);
+    }
+
+    console.log(`[auto_post] 完了 ROOM成功:${succeeded} 失敗:${failed} X投稿:${xPosted}`);
   } catch (err) {
     const msg = String(err);
     console.error("[auto_post] エラー:", msg);

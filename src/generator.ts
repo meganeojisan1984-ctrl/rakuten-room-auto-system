@@ -6,7 +6,6 @@ dotenv.config();
 const GROQ_API_KEY = process.env.GROQ_API_KEY ?? "";
 const MODEL_NAME = "llama-3.3-70b-versatile";
 
-// レート制限対策: リクエスト間隔 (ms)
 const REQUEST_INTERVAL_MS = 2000;
 const MAX_RETRIES = 3;
 const RETRY_BASE_DELAY_MS = 5000;
@@ -26,6 +25,7 @@ function sleep(ms: number): Promise<void> {
 async function generateWithRetry(
   client: Groq,
   prompt: string,
+  temperature: number,
   attempt: number = 0
 ): Promise<string> {
   try {
@@ -33,7 +33,7 @@ async function generateWithRetry(
       model: MODEL_NAME,
       messages: [{ role: "user", content: prompt }],
       max_tokens: 512,
-      temperature: 0.8,
+      temperature,
     });
     const text = completion.choices[0]?.message?.content ?? "";
     if (!text) throw new Error("Groq APIからの応答が空です");
@@ -51,7 +51,7 @@ async function generateWithRetry(
         `[generator] レート制限に達しました。${delay / 1000}秒後にリトライ (${attempt + 1}/${MAX_RETRIES})`
       );
       await sleep(delay);
-      return generateWithRetry(client, prompt, attempt + 1);
+      return generateWithRetry(client, prompt, temperature, attempt + 1);
     }
     throw err;
   }
@@ -65,6 +65,10 @@ function getPostTypeLabel(postType: PostType): string {
   }
 }
 
+// ============================================================
+// 楽天ROOM用プロンプト
+// ============================================================
+
 function buildPrompt(item: RakutenItem, postType: PostType): string {
   const bonusInfo: string[] = [];
   if (item.hasPointBonus) {
@@ -77,7 +81,6 @@ function buildPrompt(item: RakutenItem, postType: PostType): string {
     ? `\n【お得情報（文頭で必ずアピールすること）】\n${bonusInfo.join("\n")}`
     : "";
 
-  // 投稿タイプ別の指示
   let postTypeInstruction = "";
   switch (postType) {
     case 1:
@@ -129,54 +132,71 @@ ${postTypeInstruction}
 投稿文のみを出力してください（前置き・説明・タイトル等は一切不要）:`;
 }
 
-function buildXPrompt(item: RakutenItem, postType: PostType): string {
-  // 投稿タイプ別のX向け指示
-  let postTypeInstruction = "";
+// ============================================================
+// X(Twitter)用プロンプト — PAS法・2段階スレッド方式
+// ============================================================
+
+/** 毎回異なる文章を生成するための書き出しバリエーション */
+const TONE_VARIATIONS = [
+  "「最近これなしでは生きていけないw」みたいな温度感で",
+  "「え、まだ知らないの？」という発見・驚きのトーンで",
+  "「正直に言うと最初は半信半疑だった」という本音告白スタイルで",
+  "「これ見た瞬間ピンときた」という直感と即決を強調して",
+  "「毎朝これ使うたびに買ってよかったって思う」という満足感溢れる口調で",
+  "「友達にこっそり教えたくなるやつ見つけた」という秘密感のあるトーンで",
+];
+
+function buildXParentPrompt(item: RakutenItem, postType: PostType): string {
+  // 毎回ランダムにトーン変化 → 同じ商品でも異なる文章が生成される
+  const tone = TONE_VARIATIONS[Math.floor(Math.random() * TONE_VARIATIONS.length)]!;
+
+  let pasInstruction = "";
   switch (postType) {
     case 1:
-      postTypeInstruction = `
-【投稿タイプ】認知拡大・回遊誘導
-- 「こんな商品があるの知らなかった」「これ知ってる人だけ得してる」というトーンで興味を引く
-- 次の関連商品への期待を最後に1行添える（例：「次は〇〇と組み合わせると最強になるアイテム紹介します」）`;
+      pasInstruction = `
+【P（Problem/共感）】「◯◯あるある」など読者が「あ〜わかる！」と思う日常の悩みや不満を1〜2行で提示
+【A（Agitation/煽り）】「そのままだと毎日〇〇し続ける羽目になる」「これ知らない人、損しすぎw」など共感→焦りへ転換
+【S（Solution/解決）】この商品がなぜその悩みを解決するかを体験談スタイルで。「◯◯と組み合わせたら最強だった」を入れる`;
       break;
     case 2:
-      postTypeInstruction = `
-【投稿タイプ】購買促進
-- 「今すぐ買うべき理由」を強調し、購買衝動を強く引き出す
-- ポイント・クーポン情報があれば「今だけ」「期間限定」で緊急性を出す`;
+      pasInstruction = `
+【P（Problem/共感）】購入前の典型的な悩み・失敗談（例：「○○でずっと困ってた」「何度も△△を試したけど全部失敗した」）
+【A（Agitation/煽り）】「今の状態が続くと〇〇になる」「こういうのって気づいたら手遅れだから」で危機感を演出
+【S（Solution/解決）】「これに変えてから本当に変わった」という劇的Before→Afterを短く鋭く描写`;
       break;
     case 3:
-      postTypeInstruction = `
-【投稿タイプ】楽天市場への送客
-- 「楽天で検索して」「楽天ROOMのリンクから」など楽天への誘導ワードを自然に入れる
-- 楽天スーパーセール・お買い物マラソンなどのイベントへの言及があると効果的`;
+      pasInstruction = `
+【P（Problem/共感）】「楽天でいいもの探しても結局何が良いかわからない」という迷いへの共感
+【A（Agitation/煽り）】「セール前にチェックしておかないとずっと後回しになる」「知ってる人だけが得してる現実」
+【S（Solution/解決）】「楽天でこれ見つけたとき思わず保存した」「これさえあれば全部楽天で揃う」という楽天完結の魅力`;
       break;
   }
 
-  return `あなたはフォロワー数十万人のライフスタイル系インフルエンサーです。X（旧Twitter）でバズる投稿を量産しており、「認識→共感→欲しい！」の流れを一瞬で作れるプロです。
-${postTypeInstruction}
+  return `あなたはX（旧Twitter）でフォロワー数十万人を持つライフスタイル系インフルエンサーです。
+今回は${tone}書いてください。
 
 【商品情報】
 - 商品名: ${item.itemName}
 - 価格: ${item.itemPrice.toLocaleString()}円
-- 商品説明: ${item.itemCaption.slice(0, 200)}
+- 説明: ${item.itemCaption.slice(0, 150)}
 
-【バズる投稿の必須構成（この順番で）】
-1. 【フック】「え、これ知らなかった人いる？」「これ見つけた瞬間買い物かごに即入れた」など、スクロールが止まる冒頭1行
-2. 【共感】自分の体験として「ずっと〇〇で困ってたんだけど」「〇〇好きな人に刺さりすぎる」と読者の日常と接続する
-3. 【提案】「◯◯と組み合わせると最強」という組み合わせ提案または購入後の変化を1〜2行
-4. 【CTA】「ROOMに詳細載せてるから見てみて」「気になる人はチェックして」で自然に誘導。末尾にハッシュタグ
+【PAS法の構成（この順で書く）】
+${pasInstruction}
 
 【絶対に守るルール】
-1. 全体180〜220文字以内（URLを別途付けるため短めに）
-2. 広告感・AI感ゼロ。友達へのDMみたいなリアルな口調
-3. 絵文字でテンポと感情の強弱をつける（多用しすぎない）
-4. スマホで読みやすいよう適度に改行を入れる
-5. ハッシュタグは末尾に3〜5個（#楽天ROOM #QOL向上 必須＋商品カテゴリキーワード）
-6. 検索されやすいキーワード（「時短」「便利グッズ」「買ってよかった」など）を文中に自然に入れる
+1. 全体160〜200文字以内（リンクは別リプライで付けるのでURLは含めない）
+2. URLは絶対に含めない（アルゴリズムデバフ防止）
+3. ハッシュタグは末尾に最大2個まで（スパム判定防止のため必ず2個以内）
+4. 広告感・AI感ゼロ。一人のユーザーとしての本音のレビュー風で書く
+5. スマホで読みやすいよう適度に改行を入れる
+6. 絵文字でテンポと感情の強弱をつける（多用しすぎない）
 
 投稿文のみを出力してください（前置き・説明・タイトル等は一切不要）:`;
 }
+
+// ============================================================
+// 公開API
+// ============================================================
 
 export async function generateCaption(item: RakutenItem, postType: PostType = 2): Promise<string> {
   if (!GROQ_API_KEY) {
@@ -187,7 +207,7 @@ export async function generateCaption(item: RakutenItem, postType: PostType = 2)
   const prompt = buildPrompt(item, postType);
 
   console.log(`[generator] 「${item.itemName.slice(0, 30)}...」の紹介文を生成中 (${getPostTypeLabel(postType)})`);
-  const caption = await generateWithRetry(client, prompt);
+  const caption = await generateWithRetry(client, prompt, 0.8);
   console.log("[generator] 紹介文生成完了");
   return caption.trim();
 }
@@ -195,24 +215,25 @@ export async function generateCaption(item: RakutenItem, postType: PostType = 2)
 export async function generateCaptions(
   items: RakutenItem[],
   postType: PostType = 2
-): Promise<Array<{ item: RakutenItem; caption: string; xCaption: string }>> {
-  const results: Array<{ item: RakutenItem; caption: string; xCaption: string }> = [];
+): Promise<Array<{ item: RakutenItem; caption: string; xParentCaption: string }>> {
+  const results: Array<{ item: RakutenItem; caption: string; xParentCaption: string }> = [];
 
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
     if (!item) continue;
 
     try {
+      // ROOM投稿文（temperature: 0.8）
       const caption = await generateCaption(item, postType);
-
       await sleep(REQUEST_INTERVAL_MS);
 
+      // X親投稿文（temperature: 0.95 で毎回異なる文章に）
       const client = new Groq({ apiKey: GROQ_API_KEY });
-      console.log(`[generator] 「${item.itemName.slice(0, 30)}...」のX用投稿文を生成中`);
-      const xCaption = await generateWithRetry(client, buildXPrompt(item, postType));
-      console.log("[generator] X用投稿文生成完了");
+      console.log(`[generator] 「${item.itemName.slice(0, 30)}...」のX用親投稿文を生成中 (PAS法)`);
+      const xParentCaption = await generateWithRetry(client, buildXParentPrompt(item, postType), 0.95);
+      console.log("[generator] X用親投稿文生成完了");
 
-      results.push({ item, caption, xCaption: xCaption.trim() });
+      results.push({ item, caption, xParentCaption: xParentCaption.trim() });
     } catch (err) {
       console.error(`[generator] 商品「${item.itemName.slice(0, 30)}」の生成失敗:`, err);
     }
