@@ -71,34 +71,21 @@ async function getOwnFollowingIds(
   try {
     // フォロー中リストを直接取得（Angularの描画完了まで待つ）
     await page.goto(`${ROOM_URL}/${OWN_ROOM_ID}/following`, {
-      waitUntil: "domcontentloaded",
-      timeout: 20000,
+      waitUntil: "load",
+      timeout: 30000,
     });
-    console.log(`[auto_follow][discover] ページURL: ${page.url()}`);
-    console.log(`[auto_follow][discover] ページタイトル: ${await page.title()}`);
-
-    // Angular がユーザーリンクを描画するまで最大10秒待つ
-    const selectorFound = await page.waitForSelector(SELECTORS.userLinks, { timeout: 10000 }).then(() => true).catch(() => false);
-    console.log(`[auto_follow][discover] セレクタ(${SELECTORS.userLinks})検出: ${selectorFound}`);
-
-    // セレクタが見つからなかった場合、実際のa要素サンプルをログ出力
-    if (!selectorFound) {
-      const allAnchors = await page.locator("a").all();
-      console.log(`[auto_follow][discover] ページ内のa要素数: ${allAnchors.length}`);
-      const sampleHrefs: string[] = [];
-      for (const a of allAnchors.slice(0, 10)) {
-        const href = await a.getAttribute("href").catch(() => null);
-        if (href) sampleHrefs.push(href);
-      }
-      console.log(`[auto_follow][discover] a要素hrefサンプル: ${JSON.stringify(sampleHrefs)}`);
-    }
-
-    await randomSleep(1000, 1500);
+    // Angularがデータ取得・描画するまでDOMをポーリング（最大20秒）
+    await page.waitForFunction(
+      (sel: string) => document.querySelectorAll(sel).length > 0,
+      SELECTORS.userLinks,
+      { timeout: 20000, polling: 500 }
+    ).catch(() => {});
+    console.log(`[auto_follow][discover] ページURL: ${page.url()}, a[href^="/room_"]件数: ${await page.locator(SELECTORS.userLinks).count()}`);
+    await randomSleep(500, 1000);
 
     const ids = new Set<string>();
     for (let i = 0; i < 8 && ids.size < 200; i++) {
       const links = await page.locator(SELECTORS.userLinks).all();
-      console.log(`[auto_follow][discover] scroll${i} userLinks件数: ${links.length}`);
       for (const link of links) {
         const href = await link.getAttribute("href").catch(() => null);
         if (!href) continue;
