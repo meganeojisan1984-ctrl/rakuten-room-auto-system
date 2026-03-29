@@ -1,13 +1,10 @@
 import Groq from "groq-sdk";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import * as dotenv from "dotenv";
 import type { RakutenItem } from "./fetcher";
 dotenv.config();
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY ?? "";
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY ?? "";
 const MODEL_NAME = "llama-3.3-70b-versatile";
-const GEMINI_MODEL = "gemini-1.5-flash";
 
 const REQUEST_INTERVAL_MS = 2000;
 const MAX_RETRIES = 3;
@@ -256,26 +253,15 @@ function buildGeminiXPrompt(keyword: string, item: RakutenItem): string {
 投稿文のみを出力してください（前置き不要）:`;
 }
 
-async function generateWithGemini(prompt: string): Promise<string> {
-  if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY が未設定です");
-  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({
-    model: GEMINI_MODEL,
-    generationConfig: { temperature: 0.95, maxOutputTokens: 512 },
-  });
-  const result = await model.generateContent(prompt);
-  const text = result.response.text().trim();
-  if (!text) throw new Error("Gemini APIからの応答が空です");
-  return text;
-}
-
 /**
- * トレンドキーワードに基づいてGemini Flashで投稿文を一括生成
+ * トレンドキーワードに基づいてGroqで投稿文を一括生成 (YouTube必勝構成)
  */
 export async function generateTrendCaptions(
   keyword: string,
   items: RakutenItem[]
 ): Promise<Array<{ item: RakutenItem; caption: string; xParentCaption: string }>> {
+  if (!GROQ_API_KEY) throw new Error("GROQ_API_KEY が未設定です");
+  const client = new Groq({ apiKey: GROQ_API_KEY });
   const results: Array<{ item: RakutenItem; caption: string; xParentCaption: string }> = [];
 
   for (let i = 0; i < items.length; i++) {
@@ -283,16 +269,16 @@ export async function generateTrendCaptions(
     if (!item) continue;
 
     try {
-      console.log(`[generator] Gemini: 「${item.itemName.slice(0, 30)}...」ROOM文生成中 (トレンド: ${keyword})`);
-      const caption = await generateWithGemini(buildGeminiRoomPrompt(keyword, item));
+      console.log(`[generator] 「${item.itemName.slice(0, 30)}...」ROOM文生成中 (トレンド: ${keyword})`);
+      const caption = await generateWithRetry(client, buildGeminiRoomPrompt(keyword, item), 0.95);
       await sleep(REQUEST_INTERVAL_MS);
 
-      console.log(`[generator] Gemini: 「${item.itemName.slice(0, 30)}...」X文生成中`);
-      const xParentCaption = await generateWithGemini(buildGeminiXPrompt(keyword, item));
+      console.log(`[generator] 「${item.itemName.slice(0, 30)}...」X文生成中 (トレンド)`);
+      const xParentCaption = await generateWithRetry(client, buildGeminiXPrompt(keyword, item), 0.95);
 
-      results.push({ item, caption, xParentCaption });
+      results.push({ item, caption: caption.trim(), xParentCaption: xParentCaption.trim() });
     } catch (err) {
-      console.error(`[generator] Gemini生成失敗 「${item.itemName.slice(0, 30)}」:`, err);
+      console.error(`[generator] トレンド生成失敗 「${item.itemName.slice(0, 30)}」:`, err);
     }
 
     if (i < items.length - 1) await sleep(REQUEST_INTERVAL_MS);
