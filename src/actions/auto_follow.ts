@@ -197,24 +197,22 @@ async function followWorker(
     try {
       await page.goto(`${ROOM_URL}${userUrl}`, {
         waitUntil: "domcontentloaded",
-        timeout: 30000,
+        timeout: 20000,
       });
-      await randomSleep(2000, 3000);
 
-      if ((await page.locator("[ng-click]").count()) === 0) {
-        await randomSleep(1500, 2500);
-      }
+      // Angularが読み込まれるまで待つ（最大4秒、早ければ即通過）
+      await page.waitForSelector("[ng-click]", { timeout: 4000 }).catch(() => {});
 
       const followBtn = page.locator(SELECTORS.followButton).first();
       if (!(await followBtn.isVisible().catch(() => false))) {
-        console.log(`[auto_follow][p${pageId}] フォロー済み: ${userUrl}`);
+        // フォロー済み → 追加待機なし、即スキップ
         continue;
       }
 
       await enforceRateLimit(state.followTimestamps);
 
       await followBtn.scrollIntoViewIfNeeded();
-      await randomSleep(500, 1000);
+      await randomSleep(300, 600);
 
       await page.evaluate(() => {
         const btn = Array.from(document.querySelectorAll<HTMLElement>("button")).find(
@@ -222,11 +220,11 @@ async function followWorker(
         );
         if (btn) btn.click();
       }).catch(() => {});
-      await randomSleep(1000, 2000);
+      await randomSleep(800, 1200);
 
       if (await followBtn.isVisible().catch(() => false)) {
         await followBtn.click({ force: true }).catch(() => {});
-        await randomSleep(1000, 1500);
+        await randomSleep(800, 1000);
       }
 
       state.followTimestamps.push(Date.now());
@@ -237,7 +235,7 @@ async function followWorker(
       console.log(`[auto_follow][p${pageId}] フォロー! ${userUrl} (${state.followCount}/${maxFollows})`);
       addLog("auto_follow", "info", `フォロー: ${state.followCount}/${maxFollows}`);
 
-      await randomSleep(1500, 2500);
+      await randomSleep(1000, 1500);
     } catch (err) {
       console.warn(`[auto_follow][p${pageId}] スキップ: ${userUrl} - ${err}`);
     }
