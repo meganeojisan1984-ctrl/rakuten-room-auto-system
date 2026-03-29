@@ -296,8 +296,11 @@ async function followWorker(
         timeout: 20000,
       });
 
-      // Angularが読み込まれるまで待つ（最大2秒、早ければ即通過）
-      await page.waitForSelector("[ng-click]", { timeout: 2000 }).catch(() => {});
+      // Angularが「フォローする」または「フォロー中」ボタンを描画するまで最大10秒待つ
+      await page.waitForSelector(
+        'button:has-text("フォローする"), button:has-text("フォロー中")',
+        { timeout: 10000 }
+      ).catch(() => {});
 
       const followBtn = page.locator(SELECTORS.followButton).first();
       if (!(await followBtn.isVisible().catch(() => false))) {
