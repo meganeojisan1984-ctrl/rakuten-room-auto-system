@@ -1,6 +1,6 @@
 /**
  * auto_follow.ts - 自動フォロー機能
- * 指定したインフルエンサーのフォロワー一覧からランダムにフォローする
+ * フォロワーリストページ上のフォローボタンを直接クリックする方式 (高速化)
  */
 import { createBrowserContext, validateSession } from "../core/browser";
 import { randomSleep } from "../utils/helpers";
@@ -17,71 +17,96 @@ const DEFAULT_INFLUENCER_IDS = [
 ];
 
 const SELECTORS = {
-  // 楽天ROOMのフォローボタンは class="button--1P0_8..." text="フォローする"
   followButton: 'button:has-text("フォローする")',
-  // 楽天ROOMユーザーIDは /room_xxxxxxxx 形式
-  userLinks: 'a[href^="/room_"]',
 };
 
 /**
- * 指定ユーザーのフォロワー一覧からユーザーを収集
- * SPAのため: プロフィールページを開いてからフォロワータブをクリック
+ * フォロワーリストページ上でフォローボタンを直接クリック
+ * プロフィールページへの遷移を省略することで処理速度を大幅に向上
  */
-async function collectFollowers(
+async function followFromFollowersList(
   page: import("playwright").Page,
   influencerId: string,
-  limit: number
-): Promise<string[]> {
-  const urls: string[] = [];
+  maxFollows: number
+): Promise<number> {
+  let followCount = 0;
+
   try {
-    // Step1: フォロワーページに直接遷移 (domcontentloaded + 手動待機)
     await page.goto(`${ROOM_URL}/${influencerId}/followers`, {
       waitUntil: "domcontentloaded",
       timeout: 30000,
     });
-    // AngularJSの描画を待機 (networkidleは使わない: バックグラウンドポーリングで永遠に待つため)
-    await randomSleep(6000, 8000);
-    console.log(`[auto_follow] URL: ${page.url()}, 全リンク数: ${await page.locator("a[href]").count()}, /room_リンク数: ${await page.locator('a[href^="/room_"]').count()}`);
+  } catch (err) {
+    console.warn(`[auto_follow] ページ遷移失敗 (${influencerId}): ${err}`);
+    return -1;
+  }
+  await randomSleep(6000, 8000);
 
-    // Step2: AngularJSがまだ描画中なら追加待機
-    const roomLinkCount = await page.locator('a[href^="/room_"]').count();
-    if (roomLinkCount === 0) {
-      console.log(`[auto_follow] 追加待機中...`);
-      await randomSleep(5000, 7000);
-    }
+  // AngularJSがまだ描画中なら追加待機
+  const initialCount = await page.locator(SELECTORS.followButton).count();
+  if (initialCount === 0) {
+    console.log(`[auto_follow] 追加待機中 (${influencerId})...`);
+    await randomSleep(5000, 7000);
+  }
 
-    // Step3: 無限スクロールで追加読み込み (DOM上のリンク数がlimitに達するか、新しいリンクが増えなくなるまで)
-    let noNewCount = 0;
-    for (let scroll = 0; scroll < 50; scroll++) {
-      const before = await page.locator(SELECTORS.userLinks).count();
-      if (before >= limit) break; // 十分な数が集まったら終了
+  // リストページにフォローボタンがなければフォールバックを示すため0を返す
+  const buttonCount = await page.locator(SELECTORS.followButton).count();
+  if (buttonCount === 0) {
+    console.log(`[auto_follow] フォロワーリストにフォローボタンなし: ${influencerId}`);
+    return -1; // -1 = フォールバック要求
+  }
+
+  console.log(`[auto_follow] フォロワーリストでフォローボタン ${buttonCount}件検出 (${influencerId})`);
+
+  let noNewCount = 0;
+
+  while (followCount < maxFollows) {
+    // 常に最初の「フォローする」ボタンを取得 (クリック後に消えた分が自動的にずれる)
+    const btn = page.locator(SELECTORS.followButton).first();
+    const isVisible = await btn.isVisible().catch(() => false);
+
+    if (!isVisible) {
+      // 画面内にボタンがなければスクロールして追加読み込み
+      const before = await page.locator(SELECTORS.followButton).count();
       await page.evaluate(() => window.scrollBy(0, window.innerHeight * 3));
       await randomSleep(2000, 3000);
-      const after = await page.locator(SELECTORS.userLinks).count();
+      const after = await page.locator(SELECTORS.followButton).count();
+
       if (after === before) {
         noNewCount++;
-        if (noNewCount >= 2) break; // 2回連続で増えなければページ末尾に達したと判断
+        if (noNewCount >= 2) break; // 2回連続で増えなければリスト末尾
       } else {
         noNewCount = 0;
       }
-      console.log(`[auto_follow] スクロール${scroll + 1}: ${after}件 (${influencerId})`);
+      continue;
     }
 
-    // Step4: ユーザーリンクを収集 (ユーザーID部分のみ抽出: /room_xxxxxxxx)
-    const links = await page.locator(SELECTORS.userLinks).all();
-    console.log(`[auto_follow] ユーザーリンク検出: ${links.length}件 (${influencerId})`);
-    for (const link of links.slice(0, limit)) {
-      const href = await link.getAttribute("href");
-      if (!href) continue;
-      // /room_xxxxxxxx/items などからユーザーID部分のみ取得
-      const match = href.match(/^(\/room_[^/?#]+)/);
-      const cleanHref = match?.[1] ?? href;
-      if (cleanHref && !urls.includes(cleanHref)) urls.push(cleanHref);
+    await btn.scrollIntoViewIfNeeded();
+    await randomSleep(500, 1000);
+
+    // JSクリック → force:true フォールバック
+    await page.evaluate(() => {
+      const el = Array.from(document.querySelectorAll<HTMLElement>("button")).find(
+        (b) => b.textContent?.trim() === "フォローする"
+      );
+      if (el) el.click();
+    }).catch(() => {});
+    await randomSleep(1000, 2000);
+
+    const stillVisible = await btn.isVisible().catch(() => false);
+    if (stillVisible) {
+      await btn.click({ force: true }).catch(() => {});
+      await randomSleep(1000, 1500);
     }
-  } catch (err) {
-    console.warn(`[auto_follow] フォロワー収集失敗 (${influencerId}):`, err);
+
+    followCount++;
+    console.log(`[auto_follow] フォロー! (${followCount}/${maxFollows}) [${influencerId}]`);
+    addLog("auto_follow", "info", `フォロー: ${followCount}/${maxFollows}`);
+
+    await randomSleep(2000, 4000);
   }
-  return urls;
+
+  return followCount;
 }
 
 /**
@@ -112,60 +137,20 @@ export async function runAutoFollow(
     for (const influencerId of influencerIds) {
       if (followCount >= maxFollows) break;
 
-      const userUrls = await collectFollowers(page, influencerId, maxFollows * 2);
-      console.log(`[auto_follow] ${influencerId}のフォロワー ${userUrls.length}人を収集`);
-
-      for (const userUrl of userUrls) {
-        if (followCount >= maxFollows) break;
-
-        try {
-          const fullUrl = userUrl.startsWith("http") ? userUrl : `${ROOM_URL}${userUrl}`;
-          await page.goto(fullUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
-          // プロフィールページはフォロワーページより描画が速い (3〜4s で十分)
-          await randomSleep(3000, 4000);
-
-          // Angular未描画なら追加待機
-          const ngCount = await page.locator("[ng-click]").count();
-          if (ngCount === 0) {
-            console.log(`[auto_follow] 追加待機中 (${userUrl})`);
-            await randomSleep(3000, 4000);
-          }
-
-          // フォローボタンを探す
-          const followBtn = page.locator(SELECTORS.followButton).first();
-          const isVisible = await followBtn.isVisible().catch(() => false);
-          if (!isVisible) {
-            console.log(`[auto_follow] フォロー済みまたはボタンなし: ${userUrl}`);
-            continue;
-          }
-
-          await followBtn.scrollIntoViewIfNeeded();
-          await randomSleep(500, 1000);
-
-          // JSクリックでオーバーレイを回避してからforce:trueでフォールバック
-          await page.evaluate(() => {
-            const btn = Array.from(document.querySelectorAll<HTMLElement>("button")).find(
-              (el) => el.textContent?.trim() === "フォローする"
-            );
-            if (btn) btn.click();
-          }).catch(() => {});
-          await randomSleep(1000, 2000);
-
-          // クリック後にボタンが消えたか確認（消えていれば成功）
-          const stillVisible = await followBtn.isVisible().catch(() => false);
-          if (stillVisible) {
-            await followBtn.click({ force: true }).catch(() => {});
-            await randomSleep(1000, 1500);
-          }
-
-          followCount++;
-          console.log(`[auto_follow] フォロー! ${userUrl} (${followCount}/${maxFollows})`);
-
-          await randomSleep(2000, 5000);
-        } catch (err) {
-          console.warn(`[auto_follow] スキップ: ${userUrl} - ${err}`);
-        }
+      let result: number;
+      try {
+        result = await followFromFollowersList(page, influencerId, maxFollows - followCount);
+      } catch (err) {
+        console.warn(`[auto_follow] ${influencerId} でエラー、スキップ: ${err}`);
+        continue;
       }
+
+      if (result === -1) {
+        console.log(`[auto_follow] ${influencerId} をスキップ (フォローボタン未検出)`);
+        continue;
+      }
+
+      followCount += result;
     }
 
     addLog("auto_follow", "info", `フォロー完了: ${followCount}件`);
