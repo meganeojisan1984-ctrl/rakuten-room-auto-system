@@ -13,6 +13,9 @@ const PARALLEL_PAGES = 4;
 /** 1時間あたりの最大フォロー数 (アカウント停止防止の絶対上限) */
 const MAX_FOLLOWS_PER_HOUR = 100;
 
+/** キューにこの件数以上溜まったら連鎖スキャンを停止（早期打ち切りで高速化） */
+const QUEUE_SATURATION = 80;
+
 /** ランキング/発見ページ (動的シード取得に使用) */
 const DISCOVERY_PAGES = [
   `${ROOM_URL}/ranking`,
@@ -106,10 +109,10 @@ async function scanOneFollowerList(
     console.warn(`[auto_follow][scan] ページ遷移失敗: ${influencerId}`);
     return;
   }
-  await randomSleep(6000, 8000);
+  await randomSleep(2000, 3000);
 
   if ((await page.locator(SELECTORS.userLinks).count()) === 0) {
-    await randomSleep(5000, 7000);
+    await randomSleep(2000, 3000);
   }
 
   let noNewCount = 0;
@@ -135,7 +138,7 @@ async function scanOneFollowerList(
 
     const beforeCount = await page.locator(SELECTORS.userLinks).count();
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await randomSleep(3000, 4000);
+    await randomSleep(1500, 2000);
     const afterCount = await page.locator(SELECTORS.userLinks).count();
 
     scrollNum++;
@@ -182,13 +185,19 @@ async function runScanner(
       }
     }
 
+    // キューが十分溜まっていれば連鎖スキャンを打ち切り（高速化）
+    if (queue.length >= QUEUE_SATURATION) {
+      console.log(`[auto_follow][scan] キュー${queue.length}件到達、連鎖スキャンを停止`);
+      break;
+    }
+
     if (seedPos < seedPool.length) {
       const seedUrl = seedPool[seedPos++]!;
       const seedId = seedUrl.replace(/^\//, "");
       console.log(`[auto_follow][scan] 連鎖スキャン: ${seedId} (${seedPos}/${seedPool.length})`);
       await scanOneFollowerList(page, seedId, queue, seen, state, maxFollows);
     } else {
-      await randomSleep(2000, 3000);
+      await randomSleep(1000, 1500);
       if (queue.length === 0 && seedPos >= seedPool.length) {
         console.log(`[auto_follow][scan] 新規候補が見つかりません。スキャン終了`);
         break;
@@ -225,8 +234,8 @@ async function followWorker(
         timeout: 20000,
       });
 
-      // Angularが読み込まれるまで待つ（最大4秒、早ければ即通過）
-      await page.waitForSelector("[ng-click]", { timeout: 4000 }).catch(() => {});
+      // Angularが読み込まれるまで待つ（最大2秒、早ければ即通過）
+      await page.waitForSelector("[ng-click]", { timeout: 2000 }).catch(() => {});
 
       const followBtn = page.locator(SELECTORS.followButton).first();
       if (!(await followBtn.isVisible().catch(() => false))) {
@@ -240,7 +249,7 @@ async function followWorker(
       await enforceRateLimit(state.followTimestamps);
 
       await followBtn.scrollIntoViewIfNeeded();
-      await randomSleep(300, 600);
+      await randomSleep(200, 400);
 
       await page.evaluate(() => {
         const btn = Array.from(document.querySelectorAll<HTMLElement>("button")).find(
@@ -248,11 +257,11 @@ async function followWorker(
         );
         if (btn) btn.click();
       }).catch(() => {});
-      await randomSleep(800, 1200);
+      await randomSleep(500, 800);
 
       if (await followBtn.isVisible().catch(() => false)) {
         await followBtn.click({ force: true }).catch(() => {});
-        await randomSleep(800, 1000);
+        await randomSleep(500, 700);
       }
 
       state.followTimestamps.push(Date.now());
@@ -264,12 +273,12 @@ async function followWorker(
       console.log(`[auto_follow][p${pageId}] フォロー! ${userUrl} (${state.followCount}/${maxFollows})`);
       addLog("auto_follow", "info", `フォロー: ${state.followCount}/${maxFollows}`);
 
-      await randomSleep(1000, 1500);
+      await randomSleep(700, 1000);
     } catch (err) {
       console.warn(`[auto_follow][p${pageId}] スキップ: ${userUrl} - ${err}`);
       // リダイレクト等の残留ナビゲーションが終わるのを待ってからリセット
-      await page.waitForLoadState("domcontentloaded", { timeout: 8000 }).catch(() => {});
-      await page.goto("about:blank", { timeout: 5000 }).catch(() => {});
+      await page.waitForLoadState("domcontentloaded", { timeout: 4000 }).catch(() => {});
+      await page.goto("about:blank", { timeout: 3000 }).catch(() => {});
     }
   }
 }
