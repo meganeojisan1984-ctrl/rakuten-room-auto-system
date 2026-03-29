@@ -8,7 +8,6 @@ import { randomSleep } from "../utils/helpers";
 import { addLog, isFollowedUser, recordFollowedUser, getFollowedCount } from "../api/server";
 
 const ROOM_URL = "https://room.rakuten.co.jp";
-const OWN_ROOM_ID = process.env.OWN_ROOM_ID || "room_sho_qoltime";
 const PARALLEL_PAGES = 4;
 
 /** 1時間あたりの最大フォロー数 (アカウント停止防止の絶対上限) */
@@ -17,11 +16,11 @@ const MAX_FOLLOWS_PER_HOUR = 100;
 /** キューにこの件数以上溜まったら連鎖スキャンを停止（早期打ち切りで高速化） */
 const QUEUE_SATURATION = 80;
 
-/** ランキング/発見ページ (動的シード取得に使用) */
-const DISCOVERY_PAGES = [
-  `${ROOM_URL}/ranking`,
-  `${ROOM_URL}/`,
-];
+/**
+ * デフォルトシード: フォロワーリストが確実に存在するユーザーID
+ * INFLUENCER_IDS 環境変数で上書き可能
+ */
+const DEFAULT_SEED_IDS = ["ranking"];
 
 const SELECTORS = {
   followButton: 'button:has-text("フォローする")',
@@ -62,82 +61,11 @@ async function enforceRateLimit(followTimestamps: number[]): Promise<void> {
 }
 
 /**
- * 自分のフォロー中リストからユーザーIDを収集する
- * 毎回ランダムにシャッフルして返すことで、毎回違う人のフォロワーを探索できる
+ * シードユーザーIDを返す
+ * INFLUENCER_IDS 未指定時は DEFAULT_SEED_IDS を使用
  */
-async function getOwnFollowingIds(
-  page: import("playwright").Page,
-  sampleSize = 30
-): Promise<string[]> {
-  try {
-    // フォロー中リストを直接取得
-    await page.goto(`${ROOM_URL}/${OWN_ROOM_ID}/following`, {
-      waitUntil: "domcontentloaded",
-      timeout: 30000,
-    });
-    await randomSleep(4000, 5000);
-    console.log(`[auto_follow][discover] フォロー中ページURL: ${page.url()}, userLinks件数: ${await page.locator(SELECTORS.userLinks).count()}`);
-
-    const ids = new Set<string>();
-    for (let i = 0; i < 8 && ids.size < 200; i++) {
-      const links = await page.locator(SELECTORS.userLinks).all();
-      for (const link of links) {
-        const href = await link.getAttribute("href").catch(() => null);
-        if (!href) continue;
-        const m = href.match(/\/room_([^/?#]+)/);
-        if (m) ids.add(`room_${m[1]}`);
-      }
-      const before = ids.size;
-      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-      await randomSleep(1000, 1500);
-      if (ids.size === before) break; // 末尾に到達
-    }
-
-    // ランダムにシャッフルして毎回違うシードを返す
-    const all = [...ids];
-    for (let i = all.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [all[i], all[j]] = [all[j]!, all[i]!];
-    }
-    const result = all.slice(0, sampleSize);
-    console.log(`[auto_follow][discover] フォロー中リスト ${ids.size}件からランダム${result.length}件を選出`);
-    return result;
-  } catch (e) {
-    console.warn(`[auto_follow][discover] フォロー中リスト取得失敗: ${e}`);
-    return [];
-  }
-}
-
-/**
- * シードユーザーIDを取得する
- * 優先度: 自フォロー中リスト → ランキング/TOPページ
- */
-async function discoverSeedIds(page: import("playwright").Page): Promise<string[]> {
-  // まず自分のフォロー中リストからランダムにシードを取得
-  const fromFollowing = await getOwnFollowingIds(page, 30);
-  if (fromFollowing.length >= 5) return fromFollowing;
-
-  // フォールバック: ランキング/TOPページ
-  const ids = new Set<string>();
-  for (const url of DISCOVERY_PAGES) {
-    try {
-      await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
-      await randomSleep(3000, 4000);
-      const links = await page.locator(SELECTORS.userLinks).all();
-      console.log(`[auto_follow][discover] ${url}: ${links.length}件のリンク`);
-      for (const link of links) {
-        const href = await link.getAttribute("href").catch(() => null);
-        if (!href) continue;
-        const match = href.match(/\/room_([^/?#]+)/);
-        if (match) ids.add(`room_${match[1]}`);
-      }
-    } catch {
-      console.warn(`[auto_follow][discover] ページ取得失敗: ${url}`);
-    }
-  }
-  const result = [...ids].slice(0, 30);
-  console.log(`[auto_follow][discover] ランキングページから${result.length}件のシードを取得`);
-  return result;
+function discoverSeedIds(): string[] {
+  return DEFAULT_SEED_IDS;
 }
 
 /**
@@ -369,10 +297,7 @@ export async function runAutoFollow(
 
     const scanPage = await context.newPage();
 
-    // シードが指定されていなければ発見ページから動的取得
-    const seedIds = influencerIds.length > 0
-      ? influencerIds
-      : await discoverSeedIds(scanPage);
+    const seedIds = influencerIds.length > 0 ? influencerIds : discoverSeedIds();
 
     if (seedIds.length === 0) {
       console.warn("[auto_follow] シードが見つかりませんでした。終了します。");
