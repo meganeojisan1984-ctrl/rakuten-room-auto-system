@@ -1,6 +1,6 @@
 /**
  * auto_follow.ts - 自動フォロー機能
- * 収集とフォローをパイプライン化し、100件達成まで継続スクロール
+ * フォローしたユーザーのフォロワーも連鎖スキャンし、候補を枯渇させない
  */
 import { createBrowserContext, validateSession } from "../core/browser";
 import { randomSleep } from "../utils/helpers";
@@ -11,33 +11,6 @@ const PARALLEL_PAGES = 2;
 
 /** 1時間あたりの最大フォロー数 (アカウント停止防止の絶対上限) */
 const MAX_FOLLOWS_PER_HOUR = 100;
-
-/**
- * レートリミットチェック: 過去1時間のフォロー数が上限に達していたら待機
- */
-async function enforceRateLimit(followTimestamps: number[]): Promise<void> {
-  const ONE_HOUR = 60 * 60 * 1000;
-  const now = Date.now();
-
-  // 1時間より古いタイムスタンプを削除
-  while (followTimestamps.length > 0 && now - followTimestamps[0]! > ONE_HOUR) {
-    followTimestamps.shift();
-  }
-
-  if (followTimestamps.length >= MAX_FOLLOWS_PER_HOUR) {
-    // 最古のフォローから1時間後まで待機
-    const waitMs = ONE_HOUR - (now - followTimestamps[0]!);
-    const waitMin = Math.ceil(waitMs / 60000);
-    console.log(`[auto_follow] ⚠️ 1時間${MAX_FOLLOWS_PER_HOUR}件上限に達しました。${waitMin}分待機します...`);
-    addLog("auto_follow", "info", `レートリミット待機: ${waitMin}分`);
-    await new Promise((resolve) => setTimeout(resolve, waitMs + 1000));
-    // 待機後に再度古いタイムスタンプを削除
-    const newNow = Date.now();
-    while (followTimestamps.length > 0 && newNow - followTimestamps[0]! > ONE_HOUR) {
-      followTimestamps.shift();
-    }
-  }
-}
 
 const DEFAULT_INFLUENCER_IDS = [
   "room_2b6017e5e7",
@@ -51,73 +24,137 @@ const SELECTORS = {
   userLinks: 'a[href^="/room_"]',
 };
 
+type State = {
+  followCount: number;
+  scanDone: boolean;
+  followTimestamps: number[];
+  /** フォローに成功したユーザーID (次の連鎖スキャン候補) */
+  followedSeeds: string[];
+};
+
 /**
- * 収集スキャナー: インフルエンサーのフォロワーリストを順に巡回し
- * URLをキューに積み続ける。followCount が maxFollows に達したら終了。
+ * レートリミットチェック: 過去1時間のフォロー数が上限に達していたら待機
+ */
+async function enforceRateLimit(followTimestamps: number[]): Promise<void> {
+  const ONE_HOUR = 60 * 60 * 1000;
+  const now = Date.now();
+
+  while (followTimestamps.length > 0 && now - followTimestamps[0]! > ONE_HOUR) {
+    followTimestamps.shift();
+  }
+
+  if (followTimestamps.length >= MAX_FOLLOWS_PER_HOUR) {
+    const waitMs = ONE_HOUR - (now - followTimestamps[0]!);
+    const waitMin = Math.ceil(waitMs / 60000);
+    console.log(`[auto_follow] ⚠️ 1時間${MAX_FOLLOWS_PER_HOUR}件上限に達しました。${waitMin}分待機します...`);
+    addLog("auto_follow", "info", `レートリミット待機: ${waitMin}分`);
+    await new Promise((resolve) => setTimeout(resolve, waitMs + 1000));
+    const newNow = Date.now();
+    while (followTimestamps.length > 0 && newNow - followTimestamps[0]! > ONE_HOUR) {
+      followTimestamps.shift();
+    }
+  }
+}
+
+/**
+ * 1ページ分のフォロワーリストをスキャンしてキューに追加
+ */
+async function scanOneFollowerList(
+  page: import("playwright").Page,
+  influencerId: string,
+  queue: string[],
+  seen: Set<string>,
+  state: State,
+  maxFollows: number
+): Promise<void> {
+  try {
+    await page.goto(`${ROOM_URL}/${influencerId}/followers`, {
+      waitUntil: "domcontentloaded",
+      timeout: 30000,
+    });
+  } catch {
+    console.warn(`[auto_follow][scan] ページ遷移失敗: ${influencerId}`);
+    return;
+  }
+  await randomSleep(6000, 8000);
+
+  if ((await page.locator(SELECTORS.userLinks).count()) === 0) {
+    await randomSleep(5000, 7000);
+  }
+
+  let noNewCount = 0;
+  let scrollNum = 0;
+
+  while (state.followCount < maxFollows) {
+    const links = await page.locator(SELECTORS.userLinks).all();
+    let added = 0;
+    for (const link of links) {
+      const href = await link.getAttribute("href").catch(() => null);
+      if (!href) continue;
+      const match = href.match(/^(\/room_[^/?#]+)/);
+      const userId = match?.[1];
+      if (userId && !seen.has(userId)) {
+        seen.add(userId);
+        queue.push(userId);
+        added++;
+      }
+    }
+
+    const beforeCount = await page.locator(SELECTORS.userLinks).count();
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await randomSleep(3000, 4000);
+    const afterCount = await page.locator(SELECTORS.userLinks).count();
+
+    scrollNum++;
+    console.log(`[auto_follow][scan] ${influencerId} scroll${scrollNum}: +${added}件追加 (DOM ${afterCount}件, queue ${queue.length}件)`);
+
+    if (afterCount <= beforeCount) {
+      if (++noNewCount >= 3) {
+        console.log(`[auto_follow][scan] ${influencerId} リスト末尾に到達`);
+        break;
+      }
+    } else {
+      noNewCount = 0;
+    }
+  }
+}
+
+/**
+ * スキャナー:
+ * 1. 初期インフルエンサーのフォロワーリストを順にスキャン
+ * 2. 枯渇したらフォローに成功したユーザー(followedSeeds)のフォロワーを連鎖スキャン
+ * 3. maxFollows 達成まで続ける
  */
 async function runScanner(
   page: import("playwright").Page,
   influencerIds: string[],
   queue: string[],
   seen: Set<string>,
-  state: { followCount: number; scanDone: boolean },
+  state: State,
   maxFollows: number
 ): Promise<void> {
-  for (const influencerId of influencerIds) {
+  // Phase 1: 初期インフルエンサーをスキャン
+  for (const id of influencerIds) {
     if (state.followCount >= maxFollows) break;
+    await scanOneFollowerList(page, id, queue, seen, state, maxFollows);
+  }
 
-    try {
-      await page.goto(`${ROOM_URL}/${influencerId}/followers`, {
-        waitUntil: "domcontentloaded",
-        timeout: 30000,
-      });
-    } catch {
-      console.warn(`[auto_follow][scan] ページ遷移失敗: ${influencerId}`);
-      continue;
-    }
-    await randomSleep(6000, 8000);
-
-    // 初回描画待機
-    if ((await page.locator(SELECTORS.userLinks).count()) === 0) {
-      await randomSleep(5000, 7000);
-    }
-
-    let noNewCount = 0;
-    let scrollNum = 0;
-
-    while (state.followCount < maxFollows) {
-      // 現在のDOMからURLを収集してキューに追加
-      const links = await page.locator(SELECTORS.userLinks).all();
-      let added = 0;
-      for (const link of links) {
-        const href = await link.getAttribute("href").catch(() => null);
-        if (!href) continue;
-        const match = href.match(/^(\/room_[^/?#]+)/);
-        const userId = match?.[1];
-        if (userId && !seen.has(userId)) {
-          seen.add(userId);
-          queue.push(userId);
-          added++;
-        }
-      }
-
-      // スクロールで次のバッチを読み込む
-      const beforeCount = await page.locator(SELECTORS.userLinks).count();
-      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-      await randomSleep(3000, 4000);
-      const afterCount = await page.locator(SELECTORS.userLinks).count();
-
-      scrollNum++;
-      console.log(`[auto_follow][scan] ${influencerId} scroll${scrollNum}: +${added}件追加 (DOM ${afterCount}件, queue ${queue.length}件)`);
-
-      if (afterCount <= beforeCount) {
-        noNewCount++;
-        if (noNewCount >= 3) {
-          console.log(`[auto_follow][scan] ${influencerId} リスト末尾に到達`);
-          break;
-        }
-      } else {
-        noNewCount = 0;
+  // Phase 2: フォロー済みユーザーを種にして連鎖スキャン
+  let seedIdx = 0;
+  while (state.followCount < maxFollows) {
+    if (seedIdx < state.followedSeeds.length) {
+      const seedUrl = state.followedSeeds[seedIdx++]!;
+      // "/room_xxx" → "room_xxx"
+      const seedId = seedUrl.replace(/^\//, "");
+      console.log(`[auto_follow][scan] 連鎖スキャン: ${seedId} (seed ${seedIdx})`);
+      await scanOneFollowerList(page, seedId, queue, seen, state, maxFollows);
+    } else {
+      // 新しい seed が来るまで少し待つ
+      await randomSleep(2000, 3000);
+      // ワーカーが全員キュー待ちになっていたら打ち切り
+      if (queue.length === 0 && seedIdx >= state.followedSeeds.length) {
+        console.log(`[auto_follow][scan] 新規候補が見つかりません。スキャン終了`);
+        break;
       }
     }
   }
@@ -128,16 +165,16 @@ async function runScanner(
 
 /**
  * フォローワーカー: キューからURLを取り出してフォロー
+ * フォロー成功時は state.followedSeeds に追加（連鎖スキャン用）
  */
 async function followWorker(
   page: import("playwright").Page,
   queue: string[],
-  state: { followCount: number; scanDone: boolean; followTimestamps: number[] },
+  state: State,
   maxFollows: number,
   pageId: number
 ): Promise<void> {
   while (state.followCount < maxFollows) {
-    // キューが空ならスキャン完了待ち
     if (queue.length === 0) {
       if (state.scanDone) break;
       await randomSleep(1000, 2000);
@@ -153,7 +190,6 @@ async function followWorker(
       });
       await randomSleep(3000, 4000);
 
-      // Angular未描画なら追加待機
       if ((await page.locator("[ng-click]").count()) === 0) {
         await randomSleep(3000, 4000);
       }
@@ -164,7 +200,6 @@ async function followWorker(
         continue;
       }
 
-      // フォロー前にレートリミット確認 (1時間100件上限)
       await enforceRateLimit(state.followTimestamps);
 
       await followBtn.scrollIntoViewIfNeeded();
@@ -185,6 +220,9 @@ async function followWorker(
 
       state.followTimestamps.push(Date.now());
       state.followCount++;
+      // フォロー成功 → 連鎖スキャンの種として登録
+      state.followedSeeds.push(userUrl);
+
       console.log(`[auto_follow][p${pageId}] フォロー! ${userUrl} (${state.followCount}/${maxFollows})`);
       addLog("auto_follow", "info", `フォロー: ${state.followCount}/${maxFollows}`);
 
@@ -203,7 +241,7 @@ export async function runAutoFollow(
   influencerIds: string[] = DEFAULT_INFLUENCER_IDS,
   headless: boolean = true
 ): Promise<void> {
-  console.log(`[auto_follow] 自動フォロー開始 (最大${maxFollows}件, 並列${PARALLEL_PAGES}ページ)`);
+  console.log(`[auto_follow] 自動フォロー開始 (最大${maxFollows}件, 並列${PARALLEL_PAGES}ページ, 連鎖スキャンあり)`);
   addLog("auto_follow", "info", `自動フォロー開始 (最大${maxFollows}件)`);
 
   const { browser, context } = await createBrowserContext(headless);
@@ -216,9 +254,13 @@ export async function runAutoFollow(
 
     const queue: string[] = [];
     const seen = new Set<string>();
-    const state = { followCount: 0, scanDone: false, followTimestamps: [] as number[] };
+    const state: State = {
+      followCount: 0,
+      scanDone: false,
+      followTimestamps: [],
+      followedSeeds: [],
+    };
 
-    // スキャナー用ページ + フォローワーカー用ページを並列起動
     const scanPage = await context.newPage();
     const workerPages = await Promise.all(
       Array.from({ length: PARALLEL_PAGES }, () => context.newPage())
