@@ -16,8 +16,11 @@ const MAX_FOLLOWS_PER_HOUR = 100;
 /** キューにこの件数以上溜まったら連鎖スキャンを停止（早期打ち切りで高速化） */
 const QUEUE_SATURATION = 80;
 
-/** いいねランキングページ (ユーザー一覧が表示される) */
-const RANKING_URL = `${ROOM_URL}/discover/likeUserRank`;
+/**
+ * 自分のルームID (フォロワーページをシードとして使用)
+ * OWN_ROOM_ID 環境変数で上書き可能
+ */
+const OWN_ROOM_ID = process.env.OWN_ROOM_ID || "room_sho_qoltime";
 
 const SELECTORS = {
   followButton: 'button:has-text("フォローする")',
@@ -58,37 +61,11 @@ async function enforceRateLimit(followTimestamps: number[]): Promise<void> {
 }
 
 /**
- * いいねランキングページからシードユーザーIDを取得する
+ * シードを返す: 自分のフォロワーページを起点にチェーンスキャンで新規ユーザーを発見
  */
-async function discoverSeedIds(page: import("playwright").Page): Promise<string[]> {
-  try {
-    await page.goto(RANKING_URL, { waitUntil: "domcontentloaded", timeout: 30000 });
-    // Angularがユーザーカードを描画するまで最大20秒ポーリング
-    await page.waitForFunction(
-      (sel: string) => document.querySelectorAll(sel).length > 0,
-      SELECTORS.userLinks,
-      { timeout: 20000, polling: 500 }
-    ).catch(() => {});
-
-    const ids = new Set<string>();
-    // スクロールして追加読み込み
-    for (let i = 0; i < 5; i++) {
-      const links = await page.locator(SELECTORS.userLinks).all();
-      for (const link of links) {
-        const href = await link.getAttribute("href").catch(() => null);
-        if (!href) continue;
-        const m = href.match(/\/room_([^/?#]+)/);
-        if (m) ids.add(`room_${m[1]}`);
-      }
-      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-      await randomSleep(1000, 1500);
-    }
-    console.log(`[auto_follow][discover] ランキングページから${ids.size}件のシードを取得`);
-    return [...ids].slice(0, 30);
-  } catch (e) {
-    console.warn(`[auto_follow][discover] シード取得失敗: ${e}`);
-    return [];
-  }
+function discoverSeedIds(): string[] {
+  console.log(`[auto_follow][discover] シード: ${OWN_ROOM_ID}/followers を使用`);
+  return [OWN_ROOM_ID];
 }
 
 /**
@@ -320,7 +297,7 @@ export async function runAutoFollow(
 
     const scanPage = await context.newPage();
 
-    const seedIds = influencerIds.length > 0 ? influencerIds : await discoverSeedIds(scanPage);
+    const seedIds = influencerIds.length > 0 ? influencerIds : discoverSeedIds();
 
     if (seedIds.length === 0) {
       console.warn("[auto_follow] シードが見つかりませんでした。終了します。");
