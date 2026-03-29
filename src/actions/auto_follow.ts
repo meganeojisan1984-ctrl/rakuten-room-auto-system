@@ -205,7 +205,9 @@ async function followWorker(
 
       const followBtn = page.locator(SELECTORS.followButton).first();
       if (!(await followBtn.isVisible().catch(() => false))) {
-        // フォロー済み → 追加待機なし、即スキップ
+        // フォロー済みまたはボタン未描画 → スキップ
+        const currentUrl = page.url();
+        console.log(`[auto_follow][p${pageId}] スキップ(フォロー済み or ボタンなし): ${userUrl} → ${currentUrl}`);
         continue;
       }
 
