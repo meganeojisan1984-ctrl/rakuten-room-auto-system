@@ -121,9 +121,10 @@ async function scanOneFollowerList(
 
 /**
  * スキャナー:
- * 1. 初期インフルエンサーのフォロワーリストを順にスキャン
- * 2. 枯渇したらフォローに成功したユーザー(followedSeeds)のフォロワーを連鎖スキャン
- * 3. maxFollows 達成まで続ける
+ * 1. 初期インフルエンサーのフォロワーリストをスキャン
+ * 2. Phase 1でスキャンした全員（フォロー済み含む）のフォロワーを連鎖スキャン
+ *    → 全員フォロー済みでもその人たちのフォロワーは未フォローのはず
+ * 3. 新規フォロー成功者のフォロワーも追加で連鎖スキャン
  */
 async function runScanner(
   page: import("playwright").Page,
@@ -139,20 +140,30 @@ async function runScanner(
     await scanOneFollowerList(page, id, queue, seen, state, maxFollows);
   }
 
-  // Phase 2: フォロー済みユーザーを種にして連鎖スキャン
-  let seedIdx = 0;
+  // Phase 2: 連鎖スキャン
+  // 「Phase 1で見つかった全員」を初期シードとして使用（新規フォロー0件でも動作する）
+  // 加えて「新規フォロー成功者」もシードとして随時追加
+  const seedPool: string[] = [...seen]; // Phase 1終了時点の全候補をコピー
+  const seenSeeds = new Set<string>(seedPool); // 同じ人を2回スキャンしない
+  let seedPos = 0;
+
   while (state.followCount < maxFollows) {
-    if (seedIdx < state.followedSeeds.length) {
-      const seedUrl = state.followedSeeds[seedIdx++]!;
-      // "/room_xxx" → "room_xxx"
+    // 新規フォロー成功者をシードプールに追加（まだ追加していないもの）
+    for (const s of state.followedSeeds) {
+      if (!seenSeeds.has(s)) {
+        seenSeeds.add(s);
+        seedPool.push(s);
+      }
+    }
+
+    if (seedPos < seedPool.length) {
+      const seedUrl = seedPool[seedPos++]!;
       const seedId = seedUrl.replace(/^\//, "");
-      console.log(`[auto_follow][scan] 連鎖スキャン: ${seedId} (seed ${seedIdx})`);
+      console.log(`[auto_follow][scan] 連鎖スキャン: ${seedId} (${seedPos}/${seedPool.length})`);
       await scanOneFollowerList(page, seedId, queue, seen, state, maxFollows);
     } else {
-      // 新しい seed が来るまで少し待つ
       await randomSleep(2000, 3000);
-      // ワーカーが全員キュー待ちになっていたら打ち切り
-      if (queue.length === 0 && seedIdx >= state.followedSeeds.length) {
+      if (queue.length === 0 && seedPos >= seedPool.length) {
         console.log(`[auto_follow][scan] 新規候補が見つかりません。スキャン終了`);
         break;
       }
