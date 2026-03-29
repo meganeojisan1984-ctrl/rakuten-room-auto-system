@@ -25,7 +25,8 @@ const DISCOVERY_PAGES = [
 
 const SELECTORS = {
   followButton: 'button:has-text("フォローする")',
-  userLinks: 'a[href^="/room_"]',
+  // 相対URL(/room_xxx)と絶対URL(https://room.rakuten.co.jp/room_xxx)の両方に対応
+  userLinks: 'a[href*="/room_"]',
 };
 
 type State = {
@@ -89,7 +90,7 @@ async function getOwnFollowingIds(
       for (const link of links) {
         const href = await link.getAttribute("href").catch(() => null);
         if (!href) continue;
-        const m = href.match(/^\/room_([^/?#]+)/);
+        const m = href.match(/\/room_([^/?#]+)/);
         if (m) ids.add(`room_${m[1]}`);
       }
       const before = ids.size;
@@ -126,13 +127,18 @@ async function discoverSeedIds(page: import("playwright").Page): Promise<string[
   const ids = new Set<string>();
   for (const url of DISCOVERY_PAGES) {
     try {
-      await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
-      await randomSleep(2000, 3000);
+      await page.goto(url, { waitUntil: "load", timeout: 30000 });
+      await page.waitForFunction(
+        (sel: string) => document.querySelectorAll(sel).length > 0,
+        SELECTORS.userLinks,
+        { timeout: 15000, polling: 500 }
+      ).catch(() => {});
       const links = await page.locator(SELECTORS.userLinks).all();
+      console.log(`[auto_follow][discover] ${url}: ${links.length}件のリンク`);
       for (const link of links) {
         const href = await link.getAttribute("href").catch(() => null);
         if (!href) continue;
-        const match = href.match(/^\/room_([^/?#]+)/);
+        const match = href.match(/\/room_([^/?#]+)/);
         if (match) ids.add(`room_${match[1]}`);
       }
     } catch {
@@ -180,7 +186,7 @@ async function scanOneFollowerList(
     for (const link of links) {
       const href = await link.getAttribute("href").catch(() => null);
       if (!href) continue;
-      const match = href.match(/^(\/room_[^/?#]+)/);
+      const match = href.match(/(\/room_[^/?#]+)/);
       const userId = match?.[1];
       if (userId && !seen.has(userId)) {
         seen.add(userId);
