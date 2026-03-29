@@ -60,16 +60,77 @@ async function enforceRateLimit(followTimestamps: number[]): Promise<void> {
 }
 
 /**
- * ランキング/トップページからシードユーザーIDを動的に取得する
+ * 自分のフォロー中リストからユーザーIDを収集する
+ * 毎回ランダムにシャッフルして返すことで、毎回違う人のフォロワーを探索できる
+ */
+async function getOwnFollowingIds(
+  page: import("playwright").Page,
+  sampleSize = 30
+): Promise<string[]> {
+  try {
+    // /my にアクセスして自分のルームIDを取得
+    await page.goto(`${ROOM_URL}/my`, { waitUntil: "domcontentloaded", timeout: 20000 });
+    await randomSleep(1500, 2000);
+    const ownUrl = page.url();
+    const ownMatch = ownUrl.match(/\/(room_[^/?#]+)/);
+    if (!ownMatch) {
+      console.warn("[auto_follow][discover] 自分のルームID取得失敗");
+      return [];
+    }
+    const ownId = ownMatch[1];
+
+    // フォロー中ページへ移動してスクロール収集
+    await page.goto(`${ROOM_URL}/${ownId}/following`, {
+      waitUntil: "domcontentloaded",
+      timeout: 20000,
+    });
+    await randomSleep(1500, 2000);
+
+    const ids = new Set<string>();
+    for (let i = 0; i < 8 && ids.size < 200; i++) {
+      const links = await page.locator(SELECTORS.userLinks).all();
+      for (const link of links) {
+        const href = await link.getAttribute("href").catch(() => null);
+        if (!href) continue;
+        const m = href.match(/^\/room_([^/?#]+)/);
+        if (m) ids.add(`room_${m[1]}`);
+      }
+      const before = ids.size;
+      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+      await randomSleep(1000, 1500);
+      if (ids.size === before) break; // 末尾に到達
+    }
+
+    // ランダムにシャッフルして毎回違うシードを返す
+    const all = [...ids];
+    for (let i = all.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [all[i], all[j]] = [all[j]!, all[i]!];
+    }
+    const result = all.slice(0, sampleSize);
+    console.log(`[auto_follow][discover] フォロー中リスト ${ids.size}件からランダム${result.length}件を選出`);
+    return result;
+  } catch (e) {
+    console.warn(`[auto_follow][discover] フォロー中リスト取得失敗: ${e}`);
+    return [];
+  }
+}
+
+/**
+ * シードユーザーIDを取得する
+ * 優先度: 自フォロー中リスト → ランキング/TOPページ
  */
 async function discoverSeedIds(page: import("playwright").Page): Promise<string[]> {
-  const ids = new Set<string>();
+  // まず自分のフォロー中リストからランダムにシードを取得
+  const fromFollowing = await getOwnFollowingIds(page, 30);
+  if (fromFollowing.length >= 5) return fromFollowing;
 
+  // フォールバック: ランキング/TOPページ
+  const ids = new Set<string>();
   for (const url of DISCOVERY_PAGES) {
     try {
       await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
-      await randomSleep(3000, 4000);
-
+      await randomSleep(2000, 3000);
       const links = await page.locator(SELECTORS.userLinks).all();
       for (const link of links) {
         const href = await link.getAttribute("href").catch(() => null);
@@ -77,14 +138,12 @@ async function discoverSeedIds(page: import("playwright").Page): Promise<string[
         const match = href.match(/^\/room_([^/?#]+)/);
         if (match) ids.add(`room_${match[1]}`);
       }
-      console.log(`[auto_follow][discover] ${url} から ${ids.size}件のシードを取得`);
     } catch {
       console.warn(`[auto_follow][discover] ページ取得失敗: ${url}`);
     }
   }
-
   const result = [...ids].slice(0, 30);
-  console.log(`[auto_follow][discover] シード合計: ${result.length}件`);
+  console.log(`[auto_follow][discover] ランキングページから${result.length}件のシードを取得`);
   return result;
 }
 
