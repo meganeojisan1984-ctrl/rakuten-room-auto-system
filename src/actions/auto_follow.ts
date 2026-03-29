@@ -8,6 +8,7 @@ import { randomSleep } from "../utils/helpers";
 import { addLog, isFollowedUser, recordFollowedUser, getFollowedCount } from "../api/server";
 
 const ROOM_URL = "https://room.rakuten.co.jp";
+const OWN_ROOM_ID = process.env.OWN_ROOM_ID || "room_sho_qoltime";
 const PARALLEL_PAGES = 4;
 
 /** 1時間あたりの最大フォロー数 (アカウント停止防止の絶対上限) */
@@ -68,8 +69,8 @@ async function getOwnFollowingIds(
   sampleSize = 30
 ): Promise<string[]> {
   try {
-    // /my/following を直接開いてフォロー中リストを取得
-    await page.goto(`${ROOM_URL}/my/following`, {
+    // フォロー中リストを直接取得
+    await page.goto(`${ROOM_URL}/${OWN_ROOM_ID}/following`, {
       waitUntil: "domcontentloaded",
       timeout: 20000,
     });

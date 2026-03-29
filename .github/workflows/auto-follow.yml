@@ -72,6 +72,7 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           MAX_FOLLOWS: ${{ github.event.inputs.max_follows || vars.MAX_FOLLOWS || '100' }}
           INFLUENCER_IDS: ${{ github.event.inputs.influencer_ids || vars.INFLUENCER_IDS || '' }}
+          OWN_ROOM_ID: ${{ vars.OWN_ROOM_ID || 'room_sho_qoltime' }}
         run: npx tsx src/run_follow.ts
 
       - name: エラースクリーンショット（失敗時）
