@@ -68,24 +68,8 @@ async function getOwnFollowingIds(
   sampleSize = 30
 ): Promise<string[]> {
   try {
-    // /my にアクセス → Angularがクライアントサイドナビゲーションで /room_XXX に遷移するのを待つ
-    await page.goto(`${ROOM_URL}/my`, { waitUntil: "domcontentloaded", timeout: 20000 });
-    // AngularのSPAナビゲーション完了を待つ（URLが /room_XXX になるまで）
-    await page.waitForURL(/\/room_[^/?#]+/, { timeout: 8000 }).catch(() => {});
-    await randomSleep(500, 800);
-
-    const ownUrl = page.url();
-    const ownMatch = ownUrl.match(/\/(room_[^/?#]+)/);
-    const ownId = ownMatch ? ownMatch[1] : null;
-
-    if (!ownId) {
-      console.warn(`[auto_follow][discover] 自分のルームID取得失敗 (URL: ${ownUrl})`);
-      return [];
-    }
-    console.log(`[auto_follow][discover] 自分のルームID: ${ownId}`);
-
-    // フォロー中ページへ移動してスクロール収集
-    await page.goto(`${ROOM_URL}/${ownId}/following`, {
+    // /my/following を直接開いてフォロー中リストを取得
+    await page.goto(`${ROOM_URL}/my/following`, {
       waitUntil: "domcontentloaded",
       timeout: 20000,
     });
