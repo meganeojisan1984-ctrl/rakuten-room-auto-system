@@ -1,10 +1,11 @@
 /**
  * auto_follow.ts - 自動フォロー機能
- * フォローしたユーザーのフォロワーも連鎖スキャンし、候補を枯渇させない
+ * ランキング/発見ページから動的にシードを取得し、
+ * DBでフォロー済みユーザーを追跡して重複フォローを防ぐ
  */
 import { createBrowserContext, validateSession } from "../core/browser";
 import { randomSleep } from "../utils/helpers";
-import { addLog } from "../api/server";
+import { addLog, isFollowedUser, recordFollowedUser, getFollowedCount } from "../api/server";
 
 const ROOM_URL = "https://room.rakuten.co.jp";
 const PARALLEL_PAGES = 4;
@@ -12,11 +13,10 @@ const PARALLEL_PAGES = 4;
 /** 1時間あたりの最大フォロー数 (アカウント停止防止の絶対上限) */
 const MAX_FOLLOWS_PER_HOUR = 100;
 
-const DEFAULT_INFLUENCER_IDS = [
-  "room_2b6017e5e7",
-  "room_9adbb0f109",
-  "room_marika_family",
-  "room_f585583974",
+/** ランキング/発見ページ (動的シード取得に使用) */
+const DISCOVERY_PAGES = [
+  `${ROOM_URL}/ranking`,
+  `${ROOM_URL}/`,
 ];
 
 const SELECTORS = {
@@ -57,7 +57,37 @@ async function enforceRateLimit(followTimestamps: number[]): Promise<void> {
 }
 
 /**
+ * ランキング/トップページからシードユーザーIDを動的に取得する
+ */
+async function discoverSeedIds(page: import("playwright").Page): Promise<string[]> {
+  const ids = new Set<string>();
+
+  for (const url of DISCOVERY_PAGES) {
+    try {
+      await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
+      await randomSleep(3000, 4000);
+
+      const links = await page.locator(SELECTORS.userLinks).all();
+      for (const link of links) {
+        const href = await link.getAttribute("href").catch(() => null);
+        if (!href) continue;
+        const match = href.match(/^\/room_([^/?#]+)/);
+        if (match) ids.add(`room_${match[1]}`);
+      }
+      console.log(`[auto_follow][discover] ${url} から ${ids.size}件のシードを取得`);
+    } catch {
+      console.warn(`[auto_follow][discover] ページ取得失敗: ${url}`);
+    }
+  }
+
+  const result = [...ids].slice(0, 30);
+  console.log(`[auto_follow][discover] シード合計: ${result.length}件`);
+  return result;
+}
+
+/**
  * 1ページ分のフォロワーリストをスキャンしてキューに追加
+ * DB済みユーザーはキューに入れない
  */
 async function scanOneFollowerList(
   page: import("playwright").Page,
@@ -95,8 +125,11 @@ async function scanOneFollowerList(
       const userId = match?.[1];
       if (userId && !seen.has(userId)) {
         seen.add(userId);
-        queue.push(userId);
-        added++;
+        // DB追跡: フォロー済みはキューに入れない
+        if (!isFollowedUser(userId)) {
+          queue.push(userId);
+          added++;
+        }
       }
     }
 
@@ -120,35 +153,28 @@ async function scanOneFollowerList(
 }
 
 /**
- * スキャナー:
- * 1. 初期インフルエンサーのフォロワーリストをスキャン
- * 2. Phase 1でスキャンした全員（フォロー済み含む）のフォロワーを連鎖スキャン
- *    → 全員フォロー済みでもその人たちのフォロワーは未フォローのはず
- * 3. 新規フォロー成功者のフォロワーも追加で連鎖スキャン
+ * スキャナー
  */
 async function runScanner(
   page: import("playwright").Page,
-  influencerIds: string[],
+  seedIds: string[],
   queue: string[],
   seen: Set<string>,
   state: State,
   maxFollows: number
 ): Promise<void> {
-  // Phase 1: 初期インフルエンサーをスキャン
-  for (const id of influencerIds) {
+  // Phase 1: シードのフォロワーリストをスキャン
+  for (const id of seedIds) {
     if (state.followCount >= maxFollows) break;
     await scanOneFollowerList(page, id, queue, seen, state, maxFollows);
   }
 
   // Phase 2: 連鎖スキャン
-  // 「Phase 1で見つかった全員」を初期シードとして使用（新規フォロー0件でも動作する）
-  // 加えて「新規フォロー成功者」もシードとして随時追加
-  const seedPool: string[] = [...seen]; // Phase 1終了時点の全候補をコピー
-  const seenSeeds = new Set<string>(seedPool); // 同じ人を2回スキャンしない
+  const seedPool: string[] = [...seen];
+  const seenSeeds = new Set<string>(seedPool);
   let seedPos = 0;
 
   while (state.followCount < maxFollows) {
-    // 新規フォロー成功者をシードプールに追加（まだ追加していないもの）
     for (const s of state.followedSeeds) {
       if (!seenSeeds.has(s)) {
         seenSeeds.add(s);
@@ -171,12 +197,11 @@ async function runScanner(
   }
 
   state.scanDone = true;
-  console.log(`[auto_follow][scan] スキャン完了 (収集済み ${seen.size}件)`);
+  console.log(`[auto_follow][scan] スキャン完了 (収集済み ${seen.size}件, DB累計フォロー ${getFollowedCount()}件)`);
 }
 
 /**
  * フォローワーカー: キューからURLを取り出してフォロー
- * フォロー成功時は state.followedSeeds に追加（連鎖スキャン用）
  */
 async function followWorker(
   page: import("playwright").Page,
@@ -205,9 +230,10 @@ async function followWorker(
 
       const followBtn = page.locator(SELECTORS.followButton).first();
       if (!(await followBtn.isVisible().catch(() => false))) {
-        // フォロー済みまたはボタン未描画 → スキップ
+        // フォロー済みまたはボタン未描画 → DBに記録してスキップ
         const currentUrl = page.url();
         console.log(`[auto_follow][p${pageId}] スキップ(フォロー済み or ボタンなし): ${userUrl} → ${currentUrl}`);
+        recordFollowedUser(userUrl);
         continue;
       }
 
@@ -231,8 +257,9 @@ async function followWorker(
 
       state.followTimestamps.push(Date.now());
       state.followCount++;
-      // フォロー成功 → 連鎖スキャンの種として登録
       state.followedSeeds.push(userUrl);
+      // DBにフォロー済みとして記録
+      recordFollowedUser(userUrl);
 
       console.log(`[auto_follow][p${pageId}] フォロー! ${userUrl} (${state.followCount}/${maxFollows})`);
       addLog("auto_follow", "info", `フォロー: ${state.followCount}/${maxFollows}`);
@@ -249,13 +276,14 @@ async function followWorker(
 
 /**
  * 自動フォロー実行
+ * influencerIds が空の場合はランキングページから動的にシードを取得する
  */
 export async function runAutoFollow(
   maxFollows: number = 10,
-  influencerIds: string[] = DEFAULT_INFLUENCER_IDS,
+  influencerIds: string[] = [],
   headless: boolean = true
 ): Promise<void> {
-  console.log(`[auto_follow] 自動フォロー開始 (最大${maxFollows}件, 並列${PARALLEL_PAGES}ページ, 連鎖スキャンあり)`);
+  console.log(`[auto_follow] 自動フォロー開始 (最大${maxFollows}件, 並列${PARALLEL_PAGES}ページ, DB累計${getFollowedCount()}件フォロー済み)`);
   addLog("auto_follow", "info", `自動フォロー開始 (最大${maxFollows}件)`);
 
   const { browser, context } = await createBrowserContext(headless);
@@ -276,12 +304,26 @@ export async function runAutoFollow(
     };
 
     const scanPage = await context.newPage();
+
+    // シードが指定されていなければ発見ページから動的取得
+    const seedIds = influencerIds.length > 0
+      ? influencerIds
+      : await discoverSeedIds(scanPage);
+
+    if (seedIds.length === 0) {
+      console.warn("[auto_follow] シードが見つかりませんでした。終了します。");
+      await scanPage.close().catch(() => {});
+      return;
+    }
+
+    console.log(`[auto_follow] シード: ${seedIds.slice(0, 5).join(", ")}${seedIds.length > 5 ? ` 他${seedIds.length - 5}件` : ""}`);
+
     const workerPages = await Promise.all(
       Array.from({ length: PARALLEL_PAGES }, () => context.newPage())
     );
 
     await Promise.all([
-      runScanner(scanPage, influencerIds, queue, seen, state, maxFollows),
+      runScanner(scanPage, seedIds, queue, seen, state, maxFollows),
       ...workerPages.map((page, i) =>
         followWorker(page, queue, state, maxFollows, i + 1)
       ),
@@ -292,7 +334,7 @@ export async function runAutoFollow(
     }
 
     addLog("auto_follow", "info", `フォロー完了: ${state.followCount}件`);
-    console.log(`[auto_follow] 完了: ${state.followCount}件フォロー`);
+    console.log(`[auto_follow] 完了: ${state.followCount}件フォロー (DB累計 ${getFollowedCount()}件)`);
   } catch (err) {
     const msg = String(err);
     console.error("[auto_follow] エラー:", msg);

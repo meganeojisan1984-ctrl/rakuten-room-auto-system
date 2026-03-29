@@ -29,6 +29,14 @@ export function initDatabase(): Database.Database {
     );
   `);
 
+  // フォロー済みユーザーテーブル
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS followed_users (
+      user_id    TEXT PRIMARY KEY,
+      followed_at INTEGER NOT NULL
+    );
+  `);
+
   // ログテーブル
   db.exec(`
     CREATE TABLE IF NOT EXISTS logs (
@@ -99,6 +107,28 @@ export function getAllSettings(): Record<string, string> {
 // ──────────────────────────────────────────────
 // ログヘルパー
 // ──────────────────────────────────────────────
+// ──────────────────────────────────────────────
+// フォロー済みユーザーヘルパー
+// ──────────────────────────────────────────────
+export function isFollowedUser(userId: string): boolean {
+  return !!getDb()
+    .prepare("SELECT 1 FROM followed_users WHERE user_id = ?")
+    .get(userId);
+}
+
+export function recordFollowedUser(userId: string): void {
+  getDb()
+    .prepare("INSERT OR IGNORE INTO followed_users (user_id, followed_at) VALUES (?, ?)")
+    .run(userId, Date.now());
+}
+
+export function getFollowedCount(): number {
+  const row = getDb()
+    .prepare("SELECT COUNT(*) as cnt FROM followed_users")
+    .get() as { cnt: number };
+  return row.cnt;
+}
+
 export function addLog(task: string, level: "info" | "warn" | "error", message: string): void {
   try {
     getDb().prepare("INSERT INTO logs (task, level, message) VALUES (?, ?, ?)").run(task, level, message);
