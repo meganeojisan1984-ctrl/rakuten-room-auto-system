@@ -9,6 +9,36 @@ import { addLog } from "../api/server";
 const ROOM_URL = "https://room.rakuten.co.jp";
 const PARALLEL_PAGES = 2;
 
+/** 1時間あたりの最大フォロー数 (アカウント停止防止の絶対上限) */
+const MAX_FOLLOWS_PER_HOUR = 100;
+
+/**
+ * レートリミットチェック: 過去1時間のフォロー数が上限に達していたら待機
+ */
+async function enforceRateLimit(followTimestamps: number[]): Promise<void> {
+  const ONE_HOUR = 60 * 60 * 1000;
+  const now = Date.now();
+
+  // 1時間より古いタイムスタンプを削除
+  while (followTimestamps.length > 0 && now - followTimestamps[0]! > ONE_HOUR) {
+    followTimestamps.shift();
+  }
+
+  if (followTimestamps.length >= MAX_FOLLOWS_PER_HOUR) {
+    // 最古のフォローから1時間後まで待機
+    const waitMs = ONE_HOUR - (now - followTimestamps[0]!);
+    const waitMin = Math.ceil(waitMs / 60000);
+    console.log(`[auto_follow] ⚠️ 1時間${MAX_FOLLOWS_PER_HOUR}件上限に達しました。${waitMin}分待機します...`);
+    addLog("auto_follow", "info", `レートリミット待機: ${waitMin}分`);
+    await new Promise((resolve) => setTimeout(resolve, waitMs + 1000));
+    // 待機後に再度古いタイムスタンプを削除
+    const newNow = Date.now();
+    while (followTimestamps.length > 0 && newNow - followTimestamps[0]! > ONE_HOUR) {
+      followTimestamps.shift();
+    }
+  }
+}
+
 const DEFAULT_INFLUENCER_IDS = [
   "room_2b6017e5e7",
   "room_9adbb0f109",
@@ -102,7 +132,7 @@ async function runScanner(
 async function followWorker(
   page: import("playwright").Page,
   queue: string[],
-  state: { followCount: number; scanDone: boolean },
+  state: { followCount: number; scanDone: boolean; followTimestamps: number[] },
   maxFollows: number,
   pageId: number
 ): Promise<void> {
@@ -134,6 +164,9 @@ async function followWorker(
         continue;
       }
 
+      // フォロー前にレートリミット確認 (1時間100件上限)
+      await enforceRateLimit(state.followTimestamps);
+
       await followBtn.scrollIntoViewIfNeeded();
       await randomSleep(500, 1000);
 
@@ -150,6 +183,7 @@ async function followWorker(
         await randomSleep(1000, 1500);
       }
 
+      state.followTimestamps.push(Date.now());
       state.followCount++;
       console.log(`[auto_follow][p${pageId}] フォロー! ${userUrl} (${state.followCount}/${maxFollows})`);
       addLog("auto_follow", "info", `フォロー: ${state.followCount}/${maxFollows}`);
@@ -182,7 +216,7 @@ export async function runAutoFollow(
 
     const queue: string[] = [];
     const seen = new Set<string>();
-    const state = { followCount: 0, scanDone: false };
+    const state = { followCount: 0, scanDone: false, followTimestamps: [] as number[] };
 
     // スキャナー用ページ + フォローワーカー用ページを並列起動
     const scanPage = await context.newPage();
