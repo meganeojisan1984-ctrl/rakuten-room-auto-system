@@ -68,27 +68,21 @@ async function getOwnFollowingIds(
   sampleSize = 30
 ): Promise<string[]> {
   try {
-    // /my にアクセスして自分のルームIDを取得
+    // /my にアクセス → Angularがクライアントサイドナビゲーションで /room_XXX に遷移するのを待つ
     await page.goto(`${ROOM_URL}/my`, { waitUntil: "domcontentloaded", timeout: 20000 });
-    await randomSleep(1500, 2000);
-    // Angularが描画するのを待つ
-    await page.waitForSelector("[ng-click], [ng-href]", { timeout: 5000 }).catch(() => {});
+    // AngularのSPAナビゲーション完了を待つ（URLが /room_XXX になるまで）
+    await page.waitForURL(/\/room_[^/?#]+/, { timeout: 8000 }).catch(() => {});
+    await randomSleep(500, 800);
 
-    // URLはリダイレクトされないため、DOM内のリンクからルームIDを抽出
-    const ownId = await page.evaluate(() => {
-      const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('a[href^="/room_"]'));
-      for (const a of links) {
-        // /room_XXXXX 形式（パスなし）= プロフィールページへのリンク
-        const m = a.getAttribute("href")?.match(/^\/room_([^/?#]+)$/);
-        if (m) return `room_${m[1]}`;
-      }
-      return null;
-    }) as string | null;
+    const ownUrl = page.url();
+    const ownMatch = ownUrl.match(/\/(room_[^/?#]+)/);
+    const ownId = ownMatch ? ownMatch[1] : null;
 
     if (!ownId) {
-      console.warn("[auto_follow][discover] 自分のルームID取得失敗");
+      console.warn(`[auto_follow][discover] 自分のルームID取得失敗 (URL: ${ownUrl})`);
       return [];
     }
+    console.log(`[auto_follow][discover] 自分のルームID: ${ownId}`);
 
     // フォロー中ページへ移動してスクロール収集
     await page.goto(`${ROOM_URL}/${ownId}/following`, {
