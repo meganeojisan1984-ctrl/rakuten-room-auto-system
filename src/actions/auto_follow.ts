@@ -71,13 +71,24 @@ async function getOwnFollowingIds(
     // /my にアクセスして自分のルームIDを取得
     await page.goto(`${ROOM_URL}/my`, { waitUntil: "domcontentloaded", timeout: 20000 });
     await randomSleep(1500, 2000);
-    const ownUrl = page.url();
-    const ownMatch = ownUrl.match(/\/(room_[^/?#]+)/);
-    if (!ownMatch) {
+    // Angularが描画するのを待つ
+    await page.waitForSelector("[ng-click], [ng-href]", { timeout: 5000 }).catch(() => {});
+
+    // URLはリダイレクトされないため、DOM内のリンクからルームIDを抽出
+    const ownId = await page.evaluate(() => {
+      const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('a[href^="/room_"]'));
+      for (const a of links) {
+        // /room_XXXXX 形式（パスなし）= プロフィールページへのリンク
+        const m = a.getAttribute("href")?.match(/^\/room_([^/?#]+)$/);
+        if (m) return `room_${m[1]}`;
+      }
+      return null;
+    }) as string | null;
+
+    if (!ownId) {
       console.warn("[auto_follow][discover] 自分のルームID取得失敗");
       return [];
     }
-    const ownId = ownMatch[1];
 
     // フォロー中ページへ移動してスクロール収集
     await page.goto(`${ROOM_URL}/${ownId}/following`, {
