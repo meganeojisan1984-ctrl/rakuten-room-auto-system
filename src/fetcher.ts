@@ -58,6 +58,8 @@ export interface RakutenItem {
   hasPointBonus: boolean;
   availability: number; // 1=販売中, 0=販売停止
   endTime?: string;
+  reviewAverage?: number;
+  reviewCount?: number;
 }
 
 interface RakutenApiItem {
@@ -73,6 +75,8 @@ interface RakutenApiItem {
   pointRateEndTime: string;
   availability: number;
   endTime: string;
+  reviewAverage?: number;
+  reviewCount?: number;
 }
 
 interface RakutenRankingApiItem {
@@ -264,8 +268,76 @@ function convertSearchItems(items: RakutenApiItem[]): RakutenItem[] {
       hasPointBonus,
       availability: item.availability,
       endTime: item.endTime || undefined,
+      reviewAverage: item.reviewAverage,
+      reviewCount: item.reviewCount,
     };
   });
+}
+
+/**
+ * トレンドキーワードで楽天商品を検索
+ * レビュー評価4.0以上・10件以上でフィルタリング
+ */
+export async function fetchItemsByKeyword(
+  keyword: string,
+  count: number = 3,
+  excludeCodes: Set<string> = new Set()
+): Promise<RakutenItem[]> {
+  if (!RAKUTEN_APP_ID) {
+    throw new Error("RAKUTEN_APP_ID が未設定です");
+  }
+
+  const params: Record<string, string | number> = {
+    applicationId: RAKUTEN_APP_ID,
+    formatVersion: 2,
+    hits: 30,
+    sort: "-reviewCount",
+    keyword,
+    availability: 1,
+    maxPrice: 10000,
+    minPrice: MIN_PRICE,
+  };
+
+  console.log(`[fetcher] キーワード検索中: 「${keyword}」`);
+
+  let rawItems: RakutenApiItem[];
+  try {
+    const response = await axios.get<{ Items: Array<{ Item: RakutenApiItem }> }>(
+      "https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20220601",
+      {
+        params,
+        timeout: 15000,
+        headers: { Referer: "https://github.com", Origin: "https://github.com" },
+      }
+    );
+    rawItems = response.data.Items.map((i) => i.Item);
+  } catch (err) {
+    throw new Error(`楽天キーワード検索エラー: ${String(err)}`);
+  }
+
+  const converted = convertSearchItems(rawItems);
+
+  const filtered = converted.filter((item) => {
+    if (item.availability !== 1) return false;
+    if (item.endTime && new Date(item.endTime) < new Date()) return false;
+    if (item.itemPrice > 10000) return false;
+    if (item.itemPrice < MIN_PRICE) return false;
+    // レビュー品質フィルタ（口コミ実績がある商品を優先）
+    if ((item.reviewAverage ?? 0) < 4.0) return false;
+    if ((item.reviewCount ?? 0) < 10) return false;
+    if (excludeCodes.has(item.itemCode)) return false;
+    return true;
+  });
+
+  // レビュー評価の高い順にソート
+  filtered.sort((a, b) => {
+    const scoreA = (a.reviewAverage ?? 0) * Math.log10(Math.max(a.reviewCount ?? 1, 10));
+    const scoreB = (b.reviewAverage ?? 0) * Math.log10(Math.max(b.reviewCount ?? 1, 10));
+    return scoreB - scoreA;
+  });
+
+  console.log(`[fetcher] キーワード検索: ${filtered.length}件 (フィルタ後), ${count}件を使用`);
+  return filtered.slice(0, count);
 }
 
 /**

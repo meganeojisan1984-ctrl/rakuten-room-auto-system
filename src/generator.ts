@@ -1,10 +1,13 @@
 import Groq from "groq-sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import * as dotenv from "dotenv";
 import type { RakutenItem } from "./fetcher";
 dotenv.config();
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY ?? "";
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY ?? "";
 const MODEL_NAME = "llama-3.3-70b-versatile";
+const GEMINI_MODEL = "gemini-1.5-flash";
 
 const REQUEST_INTERVAL_MS = 2000;
 const MAX_RETRIES = 3;
@@ -192,6 +195,110 @@ ${pasInstruction}
 6. 絵文字でテンポと感情の強弱をつける（多用しすぎない）
 
 投稿文のみを出力してください（前置き・説明・タイトル等は一切不要）:`;
+}
+
+// ============================================================
+// Gemini Flash — トレンド投稿用 (YouTube必勝構成)
+// ============================================================
+
+function buildGeminiRoomPrompt(keyword: string, item: RakutenItem): string {
+  const reviewInfo =
+    item.reviewAverage && item.reviewCount
+      ? `レビュー: ${item.reviewAverage}点 (${item.reviewCount}件)`
+      : "";
+
+  return `あなたはフォロワー数十万人を持つ楽天ROOMのトップインフルエンサーです。
+
+今「${keyword}」がトレンドになっています。このトレンドに乗じて以下の商品を楽天ROOMで紹介してください。
+
+【商品情報】
+- 商品名: ${item.itemName}
+- 価格: ${item.itemPrice.toLocaleString()}円
+- ショップ: ${item.shopName}
+- 説明: ${item.itemCaption.slice(0, 250)}
+${reviewInfo ? `- ${reviewInfo}` : ""}
+
+【YouTube必勝構成で書くこと（この順番で）】
+1. メリット（冒頭で最大のベネフィットを強調。「${keyword}」に悩む人への解決策として提示）
+2. 信頼・口コミ要素（レビュー数・評価・「私も使ってみたら…」という体験談で信頼感を演出）
+3. 今すぐ買う理由（「今${keyword}が話題だから今すぐチェックして！」「今がタイミング」という緊急性）
+
+【ルール】
+- 全体200〜280文字（ハッシュタグ含む）
+- ハッシュタグ5〜7個。#楽天ROOM #買ってよかった #QOL向上 は必須
+- 友達LINEのような口語体。AI感ゼロ
+- 絵文字で感情の強弱をつける
+
+投稿文のみを出力してください（前置き・説明不要）:`;
+}
+
+function buildGeminiXPrompt(keyword: string, item: RakutenItem): string {
+  const tone = TONE_VARIATIONS[Math.floor(Math.random() * TONE_VARIATIONS.length)]!;
+  return `あなたはX（旧Twitter）でフォロワー数十万人を持つライフスタイル系インフルエンサーです。
+今「${keyword}」がトレンドです。${tone}、この商品をX(Twitter)で紹介してください。
+
+【商品情報】
+- 商品名: ${item.itemName}
+- 価格: ${item.itemPrice.toLocaleString()}円
+- 説明: ${item.itemCaption.slice(0, 150)}
+
+【YouTube必勝構成 × PAS法】
+1. メリット＋共感（「${keyword}に悩んでる人に刺さる」導入）
+2. 信頼（「レビュー多数」「私も使ってみたら」等で社会的証明）
+3. 今すぐ行動（「今トレンドだから今が買いどき」の緊急性）
+
+【ルール】
+- 160〜200文字以内（URLは含めない）
+- ハッシュタグ末尾に最大2個
+- 広告感・AI感ゼロ。本音レビュー風
+- スマホで読みやすいよう改行を入れる
+
+投稿文のみを出力してください（前置き不要）:`;
+}
+
+async function generateWithGemini(prompt: string): Promise<string> {
+  if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY が未設定です");
+  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({
+    model: GEMINI_MODEL,
+    generationConfig: { temperature: 0.95, maxOutputTokens: 512 },
+  });
+  const result = await model.generateContent(prompt);
+  const text = result.response.text().trim();
+  if (!text) throw new Error("Gemini APIからの応答が空です");
+  return text;
+}
+
+/**
+ * トレンドキーワードに基づいてGemini Flashで投稿文を一括生成
+ */
+export async function generateTrendCaptions(
+  keyword: string,
+  items: RakutenItem[]
+): Promise<Array<{ item: RakutenItem; caption: string; xParentCaption: string }>> {
+  const results: Array<{ item: RakutenItem; caption: string; xParentCaption: string }> = [];
+
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    if (!item) continue;
+
+    try {
+      console.log(`[generator] Gemini: 「${item.itemName.slice(0, 30)}...」ROOM文生成中 (トレンド: ${keyword})`);
+      const caption = await generateWithGemini(buildGeminiRoomPrompt(keyword, item));
+      await sleep(REQUEST_INTERVAL_MS);
+
+      console.log(`[generator] Gemini: 「${item.itemName.slice(0, 30)}...」X文生成中`);
+      const xParentCaption = await generateWithGemini(buildGeminiXPrompt(keyword, item));
+
+      results.push({ item, caption, xParentCaption });
+    } catch (err) {
+      console.error(`[generator] Gemini生成失敗 「${item.itemName.slice(0, 30)}」:`, err);
+    }
+
+    if (i < items.length - 1) await sleep(REQUEST_INTERVAL_MS);
+  }
+
+  return results;
 }
 
 // ============================================================

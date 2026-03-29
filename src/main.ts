@@ -3,8 +3,9 @@ dotenv.config();
 
 import * as fs from "fs";
 import * as path from "path";
-import { fetchItems } from "./fetcher";
-import { generateCaptions, type PostType } from "./generator";
+import { fetchItems, fetchItemsByKeyword } from "./fetcher";
+import { generateCaptions, generateTrendCaptions, type PostType } from "./generator";
+import { fetchTrendKeyword } from "./trend-fetcher";
 import { postItems } from "./poster";
 import { postToX } from "./x-poster";
 import { notifyError } from "./notifiers";
@@ -55,23 +56,40 @@ function getPostTypeLabel(postType: PostType): string {
 }
 
 const POST_COUNT = parseInt(process.env.POST_COUNT ?? "1", 10);
+const TREND_MODE = process.env.TREND_MODE === "true";
 
 async function main(): Promise<void> {
   console.log("=== 楽天ROOM自動投稿システム 開始 ===");
   console.log(`実行時刻: ${new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })}`);
-  console.log(`ターゲットジャンル: ${process.env.TARGET_GENRE ?? "general"}`);
+  console.log(`モード: ${TREND_MODE ? "トレンド投稿" : `ランキング投稿 (${process.env.TARGET_GENRE ?? "general"})`}`);
   console.log(`投稿数: ${POST_COUNT}件\n`);
 
   const { codes: postedCodes, postTypeIndex } = loadState();
   const postType = getPostType(postTypeIndex);
   console.log(`[main] 投稿済み商品数: ${postedCodes.size}件（除外対象）`);
-  console.log(`[main] 今回の投稿タイプ: ${getPostTypeLabel(postType)}\n`);
+  if (!TREND_MODE) {
+    console.log(`[main] 今回の投稿タイプ: ${getPostTypeLabel(postType)}\n`);
+  }
 
-  // Step 1: 楽天APIから商品を取得
+  // Step 1: 商品取得
   let items;
+  let trendKeyword: string | undefined;
   try {
-    console.log("--- [1/3] 商品取得中 ---");
-    items = await fetchItems(POST_COUNT, postedCodes);
+    if (TREND_MODE) {
+      console.log("--- [1/3] トレンドキーワード取得 → 商品検索中 ---");
+      trendKeyword = await fetchTrendKeyword();
+      console.log(`トレンドキーワード: 「${trendKeyword}」`);
+      items = await fetchItemsByKeyword(trendKeyword, POST_COUNT, postedCodes);
+      // キーワード検索でヒットしない場合はランキングにフォールバック
+      if (items.length === 0) {
+        console.warn(`[main] キーワード「${trendKeyword}」で商品なし。ランキングにフォールバック`);
+        items = await fetchItems(POST_COUNT, postedCodes);
+        trendKeyword = undefined; // フォールバック時はGemini生成も通常モードへ
+      }
+    } else {
+      console.log("--- [1/3] 商品取得中 ---");
+      items = await fetchItems(POST_COUNT, postedCodes);
+    }
     if (items.length === 0) {
       throw new Error("フィルタリング後に使用可能な商品が0件でした");
     }
@@ -83,11 +101,17 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  // Step 2: 紹介文を生成（投稿タイプを渡す）
+  // Step 2: 紹介文を生成
   let captionedItems;
   try {
     console.log("--- [2/3] 紹介文生成中 ---");
-    captionedItems = await generateCaptions(items, postType);
+    if (trendKeyword) {
+      // トレンドモード: Gemini Flash で YouTube必勝構成
+      captionedItems = await generateTrendCaptions(trendKeyword, items);
+    } else {
+      // 通常モード: Groq で投稿タイプ別生成
+      captionedItems = await generateCaptions(items, postType);
+    }
     if (captionedItems.length === 0) {
       throw new Error("紹介文の生成に全て失敗しました");
     }
