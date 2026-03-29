@@ -69,12 +69,14 @@ async function getOwnFollowingIds(
   sampleSize = 30
 ): Promise<string[]> {
   try {
-    // フォロー中リストを直接取得
+    // フォロー中リストを直接取得（Angularの描画完了まで待つ）
     await page.goto(`${ROOM_URL}/${OWN_ROOM_ID}/following`, {
       waitUntil: "domcontentloaded",
       timeout: 20000,
     });
-    await randomSleep(1500, 2000);
+    // Angular がユーザーリンクを描画するまで最大10秒待つ
+    await page.waitForSelector(SELECTORS.userLinks, { timeout: 10000 }).catch(() => {});
+    await randomSleep(1000, 1500);
 
     const ids = new Set<string>();
     for (let i = 0; i < 8 && ids.size < 200; i++) {
