@@ -238,6 +238,9 @@ async function followWorker(
       await randomSleep(1000, 1500);
     } catch (err) {
       console.warn(`[auto_follow][p${pageId}] スキップ: ${userUrl} - ${err}`);
+      // リダイレクト等の残留ナビゲーションが終わるのを待ってからリセット
+      await page.waitForLoadState("domcontentloaded", { timeout: 8000 }).catch(() => {});
+      await page.goto("about:blank", { timeout: 5000 }).catch(() => {});
     }
   }
 }
