@@ -1,12 +1,15 @@
 /**
  * auto_follow.ts - 自動フォロー機能
- * フォロワーリストページ上のフォローボタンを直接クリックする方式 (高速化)
+ * フォロワーリストでURLを収集 → 複数ページ並列でプロフィール訪問＆フォロー
  */
 import { createBrowserContext, validateSession } from "../core/browser";
 import { randomSleep } from "../utils/helpers";
 import { addLog } from "../api/server";
 
 const ROOM_URL = "https://room.rakuten.co.jp";
+
+// 並列処理するページ数 (増やすと速くなるが検出リスクも上がる)
+const PARALLEL_PAGES = 2;
 
 // フォロー対象: 人気インフルエンサーのROOM ID
 const DEFAULT_INFLUENCER_IDS = [
@@ -18,113 +21,130 @@ const DEFAULT_INFLUENCER_IDS = [
 
 const SELECTORS = {
   followButton: 'button:has-text("フォローする")',
+  userLinks: 'a[href^="/room_"]',
 };
 
 /**
- * フォロワーリストページ上でフォローボタンを直接クリック
- * プロフィールページへの遷移を省略することで処理速度を大幅に向上
+ * フォロワーリストからユーザーURLを収集
  */
-async function followFromFollowersList(
+async function collectFollowers(
   page: import("playwright").Page,
   influencerId: string,
-  maxFollows: number
-): Promise<number> {
-  let followCount = 0;
-
+  limit: number
+): Promise<string[]> {
+  const urls: string[] = [];
   try {
     await page.goto(`${ROOM_URL}/${influencerId}/followers`, {
       waitUntil: "domcontentloaded",
       timeout: 30000,
     });
-  } catch (err) {
-    console.warn(`[auto_follow] ページ遷移失敗 (${influencerId}): ${err}`);
-    return -1;
-  }
-  await randomSleep(6000, 8000);
+    await randomSleep(6000, 8000);
 
-  // AngularJSがまだ描画中なら追加待機
-  const initialCount = await page.locator(SELECTORS.followButton).count();
-  if (initialCount === 0) {
-    console.log(`[auto_follow] 追加待機中 (${influencerId})...`);
-    await randomSleep(5000, 7000);
-  }
+    // AngularJS描画待機
+    const roomLinkCount = await page.locator(SELECTORS.userLinks).count();
+    if (roomLinkCount === 0) {
+      await randomSleep(5000, 7000);
+    }
 
-  // リストページにフォローボタンがなければフォールバックを示すため0を返す
-  const buttonCount = await page.locator(SELECTORS.followButton).count();
-  if (buttonCount === 0) {
-    console.log(`[auto_follow] フォロワーリストにフォローボタンなし: ${influencerId}`);
-    return -1; // -1 = フォールバック要求
-  }
-
-  console.log(`[auto_follow] フォロワーリストでフォローボタン ${buttonCount}件検出 (${influencerId})`);
-
-  let noNewCount = 0;
-
-  while (followCount < maxFollows) {
-    // 常に最初の「フォローする」ボタンを取得 (クリック後に消えた分が自動的にずれる)
-    const btn = page.locator(SELECTORS.followButton).first();
-    const isVisible = await btn.isVisible().catch(() => false);
-
-    if (!isVisible) {
-      // 画面内にボタンがなければスクロールして追加読み込み
-      const before = await page.locator(SELECTORS.followButton).count();
+    // 無限スクロールで収集
+    let noNewCount = 0;
+    for (let scroll = 0; scroll < 50; scroll++) {
+      const before = await page.locator(SELECTORS.userLinks).count();
+      if (before >= limit) break;
       await page.evaluate(() => window.scrollBy(0, window.innerHeight * 3));
       await randomSleep(2000, 3000);
-      const after = await page.locator(SELECTORS.followButton).count();
-
+      const after = await page.locator(SELECTORS.userLinks).count();
       if (after === before) {
-        noNewCount++;
-        if (noNewCount >= 2) break; // 2回連続で増えなければリスト末尾
+        if (++noNewCount >= 2) break;
       } else {
         noNewCount = 0;
       }
-      continue;
+      console.log(`[auto_follow] スクロール${scroll + 1}: ${after}件 (${influencerId})`);
     }
 
-    await btn.scrollIntoViewIfNeeded();
-    await randomSleep(500, 1000);
-
-    // JSクリック → force:true フォールバック
-    await page.evaluate(() => {
-      const el = Array.from(document.querySelectorAll<HTMLElement>("button")).find(
-        (b) => b.textContent?.trim() === "フォローする"
-      );
-      if (el) el.click();
-    }).catch(() => {});
-    await randomSleep(1000, 2000);
-
-    const stillVisible = await btn.isVisible().catch(() => false);
-    if (stillVisible) {
-      await btn.click({ force: true }).catch(() => {});
-      await randomSleep(1000, 1500);
+    const links = await page.locator(SELECTORS.userLinks).all();
+    for (const link of links.slice(0, limit)) {
+      const href = await link.getAttribute("href");
+      if (!href) continue;
+      const match = href.match(/^(\/room_[^/?#]+)/);
+      const cleanHref = match?.[1] ?? href;
+      if (cleanHref && !urls.includes(cleanHref)) urls.push(cleanHref);
     }
-
-    followCount++;
-    console.log(`[auto_follow] フォロー! (${followCount}/${maxFollows}) [${influencerId}]`);
-    addLog("auto_follow", "info", `フォロー: ${followCount}/${maxFollows}`);
-
-    await randomSleep(2000, 4000);
+  } catch (err) {
+    console.warn(`[auto_follow] フォロワー収集失敗 (${influencerId}):`, err);
   }
+  return urls;
+}
 
-  return followCount;
+/**
+ * 1ページでユーザーリストを順番にフォロー
+ */
+async function followUsers(
+  page: import("playwright").Page,
+  queue: string[],       // 共有キュー (参照渡し: shift()で消費)
+  counter: { n: number }, // 共有カウンター
+  maxFollows: number,
+  pageId: number
+): Promise<void> {
+  while (counter.n < maxFollows) {
+    const userUrl = queue.shift();
+    if (!userUrl) break;
+
+    try {
+      const fullUrl = `${ROOM_URL}${userUrl}`;
+      await page.goto(fullUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
+      await randomSleep(3000, 4000);
+
+      // Angular未描画なら追加待機
+      if ((await page.locator("[ng-click]").count()) === 0) {
+        await randomSleep(3000, 4000);
+      }
+
+      const followBtn = page.locator(SELECTORS.followButton).first();
+      if (!(await followBtn.isVisible().catch(() => false))) {
+        console.log(`[auto_follow][p${pageId}] フォロー済み: ${userUrl}`);
+        continue;
+      }
+
+      await followBtn.scrollIntoViewIfNeeded();
+      await randomSleep(500, 1000);
+
+      await page.evaluate(() => {
+        const btn = Array.from(document.querySelectorAll<HTMLElement>("button")).find(
+          (el) => el.textContent?.trim() === "フォローする"
+        );
+        if (btn) btn.click();
+      }).catch(() => {});
+      await randomSleep(1000, 2000);
+
+      if (await followBtn.isVisible().catch(() => false)) {
+        await followBtn.click({ force: true }).catch(() => {});
+        await randomSleep(1000, 1500);
+      }
+
+      counter.n++;
+      console.log(`[auto_follow][p${pageId}] フォロー! ${userUrl} (${counter.n}/${maxFollows})`);
+      addLog("auto_follow", "info", `フォロー: ${counter.n}/${maxFollows}`);
+
+      await randomSleep(2000, 4000);
+    } catch (err) {
+      console.warn(`[auto_follow][p${pageId}] スキップ: ${userUrl} - ${err}`);
+    }
+  }
 }
 
 /**
  * 自動フォロー実行
- * @param maxFollows 最大フォロー数
- * @param influencerIds フォロワー参照先インフルエンサーID一覧
- * @param headless ヘッドレス実行フラグ
  */
 export async function runAutoFollow(
   maxFollows: number = 10,
   influencerIds: string[] = DEFAULT_INFLUENCER_IDS,
   headless: boolean = true
 ): Promise<void> {
-  console.log(`[auto_follow] 自動フォロー開始 (最大${maxFollows}件)`);
+  console.log(`[auto_follow] 自動フォロー開始 (最大${maxFollows}件, 並列${PARALLEL_PAGES}ページ)`);
   addLog("auto_follow", "info", `自動フォロー開始 (最大${maxFollows}件)`);
 
   const { browser, context } = await createBrowserContext(headless);
-  let followCount = 0;
 
   try {
     if (!(await validateSession(context))) {
@@ -132,29 +152,37 @@ export async function runAutoFollow(
       return;
     }
 
-    const page = await context.newPage();
-
+    // Step1: 収集用ページでフォロワーURLを集める
+    const collectPage = await context.newPage();
+    const allUrls: string[] = [];
     for (const influencerId of influencerIds) {
-      if (followCount >= maxFollows) break;
-
-      let result: number;
-      try {
-        result = await followFromFollowersList(page, influencerId, maxFollows - followCount);
-      } catch (err) {
-        console.warn(`[auto_follow] ${influencerId} でエラー、スキップ: ${err}`);
-        continue;
+      const urls = await collectFollowers(collectPage, influencerId, maxFollows * 3);
+      console.log(`[auto_follow] ${influencerId}: ${urls.length}件収集`);
+      for (const u of urls) {
+        if (!allUrls.includes(u)) allUrls.push(u);
       }
-
-      if (result === -1) {
-        console.log(`[auto_follow] ${influencerId} をスキップ (フォローボタン未検出)`);
-        continue;
-      }
-
-      followCount += result;
+      if (allUrls.length >= maxFollows * 3) break;
     }
+    await collectPage.close();
+    console.log(`[auto_follow] 合計 ${allUrls.length}件のユーザーURLを収集`);
 
-    addLog("auto_follow", "info", `フォロー完了: ${followCount}件`);
-    console.log(`[auto_follow] 完了: ${followCount}件フォロー`);
+    // Step2: 並列ページでフォロー実行
+    const queue = [...allUrls];
+    const counter = { n: 0 };
+    const pages = await Promise.all(
+      Array.from({ length: PARALLEL_PAGES }, () => context.newPage())
+    );
+
+    await Promise.all(
+      pages.map((page, i) =>
+        followUsers(page, queue, counter, maxFollows, i + 1)
+      )
+    );
+
+    for (const page of pages) await page.close().catch(() => {});
+
+    addLog("auto_follow", "info", `フォロー完了: ${counter.n}件`);
+    console.log(`[auto_follow] 完了: ${counter.n}件フォロー`);
   } catch (err) {
     const msg = String(err);
     console.error("[auto_follow] エラー:", msg);
