@@ -70,19 +70,13 @@ async function getOwnFollowingIds(
   sampleSize = 30
 ): Promise<string[]> {
   try {
-    // フォロー中リストを直接取得（Angularの描画完了まで待つ）
+    // フォロー中リストを直接取得
     await page.goto(`${ROOM_URL}/${OWN_ROOM_ID}/following`, {
-      waitUntil: "load",
+      waitUntil: "domcontentloaded",
       timeout: 30000,
     });
-    // Angularがデータ取得・描画するまでDOMをポーリング（最大20秒）
-    await page.waitForFunction(
-      (sel: string) => document.querySelectorAll(sel).length > 0,
-      SELECTORS.userLinks,
-      { timeout: 20000, polling: 500 }
-    ).catch(() => {});
-    console.log(`[auto_follow][discover] ページURL: ${page.url()}, a[href^="/room_"]件数: ${await page.locator(SELECTORS.userLinks).count()}`);
-    await randomSleep(500, 1000);
+    await randomSleep(4000, 5000);
+    console.log(`[auto_follow][discover] フォロー中ページURL: ${page.url()}, userLinks件数: ${await page.locator(SELECTORS.userLinks).count()}`);
 
     const ids = new Set<string>();
     for (let i = 0; i < 8 && ids.size < 200; i++) {
@@ -127,12 +121,8 @@ async function discoverSeedIds(page: import("playwright").Page): Promise<string[
   const ids = new Set<string>();
   for (const url of DISCOVERY_PAGES) {
     try {
-      await page.goto(url, { waitUntil: "load", timeout: 30000 });
-      await page.waitForFunction(
-        (sel: string) => document.querySelectorAll(sel).length > 0,
-        SELECTORS.userLinks,
-        { timeout: 15000, polling: 500 }
-      ).catch(() => {});
+      await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
+      await randomSleep(3000, 4000);
       const links = await page.locator(SELECTORS.userLinks).all();
       console.log(`[auto_follow][discover] ${url}: ${links.length}件のリンク`);
       for (const link of links) {
