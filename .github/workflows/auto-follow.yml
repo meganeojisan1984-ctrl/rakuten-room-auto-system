@@ -34,9 +34,9 @@ on:
         required: false
         default: "100"
       influencer_ids:
-        description: "参照インフルエンサーID（カンマ区切り）"
+        description: "参照インフルエンサーID（カンマ区切り、空欄でランキングから自動取得）"
         required: false
-        default: "room_2b6017e5e7,room_9adbb0f109,room_marika_family,room_f585583974"
+        default: ""
 
 jobs:
   auto-follow:
@@ -51,6 +51,14 @@ jobs:
           node-version: "20"
           cache: "npm"
 
+      - name: フォロー済みDBをキャッシュから復元
+        uses: actions/cache@v4
+        with:
+          path: data/database.sqlite
+          key: follow-db-${{ github.run_id }}
+          restore-keys: |
+            follow-db-
+
       - name: 依存関係をインストール
         run: npm ci
 
@@ -63,7 +71,7 @@ jobs:
           ROOM_COOKIE: ${{ secrets.ROOM_COOKIE }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           MAX_FOLLOWS: ${{ github.event.inputs.max_follows || vars.MAX_FOLLOWS || '100' }}
-          INFLUENCER_IDS: ${{ github.event.inputs.influencer_ids || vars.INFLUENCER_IDS || 'room_2b6017e5e7,room_9adbb0f109,room_marika_family,room_f585583974' }}
+          INFLUENCER_IDS: ${{ github.event.inputs.influencer_ids || vars.INFLUENCER_IDS || '' }}
         run: npx tsx src/run_follow.ts
 
       - name: エラースクリーンショット（失敗時）
