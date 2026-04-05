@@ -101,7 +101,8 @@
     "missh-kissh:10000141",
     "tenkapas:10010258",
     "sheil-store:10020689",
-    "sheil-store:10020490"
+    "sheil-store:10020490",
+    "exception5251:10000502"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
