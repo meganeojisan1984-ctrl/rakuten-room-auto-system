@@ -7,7 +7,6 @@ import { fetchItems, fetchItemsByKeyword } from "./fetcher";
 import { generateCaptions, generateTrendCaptions, type PostType } from "./generator";
 import { fetchTrendKeyword } from "./trend-fetcher";
 import { postItems } from "./poster";
-import { postToX } from "./x-poster";
 import { notifyError } from "./notifiers";
 
 const POSTED_ITEMS_FILE = path.join(process.cwd(), "posted_items.json");
@@ -134,32 +133,6 @@ async function main(): Promise<void> {
     console.error("投稿処理中に予期しないエラー:", msg);
     await notifyError("投稿処理エラー", msg);
     process.exit(1);
-  }
-
-  // Step 4: X(Twitter)へ投稿（ROOM投稿成功分のみ）
-  const xEnabled =
-    process.env.X_API_KEY &&
-    process.env.X_API_SECRET &&
-    process.env.X_ACCESS_TOKEN &&
-    process.env.X_ACCESS_TOKEN_SECRET;
-
-  if (xEnabled) {
-    console.log("--- [4/4] X(Twitter)へ投稿中 ---");
-    for (let i = 0; i < results.length; i++) {
-      const result = results[i];
-      const captioned = captionedItems[i];
-      if (!result?.success || !captioned) continue;
-
-      await postToX(captioned.item.itemName, captioned.item.itemUrl, captioned.xParentCaption, captioned.item.imageUrl || undefined);
-
-      // 連続投稿時はレート制限対策で間隔を空ける
-      if (i < results.length - 1) {
-        await new Promise((resolve) => setTimeout(resolve, 3000));
-      }
-    }
-    console.log("");
-  } else {
-    console.log("[main] X API認証情報が未設定のためX投稿をスキップします\n");
   }
 
   // 結果サマリー

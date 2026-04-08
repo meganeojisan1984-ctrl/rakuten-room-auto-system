@@ -133,68 +133,6 @@ ${postTypeInstruction}
 }
 
 // ============================================================
-// X(Twitter)用プロンプト — PAS法・2段階スレッド方式
-// ============================================================
-
-/** 毎回異なる文章を生成するための書き出しバリエーション */
-const TONE_VARIATIONS = [
-  "「最近これなしでは生きていけないw」みたいな温度感で",
-  "「え、まだ知らないの？」という発見・驚きのトーンで",
-  "「正直に言うと最初は半信半疑だった」という本音告白スタイルで",
-  "「これ見た瞬間ピンときた」という直感と即決を強調して",
-  "「毎朝これ使うたびに買ってよかったって思う」という満足感溢れる口調で",
-  "「友達にこっそり教えたくなるやつ見つけた」という秘密感のあるトーンで",
-];
-
-function buildXParentPrompt(item: RakutenItem, postType: PostType): string {
-  // 毎回ランダムにトーン変化 → 同じ商品でも異なる文章が生成される
-  const tone = TONE_VARIATIONS[Math.floor(Math.random() * TONE_VARIATIONS.length)]!;
-
-  let pasInstruction = "";
-  switch (postType) {
-    case 1:
-      pasInstruction = `
-【P（Problem/共感）】「◯◯あるある」など読者が「あ〜わかる！」と思う日常の悩みや不満を1〜2行で提示
-【A（Agitation/煽り）】「そのままだと毎日〇〇し続ける羽目になる」「これ知らない人、損しすぎw」など共感→焦りへ転換
-【S（Solution/解決）】この商品がなぜその悩みを解決するかを体験談スタイルで。「◯◯と組み合わせたら最強だった」を入れる`;
-      break;
-    case 2:
-      pasInstruction = `
-【P（Problem/共感）】購入前の典型的な悩み・失敗談（例：「○○でずっと困ってた」「何度も△△を試したけど全部失敗した」）
-【A（Agitation/煽り）】「今の状態が続くと〇〇になる」「こういうのって気づいたら手遅れだから」で危機感を演出
-【S（Solution/解決）】「これに変えてから本当に変わった」という劇的Before→Afterを短く鋭く描写`;
-      break;
-    case 3:
-      pasInstruction = `
-【P（Problem/共感）】「楽天でいいもの探しても結局何が良いかわからない」という迷いへの共感
-【A（Agitation/煽り）】「セール前にチェックしておかないとずっと後回しになる」「知ってる人だけが得してる現実」
-【S（Solution/解決）】「楽天でこれ見つけたとき思わず保存した」「これさえあれば全部楽天で揃う」という楽天完結の魅力`;
-      break;
-  }
-
-  return `あなたはX（旧Twitter）でフォロワー数十万人を持つライフスタイル系インフルエンサーです。
-今回は${tone}書いてください。
-
-【商品情報】
-- 商品名: ${item.itemName}
-- 価格: ${item.itemPrice.toLocaleString()}円
-- 説明: ${item.itemCaption.slice(0, 150)}
-
-【PAS法の構成（この順で書く）】
-${pasInstruction}
-
-【絶対に守るルール】
-1. 全体160〜200文字以内（リンクは別リプライで付けるのでURLは含めない）
-2. URLは絶対に含めない（アルゴリズムデバフ防止）
-3. ハッシュタグは末尾に最大2個まで（スパム判定防止のため必ず2個以内）
-4. 広告感・AI感ゼロ。一人のユーザーとしての本音のレビュー風で書く
-5. スマホで読みやすいよう適度に改行を入れる
-6. 絵文字でテンポと感情の強弱をつける（多用しすぎない）
-
-投稿文のみを出力してください（前置き・説明・タイトル等は一切不要）:`;
-}
-
-// ============================================================
 // Gemini Flash — トレンド投稿用 (YouTube必勝構成)
 // ============================================================
 
@@ -229,40 +167,16 @@ ${reviewInfo ? `- ${reviewInfo}` : ""}
 投稿文のみを出力してください（前置き・説明不要）:`;
 }
 
-function buildGeminiXPrompt(keyword: string, item: RakutenItem): string {
-  const tone = TONE_VARIATIONS[Math.floor(Math.random() * TONE_VARIATIONS.length)]!;
-  return `あなたはX（旧Twitter）でフォロワー数十万人を持つライフスタイル系インフルエンサーです。
-今「${keyword}」がトレンドです。${tone}、この商品をX(Twitter)で紹介してください。
-
-【商品情報】
-- 商品名: ${item.itemName}
-- 価格: ${item.itemPrice.toLocaleString()}円
-- 説明: ${item.itemCaption.slice(0, 150)}
-
-【YouTube必勝構成 × PAS法】
-1. メリット＋共感（「${keyword}に悩んでる人に刺さる」導入）
-2. 信頼（「レビュー多数」「私も使ってみたら」等で社会的証明）
-3. 今すぐ行動（「今トレンドだから今が買いどき」の緊急性）
-
-【ルール】
-- 160〜200文字以内（URLは含めない）
-- ハッシュタグ末尾に最大2個
-- 広告感・AI感ゼロ。本音レビュー風
-- スマホで読みやすいよう改行を入れる
-
-投稿文のみを出力してください（前置き不要）:`;
-}
-
 /**
  * トレンドキーワードに基づいてGroqで投稿文を一括生成 (YouTube必勝構成)
  */
 export async function generateTrendCaptions(
   keyword: string,
   items: RakutenItem[]
-): Promise<Array<{ item: RakutenItem; caption: string; xParentCaption: string }>> {
+): Promise<Array<{ item: RakutenItem; caption: string }>> {
   if (!GROQ_API_KEY) throw new Error("GROQ_API_KEY が未設定です");
   const client = new Groq({ apiKey: GROQ_API_KEY });
-  const results: Array<{ item: RakutenItem; caption: string; xParentCaption: string }> = [];
+  const results: Array<{ item: RakutenItem; caption: string }> = [];
 
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
@@ -271,12 +185,8 @@ export async function generateTrendCaptions(
     try {
       console.log(`[generator] 「${item.itemName.slice(0, 30)}...」ROOM文生成中 (トレンド: ${keyword})`);
       const caption = await generateWithRetry(client, buildGeminiRoomPrompt(keyword, item), 0.95);
-      await sleep(REQUEST_INTERVAL_MS);
 
-      console.log(`[generator] 「${item.itemName.slice(0, 30)}...」X文生成中 (トレンド)`);
-      const xParentCaption = await generateWithRetry(client, buildGeminiXPrompt(keyword, item), 0.95);
-
-      results.push({ item, caption: caption.trim(), xParentCaption: xParentCaption.trim() });
+      results.push({ item, caption: caption.trim() });
     } catch (err) {
       console.error(`[generator] トレンド生成失敗 「${item.itemName.slice(0, 30)}」:`, err);
     }
@@ -308,25 +218,16 @@ export async function generateCaption(item: RakutenItem, postType: PostType = 2)
 export async function generateCaptions(
   items: RakutenItem[],
   postType: PostType = 2
-): Promise<Array<{ item: RakutenItem; caption: string; xParentCaption: string }>> {
-  const results: Array<{ item: RakutenItem; caption: string; xParentCaption: string }> = [];
+): Promise<Array<{ item: RakutenItem; caption: string }>> {
+  const results: Array<{ item: RakutenItem; caption: string }> = [];
 
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
     if (!item) continue;
 
     try {
-      // ROOM投稿文（temperature: 0.8）
       const caption = await generateCaption(item, postType);
-      await sleep(REQUEST_INTERVAL_MS);
-
-      // X親投稿文（temperature: 0.95 で毎回異なる文章に）
-      const client = new Groq({ apiKey: GROQ_API_KEY });
-      console.log(`[generator] 「${item.itemName.slice(0, 30)}...」のX用親投稿文を生成中 (PAS法)`);
-      const xParentCaption = await generateWithRetry(client, buildXParentPrompt(item, postType), 0.95);
-      console.log("[generator] X用親投稿文生成完了");
-
-      results.push({ item, caption, xParentCaption: xParentCaption.trim() });
+      results.push({ item, caption });
     } catch (err) {
       console.error(`[generator] 商品「${item.itemName.slice(0, 30)}」の生成失敗:`, err);
     }
