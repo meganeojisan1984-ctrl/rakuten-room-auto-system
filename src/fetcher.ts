@@ -151,17 +151,17 @@ function detectBonusInfo(item: RakutenRankingApiItem | RakutenApiItem): {
 /**
  * 楽天ランキングAPIから商品を取得
  */
-async function fetchRanking(genreId?: string): Promise<RakutenItem[]> {
+async function fetchRanking(genreId?: string, page: number = 1): Promise<RakutenItem[]> {
   const params: Record<string, string | number> = {
     applicationId: RAKUTEN_APP_ID,
     accessKey: RAKUTEN_ACCESS_KEY,
     formatVersion: 2,
     hits: 30,
-    page: 1,
+    page,
   };
   if (genreId) params.genreId = genreId;
 
-  console.log(`[fetcher] ランキングAPI取得中 (ジャンルID: ${genreId || "全体"})`);
+  console.log(`[fetcher] ランキングAPI取得中 (ジャンルID: ${genreId || "全体"}, page: ${page})`);
 
   try {
     const response = await axios.get<{
@@ -341,6 +341,135 @@ export async function fetchItemsByKeyword(
 }
 
 /**
+ * 商品一覧にフィルタを適用し、理由別内訳ログと共にフィルタ結果を返す
+ */
+function applyItemFilter(
+  rawItems: RakutenItem[],
+  minPrice: number | undefined,
+  maxPrice: number,
+  excludeCodes: Set<string>,
+  label: string
+): RakutenItem[] {
+  const stats = {
+    unavailable: 0,
+    expired: 0,
+    overMax: 0,
+    underMin: 0,
+    alreadyPosted: 0,
+    passed: 0,
+  };
+  const now = new Date();
+
+  const filtered = rawItems.filter((item) => {
+    if (item.availability !== 1) {
+      stats.unavailable++;
+      return false;
+    }
+    if (item.endTime && new Date(item.endTime) < now) {
+      stats.expired++;
+      return false;
+    }
+    if (item.itemPrice > maxPrice) {
+      stats.overMax++;
+      return false;
+    }
+    if (minPrice !== undefined && item.itemPrice < minPrice) {
+      stats.underMin++;
+      return false;
+    }
+    if (excludeCodes.has(item.itemCode)) {
+      stats.alreadyPosted++;
+      return false;
+    }
+    stats.passed++;
+    return true;
+  });
+
+  console.log(
+    `[fetcher] フィルタ内訳 [${label}] raw=${rawItems.length}, 通過=${stats.passed}, ` +
+      `販売停止=${stats.unavailable}, 期限切=${stats.expired}, 価格>${maxPrice}=${stats.overMax}, ` +
+      `価格<${minPrice ?? "-"}=${stats.underMin}, 投稿済=${stats.alreadyPosted}`
+  );
+
+  return filtered;
+}
+
+/**
+ * ランキングをフォールバック順に試行し、最初に非空となった候補を返す
+ * 1. 指定ジャンル page1
+ * 2. 指定ジャンル page2
+ * 3. 他のジャンルを順番に試行 (page1)
+ * 4. 全体ランキング (ジャンル指定なし) page1
+ * 5. 全体ランキング page2
+ * それでも0件なら、最後の試行で価格帯を緩和して再フィルタ
+ */
+async function fetchRankingWithFallback(
+  primaryGenreId: string | undefined,
+  primaryGenreName: string,
+  minPrice: number | undefined,
+  maxPrice: number,
+  excludeCodes: Set<string>
+): Promise<RakutenItem[]> {
+  // フォールバック用のジャンル候補: メイン+サブをマージし重複ジャンルIDを除去
+  const alternativeGenres = [...MAIN_GENRES, ...SUB_GENRES].filter(
+    (g) => g.genreId !== primaryGenreId
+  );
+  const seenGenres = new Set<string>();
+  const uniqueAlternatives = alternativeGenres.filter((g) => {
+    if (seenGenres.has(g.genreId)) return false;
+    seenGenres.add(g.genreId);
+    return true;
+  });
+
+  type Attempt = { label: string; genreId?: string; page: number };
+  const attempts: Attempt[] = [
+    { label: `${primaryGenreName} p1`, genreId: primaryGenreId, page: 1 },
+    { label: `${primaryGenreName} p2`, genreId: primaryGenreId, page: 2 },
+    ...uniqueAlternatives.map((g) => ({
+      label: `代替ジャンル: ${g.name} p1`,
+      genreId: g.genreId,
+      page: 1,
+    })),
+    { label: "全体ランキング p1", genreId: undefined, page: 1 },
+    { label: "全体ランキング p2", genreId: undefined, page: 2 },
+  ];
+
+  let lastRawItems: RakutenItem[] = [];
+
+  for (const attempt of attempts) {
+    let rawItems: RakutenItem[];
+    try {
+      rawItems = await fetchRanking(attempt.genreId, attempt.page);
+    } catch (err) {
+      console.warn(`[fetcher] ${attempt.label} 取得失敗: ${String(err)}`);
+      continue;
+    }
+    lastRawItems = rawItems;
+    const filtered = applyItemFilter(rawItems, minPrice, maxPrice, excludeCodes, attempt.label);
+    if (filtered.length > 0) return filtered;
+  }
+
+  // 全試行が0件なら、最後に取得したitemsに対して価格帯を緩和して再フィルタ
+  if (lastRawItems.length > 0) {
+    const relaxedMin = minPrice !== undefined ? Math.max(500, Math.floor(minPrice / 2)) : undefined;
+    const relaxedMax = Math.min(10000, maxPrice * 2);
+    console.warn(
+      `[fetcher] 全試行0件。価格帯を緩和して再フィルタ (${relaxedMin ?? "-"}〜${relaxedMax}円)`
+    );
+    const relaxed = applyItemFilter(
+      lastRawItems,
+      relaxedMin,
+      relaxedMax,
+      excludeCodes,
+      "価格緩和"
+    );
+    if (relaxed.length > 0) return relaxed;
+  }
+
+  return [];
+}
+
+/**
  * ターゲットジャンルに基づき商品を取得・フィルタリングして返す
  */
 export async function fetchItems(count: number = 5, excludeCodes: Set<string> = new Set()): Promise<RakutenItem[]> {
@@ -348,7 +477,6 @@ export async function fetchItems(count: number = 5, excludeCodes: Set<string> = 
     throw new Error("RAKUTEN_APP_ID が未設定です");
   }
 
-  let rawItems: RakutenItem[] = [];
   let maxPrice = MAX_PRICE;
   let minPrice: number | undefined;
   let genreId: string | undefined;
@@ -372,27 +500,23 @@ export async function fetchItems(count: number = 5, excludeCodes: Set<string> = 
     genreId = GENRE_IDS[TARGET_GENRE] || undefined;
   }
 
+  let filtered: RakutenItem[];
   try {
     if (TARGET_GENRE === "1000yen") {
-      rawItems = await fetchItemSearch("1000円ポッキリ 送料無料", minPrice, maxPrice);
+      const rawItems = await fetchItemSearch("1000円ポッキリ 送料無料", minPrice, maxPrice);
+      filtered = applyItemFilter(rawItems, minPrice, maxPrice, excludeCodes, "1000円ポッキリ");
     } else {
-      rawItems = await fetchRanking(genreId);
+      filtered = await fetchRankingWithFallback(
+        genreId,
+        selectedGenreName,
+        minPrice,
+        maxPrice,
+        excludeCodes
+      );
     }
   } catch (err) {
     throw new Error(`楽天APIエラー: ${String(err)}`);
   }
-
-  // フィルタリング: 価格帯1000〜3000円・販売中・投稿済み除外
-  let filtered = rawItems.filter((item) => {
-    if (item.availability !== 1) return false;
-    if (item.endTime) {
-      if (new Date(item.endTime) < new Date()) return false;
-    }
-    if (item.itemPrice > maxPrice) return false;
-    if (minPrice !== undefined && item.itemPrice < minPrice) return false;
-    if (excludeCodes.has(item.itemCode)) return false; // 投稿済みを除外
-    return true;
-  });
 
   // ポイントアップ・クーポン情報ありを優先ソート
   filtered.sort((a, b) => {
