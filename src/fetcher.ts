@@ -341,66 +341,158 @@ export async function fetchItemsByKeyword(
 }
 
 /**
- * ターゲットジャンルに基づき商品を取得・フィルタリングして返す
+ * 価格・販売状況・投稿済みで商品をフィルタ＋ソート
  */
-export async function fetchItems(count: number = 5, excludeCodes: Set<string> = new Set()): Promise<RakutenItem[]> {
-  if (!RAKUTEN_APP_ID) {
-    throw new Error("RAKUTEN_APP_ID が未設定です");
-  }
-
-  let rawItems: RakutenItem[] = [];
-  let maxPrice = MAX_PRICE;
-  let minPrice: number | undefined;
-  let genreId: string | undefined;
-  let selectedGenreName = "全体";
-
-  // generalの場合はメイン(6〜7割)/サブ(3〜4割)ジャンルからランダム選択
-  if (TARGET_GENRE === "general" || !TARGET_GENRE) {
-    // メインを6〜7割、サブを3〜4割の比率で選択
-    const useMain = Math.random() < 0.65;
-    const pool = useMain ? MAIN_GENRES : SUB_GENRES;
-    const selected = pool[Math.floor(Math.random() * pool.length)]!;
-    genreId = selected.genreId;
-    minPrice = selected.minPrice;
-    maxPrice = selected.maxPrice;
-    selectedGenreName = `${useMain ? "メイン" : "サブ"}: ${selected.name}`;
-    console.log(`[fetcher] ジャンル選択: ${selectedGenreName}`);
-  } else {
-    const priceOverride = GENRE_PRICE_OVERRIDES[TARGET_GENRE];
-    minPrice = priceOverride?.min ?? MIN_PRICE;
-    maxPrice = priceOverride?.max ?? MAX_PRICE;
-    genreId = GENRE_IDS[TARGET_GENRE] || undefined;
-  }
-
-  try {
-    if (TARGET_GENRE === "1000yen") {
-      rawItems = await fetchItemSearch("1000円ポッキリ 送料無料", minPrice, maxPrice);
-    } else {
-      rawItems = await fetchRanking(genreId);
-    }
-  } catch (err) {
-    throw new Error(`楽天APIエラー: ${String(err)}`);
-  }
-
-  // フィルタリング: 価格帯1000〜3000円・販売中・投稿済み除外
-  let filtered = rawItems.filter((item) => {
+function filterAndSort(
+  rawItems: RakutenItem[],
+  minPrice: number | undefined,
+  maxPrice: number,
+  excludeCodes: Set<string>
+): RakutenItem[] {
+  const filtered = rawItems.filter((item) => {
     if (item.availability !== 1) return false;
-    if (item.endTime) {
-      if (new Date(item.endTime) < new Date()) return false;
-    }
+    if (item.endTime && new Date(item.endTime) < new Date()) return false;
     if (item.itemPrice > maxPrice) return false;
     if (minPrice !== undefined && item.itemPrice < minPrice) return false;
-    if (excludeCodes.has(item.itemCode)) return false; // 投稿済みを除外
+    if (excludeCodes.has(item.itemCode)) return false;
     return true;
   });
 
-  // ポイントアップ・クーポン情報ありを優先ソート
   filtered.sort((a, b) => {
     const scoreA = (a.hasPointBonus ? 2 : 0) + (a.hasCoupon ? 1 : 0);
     const scoreB = (b.hasPointBonus ? 2 : 0) + (b.hasCoupon ? 1 : 0);
     return scoreB - scoreA;
   });
 
-  console.log(`[fetcher] ${filtered.length}件の商品を取得 (フィルタ後), ${count}件を使用`);
-  return filtered.slice(0, count);
+  return filtered;
+}
+
+function shuffle<T>(arr: readonly T[]): T[] {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j]!, copy[i]!];
+  }
+  return copy;
+}
+
+/**
+ * ターゲットジャンルに基づき商品を取得・フィルタリングして返す
+ * 選択したジャンルで0件の場合は他ジャンル/全体ランキングへ順次フォールバック
+ */
+export async function fetchItems(count: number = 5, excludeCodes: Set<string> = new Set()): Promise<RakutenItem[]> {
+  if (!RAKUTEN_APP_ID) {
+    throw new Error("RAKUTEN_APP_ID が未設定です");
+  }
+
+  // 1000円ポッキリモード
+  if (TARGET_GENRE === "1000yen") {
+    const priceOverride = GENRE_PRICE_OVERRIDES[TARGET_GENRE];
+    const minPrice = priceOverride?.min ?? MIN_PRICE;
+    const maxPrice = priceOverride?.max ?? MAX_PRICE;
+    let rawItems: RakutenItem[];
+    try {
+      rawItems = await fetchItemSearch("1000円ポッキリ 送料無料", minPrice, maxPrice);
+    } catch (err) {
+      throw new Error(`楽天APIエラー: ${String(err)}`);
+    }
+    const filtered = filterAndSort(rawItems, minPrice, maxPrice, excludeCodes);
+    console.log(`[fetcher] ${filtered.length}件の商品を取得 (フィルタ後), ${count}件を使用`);
+    if (filtered.length === 0) {
+      throw new Error("1000円ポッキリ検索で商品が0件でした");
+    }
+    return filtered.slice(0, count);
+  }
+
+  // 特定ジャンル指定モード (furusato, electronics など)
+  if (TARGET_GENRE && TARGET_GENRE !== "general") {
+    const priceOverride = GENRE_PRICE_OVERRIDES[TARGET_GENRE];
+    const minPrice = priceOverride?.min ?? MIN_PRICE;
+    const maxPrice = priceOverride?.max ?? MAX_PRICE;
+    const genreId = GENRE_IDS[TARGET_GENRE] || undefined;
+    let rawItems: RakutenItem[];
+    try {
+      rawItems = await fetchRanking(genreId);
+    } catch (err) {
+      throw new Error(`楽天APIエラー: ${String(err)}`);
+    }
+    let filtered = filterAndSort(rawItems, minPrice, maxPrice, excludeCodes);
+    console.log(`[fetcher] ${filtered.length}件の商品を取得 (フィルタ後), ${count}件を使用`);
+    if (filtered.length >= count) return filtered.slice(0, count);
+
+    // フォールバック: 全体ランキング
+    console.warn(`[fetcher] ジャンル「${TARGET_GENRE}」で不足、全体ランキングにフォールバック`);
+    try {
+      const fallback = await fetchRanking();
+      filtered = filterAndSort(fallback, minPrice, maxPrice, excludeCodes);
+    } catch (err) {
+      console.warn(`[fetcher] 全体ランキング失敗: ${String(err)}`);
+    }
+    if (filtered.length === 0) {
+      throw new Error("フィルタリング後に使用可能な商品が0件でした");
+    }
+    console.log(`[fetcher] 全体ランキング後: ${filtered.length}件`);
+    return filtered.slice(0, count);
+  }
+
+  // generalモード: メイン/サブジャンルをランダム順で試し、0件なら次へ
+  const useMainFirst = Math.random() < 0.65;
+  const firstPool = useMainFirst ? MAIN_GENRES : SUB_GENRES;
+  const secondPool = useMainFirst ? SUB_GENRES : MAIN_GENRES;
+  const candidates = [
+    ...shuffle(firstPool).map((g) => ({ g, label: useMainFirst ? "メイン" : "サブ" })),
+    ...shuffle(secondPool).map((g) => ({ g, label: useMainFirst ? "サブ" : "メイン" })),
+  ];
+
+  const triedGenreIds = new Set<string>();
+  for (const { g, label } of candidates) {
+    // 同じgenreIdは1度だけ試す（MAIN_GENRESに同一IDが重複しているため）
+    if (triedGenreIds.has(g.genreId)) continue;
+    triedGenreIds.add(g.genreId);
+
+    console.log(`[fetcher] ジャンル選択: ${label}: ${g.name}`);
+    let rawItems: RakutenItem[];
+    try {
+      rawItems = await fetchRanking(g.genreId);
+    } catch (err) {
+      console.warn(`[fetcher] 「${g.name}」取得失敗、次ジャンルへ: ${String(err)}`);
+      continue;
+    }
+    const filtered = filterAndSort(rawItems, g.minPrice, g.maxPrice, excludeCodes);
+    console.log(`[fetcher] ${filtered.length}件の商品を取得 (フィルタ後)`);
+    if (filtered.length >= count) {
+      console.log(`[fetcher] 「${g.name}」から${count}件を使用`);
+      return filtered.slice(0, count);
+    }
+    console.warn(`[fetcher] 「${g.name}」で不足(${filtered.length}件)、別ジャンルへ`);
+  }
+
+  // 全ジャンルで不足 → 全体ランキング(人気の売れ筋)にフォールバック
+  console.warn("[fetcher] 全ジャンルで不足、全体ランキング(売れ筋)にフォールバック");
+  let fallbackItems: RakutenItem[] = [];
+  try {
+    fallbackItems = await fetchRanking();
+  } catch (err) {
+    console.warn(`[fetcher] 全体ランキング失敗: ${String(err)}`);
+  }
+  let fallbackFiltered = filterAndSort(fallbackItems, MIN_PRICE, MAX_PRICE, excludeCodes);
+  if (fallbackFiltered.length >= count) {
+    console.log(`[fetcher] 全体ランキングから${fallbackFiltered.length}件取得、${count}件を使用`);
+    return fallbackFiltered.slice(0, count);
+  }
+
+  // 価格条件を緩和して再試行（販売中かつ未投稿のみ）
+  console.warn("[fetcher] 価格条件を緩和して再試行");
+  fallbackFiltered = fallbackItems.filter((item) => {
+    if (item.availability !== 1) return false;
+    if (item.endTime && new Date(item.endTime) < new Date()) return false;
+    if (excludeCodes.has(item.itemCode)) return false;
+    return true;
+  });
+  if (fallbackFiltered.length > 0) {
+    console.log(`[fetcher] 価格緩和後: ${fallbackFiltered.length}件`);
+    return fallbackFiltered.slice(0, count);
+  }
+
+  throw new Error("フィルタリング後に使用可能な商品が0件でした");
 }
