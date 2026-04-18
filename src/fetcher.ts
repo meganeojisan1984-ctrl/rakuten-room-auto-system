@@ -148,51 +148,50 @@ function detectBonusInfo(item: RakutenRankingApiItem | RakutenApiItem): {
   return { hasPointBonus, hasCoupon };
 }
 
+const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
+
 /**
- * 楽天ランキングAPIから商品を取得
+ * 楽天ランキングAPIから商品を取得（1ページ分）
+ * - 429: 60秒待機して1回だけ再試行
+ * - 404/400: 空配列を返す（呼び出し側でフォールバック）
  */
-async function fetchRanking(genreId?: string): Promise<RakutenItem[]> {
+async function fetchRankingPage(genreId: string | undefined, page: number): Promise<RakutenItem[]> {
   const params: Record<string, string | number> = {
     applicationId: RAKUTEN_APP_ID,
     accessKey: RAKUTEN_ACCESS_KEY,
     formatVersion: 2,
     hits: 30,
-    page: 1,
+    page,
   };
   if (genreId) params.genreId = genreId;
 
-  console.log(`[fetcher] ランキングAPI取得中 (ジャンルID: ${genreId || "全体"})`);
+  console.log(`[fetcher] ランキングAPI取得中 (ジャンルID: ${genreId || "全体"}, page: ${page})`);
+
+  const endpoint = "https://openapi.rakuten.co.jp/ichibaranking/api/IchibaItem/Ranking/20220601";
+  const headers = { Referer: "https://github.com", Origin: "https://github.com" };
 
   try {
-    const response = await axios.get<{
-      Items: Array<RakutenRankingApiItem>;
-    }>("https://openapi.rakuten.co.jp/ichibaranking/api/IchibaItem/Ranking/20220601", {
+    const response = await axios.get<{ Items: Array<RakutenRankingApiItem> }>(endpoint, {
       params,
       timeout: 15000,
-      headers: { Referer: "https://github.com", Origin: "https://github.com" },
+      headers,
     });
-
-    const items = response.data.Items ?? [];
-    return convertRankingItems(items);
+    return convertRankingItems(response.data.Items ?? []);
   } catch (err: unknown) {
     const status = (err as { response?: { status?: number } })?.response?.status;
     if (status === 429) {
       console.warn("[fetcher] 楽天API レート制限 (429)、60秒待機して再試行...");
-      await new Promise((r) => setTimeout(r, 60000));
-      const retry = await axios.get<{ Items: Array<RakutenRankingApiItem> }>(
-        "https://openapi.rakuten.co.jp/ichibaranking/api/IchibaItem/Ranking/20220601",
-        { params, timeout: 15000, headers: { Referer: "https://github.com", Origin: "https://github.com" } }
-      );
+      await sleep(60000);
+      const retry = await axios.get<{ Items: Array<RakutenRankingApiItem> }>(endpoint, {
+        params,
+        timeout: 15000,
+        headers,
+      });
       return convertRankingItems(retry.data.Items ?? []);
     }
-    if (genreId && (status === 404 || status === 400)) {
-      console.warn(`[fetcher] ジャンルID ${genreId} が無効 (${status})、全体ランキングで再試行`);
-      delete params.genreId;
-      const fallback = await axios.get<{ Items: Array<RakutenRankingApiItem> }>(
-        "https://openapi.rakuten.co.jp/ichibaranking/api/IchibaItem/Ranking/20220601",
-        { params, timeout: 15000, headers: { Referer: "https://github.com", Origin: "https://github.com" } }
-      );
-      return convertRankingItems(fallback.data.Items ?? []);
+    if (status === 404 || status === 400) {
+      console.warn(`[fetcher] ランキング取得失敗 (${status}, genreId=${genreId || "全体"}, page=${page})`);
+      return [];
     }
     throw err;
   }
@@ -340,67 +339,154 @@ export async function fetchItemsByKeyword(
   return filtered.slice(0, count);
 }
 
+interface FilterOpts {
+  minPrice?: number;
+  maxPrice: number;
+  excludeCodes: Set<string>;
+}
+
+function applyItemFilter(items: RakutenItem[], opts: FilterOpts): RakutenItem[] {
+  return items.filter((item) => {
+    if (item.availability !== 1) return false;
+    if (item.endTime && new Date(item.endTime) < new Date()) return false;
+    if (item.itemPrice > opts.maxPrice) return false;
+    if (opts.minPrice !== undefined && item.itemPrice < opts.minPrice) return false;
+    if (opts.excludeCodes.has(item.itemCode)) return false;
+    return true;
+  });
+}
+
+function sortByBonus(a: RakutenItem, b: RakutenItem): number {
+  const scoreA = (a.hasPointBonus ? 2 : 0) + (a.hasCoupon ? 1 : 0);
+  const scoreB = (b.hasPointBonus ? 2 : 0) + (b.hasCoupon ? 1 : 0);
+  return scoreB - scoreA;
+}
+
 /**
  * ターゲットジャンルに基づき商品を取得・フィルタリングして返す
+ *
+ * 商品確保のための多段フォールバック:
+ *   Stage1: 選択ジャンルの page 1〜3
+ *   Stage2: 他のMAIN/SUBジャンル（page 1）を順に試行
+ *   Stage3: 全体ランキング（genreIdなし, page 1）
+ *   Stage4: 収集済み商品に対して価格レンジを段階緩和
+ *   Stage5: excludeCodes を無視して最終フォールバック
  */
 export async function fetchItems(count: number = 5, excludeCodes: Set<string> = new Set()): Promise<RakutenItem[]> {
   if (!RAKUTEN_APP_ID) {
     throw new Error("RAKUTEN_APP_ID が未設定です");
   }
 
-  let rawItems: RakutenItem[] = [];
-  let maxPrice = MAX_PRICE;
-  let minPrice: number | undefined;
-  let genreId: string | undefined;
-  let selectedGenreName = "全体";
+  // 1000yenモードは従来どおりキーワード検索
+  if (TARGET_GENRE === "1000yen") {
+    const priceOverride = GENRE_PRICE_OVERRIDES["1000yen"]!;
+    const raw = await fetchItemSearch("1000円ポッキリ 送料無料", priceOverride.min, priceOverride.max);
+    const filtered = applyItemFilter(raw, {
+      minPrice: priceOverride.min,
+      maxPrice: priceOverride.max,
+      excludeCodes,
+    });
+    filtered.sort(sortByBonus);
+    console.log(`[fetcher] ${filtered.length}件の商品を取得 (フィルタ後), ${count}件を使用`);
+    return filtered.slice(0, count);
+  }
 
-  // generalの場合はメイン(6〜7割)/サブ(3〜4割)ジャンルからランダム選択
+  // ジャンル・価格帯の選択
+  let primaryGenreId: string | undefined;
+  let primaryMinPrice: number;
+  let primaryMaxPrice: number;
   if (TARGET_GENRE === "general" || !TARGET_GENRE) {
-    // メインを6〜7割、サブを3〜4割の比率で選択
     const useMain = Math.random() < 0.65;
     const pool = useMain ? MAIN_GENRES : SUB_GENRES;
     const selected = pool[Math.floor(Math.random() * pool.length)]!;
-    genreId = selected.genreId;
-    minPrice = selected.minPrice;
-    maxPrice = selected.maxPrice;
-    selectedGenreName = `${useMain ? "メイン" : "サブ"}: ${selected.name}`;
-    console.log(`[fetcher] ジャンル選択: ${selectedGenreName}`);
+    primaryGenreId = selected.genreId;
+    primaryMinPrice = selected.minPrice;
+    primaryMaxPrice = selected.maxPrice;
+    console.log(`[fetcher] ジャンル選択: ${useMain ? "メイン" : "サブ"}: ${selected.name}`);
   } else {
     const priceOverride = GENRE_PRICE_OVERRIDES[TARGET_GENRE];
-    minPrice = priceOverride?.min ?? MIN_PRICE;
-    maxPrice = priceOverride?.max ?? MAX_PRICE;
-    genreId = GENRE_IDS[TARGET_GENRE] || undefined;
+    primaryMinPrice = priceOverride?.min ?? MIN_PRICE;
+    primaryMaxPrice = priceOverride?.max ?? MAX_PRICE;
+    primaryGenreId = GENRE_IDS[TARGET_GENRE] || undefined;
   }
 
+  // 収集した商品を itemCode で重複排除しながら保持
+  const collected = new Map<string, RakutenItem>();
+  const addItems = (items: RakutenItem[]): void => {
+    for (const item of items) {
+      if (!collected.has(item.itemCode)) collected.set(item.itemCode, item);
+    }
+  };
+  const filterAll = (opts: FilterOpts): RakutenItem[] => applyItemFilter([...collected.values()], opts);
+  const finalize = (items: RakutenItem[], stage: string): RakutenItem[] => {
+    items.sort(sortByBonus);
+    console.log(`[fetcher] ${stage}: ${items.length}件の商品を取得 (フィルタ後), ${count}件を使用`);
+    return items.slice(0, count);
+  };
+
+  const primaryFilter: FilterOpts = {
+    minPrice: primaryMinPrice,
+    maxPrice: primaryMaxPrice,
+    excludeCodes,
+  };
+
+  // Stage 1: 選択ジャンルの page 1〜3
+  for (let page = 1; page <= 3; page++) {
+    if (page > 1) await sleep(1100); // レート制限対策 (1req/sec)
+    try {
+      addItems(await fetchRankingPage(primaryGenreId, page));
+    } catch (err) {
+      console.warn(`[fetcher] Stage1 page${page} エラー: ${String(err)}`);
+    }
+    const hit = filterAll(primaryFilter);
+    if (hit.length >= count) return finalize(hit, `Stage1 page${page}`);
+  }
+
+  // Stage 2: 他のMAIN/SUBジャンルを順に試行
+  const otherGenres = [...MAIN_GENRES, ...SUB_GENRES].filter((g) => g.genreId !== primaryGenreId);
+  for (const g of otherGenres) {
+    await sleep(1100);
+    try {
+      addItems(await fetchRankingPage(g.genreId, 1));
+    } catch (err) {
+      console.warn(`[fetcher] Stage2 ${g.name} エラー: ${String(err)}`);
+      continue;
+    }
+    const hit = filterAll(primaryFilter);
+    if (hit.length >= count) return finalize(hit, `Stage2 ${g.name}`);
+  }
+
+  // Stage 3: 全体ランキング
+  await sleep(1100);
   try {
-    if (TARGET_GENRE === "1000yen") {
-      rawItems = await fetchItemSearch("1000円ポッキリ 送料無料", minPrice, maxPrice);
-    } else {
-      rawItems = await fetchRanking(genreId);
-    }
+    addItems(await fetchRankingPage(undefined, 1));
   } catch (err) {
-    throw new Error(`楽天APIエラー: ${String(err)}`);
+    console.warn(`[fetcher] Stage3 全体ランキングエラー: ${String(err)}`);
+  }
+  const stage3 = filterAll(primaryFilter);
+  if (stage3.length >= count) return finalize(stage3, "Stage3 全体");
+
+  // Stage 4: 価格レンジ緩和（収集済みデータに対して再フィルタ）
+  const priceFallbacks: FilterOpts[] = [
+    { minPrice: primaryMinPrice, maxPrice: 8000, excludeCodes },
+    { minPrice: 500, maxPrice: 10000, excludeCodes },
+    { minPrice: 0, maxPrice: Number.MAX_SAFE_INTEGER, excludeCodes },
+  ];
+  for (const pf of priceFallbacks) {
+    const hit = filterAll(pf);
+    if (hit.length >= count) return finalize(hit, `Stage4 価格緩和(${pf.minPrice}〜${pf.maxPrice})`);
   }
 
-  // フィルタリング: 価格帯1000〜3000円・販売中・投稿済み除外
-  let filtered = rawItems.filter((item) => {
-    if (item.availability !== 1) return false;
-    if (item.endTime) {
-      if (new Date(item.endTime) < new Date()) return false;
-    }
-    if (item.itemPrice > maxPrice) return false;
-    if (minPrice !== undefined && item.itemPrice < minPrice) return false;
-    if (excludeCodes.has(item.itemCode)) return false; // 投稿済みを除外
-    return true;
+  // Stage 5: excludeCodes を無視（重複投稿のリスクを許容して空振り回避）
+  const stage5 = filterAll({
+    minPrice: 0,
+    maxPrice: Number.MAX_SAFE_INTEGER,
+    excludeCodes: new Set(),
   });
+  if (stage5.length > 0) {
+    console.warn("[fetcher] Stage5: excludeCodesを無視して返却（重複投稿の可能性あり）");
+    return finalize(stage5, "Stage5 既投稿除外を無視");
+  }
 
-  // ポイントアップ・クーポン情報ありを優先ソート
-  filtered.sort((a, b) => {
-    const scoreA = (a.hasPointBonus ? 2 : 0) + (a.hasCoupon ? 1 : 0);
-    const scoreB = (b.hasPointBonus ? 2 : 0) + (b.hasCoupon ? 1 : 0);
-    return scoreB - scoreA;
-  });
-
-  console.log(`[fetcher] ${filtered.length}件の商品を取得 (フィルタ後), ${count}件を使用`);
-  return filtered.slice(0, count);
+  throw new Error("全段階のフォールバックを試行しましたが商品が取得できませんでした");
 }
