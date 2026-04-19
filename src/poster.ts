@@ -24,10 +24,12 @@ const SELECTORS = {
   successMessage: '.success-message, .post-success, [class*="success"]',
 };
 
-type PostResult = {
+export type PostResult = {
   success: boolean;
   itemName: string;
+  itemCode: string;
   itemUrl: string;
+  ineligible?: boolean;
   error?: string;
 };
 
@@ -96,6 +98,22 @@ async function postSingleItem(
       await postPage.waitForLoadState("load", { timeout: 15000 });
     }
     console.log("[poster] ROOMに追加ボタンをクリックしました");
+
+    // 投稿不可商品の検知: mix/collect が 404 を返すケース
+    // (ROOM投稿不可ジャンル / 販売停止 / ショップ除外など)
+    const ineligibleDetected = await postPage.evaluate(() => {
+      const title = document.title || "";
+      const heading = document.querySelector("h1,h2")?.textContent || "";
+      const bodySnippet = (document.body?.innerText || "").slice(0, 500);
+      const text = `${title} ${heading} ${bodySnippet}`;
+      return /ページが見つかりません|お探しのページは見つかりません|Page Not Found|404 Not Found/i.test(text);
+    }).catch(() => false);
+
+    if (ineligibleDetected) {
+      await postPage.screenshot({ path: SCREENSHOT_PATH }).catch(() => {});
+      console.warn(`[poster] ROOM投稿不可商品を検知 (404): ${postPage.url()}`);
+      throw new Error("ROOM_INELIGIBLE: 楽天ROOMに投稿できない商品です (404)");
+    }
 
     // AngularJSの初期化完了を待機
     await postPage.waitForFunction(() => {
@@ -201,14 +219,17 @@ async function postSingleItem(
     await notifySuccess(item.itemName, item.itemUrl);
     console.log(`[poster] ✅ 投稿成功: ${item.itemName}`);
 
-    return { success: true, itemName: item.itemName, itemUrl: item.itemUrl };
+    return { success: true, itemName: item.itemName, itemCode: item.itemCode, itemUrl: item.itemUrl };
   } catch (err) {
     const errorMsg = String(err);
+    const ineligible = errorMsg.includes("ROOM_INELIGIBLE");
     console.error(`[poster] 投稿失敗: ${errorMsg}`);
     return {
       success: false,
       itemName: item.itemName,
+      itemCode: item.itemCode,
       itemUrl: item.itemUrl,
+      ineligible,
       error: errorMsg,
     };
   } finally {
