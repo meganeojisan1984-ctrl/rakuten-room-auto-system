@@ -8,8 +8,8 @@ const MAX_PRICE = parseInt(process.env.MAX_PRICE ?? "5000", 10);
 const MIN_PRICE = parseInt(process.env.MIN_PRICE ?? "1000", 10);
 const TARGET_GENRE = process.env.TARGET_GENRE ?? "general";
 
-// メインジャンル: QOLが向上する家事用品（投稿の6〜7割）
-// 条件: 商品数多い・注目度高い・悩みが明確・消耗品&買い替え需要あり
+// メインジャンル: QOLが向上する家事用品＋生活/キッチン/美容家電（投稿の6〜7割）
+// 条件: 商品数多い・注目度高い・悩みが明確・消耗品&買い替え需要あり・ROOM投稿実績多
 const MAIN_GENRES = [
   { name: "日用品雑貨・掃除・洗濯用品", genreId: "215684", minPrice: 1000, maxPrice: 5000 },
   { name: "整理収納・片付けグッズ", genreId: "215697", minPrice: 1000, maxPrice: 5000 },
@@ -18,6 +18,9 @@ const MAIN_GENRES = [
   { name: "キッチン消耗品・日用品", genreId: "216129", minPrice: 1000, maxPrice: 5000 },
   { name: "バス・トイレ用品", genreId: "215684", minPrice: 1000, maxPrice: 5000 },
   { name: "家事効率化グッズ", genreId: "215684", minPrice: 1000, maxPrice: 5000 },
+  { name: "生活家電（掃除機・炊飯器・電子レンジ）", genreId: "558929", minPrice: 2000, maxPrice: 15000 },
+  { name: "キッチン家電（ケトル・トースター・ブレンダー）", genreId: "558944", minPrice: 2000, maxPrice: 10000 },
+  { name: "美容家電（ドライヤー・ヘアアイロン・美顔器）", genreId: "558885", minPrice: 3000, maxPrice: 15000 },
 ];
 
 // サブジャンル: メインジャンル関連・同悩みの延長・使用シーン重複
@@ -27,6 +30,8 @@ const SUB_GENRES = [
   { name: "キッチン便利グッズ・調理器具", genreId: "216129", minPrice: 1000, maxPrice: 5000 },
   { name: "生活必需品・補充消耗品", genreId: "215684", minPrice: 1000, maxPrice: 5000 },
   { name: "省エネ・節約家電小物", genreId: "215783", minPrice: 1000, maxPrice: 5000 },
+  { name: "ダイエット・健康グッズ（体重計・マッサージ器）", genreId: "100939", minPrice: 1500, maxPrice: 8000 },
+  { name: "季節家電（加湿器・空気清浄機・扇風機）", genreId: "558929", minPrice: 3000, maxPrice: 12000 },
 ];
 
 // 検索APIフォールバック用キーワードプール (QOL家事系の文脈に合致)
