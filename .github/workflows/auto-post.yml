@@ -80,8 +80,25 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add posted_items.json
-          git diff --staged --quiet || git commit -m "chore: 投稿済み商品リストを更新 [skip ci]"
-          git push
+          if git diff --staged --quiet; then
+            echo "変更なしのためコミットをスキップ"
+            exit 0
+          fi
+          git commit -m "chore: 投稿済み商品リストを更新 [skip ci]"
+          # push をリトライ付きで実行 (GitHub 側の一時的な 500 エラー対策)
+          for i in 1 2 3 4 5; do
+            if git push; then
+              echo "push 成功 (試行 $i 回目)"
+              exit 0
+            fi
+            echo "push 失敗 (試行 $i 回目)。リモートを取り込んでリトライします..."
+            # リモートが進んでいる場合に備えて rebase
+            git pull --rebase origin "${GITHUB_REF_NAME}" || true
+            # 指数バックオフ: 2, 4, 8, 16, 32 秒
+            sleep $((2 ** i))
+          done
+          echo "push が 5 回の試行すべてで失敗しました" >&2
+          exit 1
 
       - name: エラースクリーンショットをアップロード（失敗時）
         if: failure()
