@@ -84,10 +84,45 @@ async function postSingleItem(
       throw new Error("「ROOMに追加」ボタンが見つかりません");
     });
 
-    // 新しいタブが開く場合に備えて待機
+    // ショップ特有のモーダル（checkbox-hack方式の <label for="modal">）や
+    // 楽天会員ヘッダーがクリック座標を覆ってクリックを妨げるため、事前に除去・無効化する
+    await page.evaluate(() => {
+      // checkbox-hack モーダルを閉じる (label[for="modal"] が開く input#modal を unchecked に)
+      document
+        .querySelectorAll<HTMLInputElement>('input[type="checkbox"][id^="modal"]')
+        .forEach((cb) => {
+          cb.checked = false;
+        });
+      // 画面の大部分を覆うオーバーレイを透過させ、pointer-events を無効化
+      const candidates = document.querySelectorAll<HTMLElement>(
+        'label[for^="modal"], #rakutenLimitedId_header, .ris-header, [class*="overlay"], [id*="overlay"]'
+      );
+      candidates.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        // ボタン自体を隠さないよう、幅か高さが画面の一定以上を占めるもののみ無効化
+        const coversWidth = rect.width >= window.innerWidth * 0.4;
+        const coversHeight = rect.height >= 80;
+        if (coversWidth && coversHeight) {
+          el.style.pointerEvents = "none";
+        }
+      });
+    });
+    await page.locator(SELECTORS.addToRoomButton).first().scrollIntoViewIfNeeded().catch(() => {});
+
+    // 新しいタブが開く場合に備えて待機。
+    // force: true でオーバーレイの pointer-event ヒットテストをバイパスし、
+    // それでも失敗した場合は JS の .click() にフォールバックする
+    const clickWithFallback = async () => {
+      try {
+        await addBtn.click({ force: true, timeout: 10000 });
+      } catch (err) {
+        console.warn(`[poster] force click失敗、JSクリックで再試行: ${String(err)}`);
+        await addBtn.evaluate((el) => (el as HTMLElement).click());
+      }
+    };
     const [newPageOrNull] = await Promise.all([
       context.waitForEvent("page", { timeout: 5000 }).catch(() => null),
-      addBtn.click(),
+      clickWithFallback(),
     ]);
 
     const postPage = newPageOrNull ?? page;
