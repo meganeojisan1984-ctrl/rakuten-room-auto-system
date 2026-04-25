@@ -85,50 +85,70 @@ async function postSingleItem(
     });
 
     // ショップ特有のモーダル（checkbox-hack方式の <label for="modal">）や
-    // 楽天会員ヘッダーがクリック座標を覆ってクリックを妨げるため、事前に除去・無効化する
+    // 楽天会員ヘッダーが座標を覆い、Playwrightの実マウスクリックは hit-test に従うため
+    // force:true でも空振りする。JSハンドラ直叩き → href抜き出し直接遷移、の順で確実に発火させる
     await page.evaluate(() => {
-      // checkbox-hack モーダルを閉じる (label[for="modal"] が開く input#modal を unchecked に)
+      // checkbox-hack モーダルを閉じる
       document
         .querySelectorAll<HTMLInputElement>('input[type="checkbox"][id^="modal"]')
         .forEach((cb) => {
           cb.checked = false;
         });
-      // 画面の大部分を覆うオーバーレイを透過させ、pointer-events を無効化
+      // 既知のオーバーレイを非表示化
       const candidates = document.querySelectorAll<HTMLElement>(
         'label[for^="modal"], #rakutenLimitedId_header, .ris-header, [class*="overlay"], [id*="overlay"]'
       );
       candidates.forEach((el) => {
         const rect = el.getBoundingClientRect();
-        // ボタン自体を隠さないよう、幅か高さが画面の一定以上を占めるもののみ無効化
-        const coversWidth = rect.width >= window.innerWidth * 0.4;
-        const coversHeight = rect.height >= 80;
-        if (coversWidth && coversHeight) {
+        if (rect.width >= window.innerWidth * 0.4 && rect.height >= 60) {
           el.style.pointerEvents = "none";
+          el.style.display = "none";
         }
       });
     });
-    await page.locator(SELECTORS.addToRoomButton).first().scrollIntoViewIfNeeded().catch(() => {});
 
-    // 新しいタブが開く場合に備えて待機。
-    // force: true でオーバーレイの pointer-event ヒットテストをバイパスし、
-    // それでも失敗した場合は JS の .click() にフォールバックする
-    const clickWithFallback = async () => {
+    // 「ROOMに追加」が <a href> の場合は href を取得しておく（ポップアップが開かない時の最終手段）
+    const addBtnHref = await addBtn
+      .evaluate((el) => (el instanceof HTMLAnchorElement ? el.href : null))
+      .catch(() => null);
+
+    // クリック戦略: JSの element.click() を最優先（オーバーレイの hit-test を完全にバイパス）
+    // 失敗したら force:true、それでもダメなら href 直接遷移
+    const triggerAddToRoom = async () => {
       try {
-        await addBtn.click({ force: true, timeout: 10000 });
-      } catch (err) {
-        console.warn(`[poster] force click失敗、JSクリックで再試行: ${String(err)}`);
         await addBtn.evaluate((el) => (el as HTMLElement).click());
+        return;
+      } catch (err) {
+        console.warn(`[poster] JSクリック失敗、force clickで再試行: ${String(err)}`);
+      }
+      try {
+        await addBtn.click({ force: true, timeout: 8000 });
+        return;
+      } catch (err) {
+        console.warn(`[poster] force click失敗: ${String(err)}`);
+      }
+      if (addBtnHref) {
+        console.log(`[poster] href から直接遷移します: ${addBtnHref}`);
+        await page.goto(addBtnHref, { waitUntil: "domcontentloaded", timeout: 30000 });
+      } else {
+        throw new Error("ROOMに追加ボタンのクリックに全て失敗しました");
       }
     };
+
     const [newPageOrNull] = await Promise.all([
-      context.waitForEvent("page", { timeout: 5000 }).catch(() => null),
-      clickWithFallback(),
+      context.waitForEvent("page", { timeout: 8000 }).catch(() => null),
+      triggerAddToRoom(),
     ]);
 
-    const postPage = newPageOrNull ?? page;
+    let postPage = newPageOrNull ?? page;
     if (newPageOrNull) {
       console.log("[poster] 新しいタブで投稿フォームが開きました");
       await postPage.waitForLoadState("load", { timeout: 15000 });
+    } else if (!page.url().includes("room.rakuten.co.jp") && addBtnHref) {
+      // クリックは発火したが新タブも遷移も起きなかった場合の最終フォールバック
+      console.log(`[poster] ポップアップ・遷移なし、新タブで href を開きます: ${addBtnHref}`);
+      postPage = await context.newPage();
+      await postPage.goto(addBtnHref, { waitUntil: "domcontentloaded", timeout: 30000 });
     }
     console.log("[poster] ROOMに追加ボタンをクリックしました");
 
