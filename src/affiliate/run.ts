@@ -11,6 +11,8 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 
+import fs from "fs";
+import path from "path";
 import { resolveOffer } from "./offers";
 import { runCampaign } from "./orchestrator";
 import { getExistingPosts, writeCampaign, isSheetsConfigured } from "./sheets";
@@ -44,7 +46,21 @@ async function main(): Promise<void> {
   const dest = await writeCampaign(result);
   console.log(`\n✅ 完了: ${dest.destination === "google-sheets" ? `タブ「${dest.tab}」に書き込みました` : `ローカル出力 ${dest.localPath}`}`);
   console.log(`   指揮官 総合評価: 信憑性 ${result.overallCredibility} / 完成度 ${result.overallCompleteness}`);
+  if (dest.reportPath) console.log(`   Markdownレポート: ${path.relative(process.cwd(), dest.reportPath)}`);
   if (dest.url) console.log(`   スプレッドシート: ${dest.url}`);
+
+  // GitHub Actions（Issueトリガー）がコメント投稿に使うサマリを書き出す
+  const summary = {
+    offer: offer.name,
+    report: dest.reportPath ? path.relative(process.cwd(), dest.reportPath) : "",
+    credibility: result.overallCredibility,
+    completeness: result.overallCompleteness,
+    summary: result.commanderSummary,
+    sheetUrl: dest.url ?? "",
+  };
+  const dir = path.join(process.cwd(), "reports", "affiliate");
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, "_last.json"), JSON.stringify(summary, null, 2), "utf-8");
 }
 
 main().catch((err) => {

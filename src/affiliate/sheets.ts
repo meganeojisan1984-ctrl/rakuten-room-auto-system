@@ -305,6 +305,78 @@ function collectPostTexts(r: CampaignResult): string[] {
 }
 
 // ──────────────────────────────────────────────
+// Markdownレポート（スマホのGitHubアプリでそのまま読める形式）
+// ──────────────────────────────────────────────
+const REPORT_DIR = path.join(process.cwd(), "reports", "affiliate");
+
+export function buildMarkdown(r: CampaignResult): string {
+  const L: string[] = [];
+  const post = (label: string, text: string, img?: string, extra?: string): void => {
+    L.push(`> ${text.replace(/\n/g, "\n> ")}`);
+    if (extra) L.push(`\n_${extra}_`);
+    if (img) L.push(`\n🖼 画像プロンプト: \`${img}\``);
+    L.push("");
+  };
+
+  L.push(`# 🎯 ${r.offer.name} — X送客キャンペーン`);
+  L.push(`生成: ${r.generatedAt}`);
+  L.push(`\n**指揮官 総合評価**: 信憑性 ${r.overallCredibility} / 完成度 ${r.overallCompleteness}`);
+  L.push(`\n> ${r.commanderSummary.replace(/\n/g, "\n> ")}`);
+  L.push(`\n選定ジャンル: **${r.genres.items.find((g) => g.fitScore)?.genre ?? r.profile.genre}** / 選定ターゲット: **${r.targets.items[0]?.name ?? ""}** / コンセプト: **${r.concepts.items[0]?.concept ?? ""}**`);
+  L.push(`\n> 使い方: Xは手動投稿です。各「投稿文」をコピーして投稿し、「画像プロンプト」をChatGPTに貼って画像を作成してください。\n`);
+
+  L.push(`\n## ④ 見込み客を集めるX投稿（${r.collectPosts.items.length}本・具体性${r.collectPosts.review.valueConcreteness}）`);
+  r.collectPosts.items.forEach((p, i) => { L.push(`\n### ${i + 1}. [${p.type}]`); post("", p.text, p.imagePrompt, `狙い: ${p.psychology}`); });
+
+  L.push(`\n## ⑤ 固定ポスト（${r.pinnedPosts.items.length}本）`);
+  r.pinnedPosts.items.forEach((p, i) => { L.push(`\n### ${i + 1}.`); post("", p.text, p.imagePrompt, p.openingAim); });
+
+  L.push(`\n## ⑥ DM誘導`);
+  r.dms.items.forEach((d) => { L.push(`\n**${d.stage}**`); L.push(`> ${d.text.replace(/\n/g, "\n> ")}`); });
+
+  L.push(`\n## ⑦ 教育投稿（${r.educationPosts.items.length}本）`);
+  r.educationPosts.items.forEach((p, i) => { L.push(`\n### ${i + 1}. [${p.type}]`); post("", p.text, p.imagePrompt, p.aim); });
+
+  const oc = r.offerCopy.items[0];
+  if (oc) {
+    L.push(`\n## ⑧ オファー文`);
+    L.push(`- **名称**: ${oc.consultName}\n- **キャッチ**: ${oc.catchCopy}\n- **固定用短文**: ${oc.pinnedShort}\n- **DM用短文**: ${oc.dmShort}\n- **プロフ用短文**: ${oc.profileShort}`);
+  }
+
+  const dg = r.diagnosis.items[0];
+  if (dg) {
+    L.push(`\n## ⑨ 見込み客 診断ルブリック`);
+    L.push(`- **S/A/B/C基準**: ${dg.grade}\n- **見極め**: ${dg.criteria}\n- **次の行動**: ${dg.nextAction}`);
+  }
+
+  L.push(`\n## ⑩ 30日ロードマップ`);
+  r.roadmap.items.forEach((d) => L.push(`- **Day${d.day}**: ${d.todo} ｜ 投稿: ${d.postTheme}`));
+
+  L.push(`\n## ⑪ 長文記事（${r.articles.items.length}本）`);
+  r.articles.items.forEach((a, i) => {
+    L.push(`\n### 記事${i + 1}: ${a.title}  _(${a.pattern} / ${a.format} / 約${a.charCount}字)_`);
+    if (a.coverImagePrompt) L.push(`🖼 カバー画像: \`${a.coverImagePrompt}\``);
+    L.push(`\n**▼ X用スレッド（この順に連投）**`);
+    const n = a.thread.length;
+    a.thread.forEach((tw, j) => L.push(`\n**${j + 1}/${n}**\n> ${tw.replace(/\n/g, "\n> ")}`));
+    L.push(`\n<details><summary>note/ブログ用 本文</summary>\n\n${a.body}\n\n</details>`);
+  });
+
+  return L.join("\n");
+}
+
+function writeMarkdown(r: CampaignResult): string {
+  if (!fs.existsSync(REPORT_DIR)) fs.mkdirSync(REPORT_DIR, { recursive: true });
+  const date = new Date().toISOString().slice(0, 10);
+  const file = path.join(REPORT_DIR, `${r.offer.id}-${date}.md`);
+  const md = buildMarkdown(r);
+  fs.writeFileSync(file, md, "utf-8");
+  // GitHubアプリから最新を辿りやすいよう latest も更新
+  fs.writeFileSync(path.join(REPORT_DIR, "latest.md"), md, "utf-8");
+  return file;
+}
+
+// ──────────────────────────────────────────────
 // ローカル出力（フォールバック / 常に保存）
 // ──────────────────────────────────────────────
 function ensureOutputDir(): void {
@@ -337,16 +409,19 @@ export interface WriteResult {
   tab: string;
   url?: string;
   localPath?: string;
+  /** GitHubアプリで読めるMarkdownレポートのパス（常に生成） */
+  reportPath?: string;
 }
 
 export async function writeCampaign(r: CampaignResult): Promise<WriteResult> {
   const localPath = writeLocal(r, r.offer.name);
+  const reportPath = writeMarkdown(r);
   const c = await getClient();
 
   if (!c) {
     await recordPosts(collectPostTexts(r));
-    console.log("[sheets] Google認証が未設定のためローカル出力のみ:", localPath);
-    return { destination: "local", tab: r.offer.name, localPath };
+    console.log("[sheets] Google認証が未設定のためローカル＋Markdown出力:", reportPath);
+    return { destination: "local", tab: r.offer.name, localPath, reportPath };
   }
 
   // 案件ごとに新しいタブを作成
@@ -365,5 +440,5 @@ export async function writeCampaign(r: CampaignResult): Promise<WriteResult> {
 
   const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
   console.log(`[sheets] 書き込み完了: タブ「${tab}」`);
-  return { destination: "google-sheets", tab, url, localPath };
+  return { destination: "google-sheets", tab, url, localPath, reportPath };
 }

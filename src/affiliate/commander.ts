@@ -141,14 +141,19 @@ async function scoreAndPick<T extends { fitScore?: number }>(
     .join("\n")
     .slice(0, 3500);
 
-  const prompt = `あなたは高単価アフィリエイトの指揮官です。案件「${offer.name}」（ジャンル: ${profile.genre} / ${profile.rewardModel}）を
+  const prompt = `あなたは高単価アフィリエイトの指揮官です。案件「${offer.name}」（ジャンル: ${profile.genre} / 価格: ${offer.price || profile.priceBand} / ${profile.rewardModel}）を
 Xで集客し無料面談に送客する前提で、最も成果が出そうな候補を選びます。
+
+【適合度の評価軸（重要）】
+- 案件の価格帯（${offer.price || profile.priceBand}）を個人が自己投資で払い、無料面談に申し込む現実性
+- 案件の想定ターゲット像「${profile.targetSummary}」との一致度
+- 価格や面談の性質と合わない層（例: 安価な個人向け案件に対する法人/経営者）は低スコアにする
 
 【候補一覧（index. 概要）】
 ${listText}
 
 各候補に index(数値) と fitScore(0-100, 適合度) を付け、items 配列で全件返してください。
-最も適合度が高いものほど高スコアにすること。`;
+上記の評価軸に最も合うものほど高スコアにすること。`;
 
   try {
     const scoredRaw = await generateItems<{ index: number; fitScore: number }>(prompt, {

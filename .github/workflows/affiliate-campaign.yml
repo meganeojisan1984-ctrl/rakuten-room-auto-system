@@ -12,7 +12,7 @@ on:
         default: "AI学習スクール"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   generate:
@@ -40,6 +40,15 @@ jobs:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           AFFILIATE_OFFER: ${{ github.event.inputs.offer }}
         run: npx tsx src/affiliate/run.ts "${{ github.event.inputs.offer }}"
+
+      - name: レポートをコミット（スマホで閲覧可能に）
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add reports/affiliate
+          git diff --staged --quiet || git commit -m "docs: ${{ github.event.inputs.offer }} のX送客素材を生成 [skip ci]"
+          git push
 
       - name: 生成物（ローカル出力）をアップロード
         if: always()

@@ -1,0 +1,95 @@
+name: X送客 キャンペーン生成（Issueトリガー・スマホ用）
+
+# スマホのGitHubアプリだけで完結する実行方法。
+# Issue を新規作成し、タイトルに案件名（例: 「案件: AI学習スクール」）を入れる、
+# または Issue に "affiliate" ラベルを付けると自動で生成が走る。
+# 結果は reports/affiliate/ にMarkdownでコミットされ、Issueにコメントで通知される。
+on:
+  issues:
+    types: [opened, labeled]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  generate:
+    # タイトルが「案件:」で始まる、または affiliate ラベルが付いた Issue のみ実行
+    if: startsWith(github.event.issue.title, '案件:') || startsWith(github.event.issue.title, '案件：') || contains(github.event.issue.labels.*.name, 'affiliate')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: 案件名を抽出
+        id: offer
+        env:
+          TITLE: ${{ github.event.issue.title }}
+        run: |
+          NAME="${TITLE#案件:}"
+          NAME="${NAME#案件：}"
+          NAME="$(echo "$NAME" | sed 's/^[[:space:]　]*//; s/[[:space:]　]*$//')"
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Node.js のセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: 依存関係をインストール
+        run: npm ci
+
+      - name: キャンペーンを生成
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          AFFILIATE_LLM_MODEL: ${{ vars.AFFILIATE_LLM_MODEL || 'llama-3.3-70b-versatile' }}
+          AFFILIATE_SHEET_ID: ${{ secrets.AFFILIATE_SHEET_ID }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+        run: npx tsx src/affiliate/run.ts "${{ steps.offer.outputs.name }}"
+
+      - name: レポートをコミット
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add reports/affiliate
+          git diff --staged --quiet || git commit -m "docs: ${{ steps.offer.outputs.name }} のX送客素材を生成 [skip ci]"
+          git push
+
+      - name: 結果をIssueにコメント
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let body = '⚠️ 生成に失敗しました。Actionsのログとシークレット(GROQ_API_KEY)を確認してください。';
+            try {
+              const s = JSON.parse(fs.readFileSync('reports/affiliate/_last.json', 'utf-8'));
+              const repo = `${context.repo.owner}/${context.repo.repo}`;
+              const sha = context.sha;
+              const fileUrl = s.report
+                ? `https://github.com/${repo}/blob/${sha}/${s.report}`
+                : '';
+              body = [
+                `## ✅ 「${s.offer}」のX送客素材が完成しました`,
+                ``,
+                `**指揮官 総合評価**: 信憑性 ${s.credibility} / 完成度 ${s.completeness}`,
+                ``,
+                `> ${String(s.summary || '').replace(/\n/g, '\n> ')}`,
+                ``,
+                fileUrl ? `📄 **全素材（投稿文・DM・記事・スレッド・画像プロンプト）はこちら → [${s.report}](${fileUrl})**` : '',
+                s.sheetUrl ? `📊 スプレッドシート: ${s.sheetUrl}` : '',
+                ``,
+                `Xは手動投稿です。投稿文をコピーして投稿し、画像プロンプトはChatGPTに貼って画像を作成してください。`,
+              ].join('\n');
+            } catch (e) {
+              core.warning('summary not found: ' + e.message);
+            }
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
