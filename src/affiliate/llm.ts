@@ -91,25 +91,74 @@ function extractJson(raw: string): unknown {
 }
 
 /**
+ * items 配列の各要素を個別にパースして救出する。
+ * モデルが一部の要素で不正なJSON（カンマ区切りの複数値など）を返しても、
+ * 壊れた要素だけスキップして残りを取り出す。
+ */
+function salvageItems<T>(raw: string): T[] {
+  const itemsKey = raw.indexOf('"items"');
+  const arrStart = raw.indexOf("[", itemsKey >= 0 ? itemsKey : 0);
+  const s = arrStart >= 0 ? raw.slice(arrStart) : raw;
+  const objs: T[] = [];
+  let depth = 0;
+  let start = -1;
+  let inStr = false;
+  let esc = false;
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (inStr) {
+      if (esc) esc = false;
+      else if (ch === "\\") esc = true;
+      else if (ch === '"') inStr = false;
+      continue;
+    }
+    if (ch === '"') inStr = true;
+    else if (ch === "{") {
+      if (depth === 0) start = i;
+      depth++;
+    } else if (ch === "}") {
+      depth--;
+      if (depth === 0 && start >= 0) {
+        try {
+          objs.push(JSON.parse(s.slice(start, i + 1)) as T);
+        } catch {
+          /* 壊れた要素はスキップ */
+        }
+        start = -1;
+      }
+    } else if (ch === "]" && depth === 0) {
+      break;
+    }
+  }
+  return objs;
+}
+
+/**
  * {"items": [...]} 形式のJSONを生成して items 配列を返す。
- * 失敗時は1度だけテキスト救出を試みる。
+ * パース失敗時は要素単位の救出を行い、それも無理なら空配列を返す（例外は投げない）。
  */
 export async function generateItems<T>(prompt: string, opts: GenOpts = {}): Promise<T[]> {
   const fullPrompt = `${prompt}
 
 【出力形式（厳守）】
 必ず次の構造の JSON のみを出力してください。前置き・説明・コードフェンスは一切不要です。
+各フィールドの値は必ず1つの文字列または数値にすること（カンマ区切りで複数値を入れない）。
 {"items": [ ... ]}`;
   const raw = await chat(fullPrompt, { ...opts, json: true });
   try {
     const parsed = extractJson(raw) as { items?: T[] } | T[];
     if (Array.isArray(parsed)) return parsed;
-    return parsed.items ?? [];
-  } catch (err) {
-    console.warn("[llm] JSONパース失敗、救出を試行:", String(err).slice(0, 120));
-    const parsed = extractJson(raw) as { items?: T[] };
-    return parsed.items ?? [];
+    if (parsed.items) return parsed.items;
+  } catch {
+    /* フォールバックへ */
   }
+  const salvaged = salvageItems<T>(raw);
+  if (salvaged.length === 0) {
+    console.warn("[llm] JSONパース失敗、救出も0件:", raw.slice(0, 160).replace(/\n/g, " "));
+  } else {
+    console.warn(`[llm] JSON一部破損のため ${salvaged.length} 件を救出`);
+  }
+  return salvaged;
 }
 
 /**

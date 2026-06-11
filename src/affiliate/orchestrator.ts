@@ -72,14 +72,25 @@ async function runFlow<T>(
   valueFocused = false
 ): Promise<FlowOutput<T>> {
   onProgress?.(flow, "生成中");
-  let items = await produce();
+  // 1フローの失敗で全体を止めないよう、生成は例外を握りつぶして空配列にフォールバック
+  const safeProduce = async (): Promise<T[]> => {
+    try {
+      return await produce();
+    } catch (err) {
+      console.error(`[orchestrator] ${flow} 生成エラー:`, String(err).slice(0, 200));
+      onProgress?.(flow, `生成エラー（スキップ）: ${String(err).slice(0, 80)}`);
+      return [];
+    }
+  };
+
+  let items = await safeProduce();
   let review = await reviewFlow(flow, items, expectedMin, ctx.profile, sampleOf(items), valueFocused);
   let revised = false;
 
   if (review.verdict === "revise") {
     onProgress?.(flow, `再生成（指揮官指摘: ${review.feedback || review.issues.join("; ") || "品質不足"}）`);
     await pace();
-    const retry = await produce();
+    const retry = await safeProduce();
     const retryReview = await reviewFlow(flow, retry, expectedMin, ctx.profile, sampleOf(retry), valueFocused);
     // スコアが改善した方を採用
     const score = (r: CommanderReview) => r.credibility + r.completeness + r.valueConcreteness;
