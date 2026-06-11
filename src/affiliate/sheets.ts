@@ -11,6 +11,9 @@ import path from "path";
 import type { CampaignResult } from "./types";
 
 const SHEET_ID = process.env.AFFILIATE_SHEET_ID ?? "";
+// Apps Script Webアプリ方式（サービスアカウント鍵が作れない環境向け・スマホ完結）
+const WEBAPP_URL = process.env.AFFILIATE_SHEETS_WEBAPP_URL ?? "";
+const WEBAPP_TOKEN = process.env.AFFILIATE_SHEETS_TOKEN ?? "";
 const DEDUP_TAB = "_dedup";
 const INDEX_TAB = "_index";
 const OUTPUT_DIR = path.join(process.cwd(), "data", "affiliate", "output");
@@ -47,7 +50,30 @@ function loadCredentials(): Record<string, unknown> | null {
 }
 
 export function isSheetsConfigured(): boolean {
+  if (WEBAPP_URL.length > 0) return true;
   return SHEET_ID.length > 0 && loadCredentials() !== null;
+}
+
+// ──────────────────────────────────────────────
+// Apps Script Webアプリ方式（鍵不要・スマホで設定可能）
+// ──────────────────────────────────────────────
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function webappCall(payload: Record<string, unknown>): Promise<any> {
+  const res = await fetch(WEBAPP_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token: WEBAPP_TOKEN, ...payload }),
+    redirect: "follow",
+  });
+  const text = await res.text();
+  let data: { ok?: boolean; error?: string } = {};
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error(`Webアプリの応答が不正です（公開設定/URLを確認）: ${text.slice(0, 160)}`);
+  }
+  if (data.ok === false) throw new Error(`Webアプリエラー: ${data.error ?? "不明"}`);
+  return data;
 }
 
 async function getClient(): Promise<SheetsClient | null> {
@@ -134,6 +160,15 @@ async function readColumnA(c: SheetsClient, tab: string): Promise<string[]> {
 // 重複防止: 既出投稿テキストの取得 / 蓄積
 // ──────────────────────────────────────────────
 export async function getExistingPosts(): Promise<string[]> {
+  if (WEBAPP_URL) {
+    try {
+      const r = await webappCall({ action: "dedup" });
+      return Array.isArray(r.posts) ? (r.posts as string[]) : [];
+    } catch (e) {
+      console.warn("[sheets] Webアプリのdedup取得失敗:", String(e).slice(0, 160));
+      return [];
+    }
+  }
   const c = await getClient();
   if (c) {
     await ensureTab(c, DEDUP_TAB);
@@ -416,6 +451,28 @@ export interface WriteResult {
 export async function writeCampaign(r: CampaignResult): Promise<WriteResult> {
   const localPath = writeLocal(r, r.offer.name);
   const reportPath = writeMarkdown(r);
+
+  // 方式1: Apps Script Webアプリ（鍵不要）
+  if (WEBAPP_URL) {
+    try {
+      const resp = await webappCall({
+        action: "write",
+        tab: r.offer.name,
+        rows: buildRows(r),
+        posts: collectPostTexts(r),
+        index: [r.generatedAt, r.offer.name, r.overallCredibility, r.overallCompleteness],
+      });
+      const tab = (resp.tab as string) || r.offer.name;
+      const url = (resp.url as string) || "";
+      console.log(`[sheets] Webアプリ経由で書き込み完了: タブ「${tab}」`);
+      return { destination: "google-sheets", tab, url, localPath, reportPath };
+    } catch (e) {
+      console.warn("[sheets] Webアプリ書き込み失敗、ローカル＋Markdownのみ:", String(e).slice(0, 200));
+      return { destination: "local", tab: r.offer.name, localPath, reportPath };
+    }
+  }
+
+  // 方式2: サービスアカウント（googleapis）
   const c = await getClient();
 
   if (!c) {

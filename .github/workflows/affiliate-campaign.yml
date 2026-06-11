@@ -36,6 +36,8 @@ jobs:
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           AFFILIATE_LLM_MODEL: ${{ vars.AFFILIATE_LLM_MODEL || 'llama-3.3-70b-versatile' }}
+          AFFILIATE_SHEETS_WEBAPP_URL: ${{ secrets.AFFILIATE_SHEETS_WEBAPP_URL }}
+          AFFILIATE_SHEETS_TOKEN: ${{ secrets.AFFILIATE_SHEETS_TOKEN }}
           AFFILIATE_SHEET_ID: ${{ secrets.AFFILIATE_SHEET_ID }}
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           AFFILIATE_OFFER: ${{ github.event.inputs.offer }}
