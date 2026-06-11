@@ -436,19 +436,28 @@ ${VIRAL_CRAFT}
 - 商品名は押し出さず、最後に「個別最適化は無料面談で」と自然に誘導
 - 誇大表現・収入/効果の保証はしない
 
+【X用スレッド（連投）版も必ず作る】
+- 同じ内容を、Xプレミアム無しでも投稿できるよう複数ツイートに分割する（=投稿を分ける方式）
+- thread は 5〜9個の文字列配列。各ツイートは本文のみ（番号は付けない）で、1ツイート最大120字程度
+- 1本目は単体で伸びる強いフック（断定×数字 / 結果公開 / 常識破壊 のいずれか）
+- 2本目以降で具体的な手順・序列・数字・before→after を小分けに提示し、各ツイート単体でも価値が分かる
+- 最後のツイートは無料面談への自然なCTA（売り込み感ゼロ）
+
 次の要素を持つオブジェクトを1件だけ items に入れて返す:
 - format: "${p.format}"
 - pattern: "${p.pattern}"
 - title: 記事タイトル
 - lead: 冒頭フック（1〜3行）
-- body: Markdown本文（1800〜3000字）
+- body: Markdown本文（1800〜3000字、note/ブログ用）
+- thread: X用スレッドの配列（5〜9ツイート、各最大120字程度）
 - cta: 無料面談への誘導文`;
     try {
       const items = await generateItems<Article>(prompt, { temperature: 0.85, maxTokens: 8000 });
       const a = items[0];
-      if (a && a.body) {
+      if (a && (a.body || (Array.isArray(a.thread) && a.thread.length))) {
         a.format = a.format || p.format;
         a.pattern = a.pattern || p.pattern;
+        a.thread = Array.isArray(a.thread) ? a.thread.filter(Boolean) : [];
         a.charCount = (a.body || "").replace(/\s/g, "").length;
         articles.push(a);
       }

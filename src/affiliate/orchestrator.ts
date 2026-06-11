@@ -236,7 +236,7 @@ export async function runCampaign(offer: Offer, opts: RunOptions = {}): Promise<
     1,
     { profile },
     () => runArticles(ctx, 3),
-    (items) => items.map((a) => `[${a.pattern}] ${a.title}\n${(a.body ?? "").slice(0, 600)}`).join("\n---\n"),
+    (items) => items.map((a) => `[${a.pattern}] ${a.title}\n${((a.body || a.thread?.join("\n")) ?? "").slice(0, 600)}`).join("\n---\n"),
     onProgress,
     true
   );

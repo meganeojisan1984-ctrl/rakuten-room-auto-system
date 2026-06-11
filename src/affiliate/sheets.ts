@@ -274,11 +274,22 @@ function buildRows(r: CampaignResult): Matrix {
   r.roadmap.items.forEach((d) =>
     rows.push([d.day, d.todo, d.postTheme, d.postExample, d.replyStrategy, d.dmTask, d.consultFunnel, d.metricToWatch, d.improvement]));
 
-  // フロー11（長文記事・コピペ用）
-  section(`⑪長文記事（${r.articles.items.length}本 / 具体性${r.articles.review.valueConcreteness}）`,
-    ["No", "媒体", "型", "タイトル（コピペ用）", "リード", "本文Markdown（コピペ用）", "CTA", "文字数", "カバー画像プロンプト（ChatGPT用）"]);
-  r.articles.items.forEach((a, i) =>
-    rows.push([i + 1, a.format, a.pattern, a.title, a.lead, a.body, a.cta, a.charCount ?? "", a.coverImagePrompt ?? ""]));
+  // フロー11（長文記事 + X用スレッド・コピペ用）
+  blank();
+  rows.push([`■ ⑪長文記事（${r.articles.items.length}本 / 具体性${r.articles.review.valueConcreteness}）`]);
+  rows.push(["長文はXプレミアム不要。『X用スレッド』を上から順にそのまま連投してください（1ツイート=1行）。note/ブログには『本文』を使用。"]);
+  r.articles.items.forEach((a, i) => {
+    blank();
+    rows.push([`【記事${i + 1}】`, `${a.pattern} / ${a.format}`, `約${a.charCount ?? "-"}字`]);
+    rows.push(["タイトル（コピペ用）", a.title]);
+    rows.push(["リード", a.lead]);
+    rows.push(["カバー画像プロンプト（ChatGPT用）", a.coverImagePrompt ?? ""]);
+    rows.push(["note/ブログ本文（コピペ用）", a.body]);
+    rows.push(["── X用スレッド（この順に連投）──", "投稿文（コピペ用）"]);
+    const n = a.thread.length;
+    a.thread.forEach((t, j) => rows.push([`${j + 1}/${n}`, t]));
+    rows.push(["CTA（最終ツイート/プロフィール用）", a.cta]);
+  });
 
   return rows;
 }
