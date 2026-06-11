@@ -154,6 +154,30 @@ export interface DiagnosisRubric {
   nextAction: string;
 }
 
+/**
+ * フロー11: 長文記事（note / X長文記事 / ブログ）
+ * バズ事例の「方法公開型 / 比較型 / ロードマップ型」を再現し、
+ * 記事だけで悩みが解決する“具体的な価値”を提供してから無料面談へ橋渡しする。
+ */
+export interface Article {
+  /** 想定媒体: note / X長文記事 / ブログ */
+  format: string;
+  /** 構成パターン: 方法公開型 / 比較・ティアリスト型 / ロードマップ型 */
+  pattern: string;
+  /** 思わずクリックしたくなるタイトル */
+  title: string;
+  /** 冒頭フック（1〜3行） */
+  lead: string;
+  /** Markdown本文（見出し・箇条書き・具体的手順/数字つき） */
+  body: string;
+  /** 無料面談への自然な誘導CTA */
+  cta: string;
+  /** カバー画像のChatGPTプロンプト */
+  coverImagePrompt?: string;
+  /** 概算文字数 */
+  charCount?: number;
+}
+
 /** フロー10: 30日ロードマップ（1日分） */
 export interface RoadmapDay {
   day: number;
@@ -178,6 +202,8 @@ export interface CommanderReview {
   credibility: number;
   /** 完成度 0-100（フォーマット網羅・実用性） */
   completeness: number;
+  /** 価値の具体性 0-100（数字/固有名詞/手順があり保存・行動に値するか） */
+  valueConcreteness: number;
   verdict: Verdict;
   issues: string[];
   /** 再生成時にエージェントへ渡す具体的フィードバック */
@@ -218,6 +244,7 @@ export interface CampaignResult {
   offerCopy: FlowOutput<OfferCopy>;
   diagnosis: FlowOutput<DiagnosisRubric>;
   roadmap: FlowOutput<RoadmapDay>;
+  articles: FlowOutput<Article>;
   /** 指揮官による総合所見 */
   commanderSummary: string;
   /** 全フローの平均スコア */

@@ -19,6 +19,7 @@ import {
   runDiagnosisRubric,
   runDmTemplates,
   runEducationPosts,
+  runArticles,
   runGenreSelection,
   runOfferCopy,
   runPinnedPosts,
@@ -66,20 +67,21 @@ async function runFlow<T>(
   ctx: { profile: CampaignContext["profile"] },
   produce: () => Promise<T[]>,
   sampleOf: (items: T[]) => string,
-  onProgress?: RunOptions["onProgress"]
+  onProgress?: RunOptions["onProgress"],
+  valueFocused = false
 ): Promise<FlowOutput<T>> {
   onProgress?.(flow, "生成中");
   let items = await produce();
-  let review = await reviewFlow(flow, items, expectedMin, ctx.profile, sampleOf(items));
+  let review = await reviewFlow(flow, items, expectedMin, ctx.profile, sampleOf(items), valueFocused);
   let revised = false;
 
   if (review.verdict === "revise") {
     onProgress?.(flow, `再生成（指揮官指摘: ${review.feedback || review.issues.join("; ") || "品質不足"}）`);
     await pace();
     const retry = await produce();
-    const retryReview = await reviewFlow(flow, retry, expectedMin, ctx.profile, sampleOf(retry));
+    const retryReview = await reviewFlow(flow, retry, expectedMin, ctx.profile, sampleOf(retry), valueFocused);
     // スコアが改善した方を採用
-    const score = (r: CommanderReview) => r.credibility + r.completeness;
+    const score = (r: CommanderReview) => r.credibility + r.completeness + r.valueConcreteness;
     if (score(retryReview) >= score(review)) {
       items = retry;
       review = retryReview;
@@ -87,7 +89,7 @@ async function runFlow<T>(
     revised = true;
   }
 
-  onProgress?.(flow, `完了 (信憑性${review.credibility}/完成度${review.completeness})`);
+  onProgress?.(flow, `完了 (信憑性${review.credibility}/完成度${review.completeness}/具体性${review.valueConcreteness})`);
   return { items, review, revised };
 }
 
@@ -155,7 +157,8 @@ export async function runCampaign(offer: Offer, opts: RunOptions = {}): Promise<
     { profile },
     async () => dedupeBy(await runCollectPosts(ctx, 30, existingPosts), (p) => p.text, existingPosts),
     (items) => items.slice(0, 5).map((p) => p.text).join("\n---\n"),
-    onProgress
+    onProgress,
+    true
   );
   await pace();
 
@@ -166,7 +169,8 @@ export async function runCampaign(offer: Offer, opts: RunOptions = {}): Promise<
     { profile },
     async () => dedupeBy(await runPinnedPosts(ctx, existingPosts), (p) => p.text, existingPosts),
     (items) => items.slice(0, 4).map((p) => p.text).join("\n---\n"),
-    onProgress
+    onProgress,
+    true
   );
   await pace();
 
@@ -188,7 +192,8 @@ export async function runCampaign(offer: Offer, opts: RunOptions = {}): Promise<
     { profile },
     async () => dedupeBy(await runEducationPosts(ctx, 20, existingPosts), (p) => p.text, existingPosts),
     (items) => items.slice(0, 5).map((p) => p.text).join("\n---\n"),
-    onProgress
+    onProgress,
+    true
   );
   await pace();
 
@@ -223,6 +228,18 @@ export async function runCampaign(offer: Offer, opts: RunOptions = {}): Promise<
     (items) => items.slice(0, 4).map((d) => `Day${d.day}: ${d.todo}`).join("\n"),
     onProgress
   );
+  await pace();
+
+  // ── フロー11: 長文記事（方法公開/比較/ロードマップ型） ──
+  const articles = await runFlow(
+    "⑪長文記事",
+    1,
+    { profile },
+    () => runArticles(ctx, 3),
+    (items) => items.map((a) => `[${a.pattern}] ${a.title}\n${(a.body ?? "").slice(0, 600)}`).join("\n---\n"),
+    onProgress,
+    true
+  );
 
   // ── 画像プロンプト付与（投稿系のみ） ──
   onProgress?.("画像プロンプト", "ChatGPT用プロンプトを生成中");
@@ -234,12 +251,19 @@ export async function runCampaign(offer: Offer, opts: RunOptions = {}): Promise<
   await pace();
   const eduImgs = await generateImagePrompts(ctx, educationPosts.items.map((p) => p.text));
   educationPosts.items.forEach((p, i) => (p.imagePrompt = eduImgs[i] ?? ""));
+  await pace();
+  // 記事カバー画像プロンプト（タイトル＋リードを元に生成）
+  const articleImgs = await generateImagePrompts(
+    ctx,
+    articles.items.map((a) => `${a.title} / ${a.lead ?? ""}`)
+  );
+  articles.items.forEach((a, i) => (a.coverImagePrompt = articleImgs[i] ?? ""));
 
   // ── 総合所見 ──
   const allReviews = [
     genres.review, targets.review, concepts.review, collectPosts.review,
     pinnedPosts.review, dms.review, educationPosts.review, offerCopy.review,
-    diagnosis.review, roadmap.review,
+    diagnosis.review, roadmap.review, articles.review,
   ];
   onProgress?.("指揮官総括", "総合所見を作成中");
   const commanderSummary = await summarize(offer, allReviews);
@@ -260,6 +284,7 @@ export async function runCampaign(offer: Offer, opts: RunOptions = {}): Promise<
     offerCopy,
     diagnosis,
     roadmap,
+    articles,
     commanderSummary,
     overallCredibility,
     overallCompleteness,

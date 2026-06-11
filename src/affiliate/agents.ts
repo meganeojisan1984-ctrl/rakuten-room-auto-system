@@ -7,6 +7,7 @@
  */
 import type {
   CampaignContext,
+  Article,
   CollectPost,
   ConceptCandidate,
   DiagnosisRubric,
@@ -22,7 +23,26 @@ import type {
 } from "./types";
 import { generateItems, generateItemsBatched } from "./llm";
 
-const POST_RULE = "Xの投稿文は140〜280文字以内。AI感・広告感を出さず、自然な日本語で書くこと。";
+const POST_RULE = "Xの投稿は改行を活かして読みやすく。AI感・広告感を出さず自然な日本語で。通常投稿は140〜280字、ティアリスト/チェックリスト等の保存系は最大500字程度まで可（Xプレミアム想定）。";
+
+/**
+ * バズ投稿の鉄則。実在のバズ投稿（断定×数字のティアリスト型 / よく聞かれる質問型の
+ * オファー誘導 / 結果・方法公開型）から抽出した型を各投稿エージェントへ注入する。
+ * 「共感だけ」で終わらせず、その投稿だけで悩みが一歩解決する“具体的価値”を出させる。
+ */
+const VIRAL_CRAFT = `【バズる投稿の鉄則（必ず全て反映）】
+1. 1行目フックで指を止める。次のいずれかを使う:
+   - 断定×数字（例「副業で年収100万を超えるかは“選ぶ副業”で9割決まる」）
+   - よく聞かれる質問（例「なぜ無料で公開してるの？とよく聞かれます」）
+   - 結果/実績の公開（例「〇〇を△△で自動化したら□□になった」）
+   - 常識破壊（例「実は“毎日頑張って投稿”は遠回りです」）
+2. 本文は必ず“具体”で埋める。抽象論・精神論はNG。固有名詞・具体的な数字・手順(1.2.3.)・
+   序列(🥇🥈🥉)・before→after・→での一言ジャッジ のうち複数を必ず使う。
+3. その投稿“だけ”で読者の悩みが一歩解決する＝保存したくなる構成にする
+   （使えるチェックリスト/判断基準/手順/具体例を必ず渡し切る）。
+4. 価値を出し切った最後に「ここまでで足りない“あなた専用の最適解”は無料面談で」と
+   自然に橋渡し（売り込み感ゼロ。煽らない）。
+5. 「必ず稼げる」等の断定的な収入・効果の保証は書かない（景表法・特商法）。`;
 
 function avoidBlock(avoid: string[]): string {
   if (avoid.length === 0) return "";
@@ -144,13 +164,13 @@ export async function runCollectPosts(ctx: CampaignContext, total = 30, avoid: s
 ターゲット：${ctx.chosenTarget.name}（${ctx.chosenTarget.pain}）
 無料面談で得られること：${ctx.consultBenefits}
 
+${VIRAL_CRAFT}
+
 条件：
 ・売り込み感を出さない
-・悩みを言語化する
-・読者に「自分のことだ」と思わせる
+・読者に「自分のことだ」と思わせた上で、具体的な解決のヒントまで渡し切る
 ・無料面談に興味を持たせる
-・保存されやすい
-・共感されやすい
+・固有名詞/数字/手順/チェックリストを入れ、保存・スクショされる価値にする
 ・${POST_RULE}
 
 投稿の型（type にいずれかを設定し、全体でバランスよく使う）：
@@ -158,7 +178,7 @@ ${COLLECT_TYPES.join(" / ")}
 
 各要素を持つオブジェクトを${n}件:
 - type: 投稿の型
-- text: 投稿文（140〜280文字）
+- text: 投稿文（鉄則を反映。具体的な数字/手順/序列を含める）
 - psychology: 狙っている心理
 - consultLink: 無料面談につながる理由${avoidBlock([...avoid, ...produced.map((p) => p.text)])}`;
   return generateItemsBatched<CollectPost>(build, total, 10, { temperature: 0.92, maxTokens: 5000 });
@@ -175,17 +195,16 @@ export async function runPinnedPosts(ctx: CampaignContext, avoid: string[] = [])
 ターゲット：${ctx.chosenTarget.name}（${ctx.chosenTarget.pain}）
 無料面談の内容：${ctx.consultContent}
 
+${VIRAL_CRAFT}
+
 条件：
-・売り込み感を出しすぎない
-・悩みから入る
-・理想の未来を見せる
-・無料で相談できる価値を伝える
-・怪しく見えない
-・今すぐ行動したくなる
+・「なぜ無料で公開/相談を受けているのか」をリフレーム（相手の遠回りを指摘）して語る型を必ず含める
+・悩みから入り、理想の未来と“相談で得られる具体的中身”を見せる
+・怪しく見えない／今すぐ行動したくなる
 ・${POST_RULE}
 
 各要素を持つオブジェクトを10件:
-- text: 固定ポスト本文（140〜280文字）
+- text: 固定ポスト本文（鉄則を反映。冒頭フック必須）
 - openingAim: 冒頭の狙い
 - audience: 刺さるターゲット
 - consultReason: 無料面談に誘導できる理由
@@ -241,14 +260,13 @@ export async function runEducationPosts(ctx: CampaignContext, total = 20, avoid:
 ターゲット：${ctx.chosenTarget.name}（${ctx.chosenTarget.pain}）
 商品で解決できる悩み：${ctx.chosenGenre.pain}
 
+${VIRAL_CRAFT}
+
 条件：
 ・商品名を出さない
-・無料面談に行く理由を作る
-・独学の限界を伝える
-・放置リスクを伝える
-・プロに相談する価値を伝える
-・不安を煽りすぎない
-・初心者にもわかりやすい
+・「独学の落とし穴」等を“具体例・数字・チェックリスト”で示し、読者がその場で気づける
+・放置リスクとプロに相談する価値を、具体的なbefore→afterで伝える
+・不安を煽りすぎない／初心者にもわかりやすい
 ・${POST_RULE}
 
 投稿の型（type にいずれかを設定）：
@@ -256,7 +274,7 @@ ${EDU_TYPES.join(" / ")}
 
 各要素を持つオブジェクトを${n}件:
 - type: 投稿の型
-- text: 投稿文（140〜280文字）
+- text: 投稿文（鉄則を反映。具体例・序列・手順を含める）
 - aim: 投稿の狙い
 - emotion: 読者に起こしたい感情
 - consultBridge: 無料面談へのつなげ方${avoidBlock([...avoid, ...produced.map((p) => p.text)])}`;
@@ -362,4 +380,81 @@ export async function runRoadmap(ctx: CampaignContext): Promise<RoadmapDay[]> {
     days.push(...batch);
   }
   return days.sort((a, b) => (a.day ?? 0) - (b.day ?? 0)).slice(0, 30);
+}
+
+// ──────────────────────────────────────────────
+// フロー11: 長文記事（note / X長文記事 / ブログ）
+// バズ事例（方法公開型/比較型/ロードマップ型）を再現し、記事だけで悩みが
+// 解決する具体的価値を提供してから無料面談へ橋渡しする。
+// ──────────────────────────────────────────────
+const ARTICLE_PATTERNS: { pattern: string; format: string; brief: string }[] = [
+  {
+    pattern: "方法公開型",
+    format: "note / X長文記事",
+    brief:
+      "「〇〇する方法を公開します」という実践手順の全公開。具体的なステップ、使うツール名、" +
+      "数字（時間・件数・費用など）、つまずきポイントと回避法を出し切る。読者がその記事だけで" +
+      "実際に着手・前進できるレベルの具体性にする。",
+  },
+  {
+    pattern: "比較・ティアリスト型",
+    format: "note / X長文記事",
+    brief:
+      "選択肢を🥇🥈🥉や◎○△×で序列化し、それぞれを具体例つきで一刀両断。読者が" +
+      "「どれを選べばいいか」をその場で判断できる基準を渡す。NG例→推奨例の順で。",
+  },
+  {
+    pattern: "ロードマップ型",
+    format: "ブログ / note",
+    brief:
+      "ゼロ→ゴールまでの全体像を段階（フェーズ/週次など）に分け、各段階の到達点と具体的アクション、" +
+      "目安数字を示す。初心者が迷わず辿れる地図にする。",
+  },
+];
+
+export async function runArticles(ctx: CampaignContext, count = 3): Promise<Article[]> {
+  const picks = ARTICLE_PATTERNS.slice(0, Math.max(1, Math.min(count, ARTICLE_PATTERNS.length)));
+  const articles: Article[] = [];
+  for (const p of picks) {
+    const prompt = `あなたはX/noteで何度もバズを生んでいる、価値提供型の長文ライターです。
+以下の案件の見込み客を無料面談へ送客するため、「${p.pattern}」の長文記事を1本作成してください。
+
+商品ジャンル：${ctx.chosenGenre.genre}
+ターゲット：${ctx.chosenTarget.name}（${ctx.chosenTarget.pain}）
+読者が解決したい悩み：${ctx.chosenGenre.pain}
+無料面談で得られること：${ctx.consultBenefits}
+
+【この記事の型】${p.pattern}
+${p.brief}
+
+${VIRAL_CRAFT}
+
+【記事の必須要件】
+- タイトルは思わずクリックしたくなるもの（数字・結果・ベネフィットを入れる）
+- 記事だけで悩みが大きく前進する“具体的な価値”を出し切る（抽象論NG）
+- 本文は1800〜3000字程度。Markdownで見出し(##)・箇条書き・番号付き手順を使い、スマホで読みやすく
+- 商品名は押し出さず、最後に「個別最適化は無料面談で」と自然に誘導
+- 誇大表現・収入/効果の保証はしない
+
+次の要素を持つオブジェクトを1件だけ items に入れて返す:
+- format: "${p.format}"
+- pattern: "${p.pattern}"
+- title: 記事タイトル
+- lead: 冒頭フック（1〜3行）
+- body: Markdown本文（1800〜3000字）
+- cta: 無料面談への誘導文`;
+    try {
+      const items = await generateItems<Article>(prompt, { temperature: 0.85, maxTokens: 8000 });
+      const a = items[0];
+      if (a && a.body) {
+        a.format = a.format || p.format;
+        a.pattern = a.pattern || p.pattern;
+        a.charCount = (a.body || "").replace(/\s/g, "").length;
+        articles.push(a);
+      }
+    } catch (err) {
+      console.warn(`[agents] 記事生成失敗(${p.pattern}):`, String(err).slice(0, 120));
+    }
+  }
+  return articles;
 }

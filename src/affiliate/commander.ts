@@ -19,6 +19,7 @@ import { generateItems, generateText, isLlmConfigured } from "./llm";
 interface RawReview {
   credibility?: number;
   completeness?: number;
+  valueConcreteness?: number;
   verdict?: string;
   issues?: string[];
   feedback?: string;
@@ -41,7 +42,9 @@ export async function reviewFlow(
   items: unknown[],
   expectedMin: number,
   profile: OfferProfile,
-  sampleText: string
+  sampleText: string,
+  /** 投稿/記事など「価値の具体性」を重視するフローか */
+  valueFocused = false
 ): Promise<CommanderReview> {
   // 件数による機械的な完成度の下限
   const countRatio = expectedMin > 0 ? Math.min(1, items.length / expectedMin) : 1;
@@ -52,14 +55,19 @@ export async function reviewFlow(
       flow,
       credibility: items.length === 0 ? 0 : 70,
       completeness,
+      valueConcreteness: items.length === 0 ? 0 : completeness,
       verdict: items.length >= expectedMin ? "approve" : "revise",
       issues: items.length === 0 ? ["出力が空です"] : items.length < expectedMin ? ["件数が不足しています"] : [],
       feedback: items.length < expectedMin ? `${expectedMin}件以上を厳守してください。` : "",
     };
   }
 
+  const valueNote = valueFocused
+    ? `\n- valueConcreteness(価値の具体性 0-100): 【最重要】抽象論・共感だけで終わらず、固有名詞・具体的な数字・手順・序列・before→afterがあり、読者がその場で行動でき「保存したくなる」価値があるか。バズ投稿基準で厳しく。70未満は revise。`
+    : `\n- valueConcreteness(価値の具体性 0-100): 内容が具体的で実用的か。`;
+
   const prompt = `あなたは高単価アフィリエイト案件の品質管理を行う「指揮官」です。
-以下はフロー「${flow}」の生成結果（${items.length}件）のサンプルです。信憑性と完成度を厳しく評価してください。
+以下はフロー「${flow}」の生成結果（${items.length}件）のサンプルです。バズ投稿の基準で厳しく評価してください。
 
 【案件のコンプラ注意点】
 ${profile.cautions.map((c) => `- ${c}`).join("\n")}
@@ -69,36 +77,42 @@ ${sampleText.slice(0, 3500)}
 
 評価観点：
 - credibility(信憑性 0-100): 誇大・虚偽・断定的な収入/効果保証・薬機法/景表法違反・怪しさが無いか。高いほど健全。
-- completeness(完成度 0-100): 指定フォーマットの網羅・実用性・具体性・ターゲット適合。期待件数は約${expectedMin}件。
+- completeness(完成度 0-100): 指定フォーマットの網羅・実用性・ターゲット適合。期待件数は約${expectedMin}件。${valueNote}
 - verdict: "approve"（合格）または "revise"（要再生成）
 - issues: 問題点の配列
-- feedback: 再生成する場合にエージェントへ渡す、具体的で短い改善指示
+- feedback: 再生成する場合にエージェントへ渡す、具体的で短い改善指示（特に「具体性が足りない」なら何を足すか明記）
 
 次のオブジェクトを1件だけ items に入れて返す:
-{credibility, completeness, verdict, issues, feedback}`;
+{credibility, completeness, valueConcreteness, verdict, issues, feedback}`;
 
   try {
     const arr = await generateItems<RawReview>(prompt, { temperature: 0.3, maxTokens: 900 });
     const r = arr[0] ?? {};
     const credibility = clampScore(r.credibility, 70);
     const completeness = clampScore(r.completeness ?? countRatio * 100, Math.round(countRatio * 100));
+    const valueConcreteness = clampScore(r.valueConcreteness ?? completeness, completeness);
     let verdict: Verdict = r.verdict === "revise" ? "revise" : "approve";
     // 信憑性・完成度・件数のいずれかが基準未満なら強制 revise
     if (credibility < 60 || completeness < 60 || items.length < expectedMin) verdict = "revise";
+    // 価値重視フローは具体性が低ければ revise
+    if (valueFocused && valueConcreteness < 70) verdict = "revise";
     return {
       flow,
       credibility,
       completeness,
+      valueConcreteness,
       verdict,
       issues: Array.isArray(r.issues) ? r.issues : [],
       feedback: r.feedback || "",
     };
   } catch (err) {
     console.warn(`[commander] レビュー失敗(${flow}):`, String(err).slice(0, 120));
+    const completeness = clampScore(countRatio * 100, 70);
     return {
       flow,
       credibility: 70,
-      completeness: clampScore(countRatio * 100, 70),
+      completeness,
+      valueConcreteness: completeness,
       verdict: items.length >= expectedMin ? "approve" : "revise",
       issues: [],
       feedback: "",
@@ -201,7 +215,7 @@ export async function summarize(
   }
 
   const detail = reviews
-    .map((r) => `${r.flow}: 信憑性${r.credibility}/完成度${r.completeness}/${r.verdict}${r.issues.length ? ` (${r.issues.join("; ")})` : ""}`)
+    .map((r) => `${r.flow}: 信憑性${r.credibility}/完成度${r.completeness}/具体性${r.valueConcreteness}/${r.verdict}${r.issues.length ? ` (${r.issues.join("; ")})` : ""}`)
     .join("\n");
   const prompt = `あなたは高単価アフィリエイト案件の指揮官です。案件「${offer.name}」のキャンペーン素材一式の品質レビュー結果を踏まえ、
 運用者向けに「総合所見」を日本語で簡潔に（3〜6行）まとめてください。良い点・リスク・運用上の注意・最優先で直すべき点を含めること。

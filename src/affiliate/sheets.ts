@@ -217,7 +217,7 @@ function buildRows(r: CampaignResult): Matrix {
     rows.push([i + 1, c.fitScore ?? "", c.concept, c.profileText, c.theme, c.audience, c.pinnedDirection, c.consultFunnel, c.differentiation]));
 
   // フロー4（コピペ用）
-  section(`④見込み客を集めるX投稿（${r.collectPosts.items.length}件 / 信憑性${r.collectPosts.review.credibility}・完成度${r.collectPosts.review.completeness}）`,
+  section(`④見込み客を集めるX投稿（${r.collectPosts.items.length}件 / 信憑性${r.collectPosts.review.credibility}・完成度${r.collectPosts.review.completeness}・具体性${r.collectPosts.review.valueConcreteness}）`,
     ["No", "型", "投稿文（コピペ用）", "狙う心理", "面談につながる理由", "画像プロンプト（ChatGPT用）", "投稿状況"]);
   r.collectPosts.items.forEach((p, i) =>
     rows.push([i + 1, p.type, p.text, p.psychology, p.consultLink, p.imagePrompt ?? "", "未投稿"]));
@@ -274,6 +274,12 @@ function buildRows(r: CampaignResult): Matrix {
   r.roadmap.items.forEach((d) =>
     rows.push([d.day, d.todo, d.postTheme, d.postExample, d.replyStrategy, d.dmTask, d.consultFunnel, d.metricToWatch, d.improvement]));
 
+  // フロー11（長文記事・コピペ用）
+  section(`⑪長文記事（${r.articles.items.length}本 / 具体性${r.articles.review.valueConcreteness}）`,
+    ["No", "媒体", "型", "タイトル（コピペ用）", "リード", "本文Markdown（コピペ用）", "CTA", "文字数", "カバー画像プロンプト（ChatGPT用）"]);
+  r.articles.items.forEach((a, i) =>
+    rows.push([i + 1, a.format, a.pattern, a.title, a.lead, a.body, a.cta, a.charCount ?? "", a.coverImagePrompt ?? ""]));
+
   return rows;
 }
 
@@ -283,6 +289,7 @@ function collectPostTexts(r: CampaignResult): string[] {
     ...r.collectPosts.items.map((p) => p.text),
     ...r.pinnedPosts.items.map((p) => p.text),
     ...r.educationPosts.items.map((p) => p.text),
+    ...r.articles.items.map((a) => a.title),
   ].filter(Boolean);
 }
 
