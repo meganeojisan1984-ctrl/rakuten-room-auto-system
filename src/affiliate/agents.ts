@@ -40,13 +40,27 @@ const VIRAL_CRAFT = `【バズる投稿の鉄則（必ず全て反映）】
    序列(🥇🥈🥉)・before→after・→での一言ジャッジ のうち複数を必ず使う。
 3. その投稿“だけ”で読者の悩みが一歩解決する＝保存したくなる構成にする
    （使えるチェックリスト/判断基準/手順/具体例を必ず渡し切る）。
-4. 価値を出し切った最後に「ここまでで足りない“あなた専用の最適解”は無料面談で」と
-   自然に橋渡し（売り込み感ゼロ。煽らない）。
+4. 価値を出し切った最後に「ここまでで足りない“あなた専用の最適解”は別途案内へ」と
+   自然に橋渡し（具体的な誘導先は後述のCTA指示に従う。売り込み感ゼロ。煽らない）。
 5. 「必ず稼げる」「年間〇〇万円稼げる」等、収入・効果を約束/断定する表現は書かない（景表法・特商法）。
    さらに「月収50万」「年収100万」等の具体的な収入額を“成果”として書かない。
    数字を使うなら「手順数・所要時間・件数・割合・期間」など検証可能なものに限る。
 6. 必ず自然な日本語のみで書く。中国語・英語・他言語の単語や漢字（例: 獨学, 如果, 兴味）を混在させない。
-7. 同じ言い回しの使い回しを避け、投稿ごとに切り口・語彙・例を変える。`;
+7. 同じ言い回しの使い回しを避け、投稿ごとに切り口・語彙・例を変える。
+8. 【具体性の必須要件・厳守】各投稿に必ず次を入れる:
+   (a) 具体的な数字（所要時間/件数/割合/日数/個数 など。収入額は不可）を1つ以上
+   (b) 「1. 2. 3.」の手順 または 「🥇🥈🥉」の序列 を1つ以上
+   (c) 抽象的な締め（「検討してみましょう」「大切です」等）で終わらせない。具体的な次の一歩を書く
+
+【お手本（このレベルの具体性・テンポ・自然さを目指す）】
+例（チェックリスト型）:
+「AI副業で“最初の1件”を最短で取る人がやってる準備、3つ。
+🥇 使うツールを1つに絞る（ChatGPTかClaude、両方やらない）
+🥈 1日30分だけカレンダーに固定（量より継続）
+🥉 完成を待たず“応募”を5件出す
+逆に、教材を10個買って満足→9割が動けないまま終わる。
+順番さえ間違えなければ、1週間あれば最初の応募までいけます。
+受け取りはプロフ/固定のLINEから。」`;
 
 function avoidBlock(avoid: string[]): string {
   if (avoid.length === 0) return "";
@@ -152,7 +166,7 @@ export async function runConcept(ctx: CampaignContext): Promise<ConceptCandidate
 - theme: 発信テーマ
 - audience: 刺さるターゲット
 - pinnedDirection: 固定ポストの方向性
-- consultFunnel: 無料面談への導線
+- consultFunnel: ${ctx.destLabel}への導線
 - differentiation: 競合との差別化ポイント`;
   return generateItems<ConceptCandidate>(prompt, { temperature: 0.85, maxTokens: 4000 });
 }
@@ -343,7 +357,7 @@ ${ctx.ctaGuide}
 // ──────────────────────────────────────────────
 export async function runDiagnosisRubric(ctx: CampaignContext): Promise<DiagnosisRubric[]> {
   const prompt = `あなたは高単価アフィリエイトの成約率を上げるプロです。
-Xで集客した見込み客を、無料面談に送客すべきか判断するための「診断ルブリック（運用マニュアル）」を作ってください。
+Xで集客した見込み客を、${ctx.destLabel}へ送客すべきか判断するための「診断ルブリック（運用マニュアル）」を作ってください。
 特定個人ではなく、運用者が毎回当てはめて使える汎用ルールとして記述してください。
 
 商品ジャンル：${ctx.chosenGenre.genre}
@@ -373,7 +387,7 @@ export async function runRoadmap(ctx: CampaignContext): Promise<RoadmapDay[]> {
   for (let start = 1; start <= 30; start += 10) {
     const end = Math.min(start + 9, 30);
     const prompt = `あなたはX集客と高単価アフィリエイトの専門家です。
-以下の商品を無料面談に送客してアフィリエイト報酬を得るための30日間ロードマップのうち、${start}日目〜${end}日目を作ってください。
+以下の商品の見込み客を${ctx.destLabel}へ送客してアフィリエイト報酬を得るための30日間ロードマップのうち、${start}日目〜${end}日目を作ってください。
 
 商品ジャンル：${ctx.chosenGenre.genre}
 ターゲット：${ctx.chosenTarget.name}（${ctx.chosenTarget.pain}）
@@ -384,9 +398,10 @@ export async function runRoadmap(ctx: CampaignContext): Promise<RoadmapDay[]> {
 条件：
 ・初心者でも実行できる
 ・毎日何をすればいいかわかる
-・投稿内容まで具体的にする
+・投稿内容（postExample）は実際にコピペできる完成文にする
+・各日に具体的な数値目標（例: 投稿2本・リプ10件・いいね30・DM3件 など）を入れる
 ・プロフィール改善も固定ポスト改善もDM導線も含める
-・無料面談への送客導線を作る
+・${ctx.destLabel}への送客導線を作る
 
 各日について次の要素を持つオブジェクトを${end - start + 1}件（day は ${start}〜${end}）:
 - day: 日数（数値）
@@ -395,7 +410,7 @@ export async function runRoadmap(ctx: CampaignContext): Promise<RoadmapDay[]> {
 - postExample: 投稿文の例
 - replyStrategy: リプ周りのやり方
 - dmTask: DMでやること
-- consultFunnel: 無料面談への導線
+- consultFunnel: ${ctx.destLabel}への導線
 - metricToWatch: 改善すべき数字
 - improvement: 翌日に向けた改善点`;
     const batch = await generateItems<RoadmapDay>(prompt, { temperature: 0.8, maxTokens: 6000 });
@@ -439,7 +454,7 @@ export async function runArticles(ctx: CampaignContext, count = 3): Promise<Arti
   const articles: Article[] = [];
   for (const p of picks) {
     const prompt = `あなたはX/noteで何度もバズを生んでいる、価値提供型の長文ライターです。
-以下の案件の見込み客を無料面談へ送客するため、「${p.pattern}」の長文記事を1本作成してください。
+以下の案件の見込み客を${ctx.destLabel}へ送客するため、「${p.pattern}」の長文記事を1本作成してください。
 
 商品ジャンル：${ctx.chosenGenre.genre}
 ターゲット：${ctx.chosenTarget.name}（${ctx.chosenTarget.pain}）
@@ -457,6 +472,7 @@ ${ctx.ctaGuide}
 - タイトルは思わずクリックしたくなるもの（数字・結果・ベネフィットを入れる）
 - 記事だけで悩みが大きく前進する“具体的な価値”を出し切る（抽象論NG）
 - 本文は1800〜3000字程度。Markdownで見出し(##)・箇条書き・番号付き手順を使い、スマホで読みやすく
+- 【抽象論を禁止】各見出しの下に必ず「具体的な数字・手順・実例・ツール名」を入れる。精神論で埋めない
 - 商品名は押し出さず、最後に「個別最適化・続きは${ctx.destLabel}で」と自然に誘導
 - 誇大表現・収入/効果の保証はしない。**タイトルや本文に「年間〇〇万円」等の収入額の約束/断定を使わない**
   （数字は手順・時間・件数・割合など検証可能なものに限り、成果には個人差がある前提で書く）

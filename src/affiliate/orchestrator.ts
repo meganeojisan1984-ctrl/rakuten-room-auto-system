@@ -42,17 +42,14 @@ function normalize(text: string): string {
   return text.replace(/\s+/g, "").replace(/[、。！？!?.,]/g, "").toLowerCase();
 }
 
-/** 既出・自己重複を除去（正規化後の完全一致＆高類似プレフィックスで判定） */
+/** 既出・自己重複を除去（正規化後の完全一致のみ。過剰削除しない） */
 function dedupeBy<T>(items: T[], getText: (t: T) => string, existing: string[]): T[] {
   const seen = new Set(existing.map(normalize));
   const out: T[] = [];
   for (const it of items) {
     const key = normalize(getText(it));
     if (!key) continue;
-    // 先頭40文字一致も重複とみなす
-    const prefix = key.slice(0, 40);
-    const dup = seen.has(key) || [...seen].some((s) => s.startsWith(prefix) && prefix.length >= 20);
-    if (dup) continue;
+    if (seen.has(key)) continue;
     seen.add(key);
     out.push(it);
   }
@@ -87,13 +84,19 @@ async function runFlow<T>(
   let review = await reviewFlow(flow, items, expectedMin, ctx.profile, sampleOf(items), valueFocused);
   let revised = false;
 
-  if (review.verdict === "revise") {
-    onProgress?.(flow, `再生成（指揮官指摘: ${review.feedback || review.issues.join("; ") || "品質不足"}）`);
+  // 高得点になるまで作り直す（価値重視フローは最大2回・その他は1回）
+  const maxRetries = valueFocused ? 2 : 1;
+  const score = (r: CommanderReview) => r.credibility + r.completeness + r.valueConcreteness;
+  const isHigh = (r: CommanderReview): boolean =>
+    r.credibility >= 88 && r.completeness >= 88 && (!valueFocused || r.valueConcreteness >= 85);
+
+  let attempts = 0;
+  while (review.verdict === "revise" && !isHigh(review) && attempts < maxRetries) {
+    attempts++;
+    onProgress?.(flow, `再生成${attempts}（指揮官指摘: ${review.feedback || review.issues.join("; ") || "品質不足"}）`);
     await pace();
     const retry = await safeProduce();
     const retryReview = await reviewFlow(flow, retry, expectedMin, ctx.profile, sampleOf(retry), valueFocused);
-    // スコアが改善した方を採用
-    const score = (r: CommanderReview) => r.credibility + r.completeness + r.valueConcreteness;
     if (score(retryReview) >= score(review)) {
       items = retry;
       review = retryReview;
