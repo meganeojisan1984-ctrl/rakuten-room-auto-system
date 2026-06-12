@@ -1,0 +1,62 @@
+name: X送客 キャンペーン生成
+
+# スマホのGitHubアプリ等から手動実行できる。案件名を入力すると、
+# 指揮官＋10エージェントが素材一式を生成し、案件ごとの新しいタブとして
+# Googleスプレッドシートへ書き込む（サーバー常駐不要）。
+on:
+  workflow_dispatch:
+    inputs:
+      offer:
+        description: "案件名（例: AI学習スクール）"
+        required: true
+        default: "AI学習スクール"
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Node.js のセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: 依存関係をインストール
+        run: npm ci
+
+      - name: キャンペーンを生成
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          AFFILIATE_LLM_MODEL: ${{ vars.AFFILIATE_LLM_MODEL || 'llama-3.3-70b-versatile' }}
+          AFFILIATE_SHEETS_WEBAPP_URL: ${{ secrets.AFFILIATE_SHEETS_WEBAPP_URL }}
+          AFFILIATE_SHEETS_TOKEN: ${{ secrets.AFFILIATE_SHEETS_TOKEN }}
+          AFFILIATE_SHEET_ID: ${{ secrets.AFFILIATE_SHEET_ID }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          AFFILIATE_OFFER: ${{ github.event.inputs.offer }}
+        run: npx tsx src/affiliate/run.ts "${{ github.event.inputs.offer }}"
+
+      - name: レポートをコミット（スマホで閲覧可能に）
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add reports/affiliate
+          git diff --staged --quiet || git commit -m "docs: ${{ github.event.inputs.offer }} のX送客素材を生成 [skip ci]"
+          git push
+
+      - name: 生成物（ローカル出力）をアップロード
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: affiliate-output-${{ github.run_id }}
+          path: data/affiliate/output/
+          retention-days: 7
+          if-no-files-found: ignore

@@ -7,6 +7,8 @@
     "start": "npx tsx src/index.ts",
     "start:post-only": "npx tsx src/main.ts",
     "export-cookie": "npx tsx tools/cookie-exporter.ts",
+    "affiliate": "npx tsx src/affiliate/server.ts",
+    "affiliate:run": "npx tsx src/affiliate/run.ts",
     "build": "npx tsc"
   },
   "keywords": [],
@@ -19,6 +21,7 @@
     "better-sqlite3": "^12.8.0",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
+    "googleapis": "^144.0.0",
     "groq-sdk": "^0.15.0",
     "node-cron": "^4.2.1",
     "playwright": "^1.58.2",

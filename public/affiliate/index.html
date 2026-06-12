@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>X高単価アフィリ 送客システム</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <h1>🎯 X送客 指揮官システム</h1>
+      <div class="status-bar">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">接続中...</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- 誘導先(CTA)設定 -->
+    <section class="card">
+      <h2>🎯 誘導先（CTA）設定</h2>
+      <p class="hint">投稿・DM・記事の最後の誘導先です。LINE登録を軸にすると、X→LINE→教育→案件の2ステップで伸びます。</p>
+      <label>誘導先タイプ
+        <select id="funnelType">
+          <option value="line">LINE登録を軸に（推奨）</option>
+          <option value="blog">ブログ記事を軸に</option>
+          <option value="consult">無料面談に直</option>
+        </select>
+      </label>
+      <label>公式LINEの友だち追加URL<input type="text" id="funnelLine" placeholder="https://lin.ee/xxxx" /></label>
+      <label>無料特典（リードマグネット）名<input type="text" id="funnelMagnet" placeholder="AI副業 最初の30日ロードマップ＋プロンプト30選" /></label>
+      <label>ブログURL<input type="text" id="funnelBlog" placeholder="https://meganeojisanblog.com/ai-job/" /></label>
+      <label>ブランド名<input type="text" id="funnelBrand" placeholder="M.O.Laboratory" /></label>
+      <button id="saveFunnelBtn" class="btn-sub" type="button">誘導先設定を保存</button>
+    </section>
+
+    <!-- 案件入力 -->
+    <section class="card">
+      <h2>① 案件名を入力</h2>
+      <p class="hint">案件名を入れて「生成開始」を押すと、指揮官＋10エージェントが投稿文・DM・ロードマップ・画像プロンプトを作成し、スプレッドシートの新しいタブに書き込みます。</p>
+      <input type="text" id="offerInput" list="offerList" placeholder="例: AI学習スクール" autocomplete="off" />
+      <datalist id="offerList"></datalist>
+
+      <details class="adv">
+        <summary>案件の詳細を設定（任意・空欄ならAIが推定）</summary>
+        <label>ジャンル<input type="text" id="f_genre" placeholder="AI学習" /></label>
+        <label>商品価格<input type="text" id="f_price" placeholder="14,800円" /></label>
+        <label>成果報酬<input type="text" id="f_reward" placeholder="無料予約2257円 / 入会7519円" /></label>
+        <label>無料面談の内容<input type="text" id="f_consult" placeholder="AI活用の個別無料相談" /></label>
+        <label>面談で得られること<input type="text" id="f_benefits" placeholder="最短ルートが分かる" /></label>
+        <label>現在のフォロワー数<input type="number" id="f_followers" placeholder="0" /></label>
+        <label>目標送客数<input type="number" id="f_goalLeads" placeholder="10" /></label>
+        <label>目標報酬<input type="text" id="f_goalRevenue" placeholder="10万円" /></label>
+        <button id="saveOfferBtn" class="btn-sub" type="button">案件情報を保存</button>
+      </details>
+
+      <button id="runBtn" class="btn-main" type="button">🚀 生成開始（新しいタブに作成）</button>
+    </section>
+
+    <!-- 進捗 -->
+    <section class="card" id="progressCard" style="display:none;">
+      <h2>② 生成の進捗</h2>
+      <div id="progressStatus" class="badge">実行中…</div>
+      <ul id="progressLog" class="log"></ul>
+    </section>
+
+    <!-- 結果 -->
+    <section class="card" id="resultCard" style="display:none;">
+      <h2>③ 完了</h2>
+      <div id="resultBody"></div>
+      <a id="sheetLink" class="btn-main" target="_blank" rel="noopener" style="display:none;">📄 スプレッドシートを開く</a>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span id="envInfo"></span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
