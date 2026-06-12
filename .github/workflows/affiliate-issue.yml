@@ -1,12 +1,12 @@
 name: X送客 キャンペーン生成（Issueトリガー・スマホ用）
 
 # スマホのGitHubアプリだけで完結する実行方法。
-# Issue を新規作成し、タイトルに案件名（例: 「案件: AI学習スクール」）を入れる、
-# または Issue に "affiliate" ラベルを付けると自動で生成が走る。
+# Issue を新規作成し、タイトルに案件名（例: 「案件: AI学習スクール」）を入れると自動で生成が走る。
 # 結果は reports/affiliate/ にMarkdownでコミットされ、Issueにコメントで通知される。
 on:
   issues:
-    types: [opened, labeled]
+    # opened のみ（opened+labeled だと作成時に二重起動するため）
+    types: [opened]
 
 permissions:
   contents: write
