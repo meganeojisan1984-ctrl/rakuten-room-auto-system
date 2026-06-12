@@ -6,7 +6,8 @@ name: X送客 キャンペーン生成（Issueトリガー・スマホ用）
 # 結果は reports/affiliate/ にMarkdownでコミットされ、Issueにコメントで通知される。
 on:
   issues:
-    types: [opened, labeled]
+    # opened のみ（opened+labeled だと作成時に二重起動するため）
+    types: [opened]
 
 permissions:
   contents: write
