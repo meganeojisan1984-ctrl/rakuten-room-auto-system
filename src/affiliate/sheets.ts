@@ -209,6 +209,49 @@ async function recordPosts(texts: string[]): Promise<void> {
 }
 
 // ──────────────────────────────────────────────
+// コンプラ自動チェック（収入断定・誇大・保証表現の検出）
+// ──────────────────────────────────────────────
+const RISKY_PATTERNS: { label: string; re: RegExp }[] = [
+  { label: "収入額の明示", re: /(月収|年収|日給|時給|月商)\s*[0-9０-９]+\s*万/g },
+  { label: "収入額の明示", re: /[0-9０-９]+\s*万円?\s*(稼|儲|の収入|の利益|稼げ)/g },
+  { label: "収入保証", re: /(必ず|確実に|誰でも|100\s*[%％])\s*(稼|儲|成功|稼げ)/g },
+  { label: "断定的な保証", re: /(絶対に?稼げ|必ず儲か|必ず成功|放置で稼)/g },
+];
+
+export interface ComplianceHit {
+  where: string;
+  hits: string[];
+  excerpt: string;
+}
+
+function scanText(text: string): string[] {
+  if (!text) return [];
+  const found = new Set<string>();
+  for (const p of RISKY_PATTERNS) {
+    const m = text.match(p.re);
+    if (m) m.forEach((x) => found.add(x.trim()));
+  }
+  return [...found];
+}
+
+export function scanCompliance(r: CampaignResult): ComplianceHit[] {
+  const out: ComplianceHit[] = [];
+  const check = (where: string, text: string): void => {
+    const hits = scanText(text);
+    if (hits.length) out.push({ where, hits, excerpt: text.slice(0, 60) });
+  };
+  r.collectPosts.items.forEach((p, i) => check(`④投稿 ${i + 1}`, p.text));
+  r.pinnedPosts.items.forEach((p, i) => check(`⑤固定 ${i + 1}`, p.text));
+  r.educationPosts.items.forEach((p, i) => check(`⑦教育 ${i + 1}`, p.text));
+  r.articles.items.forEach((a, i) => {
+    check(`⑪記事${i + 1} タイトル`, a.title);
+    check(`⑪記事${i + 1} 本文`, a.body);
+    (a.thread || []).forEach((t, j) => check(`⑪記事${i + 1} スレッド${j + 1}`, t));
+  });
+  return out;
+}
+
+// ──────────────────────────────────────────────
 // CampaignResult → 行列（スプレッドシートのレイアウト）
 // ──────────────────────────────────────────────
 function buildRows(r: CampaignResult): Matrix {
@@ -229,6 +272,16 @@ function buildRows(r: CampaignResult): Matrix {
   rows.push([`選定ジャンル:`, r.genres.items.find((g) => g.fitScore)?.genre ?? r.profile.genre]);
   rows.push([`選定ターゲット:`, r.targets.items[0]?.name ?? ""]);
   rows.push([`選定コンセプト:`, r.concepts.items[0]?.concept ?? ""]);
+
+  // コンプラ自動チェック
+  const comp = scanCompliance(r);
+  blank();
+  if (comp.length) {
+    rows.push([`⚠️ コンプラ自動チェック（投稿前に要修正 ${comp.length}件）`, "検出語", "該当箇所(冒頭)"]);
+    comp.forEach((c) => rows.push([c.where, c.hits.join(" / "), c.excerpt]));
+  } else {
+    rows.push([`✅ コンプラ自動チェック: 収入断定・保証表現は未検出（最終確認は人間で）`]);
+  }
 
   // 使い方メモ
   blank();
@@ -360,6 +413,14 @@ export function buildMarkdown(r: CampaignResult): string {
   L.push(`\n**指揮官 総合評価**: 信憑性 ${r.overallCredibility} / 完成度 ${r.overallCompleteness}`);
   L.push(`\n> ${r.commanderSummary.replace(/\n/g, "\n> ")}`);
   L.push(`\n選定ジャンル: **${r.genres.items.find((g) => g.fitScore)?.genre ?? r.profile.genre}** / 選定ターゲット: **${r.targets.items[0]?.name ?? ""}** / コンセプト: **${r.concepts.items[0]?.concept ?? ""}**`);
+  const comp = scanCompliance(r);
+  if (comp.length) {
+    L.push(`\n## ⚠️ コンプラ自動チェック（投稿前に要修正 ${comp.length}件）`);
+    comp.forEach((c) => L.push(`- **${c.where}**: ${c.hits.join(" / ")} ｜ ${c.excerpt}…`));
+  } else {
+    L.push(`\n✅ コンプラ自動チェック: 収入断定・保証表現は未検出（最終確認は人間で）`);
+  }
+
   L.push(`\n> 使い方: Xは手動投稿です。各「投稿文」をコピーして投稿し、「画像プロンプト」をChatGPTに貼って画像を作成してください。\n`);
 
   L.push(`\n## ④ 見込み客を集めるX投稿（${r.collectPosts.items.length}本・具体性${r.collectPosts.review.valueConcreteness}）`);
