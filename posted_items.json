@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "jukusui:10040713",
     "mirara520:10001718",
     "bon-kagu:10055134",
     "mobel:10008375",
@@ -499,7 +498,8 @@
     "teamo:10001200",
     "jyonetsubatake:10000342",
     "atcontact:10002164",
-    "kyunan:10020376"
+    "kyunan:10020376",
+    "shibuya-k2009:10029306"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
