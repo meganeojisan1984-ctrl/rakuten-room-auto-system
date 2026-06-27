@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "yakyu-kasukawa:10454084",
     "rack-kan:10006946",
     "jukusui:10040708",
     "jukusui:10040713",
@@ -499,7 +498,8 @@
     "craife:10000642",
     "imokuniya:10000012",
     "kurashikenkou:10201844",
-    "teamo:10001200"
+    "teamo:10001200",
+    "jyonetsubatake:10000342"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
