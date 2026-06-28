@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "bon-kagu:10055134",
     "mobel:10008375",
     "alpen:10507730",
     "alpen:10508595",
@@ -499,7 +498,8 @@
     "atcontact:10002164",
     "kyunan:10020376",
     "shibuya-k2009:10029306",
-    "laughlaugh:10521200"
+    "laughlaugh:10521200",
+    "and-a-me:10000006"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
