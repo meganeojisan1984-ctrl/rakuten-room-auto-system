@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "kouragumi:10000855",
     "kouragumi:10001552",
     "kouragumi:10001834",
     "jukusui:10040728",
@@ -499,7 +498,8 @@
     "irisplaza-r:10136708",
     "i-need-more-shoes:10000563",
     "cream-dot:10026798",
-    "yunth:10000122"
+    "yunth:10000122",
+    "e-kurashi:10048736"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
