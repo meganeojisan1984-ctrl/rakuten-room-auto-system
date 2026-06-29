@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "roomy:10017594",
     "kouragumi:10000855",
     "kouragumi:10001552",
     "kouragumi:10001834",
@@ -499,7 +498,8 @@
     "candymagic:10000575",
     "irisplaza-r:10136708",
     "i-need-more-shoes:10000563",
-    "cream-dot:10026798"
+    "cream-dot:10026798",
+    "yunth:10000122"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
