@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "petdr-x:10000160",
     "barsado:10019926",
     "livingut:10201261",
     "ogawahan:10002465",
@@ -499,7 +498,8 @@
     "rakutenoriginal-daily:10000046",
     "kouragumi:10001552",
     "cream-dot:10024939",
-    "queeneyes:10000234"
+    "queeneyes:10000234",
+    "craife:10001028"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
