@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "ogawahan:10002465",
     "air-rhizome:10011884",
     "vox:10019271",
     "dainichi-corp:10000046",
@@ -499,7 +498,8 @@
     "queeneyes:10000234",
     "craife:10001028",
     "craife:10000743",
-    "hankoya-shop:10024424"
+    "hankoya-shop:10024424",
+    "seedcoms:10007479"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
