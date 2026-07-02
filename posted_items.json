@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "vox:10019271",
     "dainichi-corp:10000046",
     "bugyo:10004467",
     "toucher-home:10000543",
@@ -499,7 +498,8 @@
     "craife:10000743",
     "hankoya-shop:10024424",
     "seedcoms:10007479",
-    "ogawahan:10002465"
+    "ogawahan:10002465",
+    "vox:10020683"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
