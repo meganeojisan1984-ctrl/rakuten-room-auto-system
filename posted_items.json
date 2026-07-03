@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "tonan:10000112",
     "kaguin:10097867",
     "bon-kagu:10054735",
     "kiki-oshareya:10000627",
@@ -499,7 +498,8 @@
     "vox:10021109",
     "craife:10000875",
     "dainichi-corp:10000046",
-    "rinrinrin:10010955"
+    "rinrinrin:10010955",
+    "regain:10000041"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
