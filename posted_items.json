@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "assistone:10008588",
     "himaraya:10369590",
     "tonan:10000112",
     "kaguin:10097867",
@@ -499,7 +498,8 @@
     "vox:10020683",
     "laughlaugh:10518541",
     "vox:10021109",
-    "craife:10000875"
+    "craife:10000875",
+    "dainichi-corp:10000046"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
