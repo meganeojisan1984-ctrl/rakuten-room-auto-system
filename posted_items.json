@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "bon-kagu:10054735",
     "kiki-oshareya:10000627",
     "jewelrysunflower:10008940",
     "roomy:10013226",
@@ -499,7 +498,8 @@
     "dainichi-corp:10000046",
     "rinrinrin:10010955",
     "regain:10000041",
-    "lg-beauty-japan:10000330"
+    "lg-beauty-japan:10000330",
+    "hanamizuki-gama:10000202"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
