@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "jewelrysunflower:10008940",
     "roomy:10013226",
     "yamayuu:10019627",
     "livingut:10234134",
@@ -499,7 +498,8 @@
     "regain:10000041",
     "lg-beauty-japan:10000330",
     "hanamizuki-gama:10000202",
-    "realstyle4u:10002512"
+    "realstyle4u:10002512",
+    "basementonline:10003135"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
