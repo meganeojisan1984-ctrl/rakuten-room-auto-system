@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "gekiyasukaguya:10025096",
     "sanwadirect:10102117",
     "auc-epsomsalt:10000222",
     "comodocasa:10000449",
@@ -499,7 +498,8 @@
     "vtcosmetic-official:10001456",
     "craife:10000001",
     "ajiro:10000830",
-    "chakasho-dina:10000764"
+    "chakasho-dina:10000764",
+    "toucher-home:10000543"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
