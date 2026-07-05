@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "rosylily-shop:10000024",
     "gekiyasukaguya:10025096",
     "sanwadirect:10102117",
     "auc-epsomsalt:10000222",
@@ -499,7 +498,8 @@
     "suisosum-shop:10000322",
     "vtcosmetic-official:10001456",
     "craife:10000001",
-    "ajiro:10000830"
+    "ajiro:10000830",
+    "chakasho-dina:10000764"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
