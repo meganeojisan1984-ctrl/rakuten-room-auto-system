@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "craife:10000198",
     "toucher-home:10000396",
     "roomy:10017571",
     "gekiyasukaguya:10023613",
@@ -499,7 +498,8 @@
     "rakuten24:11206670",
     "scope:10105257",
     "rakkenshop:10000003",
-    "endeavour:10000007"
+    "endeavour:10000007",
+    "komatirain:10000001"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
