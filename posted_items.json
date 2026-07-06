@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "auc-epsomsalt:10000222",
     "comodocasa:10000449",
     "marin-shop01:10000282",
     "craife:10000198",
@@ -499,7 +498,8 @@
     "ajiro:10000830",
     "chakasho-dina:10000764",
     "toucher-home:10000543",
-    "rakuten24:11206670"
+    "rakuten24:11206670",
+    "scope:10105257"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
