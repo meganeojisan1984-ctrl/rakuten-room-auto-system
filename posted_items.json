@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "toucher-home:10000396",
     "roomy:10017571",
     "gekiyasukaguya:10023613",
     "sanwadirect:10107803",
@@ -499,7 +498,8 @@
     "scope:10105257",
     "rakkenshop:10000003",
     "endeavour:10000007",
-    "komatirain:10000001"
+    "komatirain:10000001",
+    "auc-epsomsalt:10000222"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
