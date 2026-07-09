@@ -84,7 +84,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add posted_items.json
+          git pull --rebase origin main || true
+          git add posted_items.json post_history.json agent_reports.json
           git diff --staged --quiet || git commit -m "chore: 投稿済み商品リストを更新 [skip ci]"
           git push
 

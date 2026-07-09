@@ -1,0 +1,50 @@
+name: 自己学習ループ (司令官)
+
+on:
+  schedule:
+    # JST 23:45 → UTC 14:45 (最終投稿23:00の後に1日分を学習)
+    - cron: "45 14 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  learn:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Node.js のセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: 依存関係をインストール
+        run: npm ci
+
+      - name: Playwright Chromium をインストール
+        run: npx playwright install chromium --with-deps
+
+      - name: 学習ループを実行 (計測→分析→司令官)
+        env:
+          CI: "true"
+          ROOM_COOKIE: ${{ secrets.ROOM_COOKIE }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          ROOM_PROFILE_URL: ${{ secrets.ROOM_PROFILE_URL || vars.ROOM_PROFILE_URL || '' }}
+        run: npx tsx src/run_learn.ts
+
+      - name: 学習結果をコミット
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main || true
+          git add strategy.json post_history.json agent_reports.json
+          git diff --staged --quiet || git commit -m "chore: 学習ループ実行 - 戦略を更新 [skip ci]"
+          git push

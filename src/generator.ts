@@ -1,7 +1,15 @@
 import Groq from "groq-sdk";
 import * as dotenv from "dotenv";
 import type { RakutenItem } from "./fetcher";
+import { loadStrategy } from "./agents/store";
 dotenv.config();
+
+/** 司令官が学習した勝ちパターンをプロンプトに注入する */
+function getStyleHintsBlock(): string {
+  const hints = loadStrategy().styleHints;
+  if (hints.length === 0) return "";
+  return `\n【過去実績から学習した勝ちパターン（必ず反映すること）】\n${hints.map((h) => `- ${h}`).join("\n")}\n`;
+}
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY ?? "";
 const MODEL_NAME = "llama-3.3-70b-versatile";
@@ -158,7 +166,7 @@ ${postTypeInstruction}
 ${item.reviewAverage && item.reviewCount ? `- レビュー: ★${item.reviewAverage} (${item.reviewCount}件) ← 「レビュー${item.reviewCount}件で★${item.reviewAverage}」のような社会的証明として必ず本文に織り込むこと` : ""}
 
 【季節の文脈】いまは「${getSeasonContext()}」の時期。自然に絡められる場合のみ絡めること（無理やりはNG）。
-
+${getStyleHintsBlock()}
 【トップインフルエンサーの書き方ルール（必ず全部守ること）】
 1. 冒頭1〜2行は「思わず止まってしまう」フック。驚き・共感・ビフォーアフター・問いかけのどれかで引き込む
 2. 「使う前は〇〇で困ってた」→「使い始めたら△△が変わった！」という体験談スタイルで書く（スペック羅列は絶対NG）
@@ -203,6 +211,7 @@ ${reviewInfo ? `- ${reviewInfo}` : ""}
 - ハッシュタグ5〜7個。#楽天ROOM #買ってよかった #QOL向上 は必須
 - 友達LINEのような口語体。AI感ゼロ
 - 絵文字で感情の強弱をつける
+${getStyleHintsBlock()}
 
 投稿文のみを出力してください（前置き・説明不要）:`;
 }

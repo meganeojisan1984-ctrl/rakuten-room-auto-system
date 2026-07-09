@@ -3,12 +3,13 @@ dotenv.config();
 
 import * as fs from "fs";
 import * as path from "path";
-import { fetchItems, fetchItemsByKeyword } from "./fetcher";
+import { fetchItems, fetchItemsByKeyword, getLastSelectedGenre } from "./fetcher";
 import { generateCaptions, generateTrendCaptions, type PostType } from "./generator";
 import { fetchTrendKeyword } from "./trend-fetcher";
 import { postItems } from "./poster";
 import { crossPostToSns } from "./sns";
 import { notifyError } from "./notifiers";
+import { loadStrategy, weightedPick, appendHistory, report, type PostRecord } from "./agents/store";
 
 const POSTED_ITEMS_FILE = path.join(process.cwd(), "posted_items.json");
 const MAX_HISTORY = 500; // 保持する最大件数
@@ -37,12 +38,18 @@ function saveState(codes: Set<string>, postTypeIndex: number): void {
 }
 
 /**
- * 投稿タイプのローテーション:
+ * 投稿タイプの選択:
+ * 司令官の学習済み重み(strategy.json)があれば重み付きランダム、なければローテーション。
  * 1=評価取り投稿（クリック・ROOM回遊目的）
  * 2=売上投稿（成約目的）
  * 3=送客投稿（楽天市場誘導）
  */
 function getPostType(index: number): PostType {
+  const weights = loadStrategy().postTypeWeights;
+  const hasLearned = Object.values(weights).some((w) => w !== 1);
+  if (hasLearned) {
+    return parseInt(weightedPick(["1", "2", "3"], (t) => t, weights), 10) as PostType;
+  }
   const types: PostType[] = [1, 2, 3];
   return types[index % 3]!;
 }
@@ -94,9 +101,11 @@ async function main(): Promise<void> {
       throw new Error("フィルタリング後に使用可能な商品が0件でした");
     }
     console.log(`商品取得完了: ${items.length}件\n`);
+    report("scout", true, `${items.length}件選定 (${trendKeyword ? `トレンド: ${trendKeyword}` : getLastSelectedGenre()})`);
   } catch (err) {
     const msg = String(err);
     console.error("商品取得エラー:", msg);
+    report("scout", false, msg.slice(0, 150));
     await notifyError("楽天API商品取得エラー", msg);
     process.exit(1);
   }
@@ -116,9 +125,11 @@ async function main(): Promise<void> {
       throw new Error("紹介文の生成に全て失敗しました");
     }
     console.log(`紹介文生成完了: ${captionedItems.length}件\n`);
+    report("copywriter", true, `${captionedItems.length}件生成 (タイプ${postType})`);
   } catch (err) {
     const msg = String(err);
     console.error("紹介文生成エラー:", msg);
+    report("copywriter", false, msg.slice(0, 150));
     await notifyError("紹介文生成エラー", msg);
     process.exit(1);
   }
@@ -152,15 +163,43 @@ async function main(): Promise<void> {
     console.error("失敗した商品:\n" + errors);
   }
 
+  // 投稿エージェントの報告
+  report(
+    "poster",
+    succeeded > 0,
+    `成功${succeeded}件/失敗${failed}件${failed > 0 ? ` (${results.find((r) => !r.success)?.error?.slice(0, 80) ?? ""})` : ""}`
+  );
+
   // ROOM投稿成功商品をInstagram・Threadsへクロス投稿（失敗しても本体は続行）
   const succeededItems = captionedItems.filter((_, i) => results[i]?.success);
   if (succeededItems.length > 0) {
     try {
-      await crossPostToSns(succeededItems);
+      const sns = await crossPostToSns(succeededItems);
+      if (sns.attempted) {
+        report("promoter", sns.instagram || sns.threads, `IG=${sns.instagram ? "成功" : "失敗/未設定"}, Threads=${sns.threads ? "成功" : "失敗/未設定"}`);
+      }
     } catch (err) {
       console.error("[main] SNSクロス投稿エラー（続行）:", String(err));
+      report("promoter", false, String(err).slice(0, 150));
     }
   }
+
+  // 学習ループ用の投稿履歴を記録（計測エージェントが後からいいね数を付与）
+  const jstHour = parseInt(
+    new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo", hour: "2-digit", hour12: false }),
+    10
+  );
+  const historyRecords: PostRecord[] = succeededItems.map((c) => ({
+    ts: new Date().toISOString(),
+    itemCode: c.item.itemCode,
+    itemName: c.item.itemName,
+    genreName: trendKeyword ? `トレンド:${trendKeyword}` : getLastSelectedGenre(),
+    price: c.item.itemPrice,
+    postType,
+    hour: jstHour,
+    trendKeyword,
+  }));
+  if (historyRecords.length > 0) appendHistory(historyRecords);
 
   // 成功した商品を投稿済みリストに追加して保存。投稿タイプを次に進める
   const successCodes = succeededItems.map((c) => c.item.itemCode);

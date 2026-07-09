@@ -169,18 +169,20 @@ export async function postToThreads(item: RakutenItem, caption: string): Promise
  */
 export async function crossPostToSns(
   items: Array<{ item: RakutenItem; caption: string }>
-): Promise<void> {
+): Promise<{ attempted: boolean; instagram: boolean; threads: boolean }> {
+  const none = { attempted: false, instagram: false, threads: false };
   const first = items[0];
-  if (!first) return;
+  if (!first) return none;
 
   const igEnabled = !!(env("IG_USER_ID") && env("IG_ACCESS_TOKEN"));
   const threadsEnabled = !!(env("THREADS_USER_ID") && env("THREADS_ACCESS_TOKEN"));
   if (!igEnabled && !threadsEnabled) {
     console.log("[sns] Instagram/Threads未設定。クロス投稿をスキップ（SETUP-SNS.md参照）");
-    return;
+    return none;
   }
 
   console.log("\n--- SNSクロス投稿 (認知度拡大) ---");
-  if (igEnabled) await postToInstagram(first.item, first.caption);
-  if (threadsEnabled) await postToThreads(first.item, first.caption);
+  const instagram = igEnabled ? await postToInstagram(first.item, first.caption) : false;
+  const threads = threadsEnabled ? await postToThreads(first.item, first.caption) : false;
+  return { attempted: true, instagram, threads };
 }

@@ -82,6 +82,13 @@ export async function notifyXCreditsDepleted(): Promise<void> {
 }
 
 /**
+ * 汎用レポート通知（司令官のデイリーレポート等）
+ */
+export async function notifyReport(title: string, body: string): Promise<void> {
+  await sendToDiscord(`${title}\n${body}`.slice(0, 1900));
+}
+
+/**
  * 汎用エラー通知
  */
 export async function notifyError(title: string, errorMessage: string): Promise<void> {

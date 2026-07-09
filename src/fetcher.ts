@@ -1,6 +1,13 @@
 import axios from "axios";
 import * as dotenv from "dotenv";
+import { loadStrategy, weightedPick } from "./agents/store";
 dotenv.config();
+
+// 直近に選択されたジャンル名（学習ループの投稿履歴記録用）
+let lastSelectedGenreName = "全体";
+export function getLastSelectedGenre(): string {
+  return lastSelectedGenreName;
+}
 
 const RAKUTEN_APP_ID = process.env.RAKUTEN_APP_ID ?? "";
 const RAKUTEN_ACCESS_KEY = process.env.RAKUTEN_ACCESS_KEY ?? "";
@@ -601,11 +608,13 @@ export async function fetchItems(count: number = 5, excludeCodes: Set<string> = 
     // メインを6〜7割、サブを3〜4割の比率で選択
     const useMain = Math.random() < 0.65;
     const pool = useMain ? MAIN_GENRES : SUB_GENRES;
-    const selected = pool[Math.floor(Math.random() * pool.length)]!;
+    // 司令官の学習済みジャンル重み（strategy.json）で重み付き選択
+    const selected = weightedPick(pool, (g) => g.name, loadStrategy().genreWeights);
     genreId = selected.genreId;
     minPrice = selected.minPrice;
     maxPrice = selected.maxPrice;
     selectedGenreName = `${useMain ? "メイン" : "サブ"}: ${selected.name}`;
+    lastSelectedGenreName = selected.name;
     console.log(`[fetcher] ジャンル選択: ${selectedGenreName}`);
   } else {
     const priceOverride = GENRE_PRICE_OVERRIDES[TARGET_GENRE];
