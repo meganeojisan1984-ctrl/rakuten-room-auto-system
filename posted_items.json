@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "kohnan-eshop:10222587",
     "cliffhangar:10002134",
     "jewelrysunflower:10008318",
     "keyuca:10031144",
@@ -499,7 +498,8 @@
     "twdirect:10020190",
     "decori:10000319",
     "kouragumi:10001774",
-    "toucher-home:10000396"
+    "toucher-home:10000396",
+    "auc-roque:10013703"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
