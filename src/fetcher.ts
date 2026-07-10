@@ -283,6 +283,20 @@ async function fetchItemSearch(
   }
 }
 
+/**
+ * mediumImageUrlsから先頭の画像URLを取り出す。
+ * formatVersion=1: [{imageUrl: "..."}] / formatVersion=2: ["..."] の両形式に対応
+ */
+function firstImageUrl(urls: unknown): string {
+  if (!Array.isArray(urls) || urls.length === 0) return "";
+  const first: unknown = urls[0];
+  if (typeof first === "string") return first;
+  if (first && typeof first === "object" && "imageUrl" in first) {
+    return (first as { imageUrl?: string }).imageUrl ?? "";
+  }
+  return "";
+}
+
 function convertRankingItems(items: RakutenRankingApiItem[]): RakutenItem[] {
   return items.map((item) => {
     const { hasPointBonus, hasCoupon } = detectBonusInfo(item);
@@ -292,7 +306,7 @@ function convertRankingItems(items: RakutenRankingApiItem[]): RakutenItem[] {
       itemPrice: typeof item.itemPrice === "string" ? parseInt(item.itemPrice, 10) : item.itemPrice,
       itemUrl: item.itemUrl,
       itemCaption: item.itemCaption ?? "",
-      imageUrl: item.mediumImageUrls?.[0]?.imageUrl ?? "",
+      imageUrl: firstImageUrl(item.mediumImageUrls),
       shopName: item.shopName ?? "",
       pointRate: item.pointRate ?? 1,
       pointRateStartTime: item.pointRateStartTime || undefined,
@@ -331,7 +345,7 @@ function convertSearchItems(items: RakutenApiItem[]): RakutenItem[] {
       itemPrice: item.itemPrice,
       itemUrl: item.itemUrl,
       itemCaption: item.itemCaption,
-      imageUrl: item.mediumImageUrls[0]?.imageUrl ?? "",
+      imageUrl: firstImageUrl(item.mediumImageUrls),
       shopName: item.shopName,
       pointRate: item.pointRate,
       pointRateStartTime: item.pointRateStartTime || undefined,

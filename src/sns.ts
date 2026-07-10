@@ -65,6 +65,10 @@ export async function postToInstagram(item: RakutenItem, caption: string): Promi
     console.log("[sns] Instagram: 環境変数未設定のためスキップ");
     return false;
   }
+  if (!item.imageUrl) {
+    console.warn("[sns] Instagram: 商品画像URLが空のためスキップ（IGは画像必須）");
+    return false;
+  }
   try {
     const imageUrl = upscaleImageUrl(item.imageUrl);
     console.log("[sns] Instagram: メディアコンテナ作成中...");
