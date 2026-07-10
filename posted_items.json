@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "mujirushi-ryohin:10005610",
     "mmservice:10000340",
     "shopkurano:10009908",
     "sobani:10000755",
@@ -499,7 +498,8 @@
     "yamagoiida:10000077",
     "sheil-store:10020708",
     "ideazakkaten:10000307",
-    "tsurunishi:10001040"
+    "tsurunishi:10001040",
+    "mrw-g:10000005"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
