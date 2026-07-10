@@ -45,7 +45,10 @@ GitHubのリポジトリページ → **Settings → Secrets and variables → A
 | `THREADS_ACCESS_TOKEN` | Threads API 長期トークン | Threadsクロス投稿用（任意） |
 | `ROOM_PROFILE_URL` | 楽天ROOMプロフィールURL | SNSからの誘導先（任意） |
 
-> 📣 **Instagram/Threadsクロス投稿**: ROOM投稿成功後、同じ商品を自動でIG・Threadsに展開して認知度を拡大します。セットアップ手順は **[SETUP-SNS.md](SETUP-SNS.md)** を参照。未設定なら自動スキップされます。
+> 📣 **Instagram/Threadsクロス投稿**: ROOM投稿成功後、同じ商品を自動でIG・Threadsに展開して認知度を拡大します。
+> - クイックスタート: **[SETUP-SNS.md](SETUP-SNS.md)**
+> - 詳細（画面スクショ位置まで解説）: **[SETUP-SNS-DETAILED.md](SETUP-SNS-DETAILED.md)**
+> 未設定なら自動スキップされます。
 
 ---
 
