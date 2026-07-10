@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "keyuca:10031144",
     "imaging888:10000145",
     "mujirushi-ryohin:10005610",
     "mmservice:10000340",
@@ -499,7 +498,8 @@
     "toucher-home:10000396",
     "auc-roque:10013703",
     "yamagoiida:10000077",
-    "sheil-store:10020708"
+    "sheil-store:10020708",
+    "ideazakkaten:10000307"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
