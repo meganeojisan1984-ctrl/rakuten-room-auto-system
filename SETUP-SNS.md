@@ -1,5 +1,13 @@
 # Instagram / Threads 連携セットアップガイド
 
+> ✅ **2026-07-10 セットアップ完了済み**。実際の構成: Metaアプリ「楽天ROOM自動投稿システム」(ID: 27485403524487512) に **Threads API** + **Instagram API (Instagramログイン方式)** ユースケースを追加し、テスター登録した `meganeojisan.jp` のトークンをユースケース画面の「トークンを生成」で発行。
+>
+> **🔄 60日ごとのトークン再発行手順(実際の手順)**:
+> 1. https://developers.facebook.com/apps/27485403524487512/use_cases/ を開く
+> 2. **Threads**: 「Threads APIにアクセス」→ 設定 → ユーザートークン生成ツール → 「アクセストークンを生成」→ コピー
+> 3. **Instagram**: 「Instagramでメッセージとコンテンツを管理」→ InstagramログインによるAPI設定 → セクション2 → 「トークンを生成」→ コピー
+> 4. GitHub Secrets (`THREADS_ACCESS_TOKEN` / `IG_ACCESS_TOKEN`) を更新 (`gh secret set` またはリポジトリのSettings画面)
+
 ROOM投稿成功後、同じ商品を **Instagram** と **Threads** に自動クロス投稿して認知度を拡大します。
 
 **詳細な手順は [SETUP-SNS-DETAILED.md](SETUP-SNS-DETAILED.md) を参照してください。**

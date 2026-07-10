@@ -18,7 +18,9 @@ dotenv.config();
 // 環境変数は呼び出し時に読む（テスト・動的設定に対応）
 const env = (key: string): string => process.env[key] ?? "";
 
-const GRAPH_API = "https://graph.facebook.com/v21.0";
+// Instagram Login方式のトークン(IGAA...)は graph.instagram.com を使う
+// (Facebook Login方式のトークンなら graph.facebook.com だが、本システムは前者)
+const GRAPH_API = "https://graph.instagram.com/v21.0";
 const THREADS_API = "https://graph.threads.net/v1.0";
 
 function sleep(ms: number): Promise<void> {
