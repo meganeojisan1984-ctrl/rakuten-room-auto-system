@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "cliffhangar:10002134",
     "jewelrysunflower:10008318",
     "keyuca:10031144",
     "imaging888:10000145",
@@ -499,7 +498,8 @@
     "decori:10000319",
     "kouragumi:10001774",
     "toucher-home:10000396",
-    "auc-roque:10013703"
+    "auc-roque:10013703",
+    "yamagoiida:10000077"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
