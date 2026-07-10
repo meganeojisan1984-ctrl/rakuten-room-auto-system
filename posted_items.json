@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "jewelrysunflower:10008318",
     "keyuca:10031144",
     "imaging888:10000145",
     "mujirushi-ryohin:10005610",
@@ -499,7 +498,8 @@
     "kouragumi:10001774",
     "toucher-home:10000396",
     "auc-roque:10013703",
-    "yamagoiida:10000077"
+    "yamagoiida:10000077",
+    "sheil-store:10020708"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
