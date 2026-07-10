@@ -31,6 +31,8 @@ export interface Strategy {
   postTypeWeights: Record<string, number>;
   /** 価格帯→重み(0.5〜2.0)。高単価枠を含む商品選定の価格戦略 */
   priceBandWeights: Record<string, number>;
+  /** フック(書き出しパターン)→重み(0.5〜2.0)。Promotion戦略の学習対象 */
+  hookWeights: Record<string, number>;
   /** 司令官が更新する季節先取りキーワード（最大5件、商品検索に使用） */
   seasonalKeywords: string[];
   /** コメントエージェントのプロンプトに注入する勝ちパターン（最大3件） */
@@ -63,6 +65,8 @@ export interface PostRecord {
   price: number;
   postType: number;
   hour: number; // JST時間帯
+  hook?: string; // 使用したフック(書き出しパターン)のキー
+  captionHead?: string; // 投稿文の冒頭(重複回避・パターン分析用)
   trendKeyword?: string;
   likes?: number; // 計測エージェントが後から更新
   likesUpdatedAt?: string;
@@ -99,6 +103,7 @@ export function defaultStrategy(): Strategy {
     postTypeWeights: { "1": 1, "2": 1, "3": 1 },
     // 初期は低価格帯寄り（実績が付いたら司令官が高単価枠を調整）
     priceBandWeights: { "1000-3000": 1.2, "3000-5000": 1.0, "5000-10000": 0.8, "10000-30000": 0.6 },
+    hookWeights: {},
     seasonalKeywords: [],
     styleHints: [],
     commanderNotes: "",
@@ -114,6 +119,7 @@ export function loadStrategy(): Strategy {
     genreWeights: s.genreWeights ?? d.genreWeights,
     postTypeWeights: s.postTypeWeights ?? d.postTypeWeights,
     priceBandWeights: s.priceBandWeights ?? d.priceBandWeights,
+    hookWeights: s.hookWeights ?? d.hookWeights,
     seasonalKeywords: (s.seasonalKeywords ?? []).slice(0, 5),
     styleHints: (s.styleHints ?? []).slice(0, 3),
     commanderNotes: s.commanderNotes ?? "",

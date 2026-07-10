@@ -20,6 +20,7 @@ export interface AnalysisResult {
   byPostType: Aggregate[];
   byHour: Aggregate[];
   byPriceBand: Aggregate[];
+  byHook: Aggregate[];
   topPosts: Array<{ itemName: string; likes: number; genreName: string; postType: number }>;
   agentHealth: Array<{ agent: string; runs: number; failures: number; lastError: string }>;
 }
@@ -72,6 +73,7 @@ export function runAnalystAgent(): AnalysisResult {
     byPostType: aggregate(history.map((h) => ({ key: String(h.postType), likes: h.likes }))),
     byHour: aggregate(history.map((h) => ({ key: `${h.hour}時`, likes: h.likes }))),
     byPriceBand: aggregate(history.map((h) => ({ key: priceBandOf(h.price), likes: h.likes }))),
+    byHook: aggregate(history.map((h) => ({ key: h.hook ?? "未記録", likes: h.likes }))),
     topPosts: measured
       .sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0))
       .slice(0, 5)

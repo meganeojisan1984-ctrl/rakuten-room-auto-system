@@ -197,6 +197,8 @@ async function main(): Promise<void> {
     price: c.item.itemPrice,
     postType,
     hour: jstHour,
+    hook: c.hook,
+    captionHead: c.caption.replace(/\s+/g, " ").slice(0, 25),
     trendKeyword,
   }));
   if (historyRecords.length > 0) appendHistory(historyRecords);

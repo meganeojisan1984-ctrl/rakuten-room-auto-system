@@ -37,17 +37,43 @@ export function upscaleImageUrl(imageUrl: string, size = 640): string {
   return `${imageUrl}${sep}_ex=${size}x${size}`;
 }
 
+// CTA・タグはローテーションして「毎回同じ文末」のワンパターン化を防ぐ
+const IG_CTAS = [
+  "▶ 商品リンクは楽天ROOMに載せてます！プロフィールのリンクからチェックしてね🛒",
+  "📌 気になったら保存推奨！商品はプロフィールのリンク(楽天ROOM)から飛べます✈",
+  "🔗 「どこで買えるの?」→プロフィールのリンクの楽天ROOMにまとめてます!",
+  "💬 使ってる人いたらコメントで感想教えて!リンクはプロフィールから🛒",
+  "✅ 詳細・購入は楽天ROOM(プロフィールのリンク)へ。お買い物マラソン前の保存もおすすめ📌",
+];
+
+const IG_TAG_SETS = [
+  "#楽天roomに載せてます #楽天購入品 #楽天マラソン #お買い物マラソン",
+  "#楽天room #楽天で買ったもの #買ってよかったもの #暮らしを整える",
+  "#楽天お買い物マラソン #楽天セール #qol向上 #便利グッズ",
+];
+
+const THREADS_CTAS = [
+  "🛒 楽天ROOMで紹介中 →",
+  "詳細はここにまとめてます →",
+  "気になった人はこちら →",
+  "リンク置いておきます🔗",
+];
+
+function pick<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)]!;
+}
+
 /** ROOM用キャプションをInstagram用に変換（リンク不可→プロフィール誘導CTA） */
 export function toInstagramCaption(caption: string): string {
-  const cta = "\n\n▶ 商品リンクは楽天ROOMに載せてます！プロフィールのリンクからチェックしてね🛒";
-  const extraTags = "\n#楽天roomに載せてます #楽天購入品 #楽天マラソン #お買い物マラソン";
+  const cta = `\n\n${pick(IG_CTAS)}`;
+  const extraTags = `\n${pick(IG_TAG_SETS)}`;
   return `${caption}${cta}${extraTags}`.slice(0, 2200);
 }
 
 /** ROOM用キャプションをThreads用に変換（500字制限・リンク可） */
 export function toThreadsCaption(caption: string): string {
   const roomUrl = env("ROOM_PROFILE_URL");
-  const link = roomUrl ? `\n\n🛒 楽天ROOMで紹介中 → ${roomUrl}` : "";
+  const link = roomUrl ? `\n\n${pick(THREADS_CTAS)} ${roomUrl}` : "";
   // ハッシュタグはThreadsでは効果が薄いので削って本文を優先
   const body = caption.replace(/#[^\s#]+/g, "").replace(/\n{3,}/g, "\n\n").trim();
   const maxBody = 500 - link.length;

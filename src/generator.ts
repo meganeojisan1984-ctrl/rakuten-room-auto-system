@@ -1,8 +1,40 @@
 import Groq from "groq-sdk";
 import * as dotenv from "dotenv";
 import type { RakutenItem } from "./fetcher";
-import { loadStrategy } from "./agents/store";
+import { loadStrategy, loadHistory, weightedPick } from "./agents/store";
 dotenv.config();
+
+// ============================================================
+// フック(書き出しパターン) — 脱ワンパターンのローテーション対象
+// 司令官が strategy.hookWeights でどのフックが伸びるかを学習する
+// ============================================================
+
+export const HOOK_PATTERNS: Record<string, string> = {
+  surprise: "驚き型: 「え、待って。」「嘘でしょ…」のような思わず二度見する驚きから始める",
+  empathy: "共感型: 「〇〇な人、正直手を挙げて🙋」「わかる人にはわかるやつ」のようなあるある共感から始める",
+  question: "問いかけ型: 「〇〇で損してない?」「まだ△△してるの?」のような読者への質問から始める",
+  number: "数字型: 「レビュー3,000件超え」「3秒で終わる」のような具体的な数字のインパクトから始める",
+  beforeafter: "ビフォーアフター型: 「先月までの私: 〇〇 / 今の私: △△」のような変化の対比から始める",
+  loss: "損失回避型: 「これ知らないと年間〇〇円損してるかも」のような機会損失の指摘から始める",
+  story: "ストーリー型: 「深夜2時、また〇〇と格闘してた…」のような情景が浮かぶ物語の一場面から始める",
+  ranking: "権威型: 「楽天ランキング1位」「殿堂入り」「リピーター続出」のような実績・権威から始める",
+};
+
+/** フックを学習済み重みで選択し、直近の書き出しを重複回避リストとして返す */
+export function pickHook(): { hookKey: string; hookInstruction: string; recentHeads: string[] } {
+  const strategy = loadStrategy();
+  const keys = Object.keys(HOOK_PATTERNS);
+  // 直近5投稿で使ったフックは選択確率を下げる（連続同パターン防止）
+  const recent = loadHistory().slice(-5);
+  const recentHooks = new Set(recent.map((r) => r.hook).filter(Boolean));
+  const weights: Record<string, number> = {};
+  for (const k of keys) {
+    weights[k] = (strategy.hookWeights[k] ?? 1) * (recentHooks.has(k) ? 0.25 : 1);
+  }
+  const hookKey = weightedPick(keys, (k) => k, weights);
+  const recentHeads = recent.map((r) => r.captionHead ?? "").filter((h) => h.length > 0);
+  return { hookKey, hookInstruction: HOOK_PATTERNS[hookKey]!, recentHeads };
+}
 
 /** 司令官が学習した勝ちパターンをプロンプトに注入する */
 function getStyleHintsBlock(): string {
@@ -114,7 +146,12 @@ export function sanitizeCaption(caption: string): string {
   return text.trim();
 }
 
-function buildPrompt(item: RakutenItem, postType: PostType): string {
+function buildPrompt(
+  item: RakutenItem,
+  postType: PostType,
+  hookInstruction?: string,
+  recentHeads: string[] = []
+): string {
   const bonusInfo: string[] = [];
   if (item.hasPointBonus) {
     bonusInfo.push(`🎯 ポイント${item.pointRate}倍獲得チャンス！`);
@@ -167,8 +204,11 @@ ${item.reviewAverage && item.reviewCount ? `- レビュー: ★${item.reviewAver
 
 【季節の文脈】いまは「${getSeasonContext()}」の時期。自然に絡められる場合のみ絡めること（無理やりはNG）。
 ${getStyleHintsBlock()}
+【今回のフック指定（冒頭は必ずこのパターンで書くこと）】
+${hookInstruction ?? "自由（読者が思わず止まるものにする）"}
+${recentHeads.length > 0 ? `\n【直近投稿の書き出し（これらと似た書き出しは絶対NG。違う言葉・違うリズムで）】\n${recentHeads.map((h) => `- ${h}`).join("\n")}\n` : ""}
 【トップインフルエンサーの書き方ルール（必ず全部守ること）】
-1. 冒頭1〜2行は「思わず止まってしまう」フック。驚き・共感・ビフォーアフター・問いかけのどれかで引き込む
+1. 冒頭1〜2行は指定フックで「思わず止まってしまう」ものにする
 2. 「使う前は〇〇で困ってた」→「使い始めたら△△が変わった！」という体験談スタイルで書く（スペック羅列は絶対NG）
 3. 必ず「◯◯と組み合わせると最強」「△△と一緒に使うともっと便利」という"組み合わせ提案"を1回入れる
 4. 文章に緩急をつけ、絵文字を感情の強弱に合わせて戦略的に使う（多すぎず少なすぎず）
@@ -222,10 +262,10 @@ ${getStyleHintsBlock()}
 export async function generateTrendCaptions(
   keyword: string,
   items: RakutenItem[]
-): Promise<Array<{ item: RakutenItem; caption: string }>> {
+): Promise<Array<{ item: RakutenItem; caption: string; hook: string }>> {
   if (!GROQ_API_KEY) throw new Error("GROQ_API_KEY が未設定です");
   const client = new Groq({ apiKey: GROQ_API_KEY });
-  const results: Array<{ item: RakutenItem; caption: string }> = [];
+  const results: Array<{ item: RakutenItem; caption: string; hook: string }> = [];
 
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
@@ -235,7 +275,7 @@ export async function generateTrendCaptions(
       console.log(`[generator] 「${item.itemName.slice(0, 30)}...」ROOM文生成中 (トレンド: ${keyword})`);
       const caption = await generateWithRetry(client, buildGeminiRoomPrompt(keyword, item), 0.95);
 
-      results.push({ item, caption: sanitizeCaption(caption) });
+      results.push({ item, caption: sanitizeCaption(caption), hook: "trend" });
     } catch (err) {
       console.error(`[generator] トレンド生成失敗 「${item.itemName.slice(0, 30)}」:`, err);
     }
@@ -250,33 +290,40 @@ export async function generateTrendCaptions(
 // 公開API
 // ============================================================
 
-export async function generateCaption(item: RakutenItem, postType: PostType = 2): Promise<string> {
+export async function generateCaption(
+  item: RakutenItem,
+  postType: PostType = 2
+): Promise<{ caption: string; hook: string }> {
   if (!GROQ_API_KEY) {
     throw new Error("GROQ_API_KEY が未設定です");
   }
 
   const client = new Groq({ apiKey: GROQ_API_KEY });
-  const prompt = buildPrompt(item, postType);
+  // OODA: 司令官の学習済みフック重みで書き出しパターンを選択し、直近と同じ書き出しを禁止
+  const { hookKey, hookInstruction, recentHeads } = pickHook();
+  const prompt = buildPrompt(item, postType, hookInstruction, recentHeads);
 
-  console.log(`[generator] 「${item.itemName.slice(0, 30)}...」の紹介文を生成中 (${getPostTypeLabel(postType)})`);
-  const caption = await generateWithRetry(client, prompt, 0.8);
+  console.log(
+    `[generator] 「${item.itemName.slice(0, 30)}...」の紹介文を生成中 (${getPostTypeLabel(postType)} / フック: ${hookKey})`
+  );
+  const caption = await generateWithRetry(client, prompt, 0.9);
   console.log("[generator] 紹介文生成完了");
-  return sanitizeCaption(caption);
+  return { caption: sanitizeCaption(caption), hook: hookKey };
 }
 
 export async function generateCaptions(
   items: RakutenItem[],
   postType: PostType = 2
-): Promise<Array<{ item: RakutenItem; caption: string }>> {
-  const results: Array<{ item: RakutenItem; caption: string }> = [];
+): Promise<Array<{ item: RakutenItem; caption: string; hook: string }>> {
+  const results: Array<{ item: RakutenItem; caption: string; hook: string }> = [];
 
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
     if (!item) continue;
 
     try {
-      const caption = await generateCaption(item, postType);
-      results.push({ item, caption });
+      const { caption, hook } = await generateCaption(item, postType);
+      results.push({ item, caption, hook });
     } catch (err) {
       console.error(`[generator] 商品「${item.itemName.slice(0, 30)}」の生成失敗:`, err);
     }

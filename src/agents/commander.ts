@@ -77,41 +77,46 @@ const SEASONAL_KEYWORDS_BY_MONTH: Record<number, string[]> = {
 function buildCommanderPrompt(strategy: Strategy, analysis: AnalysisResult): string {
   const month = new Date().getMonth() + 1;
   const nextMonth = (month % 12) + 1;
-  return `あなたは楽天ROOMアフィリエイト自動化部隊の司令官であり、「何が売れるか」を常に考えるマーチャンダイザーです。以下の実績データを分析し、次世代の戦略を決定してください。
+  return `あなたは楽天ROOMアフィリエイト自動化部隊の司令官であり、「何が売れるか」を常に考えるマーチャンダイザーです。
+OODAループの Orient(状況判断)→Decide(意思決定) を担当します。Observe(観測)の結果である以下の実績データを分析し、次世代の戦略を決定してください。
 
 【現在の戦略 (第${strategy.generation}世代)】
-${JSON.stringify({ genreWeights: strategy.genreWeights, postTypeWeights: strategy.postTypeWeights, priceBandWeights: strategy.priceBandWeights, seasonalKeywords: strategy.seasonalKeywords, styleHints: strategy.styleHints }, null, 1)}
+${JSON.stringify({ genreWeights: strategy.genreWeights, postTypeWeights: strategy.postTypeWeights, priceBandWeights: strategy.priceBandWeights, hookWeights: strategy.hookWeights, seasonalKeywords: strategy.seasonalKeywords, styleHints: strategy.styleHints }, null, 1)}
 前世代のメモ: ${strategy.commanderNotes || "なし"}
 
-【実績集計】
+【Observe: 実績集計】
 - 総投稿: ${analysis.totalPosts}件 / いいね計測済み: ${analysis.measuredPosts}件
 - ジャンル別平均いいね: ${JSON.stringify(analysis.byGenre.slice(0, 8))}
 - 投稿タイプ別 (1=回遊/2=成約/3=送客): ${JSON.stringify(analysis.byPostType)}
 - 価格帯別: ${JSON.stringify(analysis.byPriceBand)}
+- フック(書き出しパターン)別: ${JSON.stringify(analysis.byHook)}
 - 時間帯別: ${JSON.stringify(analysis.byHour.slice(0, 6))}
 - トップ投稿: ${JSON.stringify(analysis.topPosts)}
 
-【売れる仕組みの思考（毎回必ず考慮すること）】
-- 季節先取り: いまは${month}月。読者は${nextMonth}月の需要を先取りした商品に反応する（参考テーマ: ${(SEASONAL_KEYWORDS_BY_MONTH[nextMonth] ?? []).join("・")}）
-- 高単価戦略: 報酬 = 価格×料率×成約数。高単価帯(5000円以上)は1件の報酬が大きいので、いいね実績が低価格帯の半分でも期待値では勝ちうる
-- ニーズの型: ①悩み解決の消耗品(リピート) ②季節イベント需要(瞬発力) ③高単価の買い替え家電(単価) をバランスさせる
+【Orient: マーケティング・ミックス(4P)の枠組みで状況判断すること】
+- Product(何を売るか): ジャンル実績+季節先取り。いまは${month}月、読者は${nextMonth}月需要を先取りした商品に反応する（参考テーマ: ${(SEASONAL_KEYWORDS_BY_MONTH[nextMonth] ?? []).join("・")}）。ニーズの型①悩み解決の消耗品(リピート) ②季節イベント需要(瞬発力) ③高単価の買い替え家電(単価) をバランスさせる
+- Price(いくらのものを推すか): 価格帯別実績と期待報酬。報酬=価格×料率×成約数なので、高単価帯(5000円以上)はいいねが低価格帯の半分でも期待値では勝ちうる
+- Place(どこで・いつ届けるか): 時間帯別実績。伸びる時間帯の傾向をnotesに残す
+- Promotion(どう魅せるか): 投稿タイプ×フック別実績。伸びるフックの重みを上げ、飽きられないよう1つのフックに全振りしない
 
-【指示】
+【Decide: 指示】
 1. genreWeights: 平均いいねが高いジャンルの重みを上げ、低いジャンルを下げる（0.5〜2.0、計測済み3件未満のジャンルは大きく動かさない）
 2. postTypeWeights: 同様に調整（0.5〜2.0）
-3. priceBandWeights: 価格帯別実績と期待報酬（高単価は少ないいいねでも価値が高い）を考慮して調整（0.5〜2.0）
-4. seasonalKeywords: ${nextMonth}月需要を先取りした楽天検索キーワードを5個（各20文字以内。季節需要+高単価が狙えるものを最低1個含める）
-5. styleHints: トップ投稿の共通パターンから、コメント生成AIへの具体的な指示を最大3つ（各60文字以内、日本語）。データ不足なら空配列
-6. notes: 今回の判断理由（売れる仕組みの観点を含めて）を200文字以内で
+3. priceBandWeights: Priceの判断で調整（0.5〜2.0）
+4. hookWeights: Promotionの判断で調整（0.5〜2.0、キーは surprise/empathy/question/number/beforeafter/loss/story/ranking）。計測3件未満のフックは動かさない。最大でも2つのフックまでしか1.5以上にしない（多様性の維持）
+5. seasonalKeywords: ${nextMonth}月需要を先取りした楽天検索キーワードを5個（各20文字以内。季節需要+高単価が狙えるものを最低1個含める）
+6. styleHints: トップ投稿の共通パターンから、コメント生成AIへの具体的な指示を最大3つ（各60文字以内、日本語）。データ不足なら空配列
+7. notes: 4Pそれぞれの判断理由を250文字以内で
 
 以下のJSONのみを出力（説明・マークダウン不要）:
-{"genreWeights":{...},"postTypeWeights":{"1":1.0,"2":1.0,"3":1.0},"priceBandWeights":{"1000-3000":1.0,"3000-5000":1.0,"5000-10000":1.0,"10000-30000":1.0},"seasonalKeywords":[],"styleHints":[],"notes":"..."}`;
+{"genreWeights":{...},"postTypeWeights":{"1":1.0,"2":1.0,"3":1.0},"priceBandWeights":{"1000-3000":1.0,"3000-5000":1.0,"5000-10000":1.0,"10000-30000":1.0},"hookWeights":{},"seasonalKeywords":[],"styleHints":[],"notes":"..."}`;
 }
 
 interface CommanderDecision {
   genreWeights: Record<string, number>;
   postTypeWeights: Record<string, number>;
   priceBandWeights: Record<string, number>;
+  hookWeights: Record<string, number>;
   seasonalKeywords: string[];
   styleHints: string[];
   notes: string;
@@ -135,6 +140,7 @@ async function askLlm(strategy: Strategy, analysis: AnalysisResult): Promise<Com
     genreWeights: parsed.genreWeights ?? {},
     postTypeWeights: parsed.postTypeWeights ?? {},
     priceBandWeights: parsed.priceBandWeights ?? {},
+    hookWeights: parsed.hookWeights ?? {},
     seasonalKeywords: (parsed.seasonalKeywords ?? [])
       .filter((s) => typeof s === "string" && s.trim().length > 0)
       .map((s) => s.trim().slice(0, 20))
@@ -163,6 +169,7 @@ function heuristicDecision(strategy: Strategy, analysis: AnalysisResult): Comman
     genreWeights,
     postTypeWeights: strategy.postTypeWeights,
     priceBandWeights: strategy.priceBandWeights,
+    hookWeights: strategy.hookWeights,
     seasonalKeywords: SEASONAL_KEYWORDS_BY_MONTH[nextMonth] ?? strategy.seasonalKeywords,
     styleHints: strategy.styleHints,
     notes: "LLM不通のためルールベース調整（上位ジャンル+20%・最下位-10%・平均回帰・翌月の定番季節キーワード適用）",
@@ -199,6 +206,7 @@ export async function runCommander(analysis: AnalysisResult): Promise<Strategy> 
     genreWeights: clampWeights({ ...strategy.genreWeights, ...decision.genreWeights }),
     postTypeWeights: clampWeights({ ...strategy.postTypeWeights, ...decision.postTypeWeights }),
     priceBandWeights: clampWeights({ ...strategy.priceBandWeights, ...decision.priceBandWeights }),
+    hookWeights: clampWeights({ ...strategy.hookWeights, ...decision.hookWeights }),
     seasonalKeywords: decision.seasonalKeywords.length > 0 ? decision.seasonalKeywords : strategy.seasonalKeywords,
     styleHints: decision.styleHints,
     commanderNotes: decision.notes,
@@ -222,6 +230,7 @@ export async function runCommander(analysis: AnalysisResult): Promise<Strategy> 
       `**ジャンル重み上位**: ${weightsSummary || "初期値"}`,
       `**投稿タイプ重み**: ${JSON.stringify(next.postTypeWeights)}`,
       `**価格帯重み**: ${JSON.stringify(next.priceBandWeights)}`,
+      `**フック重み**: ${Object.entries(next.hookWeights).filter(([, v]) => v !== 1).map(([k, v]) => `${k}:${v.toFixed(2)}`).join(" / ") || "全て均等"}`,
       `**季節キーワード**: ${next.seasonalKeywords.join(" / ") || "なし"}`,
       `**文体ヒント**: ${next.styleHints.join(" | ") || "なし"}`,
       `**判断** (${usedLlm ? "LLM" : "ルールベース"}): ${next.commanderNotes}`,
