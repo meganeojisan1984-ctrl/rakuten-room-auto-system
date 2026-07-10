@@ -1,8 +1,12 @@
 {
-  "generation": 0,
-  "updatedAt": "2026-07-10T00:00:00.000Z",
+  "generation": 1,
+  "updatedAt": "2026-07-10T16:48:16.803Z",
   "genreWeights": {},
-  "postTypeWeights": { "1": 1, "2": 1, "3": 1 },
+  "postTypeWeights": {
+    "1": 1,
+    "2": 1,
+    "3": 1
+  },
   "styleHints": [],
-  "commanderNotes": "初期状態。実績データが溜まり次第、司令官が毎晩更新する。"
+  "commanderNotes": "実績データが不足しているため、調整は行わない"
 }

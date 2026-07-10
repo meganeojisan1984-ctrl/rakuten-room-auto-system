@@ -100,5 +100,23 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=失敗/未設定, Threads=成功"
+  },
+  {
+    "ts": "2026-07-10T16:48:16.125Z",
+    "agent": "metrics",
+    "ok": false,
+    "summary": "計測失敗: Error: page.evaluate: Execution context was destroyed, most likely because of a navigation"
+  },
+  {
+    "ts": "2026-07-10T16:48:16.126Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴5件(計測済0)を集計。ジャンル5種"
+  },
+  {
+    "ts": "2026-07-10T16:48:17.212Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第1世代へ更新 (LLM)、警告0件"
   }
 ]
