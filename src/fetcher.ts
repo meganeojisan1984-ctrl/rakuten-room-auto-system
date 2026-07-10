@@ -1,6 +1,6 @@
 import axios from "axios";
 import * as dotenv from "dotenv";
-import { loadStrategy, weightedPick } from "./agents/store";
+import { loadStrategy, weightedPick, PRICE_BANDS } from "./agents/store";
 dotenv.config();
 
 // 直近に選択されたジャンル名（学習ループの投稿履歴記録用）
@@ -323,17 +323,19 @@ function convertRankingItems(items: RakutenRankingApiItem[]): RakutenItem[] {
 }
 
 /**
- * 売上期待値スコア: レビュー実績×お得情報×アフィリエイト料率の複合評価
+ * 売上期待値スコア: レビュー実績×お得情報×期待報酬額の複合評価
  * - レビュー: 評価×件数の対数（実績のない商品は成約率が低い）
  * - ポイントアップ/クーポン: クリック率・成約率を直接押し上げる
- * - アフィリエイト料率: 同じ成約数でも報酬が変わる
+ * - 期待報酬額: 価格×アフィリエイト料率（高単価×高料率が正当に評価される）
  */
 export function salesScore(item: RakutenItem): number {
   const review =
     (item.reviewAverage ?? 0) * Math.log10(Math.max(item.reviewCount ?? 0, 1) + 1);
   const bonus = (item.hasPointBonus ? 3 : 0) + (item.hasCoupon ? 1.5 : 0);
-  const affiliate = (item.affiliateRate ?? 2) * 1.5;
-  return review + bonus + affiliate;
+  // 1成約あたりの期待報酬(円) = 価格 × 料率。対数で圧縮して他要素とバランスさせる
+  const commission = item.itemPrice * ((item.affiliateRate ?? 2) / 100);
+  const revenue = Math.log10(commission + 1) * 3;
+  return review + bonus + revenue;
 }
 
 function convertSearchItems(items: RakutenApiItem[]): RakutenItem[] {
@@ -617,19 +619,34 @@ export async function fetchItems(count: number = 5, excludeCodes: Set<string> = 
   let genreId: string | undefined;
   let selectedGenreName = "全体";
 
-  // generalの場合はメイン(6〜7割)/サブ(3〜4割)ジャンルからランダム選択
+  // generalの場合は司令官の戦略（価格帯・季節キーワード・ジャンル重み）に従って選定
+  let seasonalKeyword: string | undefined;
   if (TARGET_GENRE === "general" || !TARGET_GENRE) {
-    // メインを6〜7割、サブを3〜4割の比率で選択
-    const useMain = Math.random() < 0.65;
-    const pool = useMain ? MAIN_GENRES : SUB_GENRES;
-    // 司令官の学習済みジャンル重み（strategy.json）で重み付き選択
-    const selected = weightedPick(pool, (g) => g.name, loadStrategy().genreWeights);
-    genreId = selected.genreId;
-    minPrice = selected.minPrice;
-    maxPrice = selected.maxPrice;
-    selectedGenreName = `${useMain ? "メイン" : "サブ"}: ${selected.name}`;
-    lastSelectedGenreName = selected.name;
-    console.log(`[fetcher] ジャンル選択: ${selectedGenreName}`);
+    const strategy = loadStrategy();
+
+    // 価格帯を司令官の学習済み重みで選択（高単価枠を含む）
+    const bandKey = weightedPick(Object.keys(PRICE_BANDS), (k) => k, strategy.priceBandWeights);
+    const band = PRICE_BANDS[bandKey]!;
+    minPrice = band.min;
+    maxPrice = band.max;
+
+    // 約3割は司令官が指定した季節先取りキーワードで商品検索（ニーズの波を掴む）
+    if (strategy.seasonalKeywords.length > 0 && Math.random() < 0.3) {
+      seasonalKeyword =
+        strategy.seasonalKeywords[Math.floor(Math.random() * strategy.seasonalKeywords.length)];
+      selectedGenreName = `季節: ${seasonalKeyword}`;
+      lastSelectedGenreName = `季節:${seasonalKeyword}`;
+      console.log(`[fetcher] 季節キーワード選択: 「${seasonalKeyword}」 価格帯: ${bandKey}円`);
+    } else {
+      // メインを6〜7割、サブを3〜4割の比率で選択し、ジャンル重みで重み付き選択
+      const useMain = Math.random() < 0.65;
+      const pool = useMain ? MAIN_GENRES : SUB_GENRES;
+      const selected = weightedPick(pool, (g) => g.name, strategy.genreWeights);
+      genreId = selected.genreId;
+      selectedGenreName = `${useMain ? "メイン" : "サブ"}: ${selected.name}`;
+      lastSelectedGenreName = selected.name;
+      console.log(`[fetcher] ジャンル選択: ${selectedGenreName} 価格帯: ${bandKey}円`);
+    }
   } else {
     const priceOverride = GENRE_PRICE_OVERRIDES[TARGET_GENRE];
     minPrice = priceOverride?.min ?? MIN_PRICE;
@@ -642,6 +659,19 @@ export async function fetchItems(count: number = 5, excludeCodes: Set<string> = 
     if (TARGET_GENRE === "1000yen") {
       const rawItems = await fetchItemSearch("1000円ポッキリ 送料無料", minPrice, maxPrice);
       filtered = applyItemFilter(rawItems, minPrice, maxPrice, excludeCodes, "1000円ポッキリ");
+    } else if (seasonalKeyword) {
+      // 季節キーワード検索（page1→2の順に、フィルタ通過が出るまで試行）
+      filtered = [];
+      for (let page = 1; page <= 2 && filtered.length === 0; page++) {
+        const rawItems = await fetchItemSearch(seasonalKeyword, minPrice, maxPrice, undefined, page);
+        if (rawItems.length === 0) break;
+        filtered = applyItemFilter(rawItems, minPrice, maxPrice, excludeCodes, `季節 "${seasonalKeyword}" p${page}`);
+      }
+      // 季節検索で見つからない場合は通常の検索ローテーションへフォールバック
+      if (filtered.length === 0) {
+        console.warn(`[fetcher] 季節キーワード「${seasonalKeyword}」で0件、検索ローテーションへ`);
+        filtered = await fetchSearchWithRotation(minPrice, maxPrice, excludeCodes);
+      }
     } else {
       filtered = await fetchRankingWithFallback(
         genreId,

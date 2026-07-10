@@ -29,10 +29,30 @@ export interface Strategy {
   genreWeights: Record<string, number>;
   /** 投稿タイプ(1=回遊/2=成約/3=送客)→重み */
   postTypeWeights: Record<string, number>;
+  /** 価格帯→重み(0.5〜2.0)。高単価枠を含む商品選定の価格戦略 */
+  priceBandWeights: Record<string, number>;
+  /** 司令官が更新する季節先取りキーワード（最大5件、商品検索に使用） */
+  seasonalKeywords: string[];
   /** コメントエージェントのプロンプトに注入する勝ちパターン（最大3件） */
   styleHints: string[];
   /** 司令官の直近の分析メモ（次世代の判断材料） */
   commanderNotes: string;
+}
+
+/** 価格帯の定義（key: strategy.priceBandWeightsのキー） */
+export const PRICE_BANDS: Record<string, { min: number; max: number }> = {
+  "1000-3000": { min: 1000, max: 3000 },
+  "3000-5000": { min: 3000, max: 5000 },
+  "5000-10000": { min: 5000, max: 10000 },
+  "10000-30000": { min: 10000, max: 30000 }, // 高単価枠（報酬単価が大きい）
+};
+
+/** 価格から所属価格帯キーを返す */
+export function priceBandOf(price: number): string {
+  for (const [key, r] of Object.entries(PRICE_BANDS)) {
+    if (price >= r.min && price < r.max) return key;
+  }
+  return price < 1000 ? "〜1000" : "30000〜";
 }
 
 export interface PostRecord {
@@ -77,6 +97,9 @@ export function defaultStrategy(): Strategy {
     updatedAt: new Date().toISOString(),
     genreWeights: {},
     postTypeWeights: { "1": 1, "2": 1, "3": 1 },
+    // 初期は低価格帯寄り（実績が付いたら司令官が高単価枠を調整）
+    priceBandWeights: { "1000-3000": 1.2, "3000-5000": 1.0, "5000-10000": 0.8, "10000-30000": 0.6 },
+    seasonalKeywords: [],
     styleHints: [],
     commanderNotes: "",
   };
@@ -90,6 +113,8 @@ export function loadStrategy(): Strategy {
     updatedAt: s.updatedAt ?? d.updatedAt,
     genreWeights: s.genreWeights ?? d.genreWeights,
     postTypeWeights: s.postTypeWeights ?? d.postTypeWeights,
+    priceBandWeights: s.priceBandWeights ?? d.priceBandWeights,
+    seasonalKeywords: (s.seasonalKeywords ?? []).slice(0, 5),
     styleHints: (s.styleHints ?? []).slice(0, 3),
     commanderNotes: s.commanderNotes ?? "",
   };

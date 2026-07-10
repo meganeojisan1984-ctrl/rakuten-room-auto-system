@@ -4,7 +4,7 @@
  * post_history.json（いいね実績付き）を集計し、
  * 「どのジャンル・投稿タイプ・時間帯が伸びているか」を司令官に渡す形に整形する。
  */
-import { loadHistory, loadReports, report, type AgentReport } from "./store";
+import { loadHistory, loadReports, report, priceBandOf, type AgentReport } from "./store";
 
 export interface Aggregate {
   key: string;
@@ -19,6 +19,7 @@ export interface AnalysisResult {
   byGenre: Aggregate[];
   byPostType: Aggregate[];
   byHour: Aggregate[];
+  byPriceBand: Aggregate[];
   topPosts: Array<{ itemName: string; likes: number; genreName: string; postType: number }>;
   agentHealth: Array<{ agent: string; runs: number; failures: number; lastError: string }>;
 }
@@ -70,6 +71,7 @@ export function runAnalystAgent(): AnalysisResult {
     byGenre: aggregate(history.map((h) => ({ key: h.genreName || "不明", likes: h.likes }))),
     byPostType: aggregate(history.map((h) => ({ key: String(h.postType), likes: h.likes }))),
     byHour: aggregate(history.map((h) => ({ key: `${h.hour}時`, likes: h.likes }))),
+    byPriceBand: aggregate(history.map((h) => ({ key: priceBandOf(h.price), likes: h.likes }))),
     topPosts: measured
       .sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0))
       .slice(0, 5)
