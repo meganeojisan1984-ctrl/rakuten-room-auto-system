@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "imaging888:10000145",
     "mujirushi-ryohin:10005610",
     "mmservice:10000340",
     "shopkurano:10009908",
@@ -499,7 +498,8 @@
     "auc-roque:10013703",
     "yamagoiida:10000077",
     "sheil-store:10020708",
-    "ideazakkaten:10000307"
+    "ideazakkaten:10000307",
+    "tsurunishi:10001040"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
