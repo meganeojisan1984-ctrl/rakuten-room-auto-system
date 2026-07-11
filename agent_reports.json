@@ -256,5 +256,11 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=成功"
+  },
+  {
+    "ts": "2026-07-11T10:00:04.281Z",
+    "agent": "scout",
+    "ok": false,
+    "summary": "Error: 楽天APIエラー: TypeError: Cannot read properties of undefined (reading 'pointRate')"
   }
 ]
