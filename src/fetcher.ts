@@ -254,15 +254,14 @@ async function fetchItemSearch(
 
   try {
     const response = await axios.get<{
-      Items: Array<{ Item: RakutenApiItem }>;
+      Items: Array<RakutenApiItem | { Item: RakutenApiItem }>;
     }>("https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20220601", {
       params,
       timeout: 15000,
       headers: { Referer: "https://github.com", Origin: "https://github.com" },
     });
 
-    const items = response.data.Items.map((i) => i.Item);
-    return convertSearchItems(items);
+    return convertSearchItems(unwrapSearchItems(response.data.Items ?? []));
   } catch (err: unknown) {
     const status = (err as { response?: { status?: number } })?.response?.status;
     // page 超過や該当0件で 404/400 が返ることがある → 空配列で先へ進める
@@ -273,14 +272,25 @@ async function fetchItemSearch(
     if (status === 429) {
       console.warn("[fetcher] 楽天API レート制限 (429)、30秒待機して再試行...");
       await new Promise((r) => setTimeout(r, 30000));
-      const retry = await axios.get<{ Items: Array<{ Item: RakutenApiItem }> }>(
+      const retry = await axios.get<{ Items: Array<RakutenApiItem | { Item: RakutenApiItem }> }>(
         "https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20220601",
         { params, timeout: 15000, headers: { Referer: "https://github.com", Origin: "https://github.com" } }
       );
-      return convertSearchItems(retry.data.Items.map((i) => i.Item));
+      return convertSearchItems(unwrapSearchItems(retry.data.Items ?? []));
     }
     throw err;
   }
+}
+
+/**
+ * 検索APIのItems要素を正規化する。
+ * formatVersion=1: [{Item: {...}}] / formatVersion=2: [{...}] の両形式に対応
+ * （formatVersion=2でi.Itemを読むとundefinedになりpointRate参照で落ちるバグの修正）
+ */
+function unwrapSearchItems(items: Array<RakutenApiItem | { Item: RakutenApiItem }>): RakutenApiItem[] {
+  return items
+    .map((i) => ("Item" in i && i.Item ? i.Item : (i as RakutenApiItem)))
+    .filter((i): i is RakutenApiItem => !!i && typeof i === "object" && "itemName" in i);
 }
 
 /**
@@ -377,6 +387,7 @@ export async function fetchItemsByKeyword(
 
   const params: Record<string, string | number> = {
     applicationId: RAKUTEN_APP_ID,
+    accessKey: RAKUTEN_ACCESS_KEY,
     formatVersion: 2,
     hits: 30,
     sort: "-reviewCount",
@@ -390,7 +401,7 @@ export async function fetchItemsByKeyword(
 
   let rawItems: RakutenApiItem[];
   try {
-    const response = await axios.get<{ Items: Array<{ Item: RakutenApiItem }> }>(
+    const response = await axios.get<{ Items: Array<RakutenApiItem | { Item: RakutenApiItem }> }>(
       "https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20220601",
       {
         params,
@@ -398,7 +409,7 @@ export async function fetchItemsByKeyword(
         headers: { Referer: "https://github.com", Origin: "https://github.com" },
       }
     );
-    rawItems = response.data.Items.map((i) => i.Item);
+    rawItems = unwrapSearchItems(response.data.Items ?? []);
   } catch (err) {
     throw new Error(`楽天キーワード検索エラー: ${String(err)}`);
   }
