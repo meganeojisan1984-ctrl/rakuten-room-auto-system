@@ -15,8 +15,13 @@ const STRATEGY_FILE = path.join(ROOT, "strategy.json");
 const HISTORY_FILE = path.join(ROOT, "post_history.json");
 const REPORTS_FILE = path.join(ROOT, "agent_reports.json");
 
+const DIALOGUE_FILE = path.join(ROOT, "dialogue.json");
+const SALES_FILE = path.join(ROOT, "sales_reports.json");
+
 const MAX_HISTORY = 300;
 const MAX_REPORTS = 200;
+const MAX_DIALOGUE = 60;
+const MAX_SALES = 24;
 
 // ============================================================
 // 型定義
@@ -77,6 +82,20 @@ export interface AgentReport {
   agent: string; // scout | copywriter | poster | promoter | metrics | analyst | commander
   ok: boolean;
   summary: string;
+}
+
+/** 司令官⇄オーナーの対話（ビジネスパートナーとしての質問・提案・回答） */
+export interface DialogueMessage {
+  ts: string;
+  from: "commander" | "user";
+  text: string;
+}
+
+/** オーナーが登録する実売データ（いいねより強い学習シグナル） */
+export interface SalesReport {
+  ts: string;
+  period: string; // 例: "2026-07"
+  note: string; // 売れたジャンル・商品・件数などの自由記述
 }
 
 // ============================================================
@@ -153,6 +172,26 @@ export function report(agent: string, ok: boolean, summary: string): void {
   reports.push({ ts: new Date().toISOString(), agent, ok, summary });
   writeJson(REPORTS_FILE, reports.slice(-MAX_REPORTS));
   console.log(`[report] ${ok ? "✅" : "❌"} ${agent}: ${summary}`);
+}
+
+export function loadDialogue(): DialogueMessage[] {
+  return readJson<DialogueMessage[]>(DIALOGUE_FILE, []);
+}
+
+export function appendDialogue(msg: DialogueMessage): void {
+  const d = loadDialogue();
+  d.push(msg);
+  writeJson(DIALOGUE_FILE, d.slice(-MAX_DIALOGUE));
+}
+
+export function loadSalesReports(): SalesReport[] {
+  return readJson<SalesReport[]>(SALES_FILE, []);
+}
+
+export function appendSalesReport(r: SalesReport): void {
+  const s = loadSalesReports();
+  s.push(r);
+  writeJson(SALES_FILE, s.slice(-MAX_SALES));
 }
 
 // ============================================================

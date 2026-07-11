@@ -24,7 +24,9 @@
     "genreName": "掃除用品・消耗品",
     "price": 2490,
     "postType": 2,
-    "hour": 19
+    "hour": 19,
+    "likes": 13,
+    "likesUpdatedAt": "2026-07-11T00:14:05.854Z"
   },
   {
     "ts": "2026-07-10T14:30:28.753Z",
@@ -33,7 +35,9 @@
     "genreName": "日用品雑貨・掃除・洗濯用品",
     "price": 2000,
     "postType": 3,
-    "hour": 23
+    "hour": 23,
+    "likes": 10,
+    "likesUpdatedAt": "2026-07-11T00:14:05.854Z"
   },
   {
     "ts": "2026-07-10T16:29:43.756Z",
@@ -51,7 +55,9 @@
     "genreName": "整理収納・片付けグッズ",
     "price": 3980,
     "postType": 2,
-    "hour": 6
+    "hour": 6,
+    "likes": 4,
+    "likesUpdatedAt": "2026-07-11T00:14:05.854Z"
   },
   {
     "ts": "2026-07-10T22:00:16.423Z",
@@ -69,6 +75,8 @@
     "genreName": "洗濯・衣類ケアグッズ",
     "price": 1310,
     "postType": 1,
-    "hour": 8
+    "hour": 8,
+    "likes": 17,
+    "likesUpdatedAt": "2026-07-11T00:14:05.854Z"
   }
 ]

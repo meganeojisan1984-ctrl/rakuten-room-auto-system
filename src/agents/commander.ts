@@ -15,6 +15,9 @@ import {
   saveStrategy,
   clampWeights,
   report,
+  loadDialogue,
+  appendDialogue,
+  loadSalesReports,
   type Strategy,
 } from "./store";
 import type { AnalysisResult } from "./analyst-agent";
@@ -77,8 +80,25 @@ const SEASONAL_KEYWORDS_BY_MONTH: Record<number, string[]> = {
 function buildCommanderPrompt(strategy: Strategy, analysis: AnalysisResult): string {
   const month = new Date().getMonth() + 1;
   const nextMonth = (month % 12) + 1;
-  return `あなたは楽天ROOMアフィリエイト自動化部隊の司令官であり、「何が売れるか」を常に考えるマーチャンダイザーです。
+
+  // オーナー報告の実売データ（いいねより強いシグナル）
+  const sales = loadSalesReports().slice(-6);
+  const salesBlock =
+    sales.length > 0
+      ? `\n【実売データ（オーナー報告・いいねより優先すべき最重要シグナル）】\n${sales.map((s) => `- [${s.period}] ${s.note.slice(0, 200)}`).join("\n")}\n`
+      : "";
+
+  // オーナーとの対話（未回答の質問には同じ質問を繰り返さない）
+  const dialogue = loadDialogue().slice(-8);
+  const dialogueBlock =
+    dialogue.length > 0
+      ? `\n【オーナーとの対話履歴（直近）】\n${dialogue.map((d) => `${d.from === "commander" ? "司令官" : "オーナー"}: ${d.text.slice(0, 150)}`).join("\n")}\n`
+      : "";
+
+  return `あなたは楽天ROOMアフィリエイト自動化部隊の司令官であり、「何が売れるか」を常に考えるSNSマーケティングのプロです。
+オーナー（このシステムの持ち主）の対等なビジネスパートナーとして、データに基づく判断はもちろん、疑問があれば率直に質問し、根拠があれば反論や別提案も行います。
 OODAループの Orient(状況判断)→Decide(意思決定) を担当します。Observe(観測)の結果である以下の実績データを分析し、次世代の戦略を決定してください。
+${salesBlock}${dialogueBlock}
 
 【現在の戦略 (第${strategy.generation}世代)】
 ${JSON.stringify({ genreWeights: strategy.genreWeights, postTypeWeights: strategy.postTypeWeights, priceBandWeights: strategy.priceBandWeights, hookWeights: strategy.hookWeights, seasonalKeywords: strategy.seasonalKeywords, styleHints: strategy.styleHints }, null, 1)}
@@ -107,9 +127,10 @@ ${JSON.stringify({ genreWeights: strategy.genreWeights, postTypeWeights: strateg
 5. seasonalKeywords: ${nextMonth}月需要を先取りした楽天検索キーワードを5個（各20文字以内。季節需要+高単価が狙えるものを最低1個含める）
 6. styleHints: トップ投稿の共通パターンから、コメント生成AIへの具体的な指示を最大3つ（各60文字以内、日本語）。データ不足なら空配列
 7. notes: 4Pそれぞれの判断理由を250文字以内で
+8. question: ビジネスパートナーとしてオーナーに聞きたいこと・提案・反論があれば1つ（250文字以内、日本語）。例: データで裏取りできない仮説の確認、実売データの依頼、オーナーの方針への根拠ある異議。**直近の対話で未回答の質問があるときや、特に聞くことがないときは空文字**にすること（毎晩質問して負担をかけない。目安は週1〜2回）
 
 以下のJSONのみを出力（説明・マークダウン不要）:
-{"genreWeights":{...},"postTypeWeights":{"1":1.0,"2":1.0,"3":1.0},"priceBandWeights":{"1000-3000":1.0,"3000-5000":1.0,"5000-10000":1.0,"10000-30000":1.0},"hookWeights":{},"seasonalKeywords":[],"styleHints":[],"notes":"..."}`;
+{"genreWeights":{...},"postTypeWeights":{"1":1.0,"2":1.0,"3":1.0},"priceBandWeights":{"1000-3000":1.0,"3000-5000":1.0,"5000-10000":1.0,"10000-30000":1.0},"hookWeights":{},"seasonalKeywords":[],"styleHints":[],"notes":"...","question":""}`;
 }
 
 interface CommanderDecision {
@@ -120,6 +141,7 @@ interface CommanderDecision {
   seasonalKeywords: string[];
   styleHints: string[];
   notes: string;
+  question: string;
 }
 
 async function askLlm(strategy: Strategy, analysis: AnalysisResult): Promise<CommanderDecision> {
@@ -147,6 +169,7 @@ async function askLlm(strategy: Strategy, analysis: AnalysisResult): Promise<Com
       .slice(0, 5),
     styleHints: (parsed.styleHints ?? []).filter((s) => typeof s === "string").map((s) => s.slice(0, 60)).slice(0, 3),
     notes: (parsed.notes ?? "").slice(0, 300),
+    question: typeof parsed.question === "string" ? parsed.question.slice(0, 300) : "",
   };
 }
 
@@ -173,6 +196,7 @@ function heuristicDecision(strategy: Strategy, analysis: AnalysisResult): Comman
     seasonalKeywords: SEASONAL_KEYWORDS_BY_MONTH[nextMonth] ?? strategy.seasonalKeywords,
     styleHints: strategy.styleHints,
     notes: "LLM不通のためルールベース調整（上位ジャンル+20%・最下位-10%・平均回帰・翌月の定番季節キーワード適用）",
+    question: "",
   };
 }
 
@@ -214,6 +238,11 @@ export async function runCommander(analysis: AnalysisResult): Promise<Strategy> 
   saveStrategy(next);
 
   // 報告
+  // ビジネスパートナーとしての質問・提案を対話ログに記録（アプリで回答できる）
+  if (decision.question) {
+    appendDialogue({ ts: new Date().toISOString(), from: "commander", text: decision.question });
+  }
+
   const weightsSummary = Object.entries(next.genreWeights)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
@@ -234,6 +263,7 @@ export async function runCommander(analysis: AnalysisResult): Promise<Strategy> 
       `**季節キーワード**: ${next.seasonalKeywords.join(" / ") || "なし"}`,
       `**文体ヒント**: ${next.styleHints.join(" | ") || "なし"}`,
       `**判断** (${usedLlm ? "LLM" : "ルールベース"}): ${next.commanderNotes}`,
+      decision.question ? `**💬 司令官からの質問・提案**: ${decision.question}\n→ メンテナンスアプリの「司令官との対話」から回答できます` : "",
       `**部隊状況**:\n${healthSummary || "報告なし"}`,
       alerts.length > 0 ? `**🚨 警告${alerts.length}件** (個別通知済み)` : "",
     ]

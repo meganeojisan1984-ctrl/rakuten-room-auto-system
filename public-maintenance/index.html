@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ROOM司令部 - メンテナンスアプリ</title>
+<link rel="icon" href="/app.ico">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Segoe UI", "Hiragino Sans", "Meiryo", sans-serif; background: #f4f6fb; color: #2c3e50; padding: 16px; max-width: 1050px; margin: 0 auto; }
+  h1 { font-size: 20px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  h2 { font-size: 15px; margin-bottom: 10px; color: #34495e; border-left: 4px solid #4a69bd; padding-left: 8px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .card { background: #fff; border-radius: 14px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,.06); margin-bottom: 14px; }
+  .pets { display: flex; gap: 12px; }
+  .pet { flex: 1; text-align: center; }
+  .pet img { height: 170px; image-rendering: pixelated; transition: transform .3s; }
+  .pet img:hover { transform: scale(1.06); }
+  .pet .role { font-weight: bold; font-size: 13px; margin-top: 4px; color: #4a69bd; }
+  .bubble { background: #eef2ff; border-radius: 12px; padding: 8px 12px; font-size: 12.5px; margin-top: 6px; position: relative; min-height: 40px; display: flex; align-items: center; justify-content: center; }
+  .stat-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .stat { flex: 1; min-width: 110px; background: #f8f9ff; border-radius: 10px; padding: 10px; text-align: center; }
+  .stat .num { font-size: 21px; font-weight: bold; color: #4a69bd; }
+  .stat .label { font-size: 11px; color: #7f8c9b; }
+  .bar-outer { background: #e8ecf7; border-radius: 8px; height: 14px; overflow: hidden; margin: 4px 0 10px; }
+  .bar-inner { background: linear-gradient(90deg, #6a89e8, #4a69bd); height: 100%; border-radius: 8px; transition: width .5s; }
+  .mini-bars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; font-size: 11px; }
+  .mini-bars .mb { background: #f8f9ff; border-radius: 8px; padding: 6px; text-align: center; }
+  .mb.done { background: #e6f9ed; }
+  .wf { display: flex; justify-content: space-between; padding: 6px 4px; font-size: 12.5px; border-bottom: 1px solid #f0f2f8; }
+  .ok { color: #27ae60; font-weight: bold; }
+  .ng { color: #e74c3c; font-weight: bold; }
+  .chat { max-height: 240px; overflow-y: auto; margin-bottom: 8px; }
+  .msg { margin: 6px 0; display: flex; }
+  .msg.commander { justify-content: flex-start; }
+  .msg.user { justify-content: flex-end; }
+  .msg span { max-width: 78%; padding: 8px 12px; border-radius: 12px; font-size: 12.5px; line-height: 1.5; }
+  .msg.commander span { background: #eef2ff; border-bottom-left-radius: 3px; }
+  .msg.user span { background: #d9f2e3; border-bottom-right-radius: 3px; }
+  textarea, input[type=text], input[type=month] { width: 100%; border: 1.5px solid #dde3f0; border-radius: 10px; padding: 9px; font-size: 13px; font-family: inherit; margin-bottom: 8px; }
+  textarea { resize: vertical; min-height: 64px; }
+  button { background: #4a69bd; color: #fff; border: none; border-radius: 10px; padding: 9px 18px; font-size: 13px; cursor: pointer; font-family: inherit; }
+  button:hover { background: #3b5aad; }
+  button.sub { background: #8395c8; font-size: 12px; padding: 7px 12px; }
+  button:disabled { background: #b8c2dd; cursor: wait; }
+  .note { font-size: 11.5px; color: #8b97ab; line-height: 1.6; margin-top: 8px; }
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #2c3e50; color: #fff; padding: 11px 22px; border-radius: 999px; font-size: 13px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 99; }
+  .toast.show { opacity: 1; }
+  .pending { animation: pulse 1.6s infinite; border: 2px solid #f39c12 !important; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(243,156,18,.35);} 50% { box-shadow: 0 0 0 8px rgba(243,156,18,0);} }
+  .log { font-size: 11.5px; color: #5d6b80; max-height: 150px; overflow-y: auto; line-height: 1.7; }
+  details summary { cursor: pointer; font-size: 12.5px; color: #4a69bd; margin-bottom: 6px; }
+  @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<h1>🎖 ROOM司令部 <span style="font-size:12px;color:#8b97ab;font-weight:normal">通常運用は完全自動 / ここは見る・伝える・直すための司令部</span></h1>
+
+<div class="card">
+  <div class="pets">
+    <div class="pet">
+      <img id="pet-commander" src="/pet/commander_hello.png" alt="司令官">
+      <div class="role">🎖 司令官</div>
+      <div class="bubble" id="bubble-commander">読み込み中…</div>
+    </div>
+    <div class="pet">
+      <img id="pet-analyst" src="/pet/analyst_hello.png" alt="分析官">
+      <div class="role">📊 分析官</div>
+      <div class="bubble" id="bubble-analyst">読み込み中…</div>
+    </div>
+  </div>
+</div>
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <h2>📈 学習の進み具合</h2>
+      <div class="stat-row">
+        <div class="stat"><div class="num" id="st-gen">-</div><div class="label">戦略世代</div></div>
+        <div class="stat"><div class="num" id="st-posts">-</div><div class="label">総投稿</div></div>
+        <div class="stat"><div class="num" id="st-measured">-</div><div class="label">いいね計測済み</div></div>
+      </div>
+      <div style="margin-top:10px;font-size:12px;">学習データの充足度（フック8種×価格帯4種が各3件計測できるまで）</div>
+      <div class="bar-outer"><div class="bar-inner" id="progress-bar" style="width:0%"></div></div>
+      <details><summary>内訳を見る</summary>
+        <div style="font-size:11px;color:#7f8c9b;margin:4px 0">フック別（書き出しパターン）</div>
+        <div class="mini-bars" id="hook-bars"></div>
+        <div style="font-size:11px;color:#7f8c9b;margin:8px 0 4px">価格帯別</div>
+        <div class="mini-bars" id="band-bars"></div>
+      </details>
+      <div class="note">⏳ 1日5投稿なので、傾向が見えるまで2〜4週間が正常ペースです。最初の1週間で変化がなくても心配いりません。</div>
+    </div>
+
+    <div class="card">
+      <h2>⚙️ 自動運用の状態</h2>
+      <div id="workflows"></div>
+      <details style="margin-top:8px"><summary>エージェントの直近ログ</summary><div class="log" id="agent-log"></div></details>
+    </div>
+
+    <div class="card">
+      <h2>🔧 メンテナンス</h2>
+      <div style="font-size:12.5px;margin-bottom:6px"><b>ROOM Cookie更新</b>（Discordに「Cookie期限切れ」が来たら）</div>
+      <div class="note" style="margin:0 0 6px">① ターミナルで <code>npm run export-cookie</code> を実行 → ② 表示されたJSONを下に貼る → ③ ボタンを押す</div>
+      <textarea id="cookie-input" placeholder='[{"name":"...","value":"..."}] 形式のJSONを貼り付け'></textarea>
+      <button onclick="updateCookie()">Cookieを更新（Secrets反映）</button>
+      <hr style="border:none;border-top:1px solid #eef1f8;margin:14px 0">
+      <div style="font-size:12.5px;margin-bottom:8px"><b>手動実行</b>（普段は不要。動作確認したいときだけ）</div>
+      <button class="sub" onclick="runWorkflow('post')">投稿を1回実行</button>
+      <button class="sub" onclick="runWorkflow('learn')">学習ループ実行</button>
+      <button class="sub" onclick="runWorkflow('refresh')">トークン更新</button>
+      <div class="note">🛠 いいね計測が失敗続き(分析官がしょんぼり)のときは楽天ROOMのUI変更の可能性 → Claudeに「計測が壊れた」と伝えてください。<br>📣 IG/Threadsは開設直後のためフォロワー増加には数週間かかります(自動フォロー等はBANリスクのため意図的に非搭載)。</div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card" id="dialogue-card">
+      <h2>💬 司令官との対話 <span style="font-size:11px;color:#8b97ab">(SNSマーケのプロとして質問・提案・反論してきます)</span></h2>
+      <div class="chat" id="chat"></div>
+      <textarea id="answer-input" placeholder="司令官への回答・指示・相談を入力（例: 7月は掃除グッズより冷感系を優先して）"></textarea>
+      <button onclick="sendAnswer()">送信（今夜の学習で司令官が考慮）</button>
+    </div>
+
+    <div class="card">
+      <h2>💰 売上レポート登録 <span style="font-size:11px;color:#8b97ab">(いいねより強い最重要シグナル)</span></h2>
+      <div class="note" style="margin:0 0 8px">月1回、<a href="https://affiliate.rakuten.co.jp/report/" target="_blank">楽天アフィリエイトのレポート</a>を見て「実際に売れたもの」を書いてください。司令官が戦略に最優先で反映します。</div>
+      <input type="month" id="sales-period">
+      <textarea id="sales-note" placeholder="例: 冷感敷きパッド2件・ハンディファン1件成約。掃除グッズはクリックのみで成約ゼロ。単価3000円台が中心。"></textarea>
+      <button onclick="sendSales()">登録（戦略に反映）</button>
+      <details style="margin-top:8px"><summary>過去の登録</summary><div class="log" id="sales-log"></div></details>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let busy = false;
+
+function toast(msg) {
+  $("toast").textContent = msg;
+  $("toast").classList.add("show");
+  setTimeout(() => $("toast").classList.remove("show"), 3500);
+}
+
+async function api(path, body) {
+  const res = await fetch(path, body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : undefined);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "エラー");
+  return data;
+}
+
+function fmtDate(iso) {
+  const d = new Date(iso);
+  return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
+
+async function refresh() {
+  try {
+    const s = await api("/api/status");
+    // ペット
+    $("pet-commander").src = `/pet/commander_${s.pets.commander.pose}.png`;
+    $("bubble-commander").textContent = s.pets.commander.message;
+    $("pet-analyst").src = `/pet/analyst_${s.pets.analyst.pose}.png`;
+    $("bubble-analyst").textContent = s.pets.analyst.message;
+    // 統計
+    $("st-gen").textContent = "第" + s.strategy.generation + "世代";
+    $("st-posts").textContent = s.progress.totalPosts;
+    $("st-measured").textContent = s.progress.measuredPosts;
+    $("progress-bar").style.width = s.progress.progressPercent + "%";
+    const mb = (x) => `<div class="mb ${x.measured >= x.target ? "done" : ""}">${x.key}<br><b>${x.measured}</b>/${x.target}</div>`;
+    $("hook-bars").innerHTML = s.progress.hooks.map(mb).join("");
+    $("band-bars").innerHTML = s.progress.bands.map(mb).join("");
+    // ワークフロー
+    $("workflows").innerHTML = s.workflows.map((w) =>
+      `<div class="wf"><span>${w.name}</span><span class="${w.conclusion === "success" ? "ok" : "ng"}">${w.conclusion === "success" ? "✅ 正常" : "⚠ " + w.conclusion}<small style="color:#8b97ab;font-weight:normal"> ${fmtDate(w.updatedAt)}</small></span></div>`
+    ).join("") || '<div class="note">ワークフロー情報を取得できませんでした</div>';
+    // ログ
+    $("agent-log").innerHTML = s.recentReports.map((r) => `${r.ok ? "✅" : "❌"} [${fmtDate(r.ts)}] ${r.agent}: ${r.summary}`).join("<br>");
+    // 対話
+    $("chat").innerHTML = s.dialogue.map((d) =>
+      `<div class="msg ${d.from}"><span>${d.from === "commander" ? "🎖 " : ""}${d.text.replace(/</g, "&lt;")}<br><small style="color:#8b97ab">${fmtDate(d.ts)}</small></span></div>`
+    ).join("") || '<div class="note">まだ対話はありません。司令官は疑問・提案があるとき(週1〜2回程度)ここに質問を書きます。こちらから指示を送ることもできます。</div>';
+    $("chat").scrollTop = $("chat").scrollHeight;
+    $("dialogue-card").classList.toggle("pending", s.pendingQuestion);
+    // 売上ログ
+    $("sales-log").innerHTML = s.salesReports.map((r) => `[${r.period}] ${r.note.replace(/</g, "&lt;")}`).join("<br>") || "まだ登録なし";
+  } catch (e) {
+    $("bubble-commander").textContent = "サーバーとの通信に失敗: " + e.message;
+  }
+}
+
+async function guard(fn, okMsg) {
+  if (busy) return;
+  busy = true;
+  document.querySelectorAll("button").forEach((b) => (b.disabled = true));
+  try {
+    await fn();
+    toast(okMsg);
+    await refresh();
+  } catch (e) {
+    toast("❌ " + e.message);
+  } finally {
+    busy = false;
+    document.querySelectorAll("button").forEach((b) => (b.disabled = false));
+  }
+}
+
+function sendAnswer() {
+  const text = $("answer-input").value.trim();
+  if (!text) return toast("メッセージを入力してください");
+  guard(async () => {
+    await api("/api/answer", { text });
+    $("answer-input").value = "";
+  }, "✅ 司令官に送信しました（今夜の学習で反映・Discordにも報告済み）");
+}
+
+function sendSales() {
+  const period = $("sales-period").value;
+  const note = $("sales-note").value.trim();
+  if (!period || !note) return toast("期間と内容を入力してください");
+  guard(async () => {
+    await api("/api/sales", { period, note });
+    $("sales-note").value = "";
+  }, "✅ 売上レポートを登録しました（戦略に最優先で反映されます）");
+}
+
+function updateCookie() {
+  const cookie = $("cookie-input").value.trim();
+  if (!cookie) return toast("CookieのJSONを貼り付けてください");
+  guard(async () => {
+    await api("/api/cookie", { cookie });
+    $("cookie-input").value = "";
+  }, "✅ Cookieを更新しました（次回投稿から有効）");
+}
+
+function runWorkflow(name) {
+  guard(async () => {
+    await api("/api/workflow", { name });
+  }, "✅ 起動しました（結果はDiscordに届きます）");
+}
+
+// 今月をデフォルトに
+$("sales-period").value = new Date().toISOString().slice(0, 7);
+refresh();
+setInterval(refresh, 60000);
+</script>
+</body>
+</html>

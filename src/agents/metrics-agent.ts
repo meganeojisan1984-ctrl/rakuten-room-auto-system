@@ -27,60 +27,87 @@ async function scrapeOwnPosts(headless: boolean): Promise<ScrapedPost[]> {
     }
     const page = await context.newPage();
     await page.goto(ROOM_PROFILE_URL(), { waitUntil: "domcontentloaded", timeout: 60000 });
-    await page.waitForTimeout(3000);
+    // ROOMはSPAで直後にクライアント側遷移が走り "Execution context was destroyed" になるため、
+    // ネットワーク静止を待ってから安定するまで追加待機する
+    await page.waitForLoadState("networkidle", { timeout: 30000 }).catch(() => {});
+    await page.waitForTimeout(4000);
 
-    // 無限スクロールを数回進めて直近投稿を読み込む
+    // 無限スクロールを数回進めて直近投稿を読み込む（遷移中のevaluate失敗はリトライ）
     for (let i = 0; i < 3; i++) {
-      await page.evaluate(() => window.scrollBy(0, window.innerHeight * 2));
+      try {
+        await page.evaluate(() => window.scrollBy(0, window.innerHeight * 2));
+      } catch {
+        await page.waitForTimeout(2000); // 遷移中なら待って次のループへ
+      }
       await page.waitForTimeout(1500);
     }
 
-    const posts = await page.evaluate(() => {
-      const results: Array<{ title: string; likes: number }> = [];
-      // 投稿カード候補: コレクト詳細へのリンクを持つ要素
-      const cards = document.querySelectorAll<HTMLElement>('a[href*="/items/"], [class*="collect"], article, li');
-      const seen = new Set<string>();
-      cards.forEach((card) => {
-        const text = card.innerText ?? "";
-        if (text.length < 10 || text.length > 1000) return;
-        // いいね数: ハートアイコン系要素 or 「いいね」近傍の数字
-        let likes = -1;
-        const likeEl = card.querySelector<HTMLElement>(
-          '[class*="like"] , [aria-label*="いいね"], [class*="heart"]'
-        );
-        if (likeEl) {
-          const m = (likeEl.innerText ?? likeEl.getAttribute("aria-label") ?? "").match(/(\d+)/);
-          if (m) likes = parseInt(m[1]!, 10);
-        }
-        if (likes < 0) {
-          const m = text.match(/いいね\s*(\d+)|(\d+)\s*いいね/);
-          if (m) likes = parseInt(m[1] ?? m[2] ?? "0", 10);
-        }
-        if (likes < 0) return;
-        // タイトル: カード内の最長行を商品名とみなす
-        const title = text
-          .split("\n")
-          .map((l) => l.trim())
-          .filter((l) => l.length >= 8)
-          .sort((a, b) => b.length - a.length)[0];
-        if (!title || seen.has(title)) return;
-        seen.add(title);
-        results.push({ title, likes });
-      });
-      return results;
-    });
-
+    // 抽出本体も遷移直後に失敗しうるため1回リトライ
+    let posts: ScrapedPost[];
+    try {
+      posts = await extractPosts(page);
+    } catch {
+      await page.waitForTimeout(3000);
+      posts = await extractPosts(page);
+    }
     return posts;
   } finally {
     await browser.close();
   }
 }
 
-/** 商品名の部分一致（先頭20文字ベース）で履歴レコードと突合 */
-function matchRecord(scrapedTitle: string, itemName: string): boolean {
-  const a = scrapedTitle.replace(/\s/g, "").slice(0, 20);
-  const b = itemName.replace(/\s/g, "").slice(0, 20);
-  return a.includes(b.slice(0, 12)) || b.includes(a.slice(0, 12));
+/**
+ * 投稿カード抽出。ROOMのmyROOMカード構造（2026-07時点）:
+ *   div[class*="collect--"] の innerText が
+ *   「キャプション\n￥価格\n…\nいいね数\n…\nコメント数」の並びになっている。
+ * → 価格行(￥…)の後に最初に現れる数字のみの行 = いいね数
+ */
+async function extractPosts(page: import("playwright").Page): Promise<ScrapedPost[]> {
+  return page.evaluate(() => {
+    const results: Array<{ title: string; likes: number }> = [];
+    const seen = new Set<string>();
+    document.querySelectorAll<HTMLElement>('div[class*="collect--"]').forEach((card) => {
+      const text = card.innerText ?? "";
+      if (text.length < 20) return;
+      const lines = text.split("\n").map((l) => l.trim()).filter((l) => l.length > 0);
+      const priceIdx = lines.findIndex((l) => /^[￥¥][\d,]+/.test(l));
+      if (priceIdx < 0) return;
+      let likes = -1;
+      for (let i = priceIdx + 1; i < Math.min(priceIdx + 4, lines.length); i++) {
+        if (/^[\d,]+$/.test(lines[i]!)) {
+          likes = parseInt(lines[i]!.replace(/,/g, ""), 10);
+          break;
+        }
+      }
+      if (likes < 0) return;
+      // キャプション全文（価格行より前）を突合キーにする
+      const caption = lines.slice(0, priceIdx).join(" ").slice(0, 300);
+      if (!caption || seen.has(caption.slice(0, 40))) return;
+      seen.add(caption.slice(0, 40));
+      results.push({ title: caption, likes });
+    });
+    return results;
+  });
+}
+
+const normalize = (s: string) => s.replace(/\s+/g, "");
+
+/**
+ * 履歴レコードとの突合:
+ * 1. captionHead(投稿文の冒頭25文字)がスクレイプしたキャプションに含まれるか
+ * 2. フォールバック: 商品名の8文字スライド窓がキャプションに含まれるか
+ */
+function matchRecord(scrapedCaption: string, rec: { itemName: string; captionHead?: string }): boolean {
+  const cap = normalize(scrapedCaption);
+  if (rec.captionHead) {
+    const head = normalize(rec.captionHead).slice(0, 15);
+    if (head.length >= 8 && cap.includes(head)) return true;
+  }
+  const name = normalize(rec.itemName.replace(/【[^】]*】/g, ""));
+  for (let i = 0; i + 8 <= Math.min(name.length, 48); i += 4) {
+    if (cap.includes(name.slice(i, i + 8))) return true;
+  }
+  return false;
 }
 
 export async function runMetricsAgent(headless = true): Promise<number> {
@@ -99,7 +126,7 @@ export async function runMetricsAgent(headless = true): Promise<number> {
     let updated = 0;
     const now = new Date().toISOString();
     for (const rec of history) {
-      const hit = scraped.find((s) => matchRecord(s.title, rec.itemName));
+      const hit = scraped.find((s) => matchRecord(s.title, rec));
       if (hit && hit.likes !== rec.likes) {
         rec.likes = hit.likes;
         rec.likesUpdatedAt = now;

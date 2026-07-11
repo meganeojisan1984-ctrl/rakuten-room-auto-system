@@ -1,4 +1,6 @@
 import { chromium, type BrowserContext, type Cookie } from "playwright";
+import * as fs from "fs";
+import * as path from "path";
 import * as dotenv from "dotenv";
 dotenv.config();
 
@@ -6,19 +8,27 @@ const ROOM_URL = "https://room.rakuten.co.jp";
 const LOGIN_URL = "https://grp01.id.rakuten.co.jp";
 
 /**
- * 環境変数 ROOM_COOKIE からCookie配列をパースして返す
+ * Cookie配列を取得する。
+ * 1. 環境変数 ROOM_COOKIE (GitHub Actions用)
+ * 2. cookies.json (ローカル用。Cookie値に#等が含まれるとdotenvが値を壊すため、
+ *    ローカルではファイル読みが確実)
  */
 export function parseCookiesFromEnv(): Cookie[] {
-  const raw = process.env.ROOM_COOKIE ?? "[]";
-  try {
-    const parsed = JSON.parse(raw) as unknown;
-    if (!Array.isArray(parsed)) {
-      throw new Error("ROOM_COOKIE はJSON配列形式でなければなりません");
+  const raw = process.env.ROOM_COOKIE ?? "";
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw) as unknown;
+      if (Array.isArray(parsed)) return parsed as Cookie[];
+    } catch {
+      console.warn("[session] 環境変数ROOM_COOKIEのパース失敗、cookies.jsonへフォールバック");
     }
-    return parsed as Cookie[];
-  } catch (err) {
-    throw new Error(`ROOM_COOKIE のパース失敗: ${String(err)}`);
   }
+  const file = path.join(process.cwd(), "cookies.json");
+  if (fs.existsSync(file)) {
+    const parsed = JSON.parse(fs.readFileSync(file, "utf-8")) as unknown;
+    if (Array.isArray(parsed)) return parsed as Cookie[];
+  }
+  throw new Error("ROOM_COOKIE のパース失敗（環境変数・cookies.json ともに利用不可）");
 }
 
 /**

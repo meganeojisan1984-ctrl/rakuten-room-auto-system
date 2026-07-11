@@ -190,5 +190,23 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=成功"
+  },
+  {
+    "ts": "2026-07-10T23:56:33.662Z",
+    "agent": "metrics",
+    "ok": false,
+    "summary": "計測失敗: Error: ROOM_COOKIE のパース失敗: SyntaxError: Unterminated string in JSON at position 22263 (line 1 column 22264)"
+  },
+  {
+    "ts": "2026-07-10T23:59:40.358Z",
+    "agent": "metrics",
+    "ok": false,
+    "summary": "投稿カードを1件も抽出できず（ROOMのDOM変更の可能性）"
+  },
+  {
+    "ts": "2026-07-11T00:14:05.856Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "39件抽出、履歴4件のいいね数を更新"
   }
 ]

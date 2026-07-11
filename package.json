@@ -7,6 +7,7 @@
     "start": "npx tsx src/index.ts",
     "start:post-only": "npx tsx src/main.ts",
     "learn": "npx tsx src/run_learn.ts",
+    "app": "npx tsx src/maintenance/server.ts",
     "export-cookie": "npx tsx tools/cookie-exporter.ts",
     "affiliate": "npx tsx src/affiliate/server.ts",
     "affiliate:run": "npx tsx src/affiliate/run.ts",
