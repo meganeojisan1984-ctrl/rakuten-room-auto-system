@@ -14,10 +14,30 @@
   .card { background: #fff; border-radius: 14px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,.06); margin-bottom: 14px; }
   .pets { display: flex; gap: 12px; }
   .pet { flex: 1; text-align: center; }
-  .pet img { height: 170px; image-rendering: pixelated; transition: transform .3s; }
-  .pet img:hover { transform: scale(1.06); }
-  .pet .role { font-weight: bold; font-size: 13px; margin-top: 4px; color: #4a69bd; }
-  .bubble { background: #eef2ff; border-radius: 12px; padding: 8px 12px; font-size: 12.5px; margin-top: 6px; position: relative; min-height: 40px; display: flex; align-items: center; justify-content: center; }
+  .pet-stage { position: relative; height: 205px; display: flex; align-items: flex-end; justify-content: center; }
+  .pet-stage::before { content: ""; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 150px; height: 26px; background: radial-gradient(ellipse at center, rgba(74,105,189,.22), rgba(74,105,189,0) 70%); border-radius: 50%; }
+  .pet img { height: 185px; image-rendering: pixelated; position: relative; z-index: 1; filter: drop-shadow(0 6px 8px rgba(44,62,80,.18)); transition: transform .3s; animation: idle 3.2s ease-in-out infinite; transform-origin: bottom center; }
+  .pet img:hover { transform: scale(1.07); }
+  .pet[data-pose="joy"] img { animation: bounce 1s ease-in-out infinite; }
+  .pet[data-pose="alert"] img { animation: shake .5s ease-in-out 4; }
+  .pet[data-pose="sad"] img { filter: drop-shadow(0 6px 8px rgba(44,62,80,.18)) saturate(.75); animation: idle 4.5s ease-in-out infinite; }
+  .pet[data-pose="work"] img { animation: wiggle 1.6s ease-in-out infinite; }
+  .pet[data-pose="think"] img { animation: sway 2.6s ease-in-out infinite; }
+  .pet img.pop { animation: pop .45s ease; }
+  @keyframes idle { 0%,100% { transform: translateY(0) scaleY(1); } 50% { transform: translateY(-4px) scaleY(1.012); } }
+  @keyframes bounce { 0%,100% { transform: translateY(0); } 40% { transform: translateY(-14px); } 60% { transform: translateY(-10px); } }
+  @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px) rotate(-2deg); } 75% { transform: translateX(6px) rotate(2deg); } }
+  @keyframes wiggle { 0%,100% { transform: rotate(-1.5deg); } 50% { transform: rotate(1.5deg); } }
+  @keyframes sway { 0%,100% { transform: rotate(0); } 50% { transform: rotate(-2.5deg) translateY(-2px); } }
+  @keyframes pop { 0% { transform: scale(.85); } 60% { transform: scale(1.08); } 100% { transform: scale(1); } }
+  .pet .role { font-weight: bold; font-size: 13px; margin-top: 6px; color: #4a69bd; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .badge { font-size: 10px; padding: 2px 9px; border-radius: 999px; font-weight: bold; }
+  .badge.good { background: #e6f9ed; color: #27ae60; }
+  .badge.busy { background: #eef2ff; color: #4a69bd; }
+  .badge.warn { background: #fdf1dc; color: #e67e22; }
+  .badge.bad { background: #fdecea; color: #e74c3c; }
+  .bubble { background: #eef2ff; border-radius: 12px; padding: 9px 13px; font-size: 12.5px; margin-top: 12px; position: relative; min-height: 42px; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1.5px #e2e8fa; }
+  .bubble::before { content: ""; position: absolute; top: -8px; left: 50%; transform: translateX(-50%); border: 8px solid transparent; border-bottom-color: #eef2ff; border-top: none; }
   .stat-row { display: flex; gap: 10px; flex-wrap: wrap; }
   .stat { flex: 1; min-width: 110px; background: #f8f9ff; border-radius: 10px; padding: 10px; text-align: center; }
   .stat .num { font-size: 21px; font-weight: bold; color: #4a69bd; }
@@ -58,14 +78,14 @@
 
 <div class="card">
   <div class="pets">
-    <div class="pet">
-      <img id="pet-commander" src="/pet/commander_hello.png" alt="司令官">
-      <div class="role">🎖 司令官</div>
+    <div class="pet" id="pet-box-commander" data-pose="hello">
+      <div class="pet-stage"><img id="pet-commander" src="/pet/commander_hello.png" alt="司令官"></div>
+      <div class="role">🎖 司令官 <span class="badge busy" id="badge-commander">確認中</span></div>
       <div class="bubble" id="bubble-commander">読み込み中…</div>
     </div>
-    <div class="pet">
-      <img id="pet-analyst" src="/pet/analyst_hello.png" alt="分析官">
-      <div class="role">📊 分析官</div>
+    <div class="pet" id="pet-box-analyst" data-pose="hello">
+      <div class="pet-stage"><img id="pet-analyst" src="/pet/analyst_hello.png" alt="分析官"></div>
+      <div class="role">📊 分析官 <span class="badge busy" id="badge-analyst">確認中</span></div>
       <div class="bubble" id="bubble-analyst">読み込み中…</div>
     </div>
   </div>
@@ -158,11 +178,26 @@ function fmtDate(iso) {
 async function refresh() {
   try {
     const s = await api("/api/status");
-    // ペット
-    $("pet-commander").src = `/pet/commander_${s.pets.commander.pose}.png`;
-    $("bubble-commander").textContent = s.pets.commander.message;
-    $("pet-analyst").src = `/pet/analyst_${s.pets.analyst.pose}.png`;
-    $("bubble-analyst").textContent = s.pets.analyst.message;
+    // ペット（ポーズ変化時はポップアニメーション+状態バッジ更新）
+    const BADGES = {
+      joy: ["good", "絶好調"], hello: ["good", "正常"], work: ["busy", "作業中"],
+      think: ["warn", "質問あり"], alert: ["bad", "要対応"], sad: ["bad", "不調"],
+    };
+    for (const who of ["commander", "analyst"]) {
+      const pose = s.pets[who].pose;
+      const box = $(`pet-box-${who}`);
+      const img = $(`pet-${who}`);
+      if (box.dataset.pose !== pose) {
+        box.dataset.pose = pose;
+        img.src = `/pet/${who}_${pose}.png`;
+        img.classList.remove("pop"); void img.offsetWidth; img.classList.add("pop");
+      }
+      $(`bubble-${who}`).textContent = s.pets[who].message;
+      const [cls, label] = BADGES[pose] ?? ["busy", pose];
+      const badge = $(`badge-${who}`);
+      badge.className = `badge ${cls}`;
+      badge.textContent = label;
+    }
     // 統計
     $("st-gen").textContent = "第" + s.strategy.generation + "世代";
     $("st-posts").textContent = s.progress.totalPosts;
