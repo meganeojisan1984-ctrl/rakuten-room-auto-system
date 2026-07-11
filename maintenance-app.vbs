@@ -1,3 +1,3 @@
-' ROOM司令部アプリ ランチャー（コンソールを見せずにbatを実行）
-Set shell = CreateObject("WScript.Shell")
-shell.Run """E:\rakuten-room-auto-system\maintenance-app.bat""", 0, False
+' ROOM Command Center launcher (runs bat without console window)
+Set objShell = CreateObject("WScript.Shell")
+objShell.Run Chr(34) & "E:\rakuten-room-auto-system\maintenance-app.bat" & Chr(34), 0, False
