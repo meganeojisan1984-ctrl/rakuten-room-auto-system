@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "tansu:10057242",
     "gekiyasukaguya:10026864",
     "ysmya:10012363",
     "sheil-store:10020551",
@@ -499,7 +498,8 @@
     "mrw-g:10000005",
     "rakutenoriginal-daily:10000001",
     "lekeke:10000143",
-    "naturelab:10003205"
+    "naturelab:10003205",
+    "shuuemura:10000018"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
