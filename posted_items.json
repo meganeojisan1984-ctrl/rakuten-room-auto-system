@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "ignis:10000557",
     "charisma-bon:10038163",
     "store-marufuku:10001696",
     "rakuten24:11148573",
@@ -499,7 +498,8 @@
     "rakuten24:10674449",
     "brita:10000161",
     "mtgec-beauty:10002177",
-    "supplement-life:10000035"
+    "supplement-life:10000035",
+    "pricon:10000128"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
