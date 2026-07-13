@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "alljapan-online-shop:10021807",
     "ogawahan:10002596",
     "marketjapan:10001158",
     "woodpro:10022727",
@@ -499,7 +498,8 @@
     "pricon:10000128",
     "rackworld:10064222",
     "jewelrysunflower:10008940",
-    "33taiyo:10000020"
+    "33taiyo:10000020",
+    "l-plus:10005488"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
