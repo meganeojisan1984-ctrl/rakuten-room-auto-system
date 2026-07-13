@@ -514,5 +514,29 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=成功"
+  },
+  {
+    "ts": "2026-07-13T05:59:46.071Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (キッチン消耗品・日用品)"
+  },
+  {
+    "ts": "2026-07-13T05:59:48.295Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ2)"
+  },
+  {
+    "ts": "2026-07-13T06:01:22.142Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-07-13T06:02:12.141Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=成功"
   }
 ]

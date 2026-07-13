@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "store-marufuku:10001696",
     "rakuten24:11148573",
     "alljapan-online-shop:10021807",
     "ogawahan:10002596",
@@ -499,7 +498,8 @@
     "mtgec-beauty:10002177",
     "supplement-life:10000035",
     "pricon:10000128",
-    "rackworld:10064222"
+    "rackworld:10064222",
+    "jewelrysunflower:10008940"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
