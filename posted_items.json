@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "marketjapan:10001158",
     "woodpro:10022727",
     "alamode:10024601",
     "kiroran:10000205",
@@ -499,7 +498,8 @@
     "jewelrysunflower:10008940",
     "33taiyo:10000020",
     "l-plus:10005488",
-    "gorilla55:10001548"
+    "gorilla55:10001548",
+    "kawasui:10000130"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
