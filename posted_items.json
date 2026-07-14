@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "risu-onlineshop:10002402",
     "cocodecow:10683158",
     "threenine:10000390",
     "asia-kobo:10014953",
@@ -499,7 +498,8 @@
     "netbaby:10028506",
     "hacono:10000227",
     "wwpc:10064892",
-    "justrich:10000977"
+    "justrich:10000977",
+    "pricon:10003151"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
