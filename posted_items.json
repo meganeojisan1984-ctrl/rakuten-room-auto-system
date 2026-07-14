@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "kiroran:10000205",
     "kiroran:10000196",
     "risu-onlineshop:10002402",
     "cocodecow:10683158",
@@ -499,7 +498,8 @@
     "gorilla55:10001548",
     "kawasui:10000130",
     "netbaby:10028506",
-    "hacono:10000227"
+    "hacono:10000227",
+    "wwpc:10064892"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
