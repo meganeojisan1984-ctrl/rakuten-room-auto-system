@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "threenine:10000390",
     "asia-kobo:10014953",
     "annon:10027562",
     "sanwadirect:10100418",
@@ -499,7 +498,8 @@
     "wwpc:10064892",
     "justrich:10000977",
     "pricon:10003151",
-    "shopjapan:10005601"
+    "shopjapan:10005601",
+    "sakauchi-shop:10010685"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }

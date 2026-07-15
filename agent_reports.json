@@ -814,5 +814,29 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=成功"
+  },
+  {
+    "ts": "2026-07-15T09:49:19.478Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (掃除用品・消耗品)"
+  },
+  {
+    "ts": "2026-07-15T09:49:20.859Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ3)"
+  },
+  {
+    "ts": "2026-07-15T09:50:57.369Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-07-15T09:51:47.133Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=成功"
   }
 ]
