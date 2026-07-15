@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "annon:10027562",
     "sanwadirect:10100418",
     "rack-kan:10086028",
     "yamayuu:10018117",
@@ -499,7 +498,8 @@
     "pricon:10003151",
     "shopjapan:10005601",
     "sakauchi-shop:10010685",
-    "azusa:10000109"
+    "azusa:10000109",
+    "futontanaka:10024022"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
