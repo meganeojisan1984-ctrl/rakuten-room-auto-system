@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "rcmdin:11411227",
     "sanwadirect:10102062",
     "missh-kissh:10000141",
     "tenkapas:10010258",
@@ -499,7 +498,8 @@
     "futontanaka:10024022",
     "jewelrycastle:10007149",
     "kiroran:10000196",
-    "rakuten24:11342601"
+    "rakuten24:11342601",
+    "rakuten24:11148573"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
