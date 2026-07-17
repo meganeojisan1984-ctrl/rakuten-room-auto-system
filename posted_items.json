@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "exception5251:10000502",
     "sanwadirect:10096483",
     "alamode:10022254",
     "akol:10000484",
@@ -499,7 +498,8 @@
     "gensenstore:10000405",
     "rakuten24:11128650",
     "rakuten24:11128644",
-    "yumenomori:10000233"
+    "yumenomori:10000233",
+    "irisplaza-r:10170526"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
