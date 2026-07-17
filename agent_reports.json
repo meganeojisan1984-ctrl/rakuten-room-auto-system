@@ -1180,5 +1180,23 @@
     "agent": "commander",
     "ok": true,
     "summary": "第8世代へ更新 (LLM)、警告0件"
+  },
+  {
+    "ts": "2026-07-17T22:55:23.388Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (整理収納・片付けグッズ)"
+  },
+  {
+    "ts": "2026-07-17T22:55:24.760Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ1)"
+  },
+  {
+    "ts": "2026-07-17T22:55:53.040Z",
+    "agent": "poster",
+    "ok": false,
+    "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/bo)"
   }
 ]
