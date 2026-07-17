@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "sheil-store:10020490",
     "exception5251:10000502",
     "sanwadirect:10096483",
     "alamode:10022254",
@@ -499,7 +498,8 @@
     "matthewmark:10000148",
     "gensenstore:10000405",
     "rakuten24:11128650",
-    "rakuten24:11128644"
+    "rakuten24:11128644",
+    "yumenomori:10000233"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
