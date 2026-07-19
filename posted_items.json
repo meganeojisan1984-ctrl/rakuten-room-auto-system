@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "rakuten24:11148571",
     "rakuten24:11148568",
     "sanwadirect:10098750",
     "elmundofoods:10001702",
@@ -499,7 +498,8 @@
     "irisplaza-r:10170526",
     "azusa:10000130",
     "tsutsumi:10003467",
-    "kurashi-zakka:10001794"
+    "kurashi-zakka:10001794",
+    "yutori:10006493"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
