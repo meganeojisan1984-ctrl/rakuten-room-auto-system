@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "sanwadirect:10098750",
     "elmundofoods:10001702",
     "swarotonya:10001516",
     "happiness-2020:10000005",
@@ -499,7 +498,8 @@
     "tsutsumi:10003467",
     "kurashi-zakka:10001794",
     "yutori:10006493",
-    "danitori:10000004"
+    "danitori:10000004",
+    "tsutsumi:10014152"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
