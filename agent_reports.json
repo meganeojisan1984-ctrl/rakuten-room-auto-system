@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-07-12T15:06:24.051Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-07-12T15:07:14.355Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=成功"
-  },
-  {
-    "ts": "2026-07-12T15:41:40.405Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "20件抽出、履歴10件のいいね数を更新"
-  },
-  {
-    "ts": "2026-07-12T15:41:40.408Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴18件(計測済12)を集計。ジャンル11種"
-  },
-  {
     "ts": "2026-07-12T15:41:42.273Z",
     "agent": "commander",
     "ok": true,
@@ -1195,6 +1171,30 @@
   },
   {
     "ts": "2026-07-21T13:55:35.098Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=成功"
+  },
+  {
+    "ts": "2026-07-21T15:46:56.870Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (キッチン便利グッズ・調理器具)"
+  },
+  {
+    "ts": "2026-07-21T15:46:58.195Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ3)"
+  },
+  {
+    "ts": "2026-07-21T15:48:33.141Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-07-21T15:49:22.738Z",
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=成功"

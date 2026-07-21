@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "shopch-r:10000216",
     "rinrinrin:10010214",
     "mmservice:10000348",
     "aoitrade-1:10001991",
@@ -499,7 +498,8 @@
     "netbaby:10035957",
     "shimin2:10000782",
     "h-rescue:10006559",
-    "pricon:10000183"
+    "pricon:10000183",
+    "tsutsumi:10014163"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
