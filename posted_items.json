@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "bon-kagu:10009688",
     "shopch-r:10000216",
     "rinrinrin:10010214",
     "mmservice:10000348",
@@ -499,7 +498,8 @@
     "exception5251:10000042",
     "netbaby:10035957",
     "shimin2:10000782",
-    "h-rescue:10006559"
+    "h-rescue:10006559",
+    "pricon:10000183"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
