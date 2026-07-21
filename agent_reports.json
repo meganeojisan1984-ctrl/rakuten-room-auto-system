@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-07-12T15:41:42.273Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第3世代へ更新 (LLM)、警告1件"
-  },
-  {
-    "ts": "2026-07-12T22:57:10.145Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (季節:秋 衣替え)"
-  },
-  {
-    "ts": "2026-07-12T22:57:11.661Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ1)"
-  },
-  {
     "ts": "2026-07-12T22:59:01.803Z",
     "agent": "poster",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=成功"
+  },
+  {
+    "ts": "2026-07-21T16:08:01.563Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "39件抽出、履歴13件のいいね数を更新"
+  },
+  {
+    "ts": "2026-07-21T16:08:01.566Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴58件(計測済34)を集計。ジャンル16種"
+  },
+  {
+    "ts": "2026-07-21T16:08:03.693Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第12世代へ更新 (LLM)、警告0件"
   }
 ]
