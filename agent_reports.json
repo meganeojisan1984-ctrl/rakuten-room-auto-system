@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-07-13T17:00:37.403Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第4世代へ更新 (LLM)、警告0件"
-  },
-  {
-    "ts": "2026-07-13T23:02:03.680Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (掃除用品・消耗品)"
-  },
-  {
-    "ts": "2026-07-13T23:02:05.405Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ1)"
-  },
-  {
     "ts": "2026-07-13T23:03:44.398Z",
     "agent": "poster",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=成功"
+  },
+  {
+    "ts": "2026-07-22T16:08:38.235Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "19件抽出、履歴15件のいいね数を更新"
+  },
+  {
+    "ts": "2026-07-22T16:08:38.239Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴63件(計測済39)を集計。ジャンル17種"
+  },
+  {
+    "ts": "2026-07-22T16:08:40.725Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第13世代へ更新 (LLM)、警告0件"
   }
 ]

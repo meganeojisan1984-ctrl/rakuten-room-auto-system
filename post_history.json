@@ -36,8 +36,8 @@
     "price": 2000,
     "postType": 3,
     "hour": 23,
-    "likes": 12,
-    "likesUpdatedAt": "2026-07-21T16:08:01.549Z"
+    "likes": 15,
+    "likesUpdatedAt": "2026-07-22T16:08:38.224Z"
   },
   {
     "ts": "2026-07-10T16:29:43.756Z",
@@ -311,8 +311,8 @@
     "hour": 22,
     "hook": "surprise",
     "captionHead": "え、待って。こんなの楽天で見つけたの！？ロイヤルカ",
-    "likes": 14,
-    "likesUpdatedAt": "2026-07-19T15:37:47.687Z"
+    "likes": 15,
+    "likesUpdatedAt": "2026-07-22T16:08:38.224Z"
   },
   {
     "ts": "2026-07-14T15:31:19.748Z",
@@ -440,8 +440,8 @@
     "hour": 0,
     "hook": "beforeafter",
     "captionHead": "先月までの私: いつもシンプルなネックレスしかして",
-    "likes": 12,
-    "likesUpdatedAt": "2026-07-21T16:08:01.549Z"
+    "likes": 15,
+    "likesUpdatedAt": "2026-07-22T16:08:38.224Z"
   },
   {
     "ts": "2026-07-16T23:06:16.122Z",
@@ -516,8 +516,8 @@
     "hour": 18,
     "hook": "ranking",
     "captionHead": "🎯 ポイント3倍獲得チャンス！楽天ランキング1位",
-    "likes": 3,
-    "likesUpdatedAt": "2026-07-20T16:14:06.381Z"
+    "likes": 4,
+    "likesUpdatedAt": "2026-07-22T16:08:38.224Z"
   },
   {
     "ts": "2026-07-18T15:03:22.341Z",
@@ -540,8 +540,8 @@
     "hour": 18,
     "hook": "beforeafter",
     "captionHead": "先月までの私: 布団を収納するのに苦労してた🤯 ",
-    "likes": 7,
-    "likesUpdatedAt": "2026-07-21T16:08:01.549Z"
+    "likes": 8,
+    "likesUpdatedAt": "2026-07-22T16:08:38.224Z"
   },
   {
     "ts": "2026-07-19T13:20:50.600Z",
@@ -553,8 +553,8 @@
     "hour": 22,
     "hook": "ranking",
     "captionHead": "🎯 ポイント3倍獲得チャンス！リピーター続出の殿",
-    "likes": 3,
-    "likesUpdatedAt": "2026-07-20T16:14:06.381Z"
+    "likes": 4,
+    "likesUpdatedAt": "2026-07-22T16:08:38.224Z"
   },
   {
     "ts": "2026-07-19T15:04:57.599Z",
@@ -566,8 +566,8 @@
     "hour": 0,
     "hook": "story",
     "captionHead": "深夜2時、またダニと格闘してた…😩 私、ダニ対策",
-    "likes": 3,
-    "likesUpdatedAt": "2026-07-20T16:14:06.381Z"
+    "likes": 4,
+    "likesUpdatedAt": "2026-07-22T16:08:38.224Z"
   },
   {
     "ts": "2026-07-19T23:00:17.081Z",
@@ -614,8 +614,8 @@
     "hour": 23,
     "hook": "empathy",
     "captionHead": "通勤バッグ悩み解決した人、正直手を挙げて🙋！私は",
-    "likes": 17,
-    "likesUpdatedAt": "2026-07-21T16:08:01.549Z"
+    "likes": 20,
+    "likesUpdatedAt": "2026-07-22T16:08:38.224Z"
   },
   {
     "ts": "2026-07-20T15:57:45.810Z",
@@ -649,8 +649,8 @@
     "hour": 14,
     "hook": "loss",
     "captionHead": "これ知らないと年間何万円も損してるかも！ 🤯 乐",
-    "likes": 7,
-    "likesUpdatedAt": "2026-07-21T16:08:01.549Z"
+    "likes": 8,
+    "likesUpdatedAt": "2026-07-22T16:08:38.224Z"
   },
   {
     "ts": "2026-07-21T10:18:25.492Z",
@@ -662,8 +662,8 @@
     "hour": 19,
     "hook": "number",
     "captionHead": "26件のレビューで★4.54の高評価！ 知らなかっ",
-    "likes": 8,
-    "likesUpdatedAt": "2026-07-21T16:08:01.549Z"
+    "likes": 10,
+    "likesUpdatedAt": "2026-07-22T16:08:38.224Z"
   },
   {
     "ts": "2026-07-21T13:55:35.099Z",
@@ -698,7 +698,9 @@
     "postType": 3,
     "hour": 8,
     "hook": "surprise",
-    "captionHead": "え、待って。家のプールの水を10日間も交換しなくて"
+    "captionHead": "え、待って。家のプールの水を10日間も交換しなくて",
+    "likes": 5,
+    "likesUpdatedAt": "2026-07-22T16:08:38.224Z"
   },
   {
     "ts": "2026-07-22T05:44:28.286Z",
@@ -709,7 +711,9 @@
     "postType": 3,
     "hour": 14,
     "hook": "surprise",
-    "captionHead": "え、待って。楽天でこれ見つけたときテンション上がり"
+    "captionHead": "え、待って。楽天でこれ見つけたときテンション上がり",
+    "likes": 1,
+    "likesUpdatedAt": "2026-07-22T16:08:38.224Z"
   },
   {
     "ts": "2026-07-22T10:15:59.653Z",
@@ -720,7 +724,9 @@
     "postType": 3,
     "hour": 19,
     "hook": "loss",
-    "captionHead": "これ知らないと年間5千円損してるかも…🤯 そんな"
+    "captionHead": "これ知らないと年間5千円損してるかも…🤯 そんな",
+    "likes": 6,
+    "likesUpdatedAt": "2026-07-22T16:08:38.224Z"
   },
   {
     "ts": "2026-07-22T13:57:34.033Z",
@@ -731,7 +737,9 @@
     "postType": 3,
     "hour": 22,
     "hook": "surprise",
-    "captionHead": "え、待って。楽天でこれ見つけたときテンション上がり"
+    "captionHead": "え、待って。楽天でこれ見つけたときテンション上がり",
+    "likes": 1,
+    "likesUpdatedAt": "2026-07-22T16:08:38.224Z"
   },
   {
     "ts": "2026-07-22T15:47:29.861Z",
@@ -742,6 +750,8 @@
     "postType": 1,
     "hour": 0,
     "hook": "surprise",
-    "captionHead": "え、待って。楽天でこんなに可愛いリュックを見つけた"
+    "captionHead": "え、待って。楽天でこんなに可愛いリュックを見つけた",
+    "likes": 3,
+    "likesUpdatedAt": "2026-07-22T16:08:38.224Z"
   }
 ]
