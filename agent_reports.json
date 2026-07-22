@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-07-13T06:01:22.142Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-07-13T06:02:12.141Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=成功"
-  },
-  {
-    "ts": "2026-07-13T10:48:53.488Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (洗濯・衣類ケアグッズ)"
-  },
-  {
-    "ts": "2026-07-13T10:48:55.377Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ2)"
-  },
-  {
     "ts": "2026-07-13T10:50:33.713Z",
     "agent": "poster",
     "ok": true,
@@ -1195,6 +1171,30 @@
   },
   {
     "ts": "2026-07-21T23:06:28.644Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=成功"
+  },
+  {
+    "ts": "2026-07-22T05:41:52.281Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (日用品雑貨・掃除・洗濯用品)"
+  },
+  {
+    "ts": "2026-07-22T05:41:53.021Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ3)"
+  },
+  {
+    "ts": "2026-07-22T05:43:27.827Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-07-22T05:44:28.285Z",
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=成功"
