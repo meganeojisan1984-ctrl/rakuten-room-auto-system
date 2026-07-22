@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-07-13T16:40:29.031Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-07-13T16:41:18.504Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=成功"
-  },
-  {
-    "ts": "2026-07-13T17:00:31.508Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "20件抽出、履歴10件のいいね数を更新"
-  },
-  {
-    "ts": "2026-07-13T17:00:31.509Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴23件(計測済14)を集計。ジャンル13種"
-  },
-  {
     "ts": "2026-07-13T17:00:37.403Z",
     "agent": "commander",
     "ok": true,
@@ -1195,6 +1171,30 @@
   },
   {
     "ts": "2026-07-22T13:57:34.032Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=成功"
+  },
+  {
+    "ts": "2026-07-22T15:45:04.066Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (季節:新学期 準備)"
+  },
+  {
+    "ts": "2026-07-22T15:45:05.573Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ1)"
+  },
+  {
+    "ts": "2026-07-22T15:46:42.465Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-07-22T15:47:29.861Z",
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=成功"

@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "enetroom:10012904",
     "kurashi-zakka:10002366",
     "furniture-abekin:10000026",
     "kaiteki-homes:10103044",
@@ -499,7 +498,8 @@
     "re-alife:10000000",
     "larocheposay:10000039",
     "kiroran:10000205",
-    "sheil-store:10020681"
+    "sheil-store:10020681",
+    "mg-mail:10025798"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
