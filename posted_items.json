@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "furniture-abekin:10000026",
     "kaiteki-homes:10103044",
     "toku-corporation:10000839",
     "1storage:10000175",
@@ -499,7 +498,8 @@
     "kiroran:10000205",
     "sheil-store:10020681",
     "mg-mail:10025798",
-    "hitidear:10000207"
+    "hitidear:10000207",
+    "tansu:10054364"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
