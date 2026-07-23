@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-07-14T16:04:15.817Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "20件抽出、履歴16件のいいね数を更新"
-  },
-  {
-    "ts": "2026-07-14T16:04:15.819Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴28件(計測済18)を集計。ジャンル13種"
-  },
-  {
-    "ts": "2026-07-14T16:04:17.859Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第5世代へ更新 (LLM)、警告0件"
-  },
-  {
     "ts": "2026-07-14T23:03:12.031Z",
     "agent": "scout",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=成功"
+  },
+  {
+    "ts": "2026-07-23T16:14:23.974Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "19件抽出、履歴20件のいいね数を更新"
+  },
+  {
+    "ts": "2026-07-23T16:14:23.977Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴66件(計測済43)を集計。ジャンル17種"
+  },
+  {
+    "ts": "2026-07-23T16:14:25.920Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第14世代へ更新 (LLM)、警告0件"
   }
 ]
