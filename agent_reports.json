@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-07-14T05:22:13.750Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ1)"
-  },
-  {
-    "ts": "2026-07-14T05:23:47.799Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-07-14T05:24:37.998Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=成功"
-  },
-  {
     "ts": "2026-07-14T09:45:31.350Z",
     "agent": "scout",
     "ok": true,
@@ -1195,6 +1177,24 @@
   },
   {
     "ts": "2026-07-22T23:11:56.831Z",
+    "agent": "poster",
+    "ok": false,
+    "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/bo)"
+  },
+  {
+    "ts": "2026-07-23T05:46:02.316Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (生活必需品・補充消耗品)"
+  },
+  {
+    "ts": "2026-07-23T05:46:03.610Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ3)"
+  },
+  {
+    "ts": "2026-07-23T05:46:30.208Z",
     "agent": "poster",
     "ok": false,
     "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/bo)"
