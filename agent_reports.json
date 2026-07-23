@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-07-14T23:03:12.031Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (家事効率化グッズ)"
-  },
-  {
-    "ts": "2026-07-14T23:03:13.932Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ1)"
-  },
-  {
-    "ts": "2026-07-14T23:04:52.018Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-07-14T23:05:46.360Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=成功"
-  },
-  {
     "ts": "2026-07-15T05:23:26.979Z",
     "agent": "scout",
     "ok": true,
@@ -1198,5 +1174,29 @@
     "agent": "commander",
     "ok": true,
     "summary": "第14世代へ更新 (LLM)、警告0件"
+  },
+  {
+    "ts": "2026-07-23T23:03:53.792Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (日用品雑貨・掃除・洗濯用品)"
+  },
+  {
+    "ts": "2026-07-23T23:03:55.263Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ1)"
+  },
+  {
+    "ts": "2026-07-23T23:05:35.128Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-07-23T23:06:20.024Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=失敗/未設定, Threads=成功"
   }
 ]
