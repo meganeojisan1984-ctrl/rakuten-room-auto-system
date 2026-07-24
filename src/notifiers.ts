@@ -95,3 +95,22 @@ export async function notifyError(title: string, errorMessage: string): Promise<
   const message = `❌ **エラー: ${title}**\n\`\`\`\n${errorMessage}\n\`\`\``;
   await sendToDiscord(message);
 }
+
+/**
+ * GitHub Actions ワークフローの失敗を通知する（ジョブURL付き）
+ * Actions 上で環境変数 GITHUB_SERVER_URL/REPOSITORY/RUN_ID が自動注入される前提
+ */
+export async function notifyWorkflowFailure(
+  workflowName: string,
+  contextMsg?: string,
+): Promise<void> {
+  const server = process.env.GITHUB_SERVER_URL ?? "";
+  const repo = process.env.GITHUB_REPOSITORY ?? "";
+  const runId = process.env.GITHUB_RUN_ID ?? "";
+  const jobUrl = server && repo && runId ? `${server}/${repo}/actions/runs/${runId}` : "(ローカル実行)";
+  const message =
+    `🛑 **Workflow 失敗: ${workflowName}**\n` +
+    (contextMsg ? `${contextMsg}\n` : "") +
+    `Job: ${jobUrl}`;
+  await sendToDiscord(message);
+}
