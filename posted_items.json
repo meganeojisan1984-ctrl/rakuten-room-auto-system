@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "sheil-store:10020453",
     "ideazakkaten:10000288",
     "enetroom:10106245",
     "mujirushi-ryohin:10007325",
@@ -499,7 +498,8 @@
     "kawapettii:10000105",
     "rackworld:10064220",
     "toku-corporation:10000839",
-    "kurashi-zakka:10002356"
+    "kurashi-zakka:10002356",
+    "saibou:10001724"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
