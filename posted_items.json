@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "shibuya-k2009:10028582",
     "velle:10004448",
     "sheil-store:10020453",
     "ideazakkaten:10000288",
@@ -499,7 +498,8 @@
     "futontanaka:10010636",
     "fuchigami:10000061",
     "kawapettii:10000105",
-    "rackworld:10064220"
+    "rackworld:10064220",
+    "toku-corporation:10000839"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
