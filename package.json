@@ -11,6 +11,7 @@
     "export-cookie": "npx tsx tools/cookie-exporter.ts",
     "affiliate": "npx tsx src/affiliate/server.ts",
     "affiliate:run": "npx tsx src/affiliate/run.ts",
+    "diagnose": "npx tsx src/utils/cookie-diagnose.ts",
     "build": "npx tsc"
   },
   "keywords": [],
