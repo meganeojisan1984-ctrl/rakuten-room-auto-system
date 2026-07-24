@@ -15,3 +15,6 @@ Phase 4 以降、実売データを元に復活検討する。
 ## 参照
 - スペック: [superpowers/specs/2026-07-25-rakuten-room-rebuild-sales-driven-design.md](superpowers/specs/2026-07-25-rakuten-room-rebuild-sales-driven-design.md) 第11章
 - 実装プラン: [superpowers/plans/2026-07-25-phase0-actions-stabilization.md](superpowers/plans/2026-07-25-phase0-actions-stabilization.md)
+
+## 完了履歴
+- 2026-07-25 Phase 0 完了: Actions 安定化・失敗通知必達・停止モジュール整理（`npm run diagnose` = valid 確認済み）
