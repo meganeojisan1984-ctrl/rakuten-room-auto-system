@@ -173,6 +173,11 @@ export async function postToInstagram(item: RakutenItem, roomCaption: string): P
  * 1. コンテナ作成 → 2. 30秒待機（公式推奨） → 3. 公開
  */
 export async function postToThreads(item: RakutenItem, caption: string): Promise<boolean> {
+  // Phase 0: Threads 投稿は無効化中（Phase 4 まで停止）。実売寄与測定不可のため。
+  console.log("[sns] Threads: Phase 0 で無効化中。スキップします");
+  void item; void caption;
+  return false;
+  /* --- Phase 4 復活用に既存コードを残置。無効化中は unreachable のためコメントアウト ---
   const THREADS_USER_ID = env("THREADS_USER_ID");
   const THREADS_ACCESS_TOKEN = env("THREADS_ACCESS_TOKEN");
   if (!THREADS_USER_ID || !THREADS_ACCESS_TOKEN) {
@@ -218,6 +223,7 @@ export async function postToThreads(item: RakutenItem, caption: string): Promise
     await notifyError("Threads投稿失敗", msg);
     return false;
   }
+  --- Phase 4 復活時: 上の /* を削除、この行も削除 --- */
 }
 
 /**
