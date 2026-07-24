@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "1storage:10000175",
     "kagudoki:10092147",
     "shibuya-k2009:10028582",
     "velle:10004448",
@@ -499,7 +498,8 @@
     "hitidear:10000207",
     "tansu:10054364",
     "futontanaka:10010636",
-    "fuchigami:10000061"
+    "fuchigami:10000061",
+    "kawapettii:10000105"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
