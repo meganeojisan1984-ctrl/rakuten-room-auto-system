@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as dotenv from "dotenv";
 import { createAuthenticatedContext, validateSession } from "./session";
-import { notifyCookieExpired, notifyCaptchaDetected, notifyDomError, notifySuccess } from "./notifiers";
+import { notifyCookieExpired, notifyCaptchaDetected, notifyDomError, notifySuccess, notifyError } from "./notifiers";
 import type { RakutenItem } from "./fetcher";
 dotenv.config();
 
@@ -260,6 +260,14 @@ async function postSingleItem(
   } catch (err) {
     const errorMsg = String(err);
     console.error(`[poster] 投稿失敗: ${errorMsg}`);
+    // Phase 0: エラーを必ず Discord へ通知する。既存の catch 内 notifyDomError と重複することもあるが冪等でOK
+    if (errorMsg.includes("Cookie期限切れ") || errorMsg.includes("ログイン要求")) {
+      await notifyCookieExpired();
+    } else if (errorMsg.includes("CAPTCHA")) {
+      await notifyCaptchaDetected();
+    } else {
+      await notifyError("楽天ROOM投稿失敗", errorMsg);
+    }
     return {
       success: false,
       itemName: item.itemName,

@@ -2,6 +2,7 @@ import { chromium, type BrowserContext, type Cookie } from "playwright";
 import * as fs from "fs";
 import * as path from "path";
 import * as dotenv from "dotenv";
+import { notifyCookieExpired } from "./notifiers";
 dotenv.config();
 
 const ROOM_URL = "https://room.rakuten.co.jp";
@@ -58,6 +59,8 @@ export async function validateSession(context: BrowserContext): Promise<boolean>
     // ログインページへリダイレクトされた場合はセッション無効
     if (currentUrl.includes(LOGIN_URL) || currentUrl.includes("/login") || currentUrl.includes("signin")) {
       console.warn("[session] セッション無効: ログインページへリダイレクトされました");
+      // Phase 0: Cookie 失効を必ず通知する（Cookie診断・投稿・学習の全経路で発火）
+      await notifyCookieExpired();
       return false;
     }
     console.log("[session] セッション有効確認済み");
