@@ -6,6 +6,10 @@ on:
     - cron: "0 19 * * 0"
   workflow_dispatch:
 
+concurrency:
+  group: main-writer
+  cancel-in-progress: false
+
 permissions:
   contents: read
 
@@ -34,3 +38,13 @@ jobs:
           GH_PAT: ${{ secrets.GH_PAT }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: npx tsx src/run_refresh.ts
+
+      - name: 失敗時 Discord 通知
+        if: failure()
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: |
+          npx tsx -e "require('./src/notifiers.ts').notifyWorkflowFailure('auto-refresh', 'ジョブが失敗しました');"
