@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "mujirushi-ryohin:10007325",
     "1storage:10000068",
     "tairyoukounyuu:10001183",
     "kyarahouse:10000036",
@@ -499,7 +498,8 @@
     "kurashi-zakka:10002356",
     "saibou:10001724",
     "surutto:10000000",
-    "darkangel:10031059"
+    "darkangel:10031059",
+    "mr-mango:10000391"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
