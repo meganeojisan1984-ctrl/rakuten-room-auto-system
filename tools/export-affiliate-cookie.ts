@@ -11,9 +11,8 @@ import * as fs from "fs";
 import * as path from "path";
 
 const AFFILIATE_TOP_URL = "https://affiliate.rakuten.co.jp/";
-// affiliate.rakuten.co.jp に直接アクセスし、未ログインなら 楽天ID 側が
-// 正しい service_id 付きのログイン画面へ自動リダイレクトさせる。
-// service_id を私が推測すると E01_008 になるため直リンクを使わない。
+// 認証必須ページに直接アクセス → 未ログインなら 楽天SSO へリダイレクト → ログイン後 /mypage に戻る
+const AFFILIATE_MYPAGE_URL = "https://affiliate.rakuten.co.jp/mypage";
 const OUTPUT_FILE = path.join(process.cwd(), "cookies-affiliate.json");
 
 async function main(): Promise<void> {
@@ -33,13 +32,25 @@ async function main(): Promise<void> {
     viewport: null,
   });
   const page = await context.newPage();
-  await page.goto(AFFILIATE_TOP_URL, { waitUntil: "domcontentloaded" });
+  await page.goto(AFFILIATE_MYPAGE_URL, { waitUntil: "domcontentloaded" });
 
-  console.log(`楽天アフィリエイトのトップ (${AFFILIATE_TOP_URL}) に遷移するまで待機します（最大15分）...`);
+  console.log(`楽天アフィリエイトのマイページ (${AFFILIATE_MYPAGE_URL}) にログイン後の遷移完了を待機（最大15分）...`);
+  // ログイン完了判定: マイページ or レポートページ or auth/callback 後の /?...状態 に着地
   await page.waitForURL(
-    (url) => url.href.startsWith(AFFILIATE_TOP_URL),
+    (url) => {
+      const s = url.href;
+      return (
+        s.startsWith("https://affiliate.rakuten.co.jp/mypage") ||
+        s.startsWith("https://affiliate.rakuten.co.jp/report") ||
+        (s.startsWith(AFFILIATE_TOP_URL) &&
+          !s.includes("login") &&
+          !s.includes("account.rakuten.com"))
+      );
+    },
     { timeout: 900000 },
   );
+  // 認証セッションが完全に確立するまで念のため待つ（SSO cookie 反映のため2秒）
+  await page.waitForTimeout(2000);
 
   console.log("\nログイン完了を検知しました！Cookieを取得中...");
   const cookies = await context.cookies();

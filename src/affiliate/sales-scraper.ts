@@ -1,8 +1,8 @@
-import { chromium, type Cookie } from "playwright";
+import { chromium, type Cookie, type APIRequestContext } from "playwright";
 import * as fs from "fs";
 import * as path from "path";
 import * as dotenv from "dotenv";
-import { parseAffiliateCsv } from "./report-parser";
+import { parseOrderCsv } from "./report-parser";
 import {
   initDb,
   upsertSalesRow,
@@ -12,14 +12,18 @@ import {
 import { notifyDomError, notifyReport } from "../notifiers";
 dotenv.config();
 
-const DEFAULT_REPORT_URL = "https://affiliate.rakuten.co.jp/rp/mypage/report/";
+const ORDER_API_TEMPLATE =
+  "https://affiliate.rakuten.co.jp/api/report/download/order?format=csv&date=";
+const REPORT_TOP_URL = "https://affiliate.rakuten.co.jp/report/summary";
 const DEBUG_DIR = path.join(process.cwd(), "data", "affiliate-debug");
 
 export interface ScrapeResult {
   ok: boolean;
-  date: string;
+  date: string;         // 対象日 (YYYY-MM-DD)
+  monthFetched: string; // 取得対象月 (YYYY-MM)
   rowsInserted: number;
   totalReward: number;
+  totalOrders: number;
   error?: string;
   debugArtifact?: string;
 }
@@ -54,19 +58,20 @@ function tsStamp(): string {
   return new Date().toISOString().replace(/[-:.T]/g, "").slice(0, 15);
 }
 
-/** CSV バッファを UTF-8 → 失敗時 Shift_JIS で decode */
-function decodeCsv(buf: Buffer): string {
-  const utf8 = buf.toString("utf-8");
-  if (/商品コード|クリック数/.test(utf8)) return utf8;
-  const sjis = new TextDecoder("shift_jis").decode(buf);
-  return sjis;
+function monthOf(date: string): string {
+  return date.slice(0, 7); // YYYY-MM
 }
 
+/**
+ * 楽天アフィリエイト「注文別成果」CSVを Cookie 認証で API 直取得し、
+ * 指定日の行を DB へ upsert する。API は月単位で返るので、
+ * 呼び出し月の全データを引き、対象日の分だけ抽出して保存する。
+ */
 export async function scrapeAffiliateReport(
   opts: { date?: string; dbPath?: string } = {},
 ): Promise<ScrapeResult> {
   const date = opts.date ?? yesterdayJst();
-  const reportUrl = process.env.RAKUTEN_AFFILIATE_REPORT_URL ?? DEFAULT_REPORT_URL;
+  const month = monthOf(date);
   fs.mkdirSync(DEBUG_DIR, { recursive: true });
 
   const cookies = parseCookiesFromEnv();
@@ -76,17 +81,23 @@ export async function scrapeAffiliateReport(
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     locale: "ja-JP",
     timezoneId: "Asia/Tokyo",
-    acceptDownloads: true,
   });
   await context.addCookies(cookies);
-  const page = await context.newPage();
 
-  const dumpDebug = async (label: string): Promise<string> => {
+  const dumpDebug = async (label: string, extra?: { body?: Buffer | string }): Promise<string> => {
     const base = path.join(DEBUG_DIR, `${tsStamp()}-${label}`);
     try {
-      await page.screenshot({ path: `${base}.png`, fullPage: true });
-      const html = await page.content();
-      fs.writeFileSync(`${base}.html`, html, "utf-8");
+      if (extra?.body !== undefined) {
+        fs.writeFileSync(`${base}.bin`, typeof extra.body === "string" ? extra.body : extra.body);
+      }
+      // sanity 用に report top のスクショも撮る
+      const page = await context.newPage();
+      await page.goto(REPORT_TOP_URL, { waitUntil: "domcontentloaded", timeout: 20000 }).catch(() => {});
+      await page.screenshot({ path: `${base}.png`, fullPage: true }).catch(() => {});
+      try {
+        fs.writeFileSync(`${base}.html`, await page.content(), "utf-8");
+      } catch { /* ignore */ }
+      await page.close();
     } catch (e) {
       console.warn("[sales-scraper] dumpDebug 失敗:", e);
     }
@@ -94,43 +105,48 @@ export async function scrapeAffiliateReport(
   };
 
   try {
-    console.log(`[sales-scraper] レポートページ: ${reportUrl}`);
-    await page.goto(reportUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
+    const apiUrl = ORDER_API_TEMPLATE + month;
+    console.log(`[sales-scraper] fetch: ${apiUrl}`);
+    const req: APIRequestContext = context.request;
+    const resp = await req.get(apiUrl, { timeout: 30000 });
+    const status = resp.status();
+    const ct = resp.headers()["content-type"] ?? "";
+    console.log(`[sales-scraper] status=${status} content-type=${ct}`);
 
-    const url = page.url();
-    if (url.includes("login") || url.includes("signin") || url.includes("grp01.id.rakuten.co.jp")) {
-      const artifact = await dumpDebug("cookie-expired");
-      await notifyDomError(`楽天アフィリエイト Cookie 失効（RAKUTEN_AFFILIATE_COOKIE を更新してください）\ndebug: ${artifact}`);
-      return { ok: false, date, rowsInserted: 0, totalReward: 0, error: "cookie-expired", debugArtifact: artifact };
+    if (status === 401 || status === 403 || status >= 500) {
+      const body = await resp.body();
+      const artifact = await dumpDebug("api-status-fail", { body });
+      await notifyDomError(`楽天アフィリ API ${status} 応答（Cookie 失効の可能性）\ndebug: ${artifact}`);
+      return {
+        ok: false, date, monthFetched: month, rowsInserted: 0, totalReward: 0, totalOrders: 0,
+        error: `api-status-${status}`, debugArtifact: artifact,
+      };
     }
 
-    const csvCandidateRe = /CSV.*(ダウンロード|出力|DL)|(ダウンロード|出力|DL).*CSV/i;
-    const [download] = await Promise.all([
-      page.waitForEvent("download", { timeout: 20000 }).catch(() => null),
-      page.getByText(csvCandidateRe).first().click({ timeout: 10000 }).catch(() => null),
-    ]);
-    if (!download) {
-      const artifact = await dumpDebug("csv-button-not-found");
-      await notifyDomError(`CSVダウンロード導線が見つかりません。UI変更の可能性。debug: ${artifact}`);
-      return { ok: false, date, rowsInserted: 0, totalReward: 0, error: "csv-button-not-found", debugArtifact: artifact };
+    // ログイン切れは 200 でもHTML(ログインページ)が返ることがある
+    if (!ct.includes("csv")) {
+      const body = await resp.body();
+      const preview = body.toString("utf-8").slice(0, 200);
+      const artifact = await dumpDebug("non-csv-response", { body });
+      await notifyDomError(`API が CSV を返さない (ct=${ct}, prefix="${preview}")\ndebug: ${artifact}`);
+      return {
+        ok: false, date, monthFetched: month, rowsInserted: 0, totalReward: 0, totalOrders: 0,
+        error: "non-csv-response", debugArtifact: artifact,
+      };
     }
 
-    const dlPath = await download.path();
-    if (!dlPath) {
-      const artifact = await dumpDebug("csv-download-failed");
-      return { ok: false, date, rowsInserted: 0, totalReward: 0, error: "csv-download-failed", debugArtifact: artifact };
-    }
-    const buf = fs.readFileSync(dlPath);
-    const csv = decodeCsv(buf);
+    const csv = (await resp.body()).toString("utf-8");
 
     let parsed: SalesRow[];
     try {
-      parsed = parseAffiliateCsv(csv, { date, defaultTrackingId: "" });
+      parsed = parseOrderCsv(csv, { targetDate: date });
     } catch (e) {
-      const artifact = await dumpDebug("csv-parse-failed");
-      fs.writeFileSync(`${artifact}.csv`, csv, "utf-8");
+      const artifact = await dumpDebug("csv-parse-failed", { body: csv });
       await notifyDomError(`CSVパース失敗: ${(e as Error).message}\ndebug: ${artifact}`);
-      return { ok: false, date, rowsInserted: 0, totalReward: 0, error: `parse-failed: ${(e as Error).message}`, debugArtifact: artifact };
+      return {
+        ok: false, date, monthFetched: month, rowsInserted: 0, totalReward: 0, totalOrders: 0,
+        error: `parse-failed: ${(e as Error).message}`, debugArtifact: artifact,
+      };
     }
 
     const db = initDb(opts.dbPath);
@@ -140,10 +156,15 @@ export async function scrapeAffiliateReport(
 
     await notifyReport(
       "📊 楽天アフィリ実売取り込み",
-      `date=${date} rows=${summary.rows} clicks=${summary.totalClicks} orders=${summary.totalOrders} reward=¥${summary.totalReward}`,
+      `date=${date} month=${month} rows=${summary.rows} orders=${summary.totalOrders} reward=¥${summary.totalReward}`,
     );
 
-    return { ok: true, date, rowsInserted: summary.rows, totalReward: summary.totalReward };
+    return {
+      ok: true, date, monthFetched: month,
+      rowsInserted: summary.rows,
+      totalReward: summary.totalReward,
+      totalOrders: summary.totalOrders,
+    };
   } finally {
     await context.close();
     await browser.close();
