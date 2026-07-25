@@ -75,6 +75,8 @@ export interface PostRecord {
   trendKeyword?: string;
   likes?: number; // 計測エージェントが後から更新
   likesUpdatedAt?: string;
+  slot?: string;          // Phase 2 で追加。"slot0" | "slot1" | "slot2"
+  itemCodeHash?: string;  // Phase 2 で追加。sha1(shopName|itemName)[0:12] (sales-db との JOIN キー)
 }
 
 export interface AgentReport {
