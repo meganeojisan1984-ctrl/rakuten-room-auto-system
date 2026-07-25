@@ -231,21 +231,27 @@ export async function postToThreads(item: RakutenItem, caption: string): Promise
  * スパム防止のため1実行につき1商品のみ。失敗しても本体処理には影響させない。
  */
 export async function crossPostToSns(
-  items: Array<{ item: RakutenItem; caption: string }>
+  items: Array<{ item: RakutenItem; caption: string }>,
+  opts?: { persona?: import("./persona/persona").PersonaSlot },
 ): Promise<{ attempted: boolean; instagram: boolean; threads: boolean }> {
   const none = { attempted: false, instagram: false, threads: false };
   const first = items[0];
   if (!first) return none;
 
   const igEnabled = !!(env("IG_USER_ID") && env("IG_ACCESS_TOKEN"));
-  const threadsEnabled = !!(env("THREADS_USER_ID") && env("THREADS_ACCESS_TOKEN"));
-  if (!igEnabled && !threadsEnabled) {
-    console.log("[sns] Instagram/Threads未設定。クロス投稿をスキップ（SETUP-SNS.md参照）");
+  if (!igEnabled) {
+    console.log("[sns] Instagram未設定。クロス投稿をスキップ（SETUP-SNS.md参照）");
     return none;
   }
 
   console.log("\n--- SNSクロス投稿 (認知度拡大) ---");
-  const instagram = igEnabled ? await postToInstagram(first.item, first.caption) : false;
-  const threads = threadsEnabled ? await postToThreads(first.item, first.caption) : false;
-  return { attempted: true, instagram, threads };
+  let instagram: boolean;
+  if (opts?.persona) {
+    const { postToInstagramWithPersona } = await import("./ig/ig-post-engine");
+    instagram = await postToInstagramWithPersona(first.item, first.caption, opts.persona);
+  } else {
+    instagram = await postToInstagram(first.item, first.caption);
+  }
+  // Threads は Phase 0 で無効化済み
+  return { attempted: true, instagram, threads: false };
 }
