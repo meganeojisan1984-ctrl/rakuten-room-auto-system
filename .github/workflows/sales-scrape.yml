@@ -1,0 +1,84 @@
+name: 楽天アフィリエイト 実売取り込み
+
+on:
+  schedule:
+    # JST 02:00 → UTC 17:00 (前日) — 楽天アフィリのレポート確定が遅めなので早朝
+    - cron: "0 17 * * *"
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "取得対象日 (YYYY-MM-DD, 空欄=昨日)"
+        required: false
+        default: ""
+
+concurrency:
+  group: main-writer
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Node.js のセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: sales.sqlite をキャッシュから復元
+        uses: actions/cache@v4
+        with:
+          path: |
+            data/sales.sqlite
+            data/sales.sqlite-shm
+            data/sales.sqlite-wal
+          key: sales-db-${{ github.run_id }}
+          restore-keys: |
+            sales-db-
+
+      - name: 依存関係をインストール
+        run: npm ci
+
+      - name: Playwright Chromium をインストール
+        run: npx playwright install chromium --with-deps
+
+      - name: 実売レポートを取得して DB へ upsert
+        env:
+          CI: "true"
+          RAKUTEN_AFFILIATE_COOKIE: ${{ secrets.RAKUTEN_AFFILIATE_COOKIE }}
+          RAKUTEN_AFFILIATE_REPORT_URL: ${{ vars.RAKUTEN_AFFILIATE_REPORT_URL || '' }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          SCRAPE_DATE: ${{ github.event.inputs.date || '' }}
+        run: |
+          if [ -n "${SCRAPE_DATE}" ]; then
+            npx tsx -e "require('./src/affiliate/sales-scraper.ts').scrapeAffiliateReport({date: process.env.SCRAPE_DATE}).then(r => { console.log(JSON.stringify(r)); process.exit(r.ok ? 0 : 1); }).catch(e => { console.error(e); process.exit(2); });"
+          else
+            npm run scrape-sales
+          fi
+
+      - name: 診断アーティファクトをアップロード（失敗時）
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: affiliate-debug-${{ github.run_id }}
+          path: data/affiliate-debug/
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: 失敗時 Discord 通知
+        if: failure()
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: |
+          npx tsx -e "require('./src/notifiers.ts').notifyWorkflowFailure('sales-scrape', 'アフィリレポート取り込みが失敗しました');"
