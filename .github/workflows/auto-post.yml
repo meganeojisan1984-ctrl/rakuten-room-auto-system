@@ -2,16 +2,13 @@ name: 楽天ROOM 自動投稿
 
 on:
   schedule:
-    # JST 07:00 → UTC 22:00 (前日)
-    - cron: "0 22 * * *"
-    # JST 12:00 → UTC 03:00
-    - cron: "0 3 * * *"
-    # JST 17:00 → UTC 08:00
-    - cron: "0 8 * * *"
-    # JST 21:00 → UTC 12:00
+    # Phase 2: 3 crons/日 (persona multi モードで slot0/1/2 にローテ)
+    # JST 08:00 → UTC 23:00 (前日) — slot0 (ROOM + IG)
+    - cron: "0 23 * * *"
+    # JST 13:00 → UTC 04:00 — slot1 (IG のみ, SKIP_ROOM=1)
+    - cron: "0 4 * * *"
+    # JST 21:00 → UTC 12:00 — slot2 (ROOM + IG)
     - cron: "0 12 * * *"
-    # JST 23:00 → UTC 14:00
-    - cron: "0 14 * * *"
   # 手動実行も可能
   workflow_dispatch:
     inputs:
@@ -81,7 +78,13 @@ jobs:
           MIN_PRICE: ${{ vars.MIN_PRICE || '1000' }}
           GENRE_ID_FURUSATO: ${{ vars.GENRE_ID_FURUSATO || '553066' }}
           GENRE_ID_ELECTRONICS: ${{ vars.GENRE_ID_ELECTRONICS || '215783' }}
-        run: npx tsx src/main.ts
+        run: |
+          # UTC 04時 (JST 13時) の cron 発火時のみ IG のみ (SKIP_ROOM=1)
+          if [ "$(date -u +%H)" = "04" ] && [ "${{ github.event_name }}" = "schedule" ]; then
+            export SKIP_ROOM=1
+            echo "[auto-post] SKIP_ROOM=1 (JST13 は IG のみ)"
+          fi
+          npx tsx src/main.ts
 
       - name: 投稿済みリストをコミット
         if: always()
