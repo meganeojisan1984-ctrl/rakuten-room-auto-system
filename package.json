@@ -10,6 +10,7 @@
     "app": "npx tsx src/maintenance/server.ts",
     "export-cookie": "npx tsx tools/cookie-exporter.ts",
     "export-affiliate-cookie": "npx tsx tools/export-affiliate-cookie.ts",
+    "scrape-sales": "npx tsx src/run_sales_scrape.ts",
     "affiliate": "npx tsx src/affiliate/server.ts",
     "affiliate:run": "npx tsx src/affiliate/run.ts",
     "diagnose": "npx tsx src/utils/cookie-diagnose.ts",
