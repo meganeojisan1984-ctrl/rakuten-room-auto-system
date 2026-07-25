@@ -44,6 +44,12 @@ export interface Strategy {
   styleHints: string[];
   /** 司令官の直近の分析メモ（次世代の判断材料） */
   commanderNotes: string;
+  /** Phase 3: sales_score モードで更新された世代のマーク */
+  salesGen?: boolean;
+  /** Phase 3: sales モードに切替わった時刻 (ISO) */
+  salesGenSince?: string;
+  /** Phase 3: slot 別重み (Phase 4 で activeSlot 決定に使う) */
+  slotWeights?: Record<string, number>;
 }
 
 /** 価格帯の定義（key: strategy.priceBandWeightsのキー） */
@@ -128,6 +134,8 @@ export function defaultStrategy(): Strategy {
     seasonalKeywords: [],
     styleHints: [],
     commanderNotes: "",
+    salesGen: false,
+    slotWeights: { slot0: 1, slot1: 1, slot2: 1 },
   };
 }
 
@@ -144,6 +152,9 @@ export function loadStrategy(): Strategy {
     seasonalKeywords: (s.seasonalKeywords ?? []).slice(0, 5),
     styleHints: (s.styleHints ?? []).slice(0, 3),
     commanderNotes: s.commanderNotes ?? "",
+    salesGen: s.salesGen ?? false,
+    salesGenSince: s.salesGenSince,
+    slotWeights: s.slotWeights ?? { slot0: 1, slot1: 1, slot2: 1 },
   };
 }
 
