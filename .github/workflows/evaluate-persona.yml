@@ -1,0 +1,72 @@
+name: ペルソナ評価 (winner 判定)
+
+on:
+  schedule:
+    # 毎週日曜 JST 03:00 → UTC 土曜 18:00
+    - cron: "0 18 * * 6"
+  workflow_dispatch:
+
+concurrency:
+  group: main-writer
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Node.js のセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: sales.sqlite をキャッシュから復元
+        uses: actions/cache@v4
+        with:
+          path: |
+            data/sales.sqlite
+            data/sales.sqlite-shm
+            data/sales.sqlite-wal
+          key: sales-db-${{ github.run_id }}
+          restore-keys: |
+            sales-db-
+
+      - name: 依存関係をインストール
+        run: npm ci
+
+      - name: evaluator 実行
+        env:
+          CI: "true"
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: npm run evaluate-persona
+
+      - name: persona.json をコミット (変更があれば)
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/persona/persona.json
+          if git diff --staged --quiet; then
+            echo "no persona changes"
+            exit 0
+          fi
+          git commit -m "chore: evaluator が persona.activeSlot を更新 [skip ci]"
+          bash tools/safe-push.sh
+
+      - name: 失敗時 Discord 通知
+        if: failure()
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: |
+          npx tsx -e "require('./src/notifiers.ts').notifyWorkflowFailure('evaluate-persona', 'ペルソナ評価が失敗しました');"
