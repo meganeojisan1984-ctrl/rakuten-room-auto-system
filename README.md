@@ -203,3 +203,37 @@ npm run learn
 
 Discord に届く司令官デイリーレポートの `**mode**:` 行で `sales` か `likes` かが分かる。
 `salesGen: true` の世代は commander の全ての weight 更新が実売由来。
+
+---
+
+## 🏆 Phase 4: 勝者ペルソナ確定 (evaluator)
+
+`evaluator` が `persona.evaluationWindow` (既定14日) 経過後に勝者スロットを判定します。
+
+### 挙動
+
+- **not-yet**: 評価窓未経過。何もしない
+- **already-decided**: `activeSlot` が既に "slotN" に確定。何もしない
+- **winner-decided**: 勝者が明確 (2位との差 ≥ 20%) → `persona.activeSlot` に上書き → 🏆 Discord 通知
+- **keep-multi**: 全 slot が拮抗 (差 < 20%) → multi 継続 → ⚖️ Discord 通知
+- **stop-loss**: 総報酬 < ¥3000/14日 → 3候補の差し替えを促す 🚨 Discord 通知（activeSlot は変更しない）
+
+### 手動再評価
+
+```bash
+npm run evaluate-persona
+```
+
+### 手動 activeSlot 切替
+
+`src/persona/persona.json` を直接編集:
+
+```json
+{ "activeSlot": "multi" }  // 全 slot を再評価対象に戻す
+```
+
+再度勝者を確定させたい場合は `evaluationStartedAt` を今の時刻に更新して window を再開。
+
+### 自動実行
+
+`.github/workflows/evaluate-persona.yml` が毎週日曜 JST 03:00 に発火します。
