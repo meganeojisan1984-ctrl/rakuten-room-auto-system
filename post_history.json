@@ -753,8 +753,8 @@
     "hour": 0,
     "hook": "surprise",
     "captionHead": "え、待って。楽天でこんなに可愛いリュックを見つけた",
-    "likes": 15,
-    "likesUpdatedAt": "2026-07-25T07:53:05.346Z"
+    "likes": 16,
+    "likesUpdatedAt": "2026-07-25T15:47:14.912Z"
   },
   {
     "ts": "2026-07-23T10:12:53.703Z",
@@ -779,8 +779,8 @@
     "hour": 23,
     "hook": "loss",
     "captionHead": "これ知らないと年間幾千円損してるかも…🤯 そんな",
-    "likes": 11,
-    "likesUpdatedAt": "2026-07-25T07:53:05.346Z"
+    "likes": 12,
+    "likesUpdatedAt": "2026-07-25T15:47:14.912Z"
   },
   {
     "ts": "2026-07-23T15:59:43.953Z",
@@ -831,8 +831,8 @@
     "hour": 19,
     "hook": "number",
     "captionHead": "レビュー238件で★4.63！🤩 そんな高評価の",
-    "likes": 4,
-    "likesUpdatedAt": "2026-07-25T07:53:05.346Z"
+    "likes": 5,
+    "likesUpdatedAt": "2026-07-25T15:47:14.912Z"
   },
   {
     "ts": "2026-07-24T13:50:30.107Z",
@@ -855,8 +855,8 @@
     "hour": 0,
     "hook": "number",
     "captionHead": "120件のレビューで★4.41！🤩 そんな高評価",
-    "likes": 8,
-    "likesUpdatedAt": "2026-07-25T07:53:05.346Z"
+    "likes": 10,
+    "likesUpdatedAt": "2026-07-25T15:47:14.912Z"
   },
   {
     "ts": "2026-07-24T23:10:41.183Z",
@@ -904,6 +904,8 @@
     "hook": "question",
     "captionHead": "まだ夏の暑さ対策をしていないの？💦 私は最近、ド",
     "slot": "slot2",
-    "itemCodeHash": "43f48342ab18"
+    "itemCodeHash": "43f48342ab18",
+    "likes": 8,
+    "likesUpdatedAt": "2026-07-25T15:47:14.912Z"
   }
 ]
