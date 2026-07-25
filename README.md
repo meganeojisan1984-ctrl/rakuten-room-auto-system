@@ -183,3 +183,23 @@ Net: 3 IG 投稿/日, 2 ROOM 投稿/日
 ```bash
 npx tsx -e "const {loadHistory} = require('./src/agents/store.ts'); const {initDb, getSalesByDateRange} = require('./src/affiliate/sales-db.ts'); const {attributeSlots} = require('./src/attribution/attribute.ts'); const db = initDb(); console.log(attributeSlots(loadHistory(), getSalesByDateRange(db, '2026-07-01', '2026-07-31'))); db.close();"
 ```
+
+---
+
+## 🧠 Phase 3: 学習ループの正解ラベル切替 (likes → 実売)
+
+Phase 3 で `commander.ts` の戦略更新を「いいね数」から「実売スコア」に切替。
+
+- **sales_score** = `reward * 0.7 + clicks * 0.3`
+- 直近14日の `data/sales.sqlite` × `post_history.json` を `itemCodeHash` で JOIN
+- 実売データが3件以上あれば sales モード、それ未満なら likes モードに自動フォールバック
+- 各世代の `strategy.json` に `salesGen` フラグ / `salesGenSince` / `slotWeights` が記録される
+
+### 挙動確認
+
+```bash
+npm run learn
+```
+
+Discord に届く司令官デイリーレポートの `**mode**:` 行で `sales` か `likes` かが分かる。
+`salesGen: true` の世代は commander の全ての weight 更新が実売由来。
