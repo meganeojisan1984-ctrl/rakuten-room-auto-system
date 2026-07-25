@@ -1,17 +1,5 @@
 [
   {
-    "ts": "2026-07-16T13:51:18.365Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (ハイエンド・スタイリッシュ家電)"
-  },
-  {
-    "ts": "2026-07-16T13:51:20.110Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ3)"
-  },
-  {
     "ts": "2026-07-16T13:52:55.392Z",
     "agent": "poster",
     "ok": true,
@@ -1182,21 +1170,33 @@
     "summary": "IG=成功, Threads=失敗/未設定"
   },
   {
-    "ts": "2026-07-25T07:55:46.287Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "20件抽出、履歴12件のいいね数を更新"
-  },
-  {
-    "ts": "2026-07-25T07:55:46.297Z",
+    "ts": "2026-07-25T07:49:20.539Z",
     "agent": "analyst",
     "ok": true,
-    "summary": "履歴74件(計測済47) 実売0件(¥0) mode=likes"
+    "summary": "履歴74件(計測済43) 実売0件(¥0) mode=likes"
   },
   {
-    "ts": "2026-07-25T07:55:48.028Z",
+    "ts": "2026-07-25T07:49:47.943Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴74件(計測済43) 実売2件(¥411) mode=likes"
+  },
+  {
+    "ts": "2026-07-25T07:53:05.354Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "39件抽出、履歴19件のいいね数を更新"
+  },
+  {
+    "ts": "2026-07-25T07:53:05.362Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴74件(計測済47) 実売2件(¥411) mode=likes"
+  },
+  {
+    "ts": "2026-07-25T07:53:05.867Z",
     "agent": "commander",
     "ok": true,
-    "summary": "第16世代へ更新 (LLM)、警告0件"
+    "summary": "第15世代へ更新 (ルールベース)、警告0件"
   }
 ]
