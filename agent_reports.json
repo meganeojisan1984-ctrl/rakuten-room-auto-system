@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-07-16T09:56:40.838Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ3)"
-  },
-  {
-    "ts": "2026-07-16T09:58:23.614Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-07-16T09:59:14.363Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=成功"
-  },
-  {
     "ts": "2026-07-16T13:51:18.365Z",
     "agent": "scout",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-07-25T07:55:46.287Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "20件抽出、履歴12件のいいね数を更新"
+  },
+  {
+    "ts": "2026-07-25T07:55:46.297Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴74件(計測済47) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-07-25T07:55:48.028Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第16世代へ更新 (LLM)、警告0件"
   }
 ]

@@ -383,8 +383,8 @@
     "hour": 0,
     "hook": "ranking",
     "captionHead": "🎉 リピーター続出の逸品を紹介します！ 🙌 私",
-    "likes": 5,
-    "likesUpdatedAt": "2026-07-23T16:14:23.964Z"
+    "likes": 10,
+    "likesUpdatedAt": "2026-07-25T07:55:46.276Z"
   },
   {
     "ts": "2026-07-15T23:06:00.613Z",
@@ -542,8 +542,8 @@
     "hour": 18,
     "hook": "beforeafter",
     "captionHead": "先月までの私: 布団を収納するのに苦労してた🤯 ",
-    "likes": 9,
-    "likesUpdatedAt": "2026-07-23T16:14:23.964Z"
+    "likes": 11,
+    "likesUpdatedAt": "2026-07-25T07:55:46.276Z"
   },
   {
     "ts": "2026-07-19T13:20:50.600Z",
@@ -664,8 +664,8 @@
     "hour": 19,
     "hook": "number",
     "captionHead": "26件のレビューで★4.54の高評価！ 知らなかっ",
-    "likes": 12,
-    "likesUpdatedAt": "2026-07-23T16:14:23.964Z"
+    "likes": 13,
+    "likesUpdatedAt": "2026-07-25T07:55:46.276Z"
   },
   {
     "ts": "2026-07-21T13:55:35.099Z",
@@ -727,8 +727,8 @@
     "hour": 19,
     "hook": "loss",
     "captionHead": "これ知らないと年間5千円損してるかも…🤯 そんな",
-    "likes": 7,
-    "likesUpdatedAt": "2026-07-23T16:14:23.964Z"
+    "likes": 8,
+    "likesUpdatedAt": "2026-07-25T07:55:46.276Z"
   },
   {
     "ts": "2026-07-22T13:57:34.033Z",
@@ -753,8 +753,8 @@
     "hour": 0,
     "hook": "surprise",
     "captionHead": "え、待って。楽天でこんなに可愛いリュックを見つけた",
-    "likes": 11,
-    "likesUpdatedAt": "2026-07-23T16:14:23.964Z"
+    "likes": 15,
+    "likesUpdatedAt": "2026-07-25T07:55:46.276Z"
   },
   {
     "ts": "2026-07-23T10:12:53.703Z",
@@ -766,8 +766,8 @@
     "hour": 19,
     "hook": "beforeafter",
     "captionHead": "先月までの私: 夏の暑さに負けてた / 今の私: ",
-    "likes": 3,
-    "likesUpdatedAt": "2026-07-23T16:14:23.964Z"
+    "likes": 5,
+    "likesUpdatedAt": "2026-07-25T07:55:46.276Z"
   },
   {
     "ts": "2026-07-23T14:03:23.614Z",
@@ -779,8 +779,8 @@
     "hour": 23,
     "hook": "loss",
     "captionHead": "これ知らないと年間幾千円損してるかも…🤯 そんな",
-    "likes": 7,
-    "likesUpdatedAt": "2026-07-23T16:14:23.964Z"
+    "likes": 11,
+    "likesUpdatedAt": "2026-07-25T07:55:46.276Z"
   },
   {
     "ts": "2026-07-23T15:59:43.953Z",
@@ -792,8 +792,8 @@
     "hour": 0,
     "hook": "number",
     "captionHead": "137件のレビューで★4.8！🤩 そんな高評価の",
-    "likes": 5,
-    "likesUpdatedAt": "2026-07-23T16:14:23.964Z"
+    "likes": 10,
+    "likesUpdatedAt": "2026-07-25T07:55:46.276Z"
   },
   {
     "ts": "2026-07-23T23:06:20.025Z",
@@ -804,7 +804,9 @@
     "postType": 1,
     "hour": 8,
     "hook": "question",
-    "captionHead": "まだ高くてお米買い替えしてないの？🤔 そんなあな"
+    "captionHead": "まだ高くてお米買い替えしてないの？🤔 そんなあな",
+    "likes": 6,
+    "likesUpdatedAt": "2026-07-25T07:55:46.276Z"
   },
   {
     "ts": "2026-07-24T05:45:34.853Z",
@@ -815,7 +817,9 @@
     "postType": 3,
     "hour": 14,
     "hook": "story",
-    "captionHead": "深夜2時、まだ外は蒸し暑いなと思っていると、窓から"
+    "captionHead": "深夜2時、まだ外は蒸し暑いなと思っていると、窓から",
+    "likes": 7,
+    "likesUpdatedAt": "2026-07-25T07:55:46.276Z"
   },
   {
     "ts": "2026-07-24T10:09:08.862Z",
@@ -826,7 +830,9 @@
     "postType": 3,
     "hour": 19,
     "hook": "number",
-    "captionHead": "レビュー238件で★4.63！🤩 そんな高評価の"
+    "captionHead": "レビュー238件で★4.63！🤩 そんな高評価の",
+    "likes": 4,
+    "likesUpdatedAt": "2026-07-25T07:55:46.276Z"
   },
   {
     "ts": "2026-07-24T13:50:30.107Z",
@@ -848,7 +854,9 @@
     "postType": 1,
     "hour": 0,
     "hook": "number",
-    "captionHead": "120件のレビューで★4.41！🤩 そんな高評価"
+    "captionHead": "120件のレビューで★4.41！🤩 そんな高評価",
+    "likes": 8,
+    "likesUpdatedAt": "2026-07-25T07:55:46.276Z"
   },
   {
     "ts": "2026-07-24T23:10:41.183Z",
