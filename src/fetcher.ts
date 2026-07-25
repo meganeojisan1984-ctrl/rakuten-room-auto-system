@@ -620,10 +620,25 @@ async function fetchSearchWithRotation(
 /**
  * ターゲットジャンルに基づき商品を取得・フィルタリングして返す
  */
-export async function fetchItems(count: number = 5, excludeCodes: Set<string> = new Set()): Promise<RakutenItem[]> {
+export async function fetchItems(
+  count: number = 5,
+  excludeCodes: Set<string> = new Set(),
+  genreWhitelist?: string[],
+): Promise<RakutenItem[]> {
   if (!RAKUTEN_APP_ID) {
     throw new Error("RAKUTEN_APP_ID が未設定です");
   }
+
+  // Phase 2: slot が渡ってきた場合、MAIN/SUB ジャンルをその whitelist に絞る
+  const whitelistSet = genreWhitelist && genreWhitelist.length > 0 ? new Set(genreWhitelist) : null;
+  const mainGenres = whitelistSet ? MAIN_GENRES.filter((g) => whitelistSet.has(g.name)) : MAIN_GENRES;
+  const subGenres = whitelistSet ? SUB_GENRES.filter((g) => whitelistSet.has(g.name)) : SUB_GENRES;
+  if (whitelistSet && mainGenres.length === 0 && subGenres.length === 0) {
+    console.warn(`[fetcher] genreWhitelist=${JSON.stringify(genreWhitelist)} が MAIN/SUB のどれとも一致しません。フルレンジにフォールバックします`);
+  }
+  const useAllGenres = whitelistSet && (mainGenres.length === 0 && subGenres.length === 0);
+  const effectiveMain = useAllGenres ? MAIN_GENRES : mainGenres;
+  const effectiveSub = useAllGenres ? SUB_GENRES : subGenres;
 
   let maxPrice = MAX_PRICE;
   let minPrice: number | undefined;
@@ -651,7 +666,9 @@ export async function fetchItems(count: number = 5, excludeCodes: Set<string> = 
     } else {
       // メインを6〜7割、サブを3〜4割の比率で選択し、ジャンル重みで重み付き選択
       const useMain = Math.random() < 0.65;
-      const pool = useMain ? MAIN_GENRES : SUB_GENRES;
+      // Phase 2: slot whitelist が絞った pool を優先。空なら他方にフォールバック
+      let pool = useMain ? effectiveMain : effectiveSub;
+      if (pool.length === 0) pool = useMain ? effectiveSub : effectiveMain;
       const selected = weightedPick(pool, (g) => g.name, strategy.genreWeights);
       genreId = selected.genreId;
       selectedGenreName = `${useMain ? "メイン" : "サブ"}: ${selected.name}`;
