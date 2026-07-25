@@ -156,3 +156,30 @@ npm test                # sales-db / report-parser の単体テスト
 ### 自動実行
 
 `.github/workflows/sales-scrape.yml` が毎日 JST 02:00 に発火します。失敗時は Discord に通知＋診断アーティファクトが Actions の Artifacts に上がります。
+
+---
+
+## 🎭 Phase 2: 3ペルソナ並行 × Instagram 特化
+
+Phase 2 では 3 価格帯ペルソナ（低単価高回転 / 中単価QOL / 高単価ふるさと納税）を並行運用します。
+
+### スケジュール（multi モード時）
+
+- JST 08:00 → slot0 (毎月これ買ってる) - ROOM + IG
+- JST 13:00 → slot1 (一人暮らしQOL) - IG のみ (SKIP_ROOM=1)
+- JST 21:00 → slot2 (ふるさと納税) - ROOM + IG
+
+Net: 3 IG 投稿/日, 2 ROOM 投稿/日
+
+### ペルソナの編集
+
+`src/persona/persona.json` を編集するとその内容が翌回の投稿に反映されます。
+
+- `activeSlot` を `"multi"` から `"slot0"` 等に変更で単一スロット集中（Phase 4 の勝者確定時）
+- 各 slot の `hashtags` / `ctaLine` / `ngWords` / `genres` を編集
+
+### slot 別実売の集計
+
+```bash
+npx tsx -e "const {loadHistory} = require('./src/agents/store.ts'); const {initDb, getSalesByDateRange} = require('./src/affiliate/sales-db.ts'); const {attributeSlots} = require('./src/attribution/attribute.ts'); const db = initDb(); console.log(attributeSlots(loadHistory(), getSalesByDateRange(db, '2026-07-01', '2026-07-31'))); db.close();"
+```
