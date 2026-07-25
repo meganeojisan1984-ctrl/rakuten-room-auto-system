@@ -10,6 +10,9 @@ import { postItems } from "./poster";
 import { crossPostToSns } from "./sns";
 import { notifyError } from "./notifiers";
 import { loadStrategy, weightedPick, appendHistory, report, type PostRecord } from "./agents/store";
+import { loadPersona, getSlot } from "./persona/persona";
+import { resolveSlot } from "./persona/slot-rotator";
+import { deriveItemCode } from "./affiliate/report-parser";
 
 const POSTED_ITEMS_FILE = path.join(process.cwd(), "posted_items.json");
 const MAX_HISTORY = 500; // 保持する最大件数
@@ -71,6 +74,13 @@ async function main(): Promise<void> {
   console.log(`モード: ${TREND_MODE ? "トレンド投稿" : `ランキング投稿 (${process.env.TARGET_GENRE ?? "general"})`}`);
   console.log(`投稿数: ${POST_COUNT}件\n`);
 
+  // Phase 2: 本回の担当 persona を決定
+  const persona = loadPersona();
+  const slotId = resolveSlot(persona, new Date());
+  const slot = getSlot(persona, slotId);
+  const SKIP_ROOM = process.env.SKIP_ROOM === "1";
+  console.log(`[main] active persona: ${slot.id} (${slot.name}) SKIP_ROOM=${SKIP_ROOM}`);
+
   const { codes: postedCodes, postTypeIndex } = loadState();
   const postType = getPostType(postTypeIndex);
   console.log(`[main] 投稿済み商品数: ${postedCodes.size}件（除外対象）`);
@@ -90,12 +100,12 @@ async function main(): Promise<void> {
       // キーワード検索でヒットしない場合はランキングにフォールバック
       if (items.length === 0) {
         console.warn(`[main] キーワード「${trendKeyword}」で商品なし。ランキングにフォールバック`);
-        items = await fetchItems(POST_COUNT, postedCodes);
+        items = await fetchItems(POST_COUNT, postedCodes, slot.genres);
         trendKeyword = undefined; // フォールバック時はGemini生成も通常モードへ
       }
     } else {
       console.log("--- [1/3] 商品取得中 ---");
-      items = await fetchItems(POST_COUNT, postedCodes);
+      items = await fetchItems(POST_COUNT, postedCodes, slot.genres);
     }
     if (items.length === 0) {
       throw new Error("フィルタリング後に使用可能な商品が0件でした");
@@ -134,17 +144,26 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  // Step 3: 楽天ROOMへ投稿
-  let results;
-  try {
-    console.log("--- [3/3] 楽天ROOMへ投稿中 ---");
-    const headless = process.env.CI === "true" || process.env.HEADLESS !== "false";
-    results = await postItems(captionedItems, headless);
-  } catch (err) {
-    const msg = String(err);
-    console.error("投稿処理中に予期しないエラー:", msg);
-    await notifyError("投稿処理エラー", msg);
-    process.exit(1);
+  // Step 3: 楽天ROOMへ投稿（SKIP_ROOM=1 の cron 枠は IG のみ）
+  let results: Awaited<ReturnType<typeof postItems>>;
+  if (SKIP_ROOM) {
+    console.log("--- [3/3] SKIP_ROOM=1 のため ROOM 投稿をスキップ ---");
+    results = captionedItems.map((c) => ({
+      success: true,
+      itemName: c.item.itemName,
+      itemUrl: c.item.itemUrl,
+    }));
+  } else {
+    try {
+      console.log("--- [3/3] 楽天ROOMへ投稿中 ---");
+      const headless = process.env.CI === "true" || process.env.HEADLESS !== "false";
+      results = await postItems(captionedItems, headless);
+    } catch (err) {
+      const msg = String(err);
+      console.error("投稿処理中に予期しないエラー:", msg);
+      await notifyError("投稿処理エラー", msg);
+      process.exit(1);
+    }
   }
 
   // 結果サマリー
@@ -164,17 +183,21 @@ async function main(): Promise<void> {
   }
 
   // 投稿エージェントの報告
-  report(
-    "poster",
-    succeeded > 0,
-    `成功${succeeded}件/失敗${failed}件${failed > 0 ? ` (${results.find((r) => !r.success)?.error?.slice(0, 80) ?? ""})` : ""}`
-  );
+  if (SKIP_ROOM) {
+    report("poster", true, "skipped (SKIP_ROOM=1)");
+  } else {
+    report(
+      "poster",
+      succeeded > 0,
+      `成功${succeeded}件/失敗${failed}件${failed > 0 ? ` (${results.find((r) => !r.success)?.error?.slice(0, 80) ?? ""})` : ""}`
+    );
+  }
 
   // ROOM投稿成功商品をInstagram・Threadsへクロス投稿（失敗しても本体は続行）
   const succeededItems = captionedItems.filter((_, i) => results[i]?.success);
   if (succeededItems.length > 0) {
     try {
-      const sns = await crossPostToSns(succeededItems);
+      const sns = await crossPostToSns(succeededItems, { persona: slot });
       if (sns.attempted) {
         report("promoter", sns.instagram || sns.threads, `IG=${sns.instagram ? "成功" : "失敗/未設定"}, Threads=${sns.threads ? "成功" : "失敗/未設定"}`);
       }
@@ -200,6 +223,9 @@ async function main(): Promise<void> {
     hook: c.hook,
     captionHead: c.caption.replace(/\s+/g, " ").slice(0, 25),
     trendKeyword,
+    // Phase 2: slot 属性 + sales-db との JOIN キー
+    slot: slot.id,
+    itemCodeHash: deriveItemCode(c.item.shopName ?? "", c.item.itemName),
   }));
   if (historyRecords.length > 0) appendHistory(historyRecords);
 
