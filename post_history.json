@@ -871,5 +871,18 @@
     "hour": 14,
     "hook": "beforeafter",
     "captionHead": "先月までの私: フライパンをいつも手磨きで掃除して"
+  },
+  {
+    "ts": "2026-07-25T07:41:28.741Z",
+    "itemCode": "darkangel:10031059",
+    "itemName": "75%OFF！【人気沸騰：4,490円→1,099円！】 ※1人様3枚まで※ 【年間ランキング3位】 UVパーカー UV UPF50+ UVカット ラッシュガード レディース 自転車 長袖 薄手 日焼け止め スポーツ ジム ヨガ マスク つば バイザー 元祖冷感coolify【完全防備UVカットパーカー】",
+    "genreName": "家事効率化グッズ",
+    "price": 1099,
+    "postType": 1,
+    "hour": 16,
+    "hook": "empathy",
+    "captionHead": "わかる人にはわかるやつ😂 夏本番に外出して、日焼",
+    "slot": "slot1",
+    "itemCodeHash": "37ff1accc0d3"
   }
 ]

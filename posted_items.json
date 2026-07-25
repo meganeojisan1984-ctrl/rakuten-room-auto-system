@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "enetroom:10106245",
     "mujirushi-ryohin:10007325",
     "1storage:10000068",
     "tairyoukounyuu:10001183",
@@ -499,7 +498,8 @@
     "toku-corporation:10000839",
     "kurashi-zakka:10002356",
     "saibou:10001724",
-    "surutto:10000000"
+    "surutto:10000000",
+    "darkangel:10031059"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
