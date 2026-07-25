@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "ideazakkaten:10000288",
     "enetroom:10106245",
     "mujirushi-ryohin:10007325",
     "1storage:10000068",
@@ -499,7 +498,8 @@
     "rackworld:10064220",
     "toku-corporation:10000839",
     "kurashi-zakka:10002356",
-    "saibou:10001724"
+    "saibou:10001724",
+    "surutto:10000000"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
