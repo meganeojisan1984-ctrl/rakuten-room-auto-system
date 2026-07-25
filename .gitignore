@@ -13,3 +13,8 @@ data/affiliate/
 google-credentials.json
 .superpowers/
 cookies-affiliate.json
+data/sales.sqlite
+data/sales.sqlite-shm
+data/sales.sqlite-wal
+data/affiliate-debug/*
+!data/affiliate-debug/.gitkeep
