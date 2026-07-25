@@ -119,3 +119,40 @@ rakuten-room-auto-system/
 │   └── cookie-exporter.ts  # Cookie取得ツール
 └── .env                    # ローカル設定（Gitに含めない）
 ```
+
+---
+
+## 📈 Phase 1: 楽天アフィリエイト実売データ取り込み
+
+Phase 1 では楽天アフィリエイト管理画面から日次で実売データ（クリック数・成果件数・報酬額）を取得し `data/sales.sqlite` に永続化します。
+
+### セットアップ（初回のみ）
+
+1. **Affiliate Cookie を取得**
+
+    ```bash
+    npm run export-affiliate-cookie
+    ```
+
+    ブラウザが開くので楽天IDでログイン。`affiliate.rakuten.co.jp/` に遷移すると自動でCookieが保存されます。
+
+2. **GitHub Secrets に登録**
+
+    - Name: `RAKUTEN_AFFILIATE_COOKIE`
+    - Secret: 手順1の標準出力に出た1行JSON
+
+3. **（任意）レポートURLの上書き**
+
+    デフォルトは `https://affiliate.rakuten.co.jp/rp/mypage/report/`。異なる場合は Variables に `RAKUTEN_AFFILIATE_REPORT_URL` を設定。
+
+### 動作確認
+
+```bash
+npm run diagnose        # ROOM + Affiliate Cookie の有効性チェック
+npm run scrape-sales    # 昨日のレポートを取得して DB に反映
+npm test                # sales-db / report-parser の単体テスト
+```
+
+### 自動実行
+
+`.github/workflows/sales-scrape.yml` が毎日 JST 02:00 に発火します。失敗時は Discord に通知＋診断アーティファクトが Actions の Artifacts に上がります。
