@@ -101,8 +101,12 @@ OODAループの Orient(状況判断)→Decide(意思決定) を担当します�
 ${salesBlock}${dialogueBlock}
 
 【現在の戦略 (第${strategy.generation}世代)】
-${JSON.stringify({ genreWeights: strategy.genreWeights, postTypeWeights: strategy.postTypeWeights, priceBandWeights: strategy.priceBandWeights, hookWeights: strategy.hookWeights, seasonalKeywords: strategy.seasonalKeywords, styleHints: strategy.styleHints }, null, 1)}
+${JSON.stringify({ genreWeights: strategy.genreWeights, postTypeWeights: strategy.postTypeWeights, priceBandWeights: strategy.priceBandWeights, hookWeights: strategy.hookWeights, seasonalKeywords: strategy.seasonalKeywords, styleHints: strategy.styleHints, slotWeights: strategy.slotWeights }, null, 1)}
 前世代のメモ: ${strategy.commanderNotes || "なし"}
+
+【Phase 3: 実売データ】${analysis.salesDataAvailable
+      ? `\n- 直近${analysis.salesWindowDays}日 総報酬 ¥${analysis.salesTotalReward} / 総クリック ${analysis.salesTotalClicks}\n- slot別 sales_score: ${analysis.slotSales.map((s) => `${s.slot}=${s.salesScore.toFixed(0)}(¥${s.totalReward})`).join(", ")}\n- ジャンル top: ${analysis.genreSales.slice(0, 3).map((g) => `${g.key}(¥${g.totalReward})`).join(", ")}\n- 価格帯 top: ${analysis.priceBandSales.slice(0, 3).map((p) => `${p.key}(¥${p.totalReward})`).join(", ")}\n**mode=sales**: いいねより実売スコア(reward*0.7+clicks*0.3)を優先して判断すること`
+      : `\n- 実売データ薄い(${analysis.slotSales.reduce((a, s) => a + s.matchedSales, 0)}件)\n**mode=likes**: 通常通り likes ベースで判断すること`}
 
 【Observe: 実績集計】
 - 総投稿: ${analysis.totalPosts}件 / いいね計測済み: ${analysis.measuredPosts}件
@@ -142,6 +146,7 @@ interface CommanderDecision {
   styleHints: string[];
   notes: string;
   question: string;
+  slotWeights?: Record<string, number>; // Phase 3: sales モード時の slot 別重み
 }
 
 async function askLlm(strategy: Strategy, analysis: AnalysisResult): Promise<CommanderDecision> {
@@ -170,6 +175,51 @@ async function askLlm(strategy: Strategy, analysis: AnalysisResult): Promise<Com
     styleHints: (parsed.styleHints ?? []).filter((s) => typeof s === "string").map((s) => s.slice(0, 60)).slice(0, 3),
     notes: (parsed.notes ?? "").slice(0, 300),
     question: typeof parsed.question === "string" ? parsed.question.slice(0, 300) : "",
+  };
+}
+
+/**
+ * Phase 3: sales_score ベースの重み更新。
+ * top 3 keys を weight *= 1.5, bottom 3 を *= 0.5 で更新。ゼロ実績は動かさない。
+ */
+function salesHeuristicDecision(strategy: Strategy, analysis: AnalysisResult): CommanderDecision {
+  const genreWeights = { ...strategy.genreWeights };
+  const priceBandWeights = { ...strategy.priceBandWeights };
+  const slotWeights = {
+    slot0: strategy.slotWeights?.slot0 ?? 1,
+    slot1: strategy.slotWeights?.slot1 ?? 1,
+    slot2: strategy.slotWeights?.slot2 ?? 1,
+  };
+
+  const nonZero = <T extends { salesScore: number }>(arr: T[]): T[] => arr.filter((a) => a.salesScore > 0);
+
+  const genreTop = nonZero(analysis.genreSales).slice(0, 3);
+  const genreBot = nonZero(analysis.genreSales).slice(-3);
+  for (const g of genreTop) genreWeights[g.key] = (genreWeights[g.key] ?? 1) * 1.5;
+  for (const g of genreBot) genreWeights[g.key] = (genreWeights[g.key] ?? 1) * 0.5;
+
+  const priceTop = nonZero(analysis.priceBandSales).slice(0, 2);
+  const priceBot = nonZero(analysis.priceBandSales).slice(-2);
+  for (const p of priceTop) priceBandWeights[p.key] = (priceBandWeights[p.key] ?? 1) * 1.5;
+  for (const p of priceBot) priceBandWeights[p.key] = (priceBandWeights[p.key] ?? 1) * 0.5;
+
+  for (const s of analysis.slotSales) {
+    if (s.salesScore > 0) {
+      const prev = slotWeights[s.slot as keyof typeof slotWeights] ?? 1;
+      slotWeights[s.slot as keyof typeof slotWeights] = prev * (1 + Math.min(0.5, s.salesScore / 5000));
+    }
+  }
+
+  return {
+    genreWeights,
+    postTypeWeights: strategy.postTypeWeights,
+    priceBandWeights,
+    hookWeights: strategy.hookWeights,
+    seasonalKeywords: strategy.seasonalKeywords,
+    styleHints: strategy.styleHints.slice(0, 3),
+    notes: `sales_score ベース: 総報酬¥${analysis.salesTotalReward}, 総クリック${analysis.salesTotalClicks}, top genres: ${genreTop.map((g) => g.key).join("/") || "-"}`,
+    question: "",
+    slotWeights,
   };
 }
 
@@ -216,11 +266,14 @@ export async function runCommander(analysis: AnalysisResult): Promise<Strategy> 
   // 学習
   let decision: CommanderDecision;
   let usedLlm = true;
+  const mode: "sales" | "likes" = analysis.salesDataAvailable ? "sales" : "likes";
   try {
     decision = await askLlm(strategy, analysis);
   } catch (err) {
-    console.warn("[commander] LLM判断失敗、ルールベースへ:", String(err).slice(0, 150));
-    decision = heuristicDecision(strategy, analysis);
+    console.warn(`[commander] LLM判断失敗、ルールベース(${mode})へ:`, String(err).slice(0, 150));
+    decision = mode === "sales"
+      ? salesHeuristicDecision(strategy, analysis)
+      : heuristicDecision(strategy, analysis);
     usedLlm = false;
   }
 
@@ -233,7 +286,12 @@ export async function runCommander(analysis: AnalysisResult): Promise<Strategy> 
     hookWeights: clampWeights({ ...strategy.hookWeights, ...decision.hookWeights }),
     seasonalKeywords: decision.seasonalKeywords.length > 0 ? decision.seasonalKeywords : strategy.seasonalKeywords,
     styleHints: decision.styleHints,
-    commanderNotes: decision.notes,
+    commanderNotes: `[mode=${mode}] ${decision.notes}`,
+    salesGen: mode === "sales",
+    salesGenSince: mode === "sales" ? (strategy.salesGenSince ?? new Date().toISOString()) : strategy.salesGenSince,
+    slotWeights: decision.slotWeights
+      ? clampWeights({ ...(strategy.slotWeights ?? { slot0: 1, slot1: 1, slot2: 1 }), ...decision.slotWeights })
+      : strategy.slotWeights,
   };
   saveStrategy(next);
 
@@ -255,6 +313,10 @@ export async function runCommander(analysis: AnalysisResult): Promise<Strategy> 
   await notifyReport(
     `🎖 司令官デイリーレポート (第${next.generation}世代)`,
     [
+      `**mode**: ${mode === "sales" ? `📊 sales_score (直近${analysis.salesWindowDays}日 総¥${analysis.salesTotalReward} clicks${analysis.salesTotalClicks})` : "👍 likes ベース (実売データ不足)"}`,
+      mode === "sales" && analysis.slotSales.length > 0
+        ? `**slot別実売スコア**: ${analysis.slotSales.map((s) => `${s.slot}=${s.salesScore.toFixed(0)}`).join(" / ")}`
+        : "",
       `**実績**: 投稿${analysis.totalPosts}件 / 計測済${analysis.measuredPosts}件`,
       `**ジャンル重み上位**: ${weightsSummary || "初期値"}`,
       `**投稿タイプ重み**: ${JSON.stringify(next.postTypeWeights)}`,
