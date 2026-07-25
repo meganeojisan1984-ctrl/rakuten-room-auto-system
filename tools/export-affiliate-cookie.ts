@@ -11,9 +11,9 @@ import * as fs from "fs";
 import * as path from "path";
 
 const AFFILIATE_TOP_URL = "https://affiliate.rakuten.co.jp/";
-const LOGIN_URL =
-  "https://grp01.id.rakuten.co.jp/rms/nid/login?service_id=s225&r=" +
-  encodeURIComponent(AFFILIATE_TOP_URL);
+// affiliate.rakuten.co.jp に直接アクセスし、未ログインなら 楽天ID 側が
+// 正しい service_id 付きのログイン画面へ自動リダイレクトさせる。
+// service_id を私が推測すると E01_008 になるため直リンクを使わない。
 const OUTPUT_FILE = path.join(process.cwd(), "cookies-affiliate.json");
 
 async function main(): Promise<void> {
@@ -33,12 +33,12 @@ async function main(): Promise<void> {
     viewport: null,
   });
   const page = await context.newPage();
-  await page.goto(LOGIN_URL, { waitUntil: "domcontentloaded" });
+  await page.goto(AFFILIATE_TOP_URL, { waitUntil: "domcontentloaded" });
 
-  console.log(`楽天アフィリエイトのトップ (${AFFILIATE_TOP_URL}) に遷移するまで待機します（最大5分）...`);
+  console.log(`楽天アフィリエイトのトップ (${AFFILIATE_TOP_URL}) に遷移するまで待機します（最大15分）...`);
   await page.waitForURL(
     (url) => url.href.startsWith(AFFILIATE_TOP_URL),
-    { timeout: 300000 },
+    { timeout: 900000 },
   );
 
   console.log("\nログイン完了を検知しました！Cookieを取得中...");
