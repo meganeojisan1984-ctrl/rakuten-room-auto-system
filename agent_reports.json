@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-07-17T09:47:13.677Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-07-17T09:48:04.576Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=成功"
-  },
-  {
-    "ts": "2026-07-17T13:38:10.153Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (バス・トイレ用品)"
-  },
-  {
     "ts": "2026-07-17T13:38:11.745Z",
     "agent": "copywriter",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-07-26T15:45:35.590Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "20件抽出、履歴19件のいいね数を更新"
+  },
+  {
+    "ts": "2026-07-26T15:45:35.601Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴78件(計測済51) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-07-26T15:45:37.213Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第18世代へ更新 (LLM)、警告0件"
   }
 ]
