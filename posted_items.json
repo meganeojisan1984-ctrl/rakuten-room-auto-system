@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "kyarahouse:10000036",
     "mujirushi-ryohin:10007326",
     "sealdename:10001270",
     "angelingg:10001004",
@@ -499,7 +498,8 @@
     "darkangel:10031059",
     "mr-mango:10000391",
     "dinos-tv:10010943",
-    "kurashi-zakka:10001724"
+    "kurashi-zakka:10001724",
+    "kurashi-zakka:10002366"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
