@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-07-17T22:55:53.040Z",
-    "agent": "poster",
-    "ok": false,
-    "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/bo)"
-  },
-  {
-    "ts": "2026-07-18T05:17:02.821Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (掃除用品・消耗品)"
-  },
-  {
-    "ts": "2026-07-18T05:17:04.178Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ2)"
-  },
-  {
     "ts": "2026-07-18T05:17:34.154Z",
     "agent": "poster",
     "ok": false,
@@ -1198,5 +1180,23 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-07-27T16:49:44.143Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "39件抽出、履歴19件のいいね数を更新"
+  },
+  {
+    "ts": "2026-07-27T16:49:44.154Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴81件(計測済53) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-07-27T16:49:46.033Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第19世代へ更新 (LLM)、警告0件"
   }
 ]
