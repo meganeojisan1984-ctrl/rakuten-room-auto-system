@@ -965,5 +965,18 @@
     "captionHead": "え、待って。这まつ毛美容液、ポイント5倍獲得チャン",
     "slot": "slot0",
     "itemCodeHash": "c0bccb399171"
+  },
+  {
+    "ts": "2026-07-27T07:28:14.597Z",
+    "itemCode": "netbaby:10028658",
+    "itemName": "【1種類を選べる】パンパース オムツ さらさらケア パンツ(1セット)【パンパース】[さらさらケア]",
+    "genreName": "家事効率化グッズ",
+    "price": 8980,
+    "postType": 3,
+    "hour": 16,
+    "hook": "empathy",
+    "captionHead": "おむつ探しの大変さ、知っていますか？🙋 私も赤ち",
+    "slot": "slot1",
+    "itemCodeHash": "badd7d756517"
   }
 ]

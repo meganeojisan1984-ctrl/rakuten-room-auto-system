@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "sealdename:10001270",
     "angelingg:10001004",
     "igusakotatu:10057614",
     "livingut:10057581",
@@ -499,7 +498,8 @@
     "dinos-tv:10010943",
     "kurashi-zakka:10001724",
     "kurashi-zakka:10002366",
-    "bjc-onlinestore:10000020"
+    "bjc-onlinestore:10000020",
+    "netbaby:10028658"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
