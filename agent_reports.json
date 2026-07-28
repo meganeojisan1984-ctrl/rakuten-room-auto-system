@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-07-18T15:37:16.190Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "19件抽出、履歴6件のいいね数を更新"
-  },
-  {
-    "ts": "2026-07-18T15:37:16.193Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴45件(計測済25)を集計。ジャンル16種"
-  },
-  {
-    "ts": "2026-07-18T15:37:19.092Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第9世代へ更新 (LLM)、警告0件"
-  },
-  {
     "ts": "2026-07-18T22:56:47.363Z",
     "agent": "scout",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-07-28T16:23:20.278Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "20件抽出、履歴20件のいいね数を更新"
+  },
+  {
+    "ts": "2026-07-28T16:23:20.289Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴84件(計測済55) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-07-28T16:23:22.743Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第20世代へ更新 (LLM)、警告0件"
   }
 ]
