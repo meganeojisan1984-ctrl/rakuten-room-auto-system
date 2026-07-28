@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "igusakotatu:10057614",
     "livingut:10057581",
     "maxshare:10060812",
     "tenkapas:10010260",
@@ -499,7 +498,8 @@
     "kurashi-zakka:10002366",
     "bjc-onlinestore:10000020",
     "netbaby:10028658",
-    "shopworld:10141240"
+    "shopworld:10141240",
+    "nanobig:10000862"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }

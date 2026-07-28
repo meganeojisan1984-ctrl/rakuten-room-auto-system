@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-07-18T05:17:34.154Z",
-    "agent": "poster",
-    "ok": false,
-    "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/bo)"
-  },
-  {
-    "ts": "2026-07-18T09:14:57.863Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (洗濯・衣類ケアグッズ)"
-  },
-  {
-    "ts": "2026-07-18T09:14:59.050Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ1)"
-  },
-  {
-    "ts": "2026-07-18T09:16:35.430Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
     "ts": "2026-07-18T09:17:18.764Z",
     "agent": "promoter",
     "ok": true,
@@ -1198,5 +1174,29 @@
     "agent": "commander",
     "ok": true,
     "summary": "第19世代へ更新 (LLM)、警告0件"
+  },
+  {
+    "ts": "2026-07-28T00:22:10.345Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (洗濯・衣類ケアグッズ)"
+  },
+  {
+    "ts": "2026-07-28T00:22:11.502Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ3)"
+  },
+  {
+    "ts": "2026-07-28T00:23:55.773Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-07-28T00:24:10.033Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
   }
 ]

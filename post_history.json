@@ -995,5 +995,18 @@
     "itemCodeHash": "a3e015e441da",
     "likes": 5,
     "likesUpdatedAt": "2026-07-27T16:49:44.123Z"
+  },
+  {
+    "ts": "2026-07-28T00:24:10.034Z",
+    "itemCode": "nanobig:10000862",
+    "itemName": "【クーポンで500円オフ】回転モップクリーナー 電動モップ Orage M200 S 軽量 自立 自走式 回転モップ 水拭き コードレス 床拭き 掃除機 網戸 モップ 高速回転 充電式 ジェネリック家電 Orage M200S【1年保証】 ギフトにも",
+    "genreName": "洗濯・衣類ケアグッズ",
+    "price": 5980,
+    "postType": 3,
+    "hour": 9,
+    "hook": "question",
+    "captionHead": "まだ手動で床掃除してるの？🙋 私、最近楽天でこれ",
+    "slot": "slot0",
+    "itemCodeHash": "9ceeaa28166b"
   }
 ]
