@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "maxshare:10060812",
     "tenkapas:10010260",
     "auc-risecreation:10005057",
     "yamamotojp:10040383",
@@ -499,7 +498,8 @@
     "netbaby:10028658",
     "shopworld:10141240",
     "nanobig:10000862",
-    "danitori:10000057"
+    "danitori:10000057",
+    "lala-nature:10002159"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
