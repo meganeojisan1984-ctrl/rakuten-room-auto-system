@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-07-18T22:56:47.363Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (時短ガジェット・小型家電)"
-  },
-  {
-    "ts": "2026-07-18T22:56:48.410Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ3)"
-  },
-  {
-    "ts": "2026-07-18T22:57:16.537Z",
-    "agent": "poster",
-    "ok": false,
-    "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/bo)"
-  },
-  {
     "ts": "2026-07-19T05:43:31.735Z",
     "agent": "scout",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "commander",
     "ok": true,
     "summary": "第20世代へ更新 (LLM)、警告0件"
+  },
+  {
+    "ts": "2026-07-29T00:11:04.947Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (洗濯・衣類ケアグッズ)"
+  },
+  {
+    "ts": "2026-07-29T00:11:06.779Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ2)"
+  },
+  {
+    "ts": "2026-07-29T00:11:35.495Z",
+    "agent": "poster",
+    "ok": false,
+    "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/bo)"
   }
 ]
