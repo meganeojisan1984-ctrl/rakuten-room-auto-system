@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "auc-risecreation:10005057",
     "yamamotojp:10040383",
     "kitajimasteel:10005027",
     "bt-iimono:10000214",
@@ -499,7 +498,8 @@
     "nanobig:10000862",
     "danitori:10000057",
     "lala-nature:10002159",
-    "futonyasan:10026729"
+    "futonyasan:10026729",
+    "at-rescue:10002460"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
