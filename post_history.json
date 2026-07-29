@@ -176,8 +176,8 @@
     "hour": 18,
     "hook": "loss",
     "captionHead": "これ知らないと年間10万円損してるかも…💸 だっ",
-    "likes": 4,
-    "likesUpdatedAt": "2026-07-28T16:23:20.264Z"
+    "likes": 5,
+    "likesUpdatedAt": "2026-07-29T16:08:57.560Z"
   },
   {
     "ts": "2026-07-12T13:22:53.014Z",
@@ -714,8 +714,8 @@
     "hour": 14,
     "hook": "surprise",
     "captionHead": "え、待って。楽天でこれ見つけたときテンション上がり",
-    "likes": 7,
-    "likesUpdatedAt": "2026-07-28T16:23:20.264Z"
+    "likes": 8,
+    "likesUpdatedAt": "2026-07-29T16:08:57.560Z"
   },
   {
     "ts": "2026-07-22T10:15:59.653Z",
@@ -740,8 +740,8 @@
     "hour": 22,
     "hook": "surprise",
     "captionHead": "え、待って。楽天でこれ見つけたときテンション上がり",
-    "likes": 7,
-    "likesUpdatedAt": "2026-07-28T16:23:20.264Z"
+    "likes": 8,
+    "likesUpdatedAt": "2026-07-29T16:08:57.560Z"
   },
   {
     "ts": "2026-07-22T15:47:29.861Z",
@@ -855,8 +855,8 @@
     "hour": 0,
     "hook": "number",
     "captionHead": "120件のレビューで★4.41！🤩 そんな高評価",
-    "likes": 17,
-    "likesUpdatedAt": "2026-07-28T16:23:20.264Z"
+    "likes": 19,
+    "likesUpdatedAt": "2026-07-29T16:08:57.560Z"
   },
   {
     "ts": "2026-07-24T23:10:41.183Z",
@@ -1008,8 +1008,8 @@
     "captionHead": "まだ手動で床掃除してるの？🙋 私、最近楽天でこれ",
     "slot": "slot0",
     "itemCodeHash": "9ceeaa28166b",
-    "likes": 9,
-    "likesUpdatedAt": "2026-07-28T16:23:20.264Z"
+    "likes": 10,
+    "likesUpdatedAt": "2026-07-29T16:08:57.560Z"
   },
   {
     "ts": "2026-07-28T06:25:20.423Z",
@@ -1036,8 +1036,8 @@
     "captionHead": "これ知らないと年間10万円損してるかも...🙅‍",
     "slot": "slot2",
     "itemCodeHash": "3716fd799825",
-    "likes": 4,
-    "likesUpdatedAt": "2026-07-28T16:23:20.264Z"
+    "likes": 5,
+    "likesUpdatedAt": "2026-07-29T16:08:57.560Z"
   },
   {
     "ts": "2026-07-29T06:30:34.977Z",
@@ -1050,7 +1050,9 @@
     "hook": "beforeafter",
     "captionHead": "先月までの私: 暑さで毎日寝苦しくて困ってた / ",
     "slot": "slot1",
-    "itemCodeHash": "6081c29e3558"
+    "itemCodeHash": "6081c29e3558",
+    "likes": 6,
+    "likesUpdatedAt": "2026-07-29T16:08:57.560Z"
   },
   {
     "ts": "2026-07-29T14:13:31.964Z",
@@ -1063,6 +1065,8 @@
     "hook": "empathy",
     "captionHead": "わかる人にはわかるやつ…but、私の家は最近非常食",
     "slot": "slot2",
-    "itemCodeHash": "40d88790f6e0"
+    "itemCodeHash": "40d88790f6e0",
+    "likes": 5,
+    "likesUpdatedAt": "2026-07-29T16:08:57.560Z"
   }
 ]
