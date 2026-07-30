@@ -18,3 +18,4 @@ data/sales.sqlite-shm
 data/sales.sqlite-wal
 data/affiliate-debug/*
 !data/affiliate-debug/.gitkeep
+public/generated/instagram-demo/

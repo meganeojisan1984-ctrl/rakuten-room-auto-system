@@ -85,6 +85,44 @@ function proofLine(item: RakutenItem): string {
   return bits.join(" ・ ");
 }
 
+function accentColor(kind: CarouselSlideKind): string {
+  switch (kind) {
+    case "hook":
+      return "#0f766e";
+    case "problem":
+      return "#be123c";
+    case "discovery":
+      return "#2563eb";
+    case "use_case":
+      return "#7c3aed";
+    case "proof":
+      return "#b45309";
+    case "room_bridge":
+      return "#15803d";
+    case "cta":
+      return "#111827";
+  }
+}
+
+function actionLabel(kind: CarouselSlideKind): string {
+  switch (kind) {
+    case "hook":
+      return "最後にリンク導線あり";
+    case "problem":
+      return "あるあるなら次へ";
+    case "discovery":
+      return "選ぶ理由を確認";
+    case "use_case":
+      return "使う場面を想像";
+    case "proof":
+      return "数字でチェック";
+    case "room_bridge":
+      return "ROOMで確認";
+    case "cta":
+      return "保存してあとで見る";
+  }
+}
+
 export function buildCarouselSlides(item: RakutenItem): CarouselSlide[] {
   const name = truncate(item.itemName, 28);
   const caption = truncate(item.itemCaption || "毎日の小さなストレスを減らしてくれる便利アイテムです。", 46);
@@ -160,37 +198,50 @@ function lines(text: string, maxChars: number): string[] {
 }
 
 export function renderSlideSvg(slide: CarouselSlide, item: RakutenItem): string {
+  const accent = accentColor(slide.kind);
   const headlineLines = lines(slide.headline, 13);
   const bodyLines = lines(slide.body, 22);
   const productName = truncate(item.itemName, 34);
   const headlineSvg = headlineLines
-    .map((line, i) => `<text x="78" y="${188 + i * 70}" class="headline">${escapeXml(line)}</text>`)
+    .map((line, i) => `<text x="78" y="${174 + i * 70}" class="headline">${escapeXml(line)}</text>`)
     .join("\n");
   const bodySvg = bodyLines
-    .map((line, i) => `<text x="82" y="${442 + i * 42}" class="body">${escapeXml(line)}</text>`)
+    .map((line, i) => `<text x="110" y="${360 + i * 43}" class="body">${escapeXml(line)}</text>`)
     .join("\n");
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
   <style>
     .badge { font: 700 34px Arial, sans-serif; fill: #ffffff; }
-    .eyebrow { font: 700 28px Arial, sans-serif; fill: #0f766e; }
+    .eyebrow { font: 700 28px Arial, sans-serif; fill: ${accent}; }
     .headline { font: 800 58px Arial, sans-serif; fill: #111827; }
-    .body { font: 600 31px Arial, sans-serif; fill: #374151; }
+    .body { font: 700 32px Arial, sans-serif; fill: #263445; }
     .small { font: 600 25px Arial, sans-serif; fill: #475569; }
+    .proof { font: 800 34px Arial, sans-serif; fill: #111827; }
+    .label { font: 700 22px Arial, sans-serif; fill: #ffffff; }
   </style>
-  <rect width="1080" height="1080" fill="#f8fafc"/>
-  <rect x="36" y="36" width="1008" height="1008" rx="26" fill="#ffffff"/>
-  <rect x="72" y="72" width="116" height="62" rx="31" fill="#0f766e"/>
+  <rect width="1080" height="1080" fill="#f4f7fb"/>
+  <rect x="36" y="36" width="1008" height="1008" rx="30" fill="#ffffff"/>
+  <rect x="36" y="36" width="1008" height="14" fill="${accent}"/>
+  <circle cx="936" cy="150" r="104" fill="${accent}" opacity="0.10"/>
+  <circle cx="1000" cy="86" r="62" fill="${accent}" opacity="0.14"/>
+  <rect x="72" y="72" width="116" height="62" rx="31" fill="${accent}"/>
   <text x="102" y="114" class="badge">${escapeXml(slide.badge)}</text>
   <text x="216" y="113" class="eyebrow">買ってよかった候補</text>
   ${headlineSvg}
-  <rect x="72" y="610" width="430" height="330" rx="22" fill="#e2e8f0"/>
-  <image href="${escapeXml(item.imageUrl)}" x="91" y="629" width="392" height="292" preserveAspectRatio="xMidYMid meet"/>
-  <rect x="536" y="610" width="470" height="330" rx="22" fill="#ecfeff"/>
+  <rect x="78" y="304" width="924" height="176" rx="26" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>
   ${bodySvg}
-  <text x="570" y="832" class="small">${escapeXml(formatPrice(item.itemPrice))}</text>
-  <text x="570" y="878" class="small">${escapeXml(truncate(item.shopName, 24))}</text>
-  <text x="76" y="1002" class="small">${escapeXml(productName)}</text>
+  <rect x="72" y="532" width="554" height="410" rx="30" fill="#e5edf3"/>
+  <rect x="94" y="554" width="510" height="366" rx="24" fill="#ffffff"/>
+  <image href="${escapeXml(item.imageUrl)}" x="114" y="578" width="470" height="300" preserveAspectRatio="xMidYMid meet"/>
+  <text x="116" y="895" class="small">${escapeXml(productName)}</text>
+  <rect x="658" y="532" width="350" height="410" rx="30" fill="#f8fafc" stroke="#dbe4ee" stroke-width="2"/>
+  <text x="696" y="612" class="small">ひと目で確認</text>
+  <text x="696" y="670" class="proof">${escapeXml(formatPrice(item.itemPrice))}</text>
+  <text x="696" y="726" class="proof">${escapeXml(item.reviewAverage && item.reviewCount ? `★${item.reviewAverage} / ${item.reviewCount}件` : truncate(item.shopName, 18))}</text>
+  <text x="696" y="782" class="small">${escapeXml(item.hasPointBonus && item.pointRate > 1 ? `ポイント${item.pointRate}倍` : truncate(item.shopName, 18))}</text>
+  <rect x="696" y="830" width="256" height="68" rx="34" fill="${accent}"/>
+  <text x="824" y="874" text-anchor="middle" class="label">${escapeXml(actionLabel(slide.kind))}</text>
+  <text x="76" y="1002" class="small">プロフィールの楽天ROOMからチェック</text>
 </svg>`;
 }
 
