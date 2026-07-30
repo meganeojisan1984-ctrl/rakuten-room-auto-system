@@ -224,7 +224,7 @@ export function renderSlideSvg(slide: CarouselSlide, item: RakutenItem, options:
     .map((line, i) => `<text x="118" y="${362 + i * 43}" class="body">${escapeXml(line)}</text>`)
     .join("\n");
   const characterSvg = guideImage
-    ? `<image href="${escapeXml(guideImage)}" x="642" y="520" width="390" height="438" preserveAspectRatio="xMidYMax meet"/>`
+    ? `<image href="${escapeXml(guideImage)}" x="694" y="498" width="290" height="330" preserveAspectRatio="xMidYMax meet"/>`
     : "";
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
@@ -247,18 +247,17 @@ export function renderSlideSvg(slide: CarouselSlide, item: RakutenItem, options:
   <text x="216" y="113" class="eyebrow">買ってよかった候補</text>
   ${headlineSvg}
   <rect x="78" y="292" width="622" height="210" rx="30" fill="#ffffff" stroke="${accent}" stroke-width="4"/>
-  <path d="M680 448 L738 486 L690 416 Z" fill="#ffffff" stroke="${accent}" stroke-width="4"/>
+  <path d="M682 448 L742 510 L690 418 Z" fill="#ffffff" stroke="${accent}" stroke-width="4"/>
   ${bodySvg}
-  <rect x="72" y="548" width="520" height="384" rx="30" fill="#e5edf3"/>
-  <rect x="94" y="570" width="476" height="340" rx="24" fill="#ffffff"/>
-  <image href="${escapeXml(item.imageUrl)}" x="114" y="590" width="436" height="260" preserveAspectRatio="xMidYMid meet"/>
-  <text x="116" y="878" class="small">${escapeXml(productName)}</text>
-  <rect x="600" y="820" width="406" height="116" rx="28" fill="#f8fafc" stroke="#dbe4ee" stroke-width="2"/>
-  <text x="630" y="864" class="proof">${escapeXml(formatPrice(item.itemPrice))}</text>
-  <text x="630" y="908" class="small">${escapeXml(item.reviewAverage && item.reviewCount ? `★${item.reviewAverage} / ${item.reviewCount}件` : truncate(item.shopName, 18))}</text>
-  <rect x="684" y="950" width="292" height="66" rx="33" fill="${accent}"/>
-  <text x="830" y="993" text-anchor="middle" class="label">${escapeXml(actionLabel(slide.kind))}</text>
+  <rect x="72" y="548" width="544" height="392" rx="30" fill="#e5edf3"/>
+  <rect x="94" y="570" width="500" height="348" rx="24" fill="#ffffff"/>
+  <image href="${escapeXml(item.imageUrl)}" x="120" y="592" width="448" height="246" preserveAspectRatio="xMidYMid meet"/>
+  <text x="120" y="874" class="small">${escapeXml(productName)}</text>
+  <text x="120" y="912" class="small">${escapeXml(`${formatPrice(item.itemPrice)} / ${item.reviewAverage && item.reviewCount ? `★${item.reviewAverage} ${item.reviewCount}件` : truncate(item.shopName, 18)}`)}</text>
+  <rect x="666" y="500" width="338" height="330" rx="34" fill="#f8fafc" stroke="#dbe4ee" stroke-width="2"/>
   ${characterSvg}
+  <rect x="612" y="892" width="360" height="64" rx="32" fill="${accent}"/>
+  <text x="792" y="934" text-anchor="middle" class="label">${escapeXml(actionLabel(slide.kind))}</text>
   <text x="76" y="1008" class="small">プロフィールの楽天ROOMからチェック 🛒</text>
 </svg>`;
 }

@@ -67,7 +67,9 @@ test("carousel slides use friendly emoji copy and character speech bubble", () =
     assert.equal(slides.some((slide) => /[✨😳💡🙌👀🛒📌]/u.test(slide.body)), true);
     const svg = renderSlideSvg(slides[0]!, item, { characterImagePath: iconPath });
     assert.match(svg, /data:image\/png;base64/);
-    assert.match(svg, /<path d="M680 448 L738 486 L690 416 Z"/);
+    assert.match(svg, /<path d="M682 448 L742 510 L690 418 Z"/);
+    assert.match(svg, /x="694" y="498" width="290" height="330"/);
+    assert.match(svg, /x="612" y="892" width="360" height="64"/);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
