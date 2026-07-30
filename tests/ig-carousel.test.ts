@@ -1,0 +1,127 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import {
+  buildCarouselSlides,
+  mapAssetToPublicUrl,
+  renderSlideSvg,
+  writeCarouselSlides,
+  type CarouselAsset,
+} from "../src/ig/carousel";
+import type { RakutenItem } from "../src/fetcher";
+
+const item: RakutenItem = {
+  itemName: "片手で使える収納ボックス 3個セット",
+  itemCode: "shop:test",
+  itemPrice: 2980,
+  itemUrl: "https://example.com/item",
+  itemCaption: "洗面台やキッチン周りの小物をすっきり収納できます。",
+  imageUrl: "https://example.com/product.jpg",
+  shopName: "暮らしショップ",
+  pointRate: 5,
+  hasCoupon: true,
+  hasPointBonus: true,
+  availability: 1,
+  reviewAverage: 4.6,
+  reviewCount: 128,
+};
+
+test("buildCarouselSlides creates seven mobile-readable slides", () => {
+  const slides = buildCarouselSlides(item);
+  assert.equal(slides.length, 7);
+  assert.deepEqual(slides.map((s) => s.kind), [
+    "hook",
+    "problem",
+    "discovery",
+    "use_case",
+    "proof",
+    "room_bridge",
+    "cta",
+  ]);
+  for (const slide of slides) {
+    assert.ok(slide.headline.length > 0);
+    assert.ok(slide.headline.length <= 34);
+    assert.ok(slide.body.length <= 82);
+  }
+});
+
+test("renderSlideSvg escapes text and includes product image", () => {
+  const svg = renderSlideSvg(
+    { index: 1, kind: "hook", headline: "A&B <収納>", body: "保存してあとで見る", badge: "01" },
+    item,
+  );
+  assert.match(svg, /<svg/);
+  assert.match(svg, /A&amp;B &lt;収納&gt;/);
+  assert.match(svg, /https:\/\/example\.com\/product\.jpg/);
+});
+
+test("writeCarouselSlides writes seven svg files with stable public urls", () => {
+  const dir = fs.mkdtempSync(path.join(process.cwd(), "tmp-carousel-"));
+  try {
+    const slides = buildCarouselSlides(item);
+    const assets = writeCarouselSlides(item, slides, {
+      outputDir: dir,
+      publicBaseUrl: "https://cdn.example.com/ig",
+      now: new Date("2026-07-30T00:00:00Z"),
+    });
+    assert.equal(assets.length, 7);
+    assert.ok(fs.existsSync(assets[0]!.filePath));
+    assert.equal(assets[0]!.publicUrl.startsWith("https://cdn.example.com/ig/2026-07-30-"), true);
+    assert.equal(assets.every((asset: CarouselAsset) => asset.publicUrl.endsWith(".svg")), true);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("mapAssetToPublicUrl rejects missing public base url", () => {
+  assert.throws(() => mapAssetToPublicUrl("slide.svg", ""));
+});
+
+test("publishInstagramCarousel creates child containers before parent carousel", async () => {
+  const calls: Array<{ method: string; url: string; params: Record<string, unknown> }> = [];
+  const client = {
+    post: async (url: string, _body: unknown, options: { params: Record<string, unknown> }) => {
+      calls.push({ method: "post", url, params: options.params });
+      if (options.params.media_type === "CAROUSEL") return { data: { id: "parent" } };
+      if (url.endsWith("/media_publish")) return { data: { id: "published" } };
+      return { data: { id: `child-${calls.length}` } };
+    },
+    get: async (url: string, options: { params: Record<string, unknown> }) => {
+      calls.push({ method: "get", url, params: options.params });
+      return { data: { status_code: "FINISHED" } };
+    },
+  };
+  const assets = [1, 2, 3].map((n) => ({
+    filePath: `slide-${n}.svg`,
+    publicUrl: `https://cdn.example.com/slide-${n}.svg`,
+    page: n,
+  }));
+  const { publishInstagramCarousel } = await import("../src/ig/carousel");
+  const id = await publishInstagramCarousel({
+    graphApiBase: "https://graph.instagram.com/v21.0",
+    igUserId: "1789",
+    accessToken: "token",
+    caption: "caption",
+    assets,
+    client,
+    waitMs: async () => {},
+  });
+  assert.equal(id, "published");
+  assert.equal(calls.filter((call) => call.params.is_carousel_item === true).length, 3);
+  assert.equal(
+    calls.some((call) => call.params.media_type === "CAROUSEL" && call.params.children === "child-1,child-2,child-3"),
+    true,
+  );
+  assert.equal(calls.at(-1)?.url.endsWith("/media_publish"), true);
+});
+
+test("isCarouselEnabled requires enabled flag and public base url", async () => {
+  const { isCarouselEnabled } = await import("../src/ig/carousel");
+  assert.equal(
+    isCarouselEnabled({ IG_CAROUSEL_ENABLED: "1", IG_CAROUSEL_PUBLIC_BASE_URL: "https://cdn.example.com/ig" }),
+    true,
+  );
+  assert.equal(isCarouselEnabled({ IG_CAROUSEL_ENABLED: "1" }), false);
+  assert.equal(isCarouselEnabled({ IG_CAROUSEL_PUBLIC_BASE_URL: "https://cdn.example.com/ig" }), false);
+});

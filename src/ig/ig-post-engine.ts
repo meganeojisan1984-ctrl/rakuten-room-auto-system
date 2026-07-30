@@ -3,6 +3,13 @@ import { buildInstagramFinalCaption, upscaleImageUrl } from "../sns";
 import { notifyError } from "../notifiers";
 import type { PersonaSlot } from "../persona/persona";
 import type { RakutenItem } from "../fetcher";
+import {
+  buildCarouselSlides,
+  getCarouselWriteOptions,
+  isCarouselEnabled,
+  publishInstagramCarousel,
+  writeCarouselSlides,
+} from "./carousel";
 
 // sns.ts と揃える (Instagram Graph API 独自エンドポイント)
 const GRAPH_API = "https://graph.instagram.com/v21.0";
@@ -47,6 +54,24 @@ export async function postToInstagramWithPersona(
     const baseCaption = await buildInstagramFinalCaption(item, roomCaption);
     const scrubbed = scrubNgWords(baseCaption, persona.ngWords);
     const finalCaption = withPersonaFooter(scrubbed, persona);
+    if (isCarouselEnabled(process.env)) {
+      try {
+        console.log(`[ig-post-engine] slot=${persona.id} carousel media creating...`);
+        const slides = buildCarouselSlides(item);
+        const assets = writeCarouselSlides(item, slides, getCarouselWriteOptions(process.env));
+        await publishInstagramCarousel({
+          graphApiBase: GRAPH_API,
+          igUserId: IG_USER_ID,
+          accessToken: IG_ACCESS_TOKEN,
+          caption: finalCaption,
+          assets,
+        });
+        console.log(`[ig-post-engine] ✓ carousel post success: ${item.itemName.slice(0, 30)}`);
+        return true;
+      } catch (err) {
+        console.warn(`[ig-post-engine] carousel failed, falling back to single image: ${String(err).slice(0, 200)}`);
+      }
+    }
     const imageUrl = upscaleImageUrl(item.imageUrl);
     console.log(`[ig-post-engine] slot=${persona.id} メディア作成中...`);
     const createRes = await axios.post<{ id: string }>(
