@@ -5,6 +5,8 @@ import * as path from "node:path";
 import {
   buildCarouselSlides,
   mapAssetToPublicUrl,
+  writeCarouselImages,
+  publishCarouselAssetsToGitHub,
   renderSlideSvg,
   writeCarouselSlides,
   type CarouselAsset,
@@ -74,6 +76,28 @@ test("writeCarouselSlides writes seven svg files with stable public urls", () =>
   }
 });
 
+test("writeCarouselImages writes jpeg files for Instagram media URLs", async () => {
+  const dir = fs.mkdtempSync(path.join(process.cwd(), "tmp-carousel-jpeg-"));
+  try {
+    const slides = buildCarouselSlides(item);
+    const assets = await writeCarouselImages(item, slides, {
+      outputDir: dir,
+      publicBaseUrl: "https://cdn.example.com/ig",
+      now: new Date("2026-07-30T01:02:03Z"),
+      renderer: async (svg, filePath) => {
+        assert.match(svg, /<svg/);
+        fs.writeFileSync(filePath, "fake-jpeg");
+      },
+    });
+    assert.equal(assets.length, 7);
+    assert.ok(fs.existsSync(assets[0]!.filePath));
+    assert.equal(assets.every((asset: CarouselAsset) => asset.filePath.endsWith(".jpg")), true);
+    assert.equal(assets.every((asset: CarouselAsset) => asset.publicUrl.endsWith(".jpg")), true);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("mapAssetToPublicUrl rejects missing public base url", () => {
   assert.throws(() => mapAssetToPublicUrl("slide.svg", ""));
 });
@@ -124,4 +148,43 @@ test("isCarouselEnabled requires enabled flag and public base url", async () => 
   );
   assert.equal(isCarouselEnabled({ IG_CAROUSEL_ENABLED: "1" }), false);
   assert.equal(isCarouselEnabled({ IG_CAROUSEL_PUBLIC_BASE_URL: "https://cdn.example.com/ig" }), false);
+});
+
+test("publishCarouselAssetsToGitHub uploads files and rewrites raw public urls", async () => {
+  const dir = fs.mkdtempSync(path.join(process.cwd(), "tmp-carousel-upload-"));
+  try {
+    const filePath = path.join(dir, "slide.jpg");
+    fs.writeFileSync(filePath, "jpeg-bytes");
+    const calls: Array<{ method: string; url: string; body?: Record<string, unknown> }> = [];
+    const client = {
+      get: async (url: string) => {
+        calls.push({ method: "get", url });
+        const err = new Error("missing") as Error & { response?: { status: number } };
+        err.response = { status: 404 };
+        throw err;
+      },
+      put: async (url: string, body: Record<string, unknown>) => {
+        calls.push({ method: "put", url, body });
+        return { data: { content: { path: "public/generated/instagram/slide.jpg" } } };
+      },
+    };
+    const uploaded = await publishCarouselAssetsToGitHub(
+      [{ filePath, publicUrl: "https://old.example.com/slide.jpg", page: 1 }],
+      {
+        repository: "owner/repo",
+        branch: "main",
+        token: "token",
+        client,
+        waitMs: async () => {},
+      },
+    );
+    assert.equal(calls.some((call) => call.method === "put"), true);
+    assert.equal(
+      calls.find((call) => call.method === "put")?.body?.content,
+      Buffer.from("jpeg-bytes").toString("base64"),
+    );
+    assert.match(uploaded[0]!.publicUrl, /^https:\/\/raw\.githubusercontent\.com\/owner\/repo\/main\/tmp-carousel-upload-.*\/slide\.jpg$/);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });

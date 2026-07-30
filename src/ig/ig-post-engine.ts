@@ -7,8 +7,9 @@ import {
   buildCarouselSlides,
   getCarouselWriteOptions,
   isCarouselEnabled,
+  publishCarouselAssetsToGitHub,
   publishInstagramCarousel,
-  writeCarouselSlides,
+  writeCarouselImages,
 } from "./carousel";
 
 // sns.ts と揃える (Instagram Graph API 独自エンドポイント)
@@ -58,7 +59,14 @@ export async function postToInstagramWithPersona(
       try {
         console.log(`[ig-post-engine] slot=${persona.id} carousel media creating...`);
         const slides = buildCarouselSlides(item);
-        const assets = writeCarouselSlides(item, slides, getCarouselWriteOptions(process.env));
+        let assets = await writeCarouselImages(item, slides, getCarouselWriteOptions(process.env));
+        if (process.env.IG_CAROUSEL_GITHUB_UPLOAD === "1") {
+          assets = await publishCarouselAssetsToGitHub(assets, {
+            repository: process.env.GITHUB_REPOSITORY ?? "",
+            branch: process.env.GITHUB_REF_NAME ?? "main",
+            token: process.env.GITHUB_TOKEN ?? "",
+          });
+        }
         await publishInstagramCarousel({
           graphApiBase: GRAPH_API,
           igUserId: IG_USER_ID,

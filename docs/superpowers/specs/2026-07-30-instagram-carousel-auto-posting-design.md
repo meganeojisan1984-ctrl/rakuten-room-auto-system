@@ -26,15 +26,16 @@ The visual style should feel like a curated Japanese affiliate/influencer carous
 
 ## Technical Design
 
-Create a new carousel generation layer that converts `RakutenItem` plus ROOM caption into structured slide data and SVG slide files. SVG keeps the first version dependency-light and testable in Node. Each slide is 1080x1080 and can reference the Rakuten product image URL.
+Create a new carousel generation layer that converts `RakutenItem` plus ROOM caption into structured slide data and rendered JPEG slide files. The slide layout is authored as SVG for deterministic typography, then rendered to 1080x1080 JPEG so Instagram can process the media URL reliably.
 
 Add a new Instagram carousel publisher that accepts public slide URLs. It creates child media containers with `is_carousel_item=true`, then creates a parent `CAROUSEL` container with `children`, waits for processing, and publishes it. If carousel generation or public URL configuration is unavailable, the system falls back to the current single-image post.
 
 Public image URL configuration is explicit:
 
 - `IG_CAROUSEL_ENABLED=1` enables carousel attempts.
+- `IG_CAROUSEL_GITHUB_UPLOAD=1` uploads generated JPEG files to the repository through GitHub Contents API before publishing.
 - `IG_CAROUSEL_PUBLIC_BASE_URL` points to a public HTTPS directory serving generated files.
-- `IG_CAROUSEL_OUTPUT_DIR` controls where SVG files are written locally, defaulting to `public/generated/instagram`.
+- `IG_CAROUSEL_OUTPUT_DIR` controls where JPEG files are written locally, defaulting to `public/generated/instagram`.
 
 This first version does not require Canva in the automated path. Canva can still be used later as a human-editable template layer once the winning slide structure is validated.
 
@@ -43,8 +44,8 @@ This first version does not require Canva in the automated path. Canva can still
 1. `main.ts` selects and posts the item to ROOM as it does now.
 2. `crossPostToSns` passes the successful item to the persona Instagram engine.
 3. `postToInstagramWithPersona` builds the final caption.
-4. If carousel is enabled, it generates slide copy and SVG files.
-5. It maps generated files to public URLs using `IG_CAROUSEL_PUBLIC_BASE_URL`.
+4. If carousel is enabled, it generates slide copy and JPEG files.
+5. In GitHub Actions, it uploads generated files to GitHub first and uses raw.githubusercontent.com URLs.
 6. It publishes a carousel through Instagram Graph API.
 7. If any step fails, it logs the reason and uses the existing single-image post.
 
@@ -57,7 +58,7 @@ The first implementation focuses on one carousel per cross-post, matching the cu
 Add unit tests for:
 
 - slide copy generation shape and limits,
-- SVG escaping and 7-page output,
+- SVG escaping, JPEG output, and 7-page output,
 - public URL mapping,
 - Graph API carousel request ordering,
 - fallback behavior when carousel configuration is missing.

@@ -31,11 +31,17 @@ export interface CarouselWriteOptions {
   outputDir?: string;
   publicBaseUrl?: string;
   now?: Date;
+  renderer?: (svg: string, filePath: string) => Promise<void>;
 }
 
 interface HttpClient {
   post<T>(url: string, body: unknown, options: { params: Record<string, unknown>; timeout?: number }): Promise<{ data: T }>;
   get<T>(url: string, options: { params: Record<string, unknown>; timeout?: number }): Promise<{ data: T }>;
+}
+
+interface GitHubClient {
+  get<T>(url: string, options?: { headers?: Record<string, string>; timeout?: number }): Promise<{ data: T }>;
+  put<T>(url: string, body: Record<string, unknown>, options?: { headers?: Record<string, string>; timeout?: number }): Promise<{ data: T }>;
 }
 
 export interface PublishCarouselArgs {
@@ -48,6 +54,14 @@ export interface PublishCarouselArgs {
   waitMs?: (ms: number) => Promise<void>;
 }
 
+export interface GitHubAssetPublishOptions {
+  repository: string;
+  branch: string;
+  token: string;
+  client?: GitHubClient;
+  waitMs?: (ms: number) => Promise<void>;
+}
+
 const DEFAULT_OUTPUT_DIR = path.join(process.cwd(), "public", "generated", "instagram");
 
 function truncate(text: string, max: number): string {
@@ -57,6 +71,10 @@ function truncate(text: string, max: number): string {
 
 function formatPrice(price: number): string {
   return `¥${price.toLocaleString("ja-JP")}`;
+}
+
+function timestamp(now: Date): string {
+  return now.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
 }
 
 function proofLine(item: RakutenItem): string {
@@ -189,12 +207,14 @@ export function writeCarouselSlides(
 ): CarouselAsset[] {
   const outputDir = options.outputDir ?? process.env.IG_CAROUSEL_OUTPUT_DIR ?? DEFAULT_OUTPUT_DIR;
   const publicBaseUrl = options.publicBaseUrl ?? process.env.IG_CAROUSEL_PUBLIC_BASE_URL ?? "";
-  const day = (options.now ?? new Date()).toISOString().slice(0, 10);
+  const now = options.now ?? new Date();
+  const day = now.toISOString().slice(0, 10);
+  const stamp = timestamp(now);
   const hash = crypto.createHash("sha1").update(`${item.itemCode}|${item.itemName}`).digest("hex").slice(0, 10);
   fs.mkdirSync(outputDir, { recursive: true });
 
   return slides.map((slide) => {
-    const fileName = `${day}-${hash}-${String(slide.index).padStart(2, "0")}.svg`;
+    const fileName = `${day}-${stamp}-${hash}-${String(slide.index).padStart(2, "0")}.svg`;
     const filePath = path.join(outputDir, fileName);
     fs.writeFileSync(filePath, renderSlideSvg(slide, item), "utf-8");
     return {
@@ -203,6 +223,49 @@ export function writeCarouselSlides(
       page: slide.index,
     };
   });
+}
+
+async function renderJpegFromSvg(svg: string, filePath: string): Promise<void> {
+  const { chromium } = await import("playwright");
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1080, height: 1080 }, deviceScaleFactor: 1 });
+    await page.setContent(
+      `<!doctype html><html><body style="margin:0;width:1080px;height:1080px;overflow:hidden">${svg}</body></html>`,
+      { waitUntil: "load" },
+    );
+    await page.screenshot({ path: filePath, type: "jpeg", quality: 92, clip: { x: 0, y: 0, width: 1080, height: 1080 } });
+  } finally {
+    await browser.close();
+  }
+}
+
+export async function writeCarouselImages(
+  item: RakutenItem,
+  slides: CarouselSlide[],
+  options: CarouselWriteOptions = {},
+): Promise<CarouselAsset[]> {
+  const outputDir = options.outputDir ?? process.env.IG_CAROUSEL_OUTPUT_DIR ?? DEFAULT_OUTPUT_DIR;
+  const publicBaseUrl = options.publicBaseUrl ?? process.env.IG_CAROUSEL_PUBLIC_BASE_URL ?? "";
+  const now = options.now ?? new Date();
+  const day = now.toISOString().slice(0, 10);
+  const stamp = timestamp(now);
+  const hash = crypto.createHash("sha1").update(`${item.itemCode}|${item.itemName}`).digest("hex").slice(0, 10);
+  const renderer = options.renderer ?? renderJpegFromSvg;
+  fs.mkdirSync(outputDir, { recursive: true });
+
+  const assets: CarouselAsset[] = [];
+  for (const slide of slides) {
+    const fileName = `${day}-${stamp}-${hash}-${String(slide.index).padStart(2, "0")}.jpg`;
+    const filePath = path.join(outputDir, fileName);
+    await renderer(renderSlideSvg(slide, item), filePath);
+    assets.push({
+      filePath,
+      publicUrl: mapAssetToPublicUrl(fileName, publicBaseUrl),
+      page: slide.index,
+    });
+  }
+  return assets;
 }
 
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
@@ -215,6 +278,72 @@ const axiosClient: HttpClient = {
     return axios.get<T>(url, options);
   },
 };
+
+const githubClient: GitHubClient = {
+  get: async <T>(url: string, options?: { headers?: Record<string, string>; timeout?: number }) => {
+    return axios.get<T>(url, options);
+  },
+  put: async <T>(url: string, body: Record<string, unknown>, options?: { headers?: Record<string, string>; timeout?: number }) => {
+    return axios.put<T>(url, body, options);
+  },
+};
+
+function repoRelativePath(filePath: string): string {
+  return path.relative(process.cwd(), filePath).replace(/\\/g, "/");
+}
+
+function rawGithubUrl(repository: string, branch: string, repoPath: string): string {
+  return `https://raw.githubusercontent.com/${repository}/${encodeURIComponent(branch)}/${repoPath
+    .split("/")
+    .map((part) => encodeURIComponent(part))
+    .join("/")}`;
+}
+
+export async function publishCarouselAssetsToGitHub(
+  assets: CarouselAsset[],
+  options: GitHubAssetPublishOptions,
+): Promise<CarouselAsset[]> {
+  if (!options.repository || !options.branch || !options.token) {
+    throw new Error("GitHub repository, branch, and token are required to publish carousel assets");
+  }
+  const client = options.client ?? githubClient;
+  const waitMs = options.waitMs ?? sleep;
+  const headers = {
+    Authorization: `Bearer ${options.token}`,
+    Accept: "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28",
+  };
+  const uploaded: CarouselAsset[] = [];
+
+  for (const asset of assets) {
+    const repoPath = repoRelativePath(asset.filePath);
+    const encodedPath = repoPath.split("/").map((part) => encodeURIComponent(part)).join("/");
+    const url = `https://api.github.com/repos/${options.repository}/contents/${encodedPath}`;
+    let sha: string | undefined;
+    try {
+      const existing = await client.get<{ sha?: string }>(`${url}?ref=${encodeURIComponent(options.branch)}`, {
+        headers,
+        timeout: 15000,
+      });
+      sha = existing.data.sha;
+    } catch (err) {
+      const status = (err as { response?: { status?: number } }).response?.status;
+      if (status !== 404) throw err;
+    }
+
+    const body: Record<string, unknown> = {
+      message: `chore: publish instagram carousel asset ${path.basename(asset.filePath)} [skip ci]`,
+      content: fs.readFileSync(asset.filePath).toString("base64"),
+      branch: options.branch,
+    };
+    if (sha) body.sha = sha;
+    await client.put(url, body, { headers, timeout: 30000 });
+    uploaded.push({ ...asset, publicUrl: rawGithubUrl(options.repository, options.branch, repoPath) });
+  }
+
+  await waitMs(3000);
+  return uploaded;
+}
 
 export async function publishInstagramCarousel(args: PublishCarouselArgs): Promise<string> {
   if (args.assets.length < 2) throw new Error("Instagram carousel requires at least two assets");

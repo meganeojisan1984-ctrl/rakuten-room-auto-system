@@ -4,7 +4,7 @@
 
 **Goal:** Build automatic Instagram carousel posts for Rakuten ROOM products with a safe fallback to the existing single-image post.
 
-**Architecture:** Add a focused carousel content module, an SVG rendering module, and a carousel publishing path inside the existing persona Instagram engine. The existing `postToInstagramWithPersona` remains the integration point, so ROOM posting and history learning keep their current shape.
+**Architecture:** Add a focused carousel content module, an SVG-authored/JPEG-rendered slide module, and a carousel publishing path inside the existing persona Instagram engine. The existing `postToInstagramWithPersona` remains the integration point, so ROOM posting and history learning keep their current shape.
 
 **Tech Stack:** TypeScript, Node built-in `fs/path/crypto`, existing `axios`, existing `node --test --import tsx` test runner, Instagram Graph API v21.0.
 
@@ -14,6 +14,7 @@
 - Use `IG_CAROUSEL_ENABLED=1` to opt into carousel posting.
 - Use `IG_CAROUSEL_PUBLIC_BASE_URL` for the public HTTPS base URL of generated slide files.
 - Use `IG_CAROUSEL_OUTPUT_DIR` for local output, defaulting to `public/generated/instagram`.
+- Use `IG_CAROUSEL_GITHUB_UPLOAD=1` in GitHub Actions to upload generated JPEG files before Instagram publishing.
 - Generate exactly 7 slides per item in the first version.
 - Avoid new npm dependencies.
 - Run `npm test` and `npm run build` before completion.
@@ -22,7 +23,7 @@
 
 ## File Structure
 
-- Create `src/ig/carousel.ts`: slide data generation, SVG rendering, file writing, public URL mapping, and Graph API carousel publishing helpers.
+- Create `src/ig/carousel.ts`: slide data generation, SVG rendering, JPEG writing, GitHub upload, public URL mapping, and Graph API carousel publishing helpers.
 - Modify `src/ig/ig-post-engine.ts`: call carousel helpers before the existing single-image path and fallback on failure.
 - Test `tests/ig-carousel.test.ts`: focused unit tests for slide generation, SVG output, URL mapping, and mocked Graph API sequence.
 
