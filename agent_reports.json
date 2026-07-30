@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-07-19T15:37:47.697Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "37件抽出、履歴16件のいいね数を更新"
-  },
-  {
-    "ts": "2026-07-19T15:37:47.699Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴48件(計測済29)を集計。ジャンル16種"
-  },
-  {
-    "ts": "2026-07-19T15:37:49.464Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第10世代へ更新 (LLM)、警告0件"
-  },
-  {
-    "ts": "2026-07-19T22:58:26.210Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (キッチン便利グッズ・調理器具)"
-  },
-  {
     "ts": "2026-07-19T22:58:28.325Z",
     "agent": "copywriter",
     "ok": true,
@@ -1195,6 +1171,30 @@
   },
   {
     "ts": "2026-07-30T01:01:00.004Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-07-30T06:24:41.778Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (季節:残暑 対策)"
+  },
+  {
+    "ts": "2026-07-30T06:24:44.324Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ1)"
+  },
+  {
+    "ts": "2026-07-30T06:26:20.398Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-07-30T06:26:35.696Z",
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"

@@ -1081,5 +1081,18 @@
     "captionHead": "え、待って。4,280円でこのクオリティなゴムバン",
     "slot": "slot0",
     "itemCodeHash": "a4114e7c8e6f"
+  },
+  {
+    "ts": "2026-07-30T06:26:35.697Z",
+    "itemCode": "passageshop:10013586",
+    "itemName": "【30%OFFクーポン】サンコー リュッククーラー クーリュック2 背中 蒸れない ペルチェで冷却リュッククーラー 正規店（熱中症対策 冷却グッズ 暑さ対策 涼しい リュック 暑い ひんやり 大容量 PC 接触冷感 通勤 通学 冷蔵）【送料無料 】【海外×】",
+    "genreName": "季節:残暑 対策",
+    "price": 15800,
+    "postType": 1,
+    "hour": 15,
+    "hook": "number",
+    "captionHead": "3000円割引🎉で買えるこのリュッククーラー、知",
+    "slot": "slot1",
+    "itemCodeHash": "aef00110dd44"
   }
 ]
