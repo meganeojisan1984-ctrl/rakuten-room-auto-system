@@ -32,6 +32,7 @@ export interface CarouselWriteOptions {
   publicBaseUrl?: string;
   now?: Date;
   renderer?: (svg: string, filePath: string) => Promise<void>;
+  characterImagePath?: string;
 }
 
 interface HttpClient {
@@ -63,6 +64,7 @@ export interface GitHubAssetPublishOptions {
 }
 
 const DEFAULT_OUTPUT_DIR = path.join(process.cwd(), "public", "generated", "instagram");
+const DEFAULT_CHARACTER_IMAGE = path.join(process.cwd(), "public", "brand", "meganeojisan-icon.png");
 
 function truncate(text: string, max: number): string {
   const compact = text.replace(/\s+/g, " ").trim();
@@ -132,49 +134,49 @@ export function buildCarouselSlides(item: RakutenItem): CarouselSlide[] {
       kind: "hook",
       badge: "01",
       headline: truncate("これ、地味に生活変わる", 34),
-      body: truncate(`${name}、ただの商品画像だけだと伝わらない良さがあります。`, 82),
+      body: truncate(`✨ ${name}、ただの商品画像だけだと良さが伝わらないんです…！`, 82),
     },
     {
       index: 2,
       kind: "problem",
       badge: "02",
       headline: truncate("その小さな不便、放置しがち", 34),
-      body: truncate("毎日使う場所ほど、少しの面倒が積み重なってストレスになります。", 82),
+      body: truncate("😳 毎日使う場所ほど、少しの面倒が積み重なってストレスになります。", 82),
     },
     {
       index: 3,
       kind: "discovery",
       badge: "03",
       headline: truncate("選ぶ理由はここ", 34),
-      body: caption,
+      body: truncate(`💡 ${caption}`, 82),
     },
     {
       index: 4,
       kind: "use_case",
       badge: "04",
       headline: truncate("使う場面が想像しやすい", 34),
-      body: truncate("キッチン、洗面台、玄関まわりなど、散らかりやすい場所に置くと効果が見えます。", 82),
+      body: truncate("🙌 キッチン、洗面台、玄関まわり。散らかりやすい場所に置くと効果が見えます。", 82),
     },
     {
       index: 5,
       kind: "proof",
       badge: "05",
       headline: truncate("買う前に見たい数字", 34),
-      body: truncate(proofLine(item), 82),
+      body: truncate(`👀 ${proofLine(item)}`, 82),
     },
     {
       index: 6,
       kind: "room_bridge",
       badge: "06",
       headline: truncate("楽天ROOMにまとめています", 34),
-      body: truncate("気になったらプロフィールのROOMから、商品名で探せるようにしておきます。", 82),
+      body: truncate("🛒 気になったらプロフィールのROOMから、商品名で探せるようにしておきます。", 82),
     },
     {
       index: 7,
       kind: "cta",
       badge: "07",
       headline: truncate("あとで見返せるように保存", 34),
-      body: truncate("似た悩みがある人は保存して、買いまわり前にチェックしてみてください。", 82),
+      body: truncate("📌 似た悩みがある人は保存して、買いまわり前にチェックしてみてください。", 82),
     },
   ];
 }
@@ -197,17 +199,33 @@ function lines(text: string, maxChars: number): string[] {
   return out.slice(0, 3);
 }
 
-export function renderSlideSvg(slide: CarouselSlide, item: RakutenItem): string {
+function imageDataUri(filePath: string): string {
+  const ext = path.extname(filePath).toLowerCase();
+  const mime = ext === ".jpg" || ext === ".jpeg" ? "image/jpeg" : "image/png";
+  return `data:${mime};base64,${fs.readFileSync(filePath).toString("base64")}`;
+}
+
+function characterHref(options: CarouselWriteOptions): string {
+  const configured = options.characterImagePath ?? process.env.IG_CAROUSEL_CHARACTER_IMAGE_PATH;
+  const filePath = configured || DEFAULT_CHARACTER_IMAGE;
+  return fs.existsSync(filePath) ? imageDataUri(filePath) : "";
+}
+
+export function renderSlideSvg(slide: CarouselSlide, item: RakutenItem, options: CarouselWriteOptions = {}): string {
   const accent = accentColor(slide.kind);
   const headlineLines = lines(slide.headline, 13);
-  const bodyLines = lines(slide.body, 22);
+  const bodyLines = lines(slide.body, 18);
   const productName = truncate(item.itemName, 34);
+  const guideImage = characterHref(options);
   const headlineSvg = headlineLines
     .map((line, i) => `<text x="78" y="${174 + i * 70}" class="headline">${escapeXml(line)}</text>`)
     .join("\n");
   const bodySvg = bodyLines
-    .map((line, i) => `<text x="110" y="${360 + i * 43}" class="body">${escapeXml(line)}</text>`)
+    .map((line, i) => `<text x="118" y="${362 + i * 43}" class="body">${escapeXml(line)}</text>`)
     .join("\n");
+  const characterSvg = guideImage
+    ? `<image href="${escapeXml(guideImage)}" x="642" y="520" width="390" height="438" preserveAspectRatio="xMidYMax meet"/>`
+    : "";
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
   <style>
@@ -228,20 +246,20 @@ export function renderSlideSvg(slide: CarouselSlide, item: RakutenItem): string 
   <text x="102" y="114" class="badge">${escapeXml(slide.badge)}</text>
   <text x="216" y="113" class="eyebrow">買ってよかった候補</text>
   ${headlineSvg}
-  <rect x="78" y="304" width="924" height="176" rx="26" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>
+  <rect x="78" y="292" width="622" height="210" rx="30" fill="#ffffff" stroke="${accent}" stroke-width="4"/>
+  <path d="M680 448 L738 486 L690 416 Z" fill="#ffffff" stroke="${accent}" stroke-width="4"/>
   ${bodySvg}
-  <rect x="72" y="532" width="554" height="410" rx="30" fill="#e5edf3"/>
-  <rect x="94" y="554" width="510" height="366" rx="24" fill="#ffffff"/>
-  <image href="${escapeXml(item.imageUrl)}" x="114" y="578" width="470" height="300" preserveAspectRatio="xMidYMid meet"/>
-  <text x="116" y="895" class="small">${escapeXml(productName)}</text>
-  <rect x="658" y="532" width="350" height="410" rx="30" fill="#f8fafc" stroke="#dbe4ee" stroke-width="2"/>
-  <text x="696" y="612" class="small">ひと目で確認</text>
-  <text x="696" y="670" class="proof">${escapeXml(formatPrice(item.itemPrice))}</text>
-  <text x="696" y="726" class="proof">${escapeXml(item.reviewAverage && item.reviewCount ? `★${item.reviewAverage} / ${item.reviewCount}件` : truncate(item.shopName, 18))}</text>
-  <text x="696" y="782" class="small">${escapeXml(item.hasPointBonus && item.pointRate > 1 ? `ポイント${item.pointRate}倍` : truncate(item.shopName, 18))}</text>
-  <rect x="696" y="830" width="256" height="68" rx="34" fill="${accent}"/>
-  <text x="824" y="874" text-anchor="middle" class="label">${escapeXml(actionLabel(slide.kind))}</text>
-  <text x="76" y="1002" class="small">プロフィールの楽天ROOMからチェック</text>
+  <rect x="72" y="548" width="520" height="384" rx="30" fill="#e5edf3"/>
+  <rect x="94" y="570" width="476" height="340" rx="24" fill="#ffffff"/>
+  <image href="${escapeXml(item.imageUrl)}" x="114" y="590" width="436" height="260" preserveAspectRatio="xMidYMid meet"/>
+  <text x="116" y="878" class="small">${escapeXml(productName)}</text>
+  <rect x="600" y="820" width="406" height="116" rx="28" fill="#f8fafc" stroke="#dbe4ee" stroke-width="2"/>
+  <text x="630" y="864" class="proof">${escapeXml(formatPrice(item.itemPrice))}</text>
+  <text x="630" y="908" class="small">${escapeXml(item.reviewAverage && item.reviewCount ? `★${item.reviewAverage} / ${item.reviewCount}件` : truncate(item.shopName, 18))}</text>
+  <rect x="684" y="950" width="292" height="66" rx="33" fill="${accent}"/>
+  <text x="830" y="993" text-anchor="middle" class="label">${escapeXml(actionLabel(slide.kind))}</text>
+  ${characterSvg}
+  <text x="76" y="1008" class="small">プロフィールの楽天ROOMからチェック 🛒</text>
 </svg>`;
 }
 
@@ -267,7 +285,7 @@ export function writeCarouselSlides(
   return slides.map((slide) => {
     const fileName = `${day}-${stamp}-${hash}-${String(slide.index).padStart(2, "0")}.svg`;
     const filePath = path.join(outputDir, fileName);
-    fs.writeFileSync(filePath, renderSlideSvg(slide, item), "utf-8");
+    fs.writeFileSync(filePath, renderSlideSvg(slide, item, options), "utf-8");
     return {
       filePath,
       publicUrl: mapAssetToPublicUrl(fileName, publicBaseUrl),
@@ -309,7 +327,7 @@ export async function writeCarouselImages(
   for (const slide of slides) {
     const fileName = `${day}-${stamp}-${hash}-${String(slide.index).padStart(2, "0")}.jpg`;
     const filePath = path.join(outputDir, fileName);
-    await renderer(renderSlideSvg(slide, item), filePath);
+    await renderer(renderSlideSvg(slide, item, options), filePath);
     assets.push({
       filePath,
       publicUrl: mapAssetToPublicUrl(fileName, publicBaseUrl),

@@ -58,6 +58,21 @@ test("renderSlideSvg escapes text and includes product image", () => {
   assert.match(svg, /https:\/\/example\.com\/product\.jpg/);
 });
 
+test("carousel slides use friendly emoji copy and character speech bubble", () => {
+  const dir = fs.mkdtempSync(path.join(process.cwd(), "tmp-carousel-character-"));
+  try {
+    const iconPath = path.join(dir, "icon.png");
+    fs.writeFileSync(iconPath, Buffer.from("fake-png"));
+    const slides = buildCarouselSlides(item);
+    assert.equal(slides.some((slide) => /[✨😳💡🙌👀🛒📌]/u.test(slide.body)), true);
+    const svg = renderSlideSvg(slides[0]!, item, { characterImagePath: iconPath });
+    assert.match(svg, /data:image\/png;base64/);
+    assert.match(svg, /<path d="M680 448 L738 486 L690 416 Z"/);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("writeCarouselSlides writes seven svg files with stable public urls", () => {
   const dir = fs.mkdtempSync(path.join(process.cwd(), "tmp-carousel-"));
   try {

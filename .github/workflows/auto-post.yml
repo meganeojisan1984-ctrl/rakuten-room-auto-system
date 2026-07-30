@@ -75,6 +75,7 @@ jobs:
           IG_CAROUSEL_GITHUB_UPLOAD: ${{ vars.IG_CAROUSEL_GITHUB_UPLOAD || '1' }}
           IG_CAROUSEL_PUBLIC_BASE_URL: ${{ vars.IG_CAROUSEL_PUBLIC_BASE_URL || format('https://raw.githubusercontent.com/{0}/{1}/public/generated/instagram', github.repository, github.ref_name) }}
           IG_CAROUSEL_OUTPUT_DIR: ${{ vars.IG_CAROUSEL_OUTPUT_DIR || 'public/generated/instagram' }}
+          IG_CAROUSEL_CHARACTER_IMAGE_PATH: ${{ vars.IG_CAROUSEL_CHARACTER_IMAGE_PATH || 'public/brand/meganeojisan-icon.png' }}
           THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
           THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
           ROOM_PROFILE_URL: ${{ secrets.ROOM_PROFILE_URL || vars.ROOM_PROFILE_URL || '' }}
