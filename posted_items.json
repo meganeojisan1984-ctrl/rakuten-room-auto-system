@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "yamamotojp:10040383",
     "kitajimasteel:10005027",
     "bt-iimono:10000214",
     "webby:12698182",
@@ -499,7 +498,8 @@
     "danitori:10000057",
     "lala-nature:10002159",
     "futonyasan:10026729",
-    "at-rescue:10002460"
+    "at-rescue:10002460",
+    "pieceselect1:10019863"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
