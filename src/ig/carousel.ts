@@ -224,7 +224,8 @@ export function renderSlideSvg(slide: CarouselSlide, item: RakutenItem, options:
     .map((line, i) => `<text x="118" y="${362 + i * 43}" class="body">${escapeXml(line)}</text>`)
     .join("\n");
   const characterSvg = guideImage
-    ? `<image href="${escapeXml(guideImage)}" x="694" y="498" width="290" height="330" preserveAspectRatio="xMidYMax meet"/>`
+    ? `<ellipse cx="846" cy="892" rx="120" ry="22" fill="#111827" opacity="0.10"/>
+  <image href="${escapeXml(guideImage)}" x="682" y="492" width="340" height="410" preserveAspectRatio="xMidYMax meet"/>`
     : "";
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
@@ -240,24 +241,32 @@ export function renderSlideSvg(slide: CarouselSlide, item: RakutenItem, options:
   <rect width="1080" height="1080" fill="#f4f7fb"/>
   <rect x="36" y="36" width="1008" height="1008" rx="30" fill="#ffffff"/>
   <rect x="36" y="36" width="1008" height="14" fill="${accent}"/>
+  <defs>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="12" stdDeviation="15" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+  </defs>
   <circle cx="936" cy="150" r="104" fill="${accent}" opacity="0.10"/>
   <circle cx="1000" cy="86" r="62" fill="${accent}" opacity="0.14"/>
   <rect x="72" y="72" width="116" height="62" rx="31" fill="${accent}"/>
   <text x="102" y="114" class="badge">${escapeXml(slide.badge)}</text>
   <text x="216" y="113" class="eyebrow">買ってよかった候補</text>
   ${headlineSvg}
-  <rect x="78" y="292" width="622" height="210" rx="30" fill="#ffffff" stroke="${accent}" stroke-width="4"/>
-  <path d="M682 448 L742 510 L690 418 Z" fill="#ffffff" stroke="${accent}" stroke-width="4"/>
+  <path d="M700 428 C730 462 752 500 770 534 C738 516 716 498 700 476 Z" fill="#ffffff" filter="url(#softShadow)"/>
+  <rect x="78" y="292" width="622" height="210" rx="30" fill="#ffffff" filter="url(#softShadow)"/>
+  <path d="M700 428 C730 462 752 500 770 534 C738 516 716 498 700 476 Z" fill="#ffffff"/>
+  <path d="M700 428 C730 462 752 500 770 534" fill="none" stroke="${accent}" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M700 476 C716 498 738 516 770 534" fill="none" stroke="${accent}" stroke-width="2.5" stroke-linecap="round"/>
+  <rect x="78" y="292" width="622" height="210" rx="30" fill="none" stroke="${accent}" stroke-width="2.5"/>
   ${bodySvg}
-  <rect x="72" y="548" width="544" height="392" rx="30" fill="#e5edf3"/>
+  <rect x="72" y="548" width="544" height="392" rx="30" fill="#e5edf3" filter="url(#softShadow)"/>
   <rect x="94" y="570" width="500" height="348" rx="24" fill="#ffffff"/>
   <image href="${escapeXml(item.imageUrl)}" x="120" y="592" width="448" height="246" preserveAspectRatio="xMidYMid meet"/>
   <text x="120" y="874" class="small">${escapeXml(productName)}</text>
   <text x="120" y="912" class="small">${escapeXml(`${formatPrice(item.itemPrice)} / ${item.reviewAverage && item.reviewCount ? `★${item.reviewAverage} ${item.reviewCount}件` : truncate(item.shopName, 18)}`)}</text>
-  <rect x="666" y="500" width="338" height="330" rx="34" fill="#f8fafc" stroke="#dbe4ee" stroke-width="2"/>
   ${characterSvg}
-  <rect x="612" y="892" width="360" height="64" rx="32" fill="${accent}"/>
-  <text x="792" y="934" text-anchor="middle" class="label">${escapeXml(actionLabel(slide.kind))}</text>
+  <rect x="640" y="908" width="332" height="66" rx="33" fill="${accent}"/>
+  <text x="806" y="951" text-anchor="middle" class="label">${escapeXml(actionLabel(slide.kind))}</text>
   <text x="76" y="1008" class="small">プロフィールの楽天ROOMからチェック 🛒</text>
 </svg>`;
 }
