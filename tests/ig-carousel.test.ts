@@ -50,7 +50,7 @@ test("buildCarouselSlides creates seven mobile-readable slides", () => {
 
 test("renderSlideSvg escapes text and includes product image", () => {
   const svg = renderSlideSvg(
-    { index: 1, kind: "hook", headline: "A&B <収納>", body: "保存してあとで見る", badge: "01" },
+    { index: 2, kind: "problem", headline: "A&B <収納>", body: "保存してあとで見る", badge: "02" },
     item,
   );
   assert.match(svg, /<svg/);
@@ -62,17 +62,24 @@ test("carousel slides use friendly emoji copy and character speech bubble", () =
   const dir = fs.mkdtempSync(path.join(process.cwd(), "tmp-carousel-character-"));
   try {
     const iconPath = path.join(dir, "icon.png");
+    const backgroundPath = path.join(dir, "room.png");
     fs.writeFileSync(iconPath, Buffer.from("fake-png"));
+    fs.writeFileSync(backgroundPath, Buffer.from("fake-room"));
     const slides = buildCarouselSlides(item);
     assert.equal(slides.some((slide) => /[✨😳💡🙌👀🛒📌]/u.test(slide.body)), true);
-    const svg = renderSlideSvg(slides[0]!, item, { characterImagePath: iconPath });
+    const coverSvg = renderSlideSvg(slides[0]!, item, { characterImagePath: iconPath, backgroundImagePath: backgroundPath });
+    assert.match(coverSvg, /data:image\/png;base64/);
+    assert.match(coverSvg, /<text x="540" y="393" text-anchor="middle" class="coverKicker">/);
+    assert.match(coverSvg, /<text x="540" y="538" text-anchor="middle" class="coverTitle">おすすめの/);
+    assert.match(coverSvg, /<text x="960" y="1000" text-anchor="end" class="swipe">SWIPE/);
+
+    const svg = renderSlideSvg(slides[1]!, item, { characterImagePath: iconPath, backgroundImagePath: backgroundPath });
     assert.match(svg, /data:image\/png;base64/);
-    assert.match(svg, /<path d="M700 428 C730 462 752 500 770 534 C738 516 716 498 700 476 Z"/);
-    assert.match(svg, /<path d="M700 428 C730 462 752 500 770 534" fill="none"/);
-    assert.match(svg, /<ellipse cx="846" cy="892" rx="120" ry="22"/);
-    assert.match(svg, /x="682" y="492" width="340" height="410"/);
-    assert.match(svg, /x="640" y="908" width="332" height="66"/);
-    assert.doesNotMatch(svg, /x="666" y="500" width="338" height="330"/);
+    assert.match(svg, /<path d="M34 86 A52 52 0 1 1 34 190 L150 138 Z"/);
+    assert.match(svg, /<rect x="34" y="278" width="1012" height="300" rx="54" class="messagePanel"/);
+    assert.match(svg, /<rect x="34" y="624" width="638" height="348" rx="0" class="productCard"/);
+    assert.match(svg, /x="686" y="608" width="322" height="382"/);
+    assert.match(svg, /x="704" y="954" width="326" height="70"/);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }

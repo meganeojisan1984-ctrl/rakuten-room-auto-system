@@ -33,6 +33,7 @@ export interface CarouselWriteOptions {
   now?: Date;
   renderer?: (svg: string, filePath: string) => Promise<void>;
   characterImagePath?: string;
+  backgroundImagePath?: string;
 }
 
 interface HttpClient {
@@ -65,6 +66,7 @@ export interface GitHubAssetPublishOptions {
 
 const DEFAULT_OUTPUT_DIR = path.join(process.cwd(), "public", "generated", "instagram");
 const DEFAULT_CHARACTER_IMAGE = path.join(process.cwd(), "public", "brand", "meganeojisan-icon.png");
+const DEFAULT_BACKGROUND_IMAGE = path.join(process.cwd(), "public", "brand", "lifestyle-room-bg.png");
 
 function truncate(text: string, max: number): string {
   const compact = text.replace(/\s+/g, " ").trim();
@@ -211,63 +213,84 @@ function characterHref(options: CarouselWriteOptions): string {
   return fs.existsSync(filePath) ? imageDataUri(filePath) : "";
 }
 
+function backgroundHref(options: CarouselWriteOptions): string {
+  const configured = options.backgroundImagePath ?? process.env.IG_CAROUSEL_BACKGROUND_IMAGE_PATH;
+  const filePath = configured || DEFAULT_BACKGROUND_IMAGE;
+  return fs.existsSync(filePath) ? imageDataUri(filePath) : "";
+}
+
 export function renderSlideSvg(slide: CarouselSlide, item: RakutenItem, options: CarouselWriteOptions = {}): string {
   const accent = accentColor(slide.kind);
-  const headlineLines = lines(slide.headline, 13);
-  const bodyLines = lines(slide.body, 18);
+  const headlineLines = lines(slide.headline, 15);
+  const bodyLines = lines(slide.body, 22);
   const productName = truncate(item.itemName, 34);
   const guideImage = characterHref(options);
-  const headlineSvg = headlineLines
-    .map((line, i) => `<text x="78" y="${174 + i * 70}" class="headline">${escapeXml(line)}</text>`)
+  const roomImage = backgroundHref(options);
+  const backgroundSvg = roomImage
+    ? `<image href="${escapeXml(roomImage)}" x="0" y="0" width="1080" height="1080" preserveAspectRatio="xMidYMid slice"/>`
+    : `<rect width="1080" height="1080" fill="#d8dccf"/>`;
+  const panelHeadlineSvg = headlineLines
+    .map((line, i) => `<text x="96" y="${366 + i * 58}" class="panelHeadline">${escapeXml(line)}</text>`)
     .join("\n");
   const bodySvg = bodyLines
-    .map((line, i) => `<text x="118" y="${362 + i * 43}" class="body">${escapeXml(line)}</text>`)
+    .map((line, i) => `<text x="96" y="${474 + i * 42}" class="panelBody">${escapeXml(line)}</text>`)
     .join("\n");
   const characterSvg = guideImage
-    ? `<ellipse cx="846" cy="892" rx="120" ry="22" fill="#111827" opacity="0.10"/>
-  <image href="${escapeXml(guideImage)}" x="682" y="492" width="340" height="410" preserveAspectRatio="xMidYMax meet"/>`
+    ? `<ellipse cx="848" cy="940" rx="118" ry="24" fill="#111827" opacity="0.16"/>
+  <image href="${escapeXml(guideImage)}" x="686" y="608" width="322" height="382" preserveAspectRatio="xMidYMax meet"/>`
     : "";
+
+  if (slide.index === 1) {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
+  <style>
+    .coverKicker { font: 700 46px Arial, sans-serif; fill: #ffffff; letter-spacing: 0; }
+    .coverTitle { font: 800 84px Arial, sans-serif; fill: #ffffff; letter-spacing: 0; }
+    .swipe { font: 500 28px Arial, sans-serif; fill: #ffffff; letter-spacing: 4px; }
+  </style>
+  ${backgroundSvg}
+  <rect width="1080" height="1080" fill="#111827" opacity="0.18"/>
+  <text x="540" y="393" text-anchor="middle" class="coverKicker">＼ 暮らしがグッと充実する ／</text>
+  <text x="540" y="538" text-anchor="middle" class="coverTitle">おすすめの</text>
+  <text x="540" y="658" text-anchor="middle" class="coverTitle">アイテム</text>
+  <text x="960" y="1000" text-anchor="end" class="swipe">SWIPE</text>
+</svg>`;
+  }
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
   <style>
-    .badge { font: 700 34px Arial, sans-serif; fill: #ffffff; }
-    .eyebrow { font: 700 28px Arial, sans-serif; fill: ${accent}; }
-    .headline { font: 800 58px Arial, sans-serif; fill: #111827; }
-    .body { font: 700 32px Arial, sans-serif; fill: #263445; }
-    .small { font: 600 25px Arial, sans-serif; fill: #475569; }
-    .proof { font: 800 34px Arial, sans-serif; fill: #111827; }
-    .label { font: 700 22px Arial, sans-serif; fill: #ffffff; }
+    .pageNum { font: 500 46px Arial, sans-serif; fill: #17233f; }
+    .panelHeadline { font: 800 52px Arial, sans-serif; fill: #ffffff; letter-spacing: 0; }
+    .panelBody { font: 700 34px Arial, sans-serif; fill: #eef4fb; letter-spacing: 0; }
+    .productTitle { font: 800 32px Arial, sans-serif; fill: #334155; letter-spacing: 0; }
+    .productMeta { font: 800 30px Arial, sans-serif; fill: #334155; letter-spacing: 0; }
+    .footer { font: 700 29px Arial, sans-serif; fill: #334155; letter-spacing: 0; }
+    .label { font: 800 24px Arial, sans-serif; fill: #ffffff; letter-spacing: 0; }
+    .messagePanel { fill: #334155; opacity: 0.76; }
+    .productCard { fill: #ffffff; filter: url(#cardShadow); }
   </style>
-  <rect width="1080" height="1080" fill="#f4f7fb"/>
-  <rect x="36" y="36" width="1008" height="1008" rx="30" fill="#ffffff"/>
-  <rect x="36" y="36" width="1008" height="14" fill="${accent}"/>
   <defs>
-    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="150%">
-      <feDropShadow dx="0" dy="12" stdDeviation="15" flood-color="#0f172a" flood-opacity="0.12"/>
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#0f172a" flood-opacity="0.18"/>
     </filter>
   </defs>
-  <circle cx="936" cy="150" r="104" fill="${accent}" opacity="0.10"/>
-  <circle cx="1000" cy="86" r="62" fill="${accent}" opacity="0.14"/>
-  <rect x="72" y="72" width="116" height="62" rx="31" fill="${accent}"/>
-  <text x="102" y="114" class="badge">${escapeXml(slide.badge)}</text>
-  <text x="216" y="113" class="eyebrow">買ってよかった候補</text>
-  ${headlineSvg}
-  <path d="M700 428 C730 462 752 500 770 534 C738 516 716 498 700 476 Z" fill="#ffffff" filter="url(#softShadow)"/>
-  <rect x="78" y="292" width="622" height="210" rx="30" fill="#ffffff" filter="url(#softShadow)"/>
-  <path d="M700 428 C730 462 752 500 770 534 C738 516 716 498 700 476 Z" fill="#ffffff"/>
-  <path d="M700 428 C730 462 752 500 770 534" fill="none" stroke="${accent}" stroke-width="2.5" stroke-linecap="round"/>
-  <path d="M700 476 C716 498 738 516 770 534" fill="none" stroke="${accent}" stroke-width="2.5" stroke-linecap="round"/>
-  <rect x="78" y="292" width="622" height="210" rx="30" fill="none" stroke="${accent}" stroke-width="2.5"/>
+  ${backgroundSvg}
+  <rect width="1080" height="1080" fill="#e6eadf" opacity="0.58"/>
+  <rect width="1080" height="1080" fill="#111827" opacity="0.10"/>
+  <path d="M34 86 A52 52 0 1 1 34 190 L150 138 Z" fill="#17233f"/>
+  <circle cx="82" cy="138" r="42" fill="#e8ebdf"/>
+  <text x="82" y="155" text-anchor="middle" class="pageNum">${escapeXml(slide.badge)}</text>
+  <rect x="34" y="278" width="1012" height="300" rx="54" class="messagePanel"/>
+  ${panelHeadlineSvg}
   ${bodySvg}
-  <rect x="72" y="548" width="544" height="392" rx="30" fill="#e5edf3" filter="url(#softShadow)"/>
-  <rect x="94" y="570" width="500" height="348" rx="24" fill="#ffffff"/>
-  <image href="${escapeXml(item.imageUrl)}" x="120" y="592" width="448" height="246" preserveAspectRatio="xMidYMid meet"/>
-  <text x="120" y="874" class="small">${escapeXml(productName)}</text>
-  <text x="120" y="912" class="small">${escapeXml(`${formatPrice(item.itemPrice)} / ${item.reviewAverage && item.reviewCount ? `★${item.reviewAverage} ${item.reviewCount}件` : truncate(item.shopName, 18)}`)}</text>
+  <rect x="34" y="624" width="638" height="348" rx="0" class="productCard"/>
+  <rect x="88" y="666" width="536" height="202" rx="18" fill="#f1f8f6"/>
+  <image href="${escapeXml(item.imageUrl)}" x="118" y="686" width="476" height="158" preserveAspectRatio="xMidYMid meet"/>
+  <text x="88" y="914" class="productTitle">${escapeXml(productName)}</text>
+  <text x="88" y="954" class="productMeta">${escapeXml(`${formatPrice(item.itemPrice)} / ${item.reviewAverage && item.reviewCount ? `★${item.reviewAverage} ${item.reviewCount}件` : truncate(item.shopName, 18)}`)}</text>
   ${characterSvg}
-  <rect x="640" y="908" width="332" height="66" rx="33" fill="${accent}"/>
-  <text x="806" y="951" text-anchor="middle" class="label">${escapeXml(actionLabel(slide.kind))}</text>
-  <text x="76" y="1008" class="small">プロフィールの楽天ROOMからチェック 🛒</text>
+  <rect x="704" y="954" width="326" height="70" rx="35" fill="${accent}"/>
+  <text x="867" y="998" text-anchor="middle" class="label">${escapeXml(actionLabel(slide.kind))}</text>
+  <text x="88" y="1030" class="footer">プロフィールの楽天ROOMからチェック 🛒</text>
 </svg>`;
 }
 
