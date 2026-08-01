@@ -111,74 +111,73 @@ function accentColor(kind: CarouselSlideKind): string {
 function actionLabel(kind: CarouselSlideKind): string {
   switch (kind) {
     case "hook":
-      return "最後にリンク導線あり";
+      return "最後にリンクあり";
     case "problem":
       return "あるあるなら次へ";
     case "discovery":
-      return "選ぶ理由を確認";
+      return "買う理由を見る";
     case "use_case":
-      return "使う場面を想像";
+      return "使い方を見る";
     case "proof":
-      return "数字でチェック";
+      return "価格とレビュー";
     case "room_bridge":
-      return "ROOMで確認";
+      return "ROOMで探す";
     case "cta":
-      return "保存してあとで見る";
+      return "保存して見返す";
   }
 }
 
 export function buildCarouselSlides(item: RakutenItem): CarouselSlide[] {
-  const name = truncate(item.itemName, 28);
-  const caption = truncate(item.itemCaption || "毎日の小さなストレスを減らしてくれる便利アイテムです。", 46);
+  const name = truncate(item.itemName, 18);
   return [
     {
       index: 1,
       kind: "hook",
       badge: "01",
       headline: truncate("これ、地味に生活変わる", 34),
-      body: truncate(`✨ ${name}、ただの商品画像だけだと良さが伝わらないんです…！`, 82),
+      body: truncate(`✨ ${name}、毎日の小さな不便をラクにしてくれる注目アイテムです。`, 82),
     },
     {
       index: 2,
       kind: "problem",
       badge: "02",
       headline: truncate("その小さな不便、放置しがち", 34),
-      body: truncate("😳 毎日使う場所ほど、少しの面倒が積み重なってストレスになります。", 82),
+      body: truncate("😳 毎日使う場所ほど、少しの面倒が積み重なります。今ラクにしておくと、家事の気分まで軽くなります。", 82),
     },
     {
       index: 3,
       kind: "discovery",
       badge: "03",
       headline: truncate("選ぶ理由はここ", 34),
-      body: truncate(`💡 ${caption}`, 82),
+      body: truncate(`💡 ${name}は、見た目より使いやすさで差が出るタイプ。毎日使う場所ほど満足感が続きます。`, 82),
     },
     {
       index: 4,
       kind: "use_case",
       badge: "04",
       headline: truncate("使う場面が想像しやすい", 34),
-      body: truncate("🙌 キッチン、洗面台、玄関まわり。散らかりやすい場所に置くと効果が見えます。", 82),
+      body: truncate("🙌 キッチン、洗面台、玄関まわりに。使う場所がハマると、片付けや準備の手間が目に見えて減ります。", 82),
     },
     {
       index: 5,
       kind: "proof",
       badge: "05",
       headline: truncate("買う前に見たい数字", 34),
-      body: truncate(`👀 ${proofLine(item)}`, 82),
+      body: truncate(`👀 迷ったら価格・レビュー・ポイントを確認。${proofLine(item)}なら候補に入れる価値ありです。`, 82),
     },
     {
       index: 6,
       kind: "room_bridge",
       badge: "06",
       headline: truncate("楽天ROOMにまとめています", 34),
-      body: truncate("🛒 気になったらプロフィールのROOMから、商品名で探せるようにしておきます。", 82),
+      body: truncate("🛒 気になった人がすぐ見られるように、プロフィールの楽天ROOMへまとめています。比較もしやすいです。", 82),
     },
     {
       index: 7,
       kind: "cta",
       badge: "07",
       headline: truncate("あとで見返せるように保存", 34),
-      body: truncate("📌 似た悩みがある人は保存して、買いまわり前にチェックしてみてください。", 82),
+      body: truncate("📌 似た悩みがある人は保存して、買いまわり前にチェック。必要な時に見返せると買い逃しを防げます。", 82),
     },
   ];
 }
@@ -198,7 +197,27 @@ function lines(text: string, maxChars: number): string[] {
   for (let i = 0; i < chars.length; i += maxChars) {
     out.push(chars.slice(i, i + maxChars).join(""));
   }
+  if (out.length > 3) {
+    const third = out[2]!;
+    out[2] = `${third.slice(0, Math.max(0, third.length - 1))}…`;
+  }
   return out.slice(0, 3);
+}
+
+function twoLineText(text: string, maxChars: number): string[] {
+  const split = lines(text, maxChars).slice(0, 2);
+  if (split.length < 2) return split;
+  const consumed = [...split[0]!, ...split[1]!].length;
+  if (consumed >= [...text].length) return split;
+  const secondLine = split[1]!;
+  return [split[0]!, `${secondLine.slice(0, Math.max(0, secondLine.length - 1))}…`];
+}
+
+function tspanText(x: number, y: number, className: string, textLines: string[], lineHeight: number): string {
+  const spans = textLines
+    .map((line, i) => `<tspan x="${x}" dy="${i === 0 ? 0 : lineHeight}">${escapeXml(line)}</tspan>`)
+    .join("");
+  return `<text x="${x}" y="${y}" class="${className}">${spans}</text>`;
 }
 
 function imageDataUri(filePath: string): string {
@@ -223,7 +242,8 @@ export function renderSlideSvg(slide: CarouselSlide, item: RakutenItem, options:
   const accent = accentColor(slide.kind);
   const headlineLines = lines(slide.headline, 15);
   const bodyLines = lines(slide.body, 22);
-  const productName = truncate(item.itemName, 34);
+  const productNameLines = twoLineText(item.itemName, 16);
+  const productTitleSvg = tspanText(88, 884, "productTitle", productNameLines, 34);
   const guideImage = characterHref(options);
   const roomImage = backgroundHref(options);
   const backgroundSvg = roomImage
@@ -260,12 +280,12 @@ export function renderSlideSvg(slide: CarouselSlide, item: RakutenItem, options:
   <style>
     .pageNum { font: 500 46px Arial, sans-serif; fill: #17233f; }
     .panelHeadline { font: 800 52px Arial, sans-serif; fill: #ffffff; letter-spacing: 0; }
-    .panelBody { font: 700 34px Arial, sans-serif; fill: #eef4fb; letter-spacing: 0; }
-    .productTitle { font: 800 32px Arial, sans-serif; fill: #334155; letter-spacing: 0; }
+    .panelBody { font: 800 36px Arial, sans-serif; fill: #ffffff; letter-spacing: 0; }
+    .productTitle { font: 800 28px Arial, sans-serif; fill: #263445; letter-spacing: 0; }
     .productMeta { font: 800 30px Arial, sans-serif; fill: #334155; letter-spacing: 0; }
     .footer { font: 700 29px Arial, sans-serif; fill: #334155; letter-spacing: 0; }
     .label { font: 800 24px Arial, sans-serif; fill: #ffffff; letter-spacing: 0; }
-    .messagePanel { fill: #334155; opacity: 0.76; }
+    .messagePanel { fill: #263445; opacity: 0.90; }
     .productCard { fill: #ffffff; filter: url(#cardShadow); }
   </style>
   <defs>
@@ -285,8 +305,8 @@ export function renderSlideSvg(slide: CarouselSlide, item: RakutenItem, options:
   <rect x="34" y="624" width="638" height="348" rx="0" class="productCard"/>
   <rect x="88" y="666" width="536" height="202" rx="18" fill="#f1f8f6"/>
   <image href="${escapeXml(item.imageUrl)}" x="118" y="686" width="476" height="158" preserveAspectRatio="xMidYMid meet"/>
-  <text x="88" y="914" class="productTitle">${escapeXml(productName)}</text>
-  <text x="88" y="954" class="productMeta">${escapeXml(`${formatPrice(item.itemPrice)} / ${item.reviewAverage && item.reviewCount ? `★${item.reviewAverage} ${item.reviewCount}件` : truncate(item.shopName, 18)}`)}</text>
+  ${productTitleSvg}
+  <text x="88" y="966" class="productMeta">${escapeXml(`${formatPrice(item.itemPrice)} / ${item.reviewAverage && item.reviewCount ? `★${item.reviewAverage} ${item.reviewCount}件` : truncate(item.shopName, 18)}`)}</text>
   ${characterSvg}
   <rect x="704" y="954" width="326" height="70" rx="35" fill="${accent}"/>
   <text x="867" y="998" text-anchor="middle" class="label">${escapeXml(actionLabel(slide.kind))}</text>

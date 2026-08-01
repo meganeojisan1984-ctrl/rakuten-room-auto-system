@@ -78,11 +78,31 @@ test("carousel slides use friendly emoji copy and character speech bubble", () =
     assert.match(svg, /<path d="M34 86 A52 52 0 1 1 34 190 L150 138 Z"/);
     assert.match(svg, /<rect x="34" y="278" width="1012" height="300" rx="54" class="messagePanel"/);
     assert.match(svg, /<rect x="34" y="624" width="638" height="348" rx="0" class="productCard"/);
+    assert.match(svg, /<tspan x="88" dy="0">/);
+    assert.match(svg, /<tspan x="88" dy="34">/);
     assert.match(svg, /x="686" y="608" width="322" height="382"/);
     assert.match(svg, /x="704" y="954" width="326" height="70"/);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test("carousel copy is stronger and product text stays inside the card area", () => {
+  const longNameItem = {
+    ...item,
+    itemName: "20％ポイントバック 〜08/14(金)9:59まで【DEAL】毎日使える高見えアクセサリー収納ケース",
+  };
+  const slides = buildCarouselSlides(longNameItem);
+  assert.match(slides[1]!.body, /今ラクにしておくと/);
+  assert.match(slides[2]!.body, /使いやすさ/);
+  assert.match(slides[4]!.body, /迷ったら/);
+  assert.match(slides[6]!.body, /保存/);
+
+  const svg = renderSlideSvg(slides[1]!, longNameItem);
+  assert.doesNotMatch(svg, /20％ポイントバック 〜08\/14\(金\)9:59まで【DEAL】毎日使える高見えアクセサリー収納ケース/);
+  assert.match(svg, /<text x="88" y="884" class="productTitle">/);
+  assert.match(svg, /…<\/tspan><\/text>/);
+  assert.match(svg, /<text x="88" y="966" class="productMeta">/);
 });
 
 test("writeCarouselSlides writes seven svg files with stable public urls", () => {

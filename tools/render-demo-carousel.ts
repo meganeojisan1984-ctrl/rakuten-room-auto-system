@@ -13,7 +13,7 @@ const productSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="700" height="
 </svg>`;
 
 const item: RakutenItem = {
-  itemName: "片手で使える収納ボックス 3個セット",
+  itemName: "20％ポイントバック 〜08/14(金)9:59まで【DEAL】毎日使える収納ボックス 3個セット",
   itemCode: "demo:storage-box",
   itemPrice: 2980,
   itemUrl: "https://example.com/item",
