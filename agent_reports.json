@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-07-20T16:14:08.194Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第11世代へ更新 (LLM)、警告0件"
-  },
-  {
-    "ts": "2026-07-20T23:06:06.648Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (家事効率化グッズ)"
-  },
-  {
-    "ts": "2026-07-20T23:06:08.398Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ1)"
-  },
-  {
     "ts": "2026-07-20T23:07:48.270Z",
     "agent": "poster",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "commander",
     "ok": true,
     "summary": "第26世代へ更新 (LLM)、警告0件"
+  },
+  {
+    "ts": "2026-08-04T16:31:31.740Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "19件抽出、履歴5件のいいね数を更新"
+  },
+  {
+    "ts": "2026-08-04T16:31:31.750Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴88件(計測済58) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-08-04T16:31:34.015Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第27世代へ更新 (LLM)、警告0件"
   }
 ]
