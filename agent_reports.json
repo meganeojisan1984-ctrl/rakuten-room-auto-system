@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-07-20T23:07:48.270Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-07-20T23:08:44.858Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=成功"
-  },
-  {
-    "ts": "2026-07-21T05:42:00.869Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (整理収納・片付けグッズ)"
-  },
-  {
     "ts": "2026-07-21T05:42:02.124Z",
     "agent": "copywriter",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "commander",
     "ok": true,
     "summary": "第27世代へ更新 (LLM)、警告0件"
+  },
+  {
+    "ts": "2026-08-05T16:21:22.402Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "39件抽出、履歴11件のいいね数を更新"
+  },
+  {
+    "ts": "2026-08-05T16:21:22.470Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴88件(計測済58) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-08-05T16:21:25.033Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第28世代へ更新 (LLM)、警告0件"
   }
 ]
