@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "webby:12698182",
     "500works:10007725",
     "eunicedress:10001955",
     "swarotonya:10002583",
@@ -499,7 +498,8 @@
     "at-rescue:10002460",
     "pieceselect1:10019863",
     "passageshop:10013586",
-    "yamayuu:10016753"
+    "yamayuu:10016753",
+    "f442011-oita:10000580"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
