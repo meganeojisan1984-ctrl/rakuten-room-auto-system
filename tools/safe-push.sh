@@ -4,7 +4,19 @@
 set -euo pipefail
 
 MAX_RETRIES=3
+
+# GitHub Contents API で既にリモートにコミット済みの生成ファイルが
+# ローカルに untracked で残っていると rebase が衝突するため事前に除去
+clean_generated() {
+  local gen_dir="public/generated"
+  if [ -d "${gen_dir}" ]; then
+    git clean -fd "${gen_dir}" 2>/dev/null || true
+    echo "[safe-push] cleaned untracked files in ${gen_dir}"
+  fi
+}
+
 for i in 1 2 3; do
+  clean_generated
   if git pull --rebase --autostash origin main && git push; then
     echo "[safe-push] success on attempt ${i}"
     exit 0
