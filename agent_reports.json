@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-07-21T10:15:53.383Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (生活必需品・補充消耗品)"
-  },
-  {
-    "ts": "2026-07-21T10:15:55.157Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ1)"
-  },
-  {
-    "ts": "2026-07-21T10:17:33.733Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-07-21T10:18:25.491Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=成功"
-  },
-  {
     "ts": "2026-07-21T13:53:02.346Z",
     "agent": "scout",
     "ok": true,
@@ -1198,5 +1174,29 @@
     "agent": "sre",
     "ok": true,
     "summary": "OK auto-post.yml rerun"
+  },
+  {
+    "ts": "2026-08-06T12:12:50.131Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (季節:収納用品)"
+  },
+  {
+    "ts": "2026-08-06T12:12:51.819Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ3)"
+  },
+  {
+    "ts": "2026-08-06T12:14:32.302Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-08-06T12:15:32.544Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
   }
 ]
