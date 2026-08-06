@@ -1,11 +1,5 @@
 [
   {
-    "ts": "2026-07-21T05:44:33.472Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=成功"
-  },
-  {
     "ts": "2026-07-21T10:15:53.383Z",
     "agent": "scout",
     "ok": true,
@@ -1195,6 +1189,12 @@
   },
   {
     "ts": "2026-08-06T12:03:47.856Z",
+    "agent": "sre",
+    "ok": true,
+    "summary": "OK auto-post.yml rerun"
+  },
+  {
+    "ts": "2026-08-06T12:04:16.031Z",
     "agent": "sre",
     "ok": true,
     "summary": "OK auto-post.yml rerun"
