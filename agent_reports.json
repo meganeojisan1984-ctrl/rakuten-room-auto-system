@@ -1,11 +1,5 @@
 [
   {
-    "ts": "2026-07-21T15:46:56.870Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (キッチン便利グッズ・調理器具)"
-  },
-  {
     "ts": "2026-07-21T15:46:58.195Z",
     "agent": "copywriter",
     "ok": true,
@@ -1198,5 +1192,11 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-08-06T21:20:19.160Z",
+    "agent": "sre",
+    "ok": true,
+    "summary": "OK auto-post.yml rerun / OK auto-learn.yml rerun"
   }
 ]
