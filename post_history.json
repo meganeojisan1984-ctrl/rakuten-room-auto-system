@@ -1008,8 +1008,8 @@
     "captionHead": "まだ手動で床掃除してるの？🙋 私、最近楽天でこれ",
     "slot": "slot0",
     "itemCodeHash": "9ceeaa28166b",
-    "likes": 15,
-    "likesUpdatedAt": "2026-08-04T16:31:31.725Z"
+    "likes": 16,
+    "likesUpdatedAt": "2026-08-06T21:37:09.186Z"
   },
   {
     "ts": "2026-07-28T06:25:20.423Z",
@@ -1108,7 +1108,9 @@
     "hook": "question",
     "captionHead": "まだダンボールの収納に困ってるの？🤔 楽天でこれ",
     "slot": "slot2",
-    "itemCodeHash": "3ae4e6eccf40"
+    "itemCodeHash": "3ae4e6eccf40",
+    "likes": 3,
+    "likesUpdatedAt": "2026-08-06T21:37:09.186Z"
   },
   {
     "ts": "2026-08-06T14:16:29.040Z",
@@ -1121,6 +1123,8 @@
     "hook": "ranking",
     "captionHead": "殿堂入り続出の秘密兵器を見つけた😍！私は最近、家",
     "slot": "slot2",
-    "itemCodeHash": "7bc43b5ae184"
+    "itemCodeHash": "7bc43b5ae184",
+    "likes": 4,
+    "likesUpdatedAt": "2026-08-06T21:37:09.186Z"
   }
 ]

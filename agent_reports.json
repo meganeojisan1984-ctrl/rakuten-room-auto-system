@@ -1,17 +1,5 @@
 [
   {
-    "ts": "2026-07-21T15:46:58.195Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ3)"
-  },
-  {
-    "ts": "2026-07-21T15:48:33.141Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
     "ts": "2026-07-21T15:49:22.738Z",
     "agent": "promoter",
     "ok": true,
@@ -1194,9 +1182,21 @@
     "summary": "IG=成功, Threads=失敗/未設定"
   },
   {
-    "ts": "2026-08-06T21:20:19.160Z",
-    "agent": "sre",
+    "ts": "2026-08-06T21:37:09.198Z",
+    "agent": "metrics",
     "ok": true,
-    "summary": "OK auto-post.yml rerun / OK auto-learn.yml rerun"
+    "summary": "19件抽出、履歴3件のいいね数を更新"
+  },
+  {
+    "ts": "2026-08-06T21:37:09.209Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴90件(計測済60) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-08-06T21:37:11.398Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第29世代へ更新 (LLM)、警告0件"
   }
 ]
