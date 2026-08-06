@@ -35,8 +35,8 @@ on:
         default: "30"
 
 concurrency:
-  group: main-writer
-  cancel-in-progress: false
+  group: room-like
+  cancel-in-progress: true
 
 jobs:
   auto-like:

@@ -12,8 +12,8 @@ on:
         default: ""
 
 concurrency:
-  group: main-writer
-  cancel-in-progress: false
+  group: room-scrape
+  cancel-in-progress: true
 
 permissions:
   contents: write

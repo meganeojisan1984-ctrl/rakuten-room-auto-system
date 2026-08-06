@@ -10,8 +10,8 @@ on:
         default: "10"
 
 concurrency:
-  group: main-writer
-  cancel-in-progress: false
+  group: room-delete
+  cancel-in-progress: true
 
 jobs:
   auto-delete:

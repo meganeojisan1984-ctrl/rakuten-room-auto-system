@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: main-writer
-  cancel-in-progress: false
+  group: room-refresh
+  cancel-in-progress: true
 
 permissions:
   contents: read
