@@ -24,16 +24,22 @@ import {
   appendDialogue,
   loadSalesReports,
   appendSalesReport,
+  report,
   PRICE_BANDS,
   priceBandOf,
 } from "../agents/store";
 import { HOOK_PATTERNS } from "../generator";
 import { notifyReport } from "../notifiers";
+import { planSreRepairs, summarizeSreRepair, type SreAction, type SreExecutionResult } from "../agents/sre-agent";
+import { scrapeAffiliateReport } from "../affiliate/sales-scraper";
+import { buildRolePetImageMap } from "./pet-images";
 
 const PORT = 3210;
 const ROOT = process.cwd();
 const REPO = "meganeojisan1984-ctrl/rakuten-room-auto-system";
 const GH_CANDIDATES = ["C:\\Program Files\\GitHub CLI\\gh.exe", "gh"];
+const PET_SOURCE_DIR = "C:\\Users\\megan\\OneDrive\\画像\\ペット用画像フォルダ";
+const GENERATED_PET_DIR = path.join(ROOT, "public-maintenance", "pet-owner", "generated");
 
 // ============================================================
 // git / gh ヘルパー
@@ -129,6 +135,34 @@ function recentWorkflows(): WorkflowStatus[] {
   } catch (e) {
     console.warn("[app] gh run list 失敗:", String(e).slice(0, 120));
     return [];
+  }
+}
+
+function petImageMap(): Record<string, Record<string, string>> {
+  return buildRolePetImageMap({
+    commander: fs.existsSync(path.join(GENERATED_PET_DIR, "commander_single.png")) ? "commander_single.png" : undefined,
+    analyst: fs.existsSync(path.join(GENERATED_PET_DIR, "analyst_single.png")) ? "analyst_single.png" : undefined,
+  });
+}
+
+async function executeSreAction(action: SreAction): Promise<SreExecutionResult> {
+  try {
+    if (action.type === "run-workflow") {
+      const file = ALLOWED_WORKFLOWS[action.workflowKey];
+      gh(["workflow", "run", file, "-R", REPO]);
+      return { action: `${file} rerun`, ok: true };
+    }
+    if (action.type === "scrape-sales") {
+      const result = await scrapeAffiliateReport({ headless: false, slowMoMs: 120 });
+      return {
+        action: `sales scrape ${result.date}`,
+        ok: result.ok,
+        error: result.ok ? undefined : result.error,
+      };
+    }
+    return { action: action.reason, ok: false, error: "owner action required" };
+  } catch (err) {
+    return { action: action.reason, ok: false, error: String(err).slice(0, 180) };
   }
 }
 
@@ -231,6 +265,10 @@ function learningProgress() {
 const app = express();
 app.use(express.json({ limit: "2mb" }));
 app.use(express.static(path.join(ROOT, "public-maintenance")));
+if (fs.existsSync(PET_SOURCE_DIR)) {
+  app.use("/pet-owner", express.static(PET_SOURCE_DIR));
+}
+app.use("/pet-owner/generated", express.static(GENERATED_PET_DIR));
 
 app.get("/api/ping", (_req, res) => res.json({ ok: true }));
 
@@ -246,6 +284,7 @@ app.get("/api/status", (_req, res) => {
 
     const health = agentHealth();
     const workflows = recentWorkflows();
+    const srePlan = planSreRepairs({ workflows, health });
     res.json({
       strategy: {
         generation: strategy.generation,
@@ -262,8 +301,55 @@ app.get("/api/status", (_req, res) => {
       pendingQuestion,
       salesReports: loadSalesReports().slice(-5),
       pets: petStates(health, pendingQuestion, workflows),
+      petImages: petImageMap(),
+      srePlan,
       recentReports: loadReports().slice(-15).reverse(),
     });
+  } catch (err) {
+    res.status(500).json({ error: String(err).slice(0, 300) });
+  }
+});
+
+app.post("/api/autofix", async (req, res) => {
+  try {
+    const { safeOnly } = (req.body ?? {}) as { safeOnly?: boolean };
+    const health = agentHealth();
+    const workflows = recentWorkflows();
+    const plan = planSreRepairs({ workflows, health });
+    const actions = safeOnly
+      ? plan.actions.filter((a) => a.type === "run-workflow")
+      : plan.actions;
+    if (actions.length === 0) {
+      return res.json({ ok: true, plan, results: [], summary: "修復不要、または安全に自動実行できるアクションなし" });
+    }
+    const results: SreExecutionResult[] = [];
+    for (const action of actions) {
+      results.push(await executeSreAction(action));
+    }
+    const summary = summarizeSreRepair(results);
+    appendDialogue({
+      ts: new Date().toISOString(),
+      from: "commander",
+      text: `SREサブエージェントの自己修復結果: ${summary}`,
+    });
+    report("sre", results.every((r) => r.ok), summary);
+    gitCommitPush(["agent_reports.json", "dialogue.json"], "chore: SREサブエージェント自己修復");
+    res.json({ ok: true, plan, results, summary });
+  } catch (err) {
+    res.status(500).json({ error: String(err).slice(0, 300) });
+  }
+});
+
+app.post("/api/sales/auto", async (_req, res) => {
+  try {
+    const result = await scrapeAffiliateReport({ headless: false, slowMoMs: 120 });
+    const note = result.ok
+      ? `自動取得: ${result.date} orders=${result.totalOrders} reward=${result.totalReward} rows=${result.rowsInserted}`
+      : `自動取得失敗: ${result.date} ${result.error ?? "unknown error"}`;
+    appendSalesReport({ ts: new Date().toISOString(), period: result.monthFetched, note });
+    report("sales-operator", result.ok, note);
+    gitCommitPush(["sales_reports.json", "agent_reports.json"], `chore: 売上レポート自動取得 (${result.monthFetched})`);
+    res.json({ ok: result.ok, result, note });
   } catch (err) {
     res.status(500).json({ error: String(err).slice(0, 300) });
   }
