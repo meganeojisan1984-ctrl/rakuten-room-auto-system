@@ -1126,5 +1126,18 @@
     "itemCodeHash": "7bc43b5ae184",
     "likes": 4,
     "likesUpdatedAt": "2026-08-06T21:37:09.186Z"
+  },
+  {
+    "ts": "2026-08-06T22:00:11.610Z",
+    "itemCode": "biyoudou:10000164",
+    "itemName": "【2,380円→SALE 2,299円(350ml対象)｜4日20:00～11日9:59】BIYOUDO 水 シリカ水 500ml×42本 350ml×48本 ナチュラルミネラルウォーター ラベルレス 軟水 美容ミネラル シリカ含有 天然水 飲むシリカ 500 保存料なし 酵素ドリンク 等にも 保存水 国産 日本製 美陽堂 公式",
+    "genreName": "掃除用品・消耗品",
+    "price": 2299,
+    "postType": 2,
+    "hour": 7,
+    "hook": "empathy",
+    "captionHead": "猛暑続きで体力が尽きてしまいそうな人、正直手を挙げ",
+    "slot": "slot0",
+    "itemCodeHash": "78692c21f355"
   }
 ]

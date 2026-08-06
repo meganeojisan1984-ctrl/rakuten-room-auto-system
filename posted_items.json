@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "500works:10007725",
     "eunicedress:10001955",
     "swarotonya:10002583",
     "sheil-store:10020438",
@@ -499,7 +498,8 @@
     "pieceselect1:10019863",
     "passageshop:10013586",
     "yamayuu:10016753",
-    "f442011-oita:10000580"
+    "f442011-oita:10000580",
+    "biyoudou:10000164"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
