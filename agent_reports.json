@@ -1,11 +1,5 @@
 [
   {
-    "ts": "2026-07-21T05:42:02.124Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ3)"
-  },
-  {
     "ts": "2026-07-21T05:43:43.984Z",
     "agent": "poster",
     "ok": true,
@@ -1198,5 +1192,11 @@
     "agent": "commander",
     "ok": true,
     "summary": "第28世代へ更新 (LLM)、警告0件"
+  },
+  {
+    "ts": "2026-08-06T12:00:00.542Z",
+    "agent": "sre",
+    "ok": true,
+    "summary": "OK auto-post.yml rerun"
   }
 ]
