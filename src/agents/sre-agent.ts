@@ -15,7 +15,7 @@ export interface HealthLike {
 }
 
 export type SreAction =
-  | { type: "run-workflow"; workflowKey: "post" | "learn" | "refresh"; reason: string; priority: number }
+  | { type: "run-workflow"; workflowKey: "post" | "learn" | "refresh" | "like" | "follow"; reason: string; priority: number }
   | { type: "scrape-sales"; reason: string; priority: number }
   | { type: "request-owner"; reason: string; priority: number };
 
@@ -46,7 +46,11 @@ export function planSreRepairs(input: { workflows: WorkflowLike[]; health: Healt
   for (const workflow of input.workflows) {
     if (!isFailure(workflow.conclusion)) continue;
     const name = workflow.name;
-    if (includesAny(name, ["自動投稿", "auto-post", "ROOM"])) {
+    if (includesAny(name, ["いいね", "auto-like"])) {
+      actions.push({ type: "run-workflow", workflowKey: "like", reason: `${name} failed`, priority: 5 });
+    } else if (includesAny(name, ["フォロー", "auto-follow"])) {
+      actions.push({ type: "run-workflow", workflowKey: "follow", reason: `${name} failed`, priority: 6 });
+    } else if (includesAny(name, ["自動投稿", "auto-post"])) {
       actions.push({ type: "run-workflow", workflowKey: "post", reason: `${name} failed`, priority: 1 });
     } else if (includesAny(name, ["売上", "sales", "アフィリエイト"])) {
       actions.push({ type: "scrape-sales", reason: `${name} failed`, priority: 2 });

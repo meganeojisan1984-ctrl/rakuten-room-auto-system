@@ -410,6 +410,8 @@ const ALLOWED_WORKFLOWS: Record<string, string> = {
   post: "auto-post.yml",
   learn: "auto-learn.yml",
   refresh: "auto-refresh.yml",
+  like: "auto-like.yml",
+  follow: "auto-follow.yml",
 };
 
 app.post("/api/workflow", async (req, res) => {
