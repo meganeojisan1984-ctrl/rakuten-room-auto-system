@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "swarotonya:10002583",
     "sheil-store:10020438",
     "oujiseiyaku:10000403",
     "oujiseiyaku:10000208",
@@ -499,7 +498,8 @@
     "yamayuu:10016753",
     "f442011-oita:10000580",
     "biyoudou:10000164",
-    "a-price:10783843"
+    "a-price:10783843",
+    "roomy:10015651"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
