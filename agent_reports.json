@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-07-21T23:06:28.644Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=成功"
-  },
-  {
-    "ts": "2026-07-22T05:41:52.281Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (日用品雑貨・掃除・洗濯用品)"
-  },
-  {
-    "ts": "2026-07-22T05:41:53.021Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ3)"
-  },
-  {
-    "ts": "2026-07-22T05:43:27.827Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
     "ts": "2026-07-22T05:44:28.285Z",
     "agent": "promoter",
     "ok": true,
@@ -1198,5 +1174,29 @@
     "agent": "poster",
     "ok": false,
     "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/bo)"
+  },
+  {
+    "ts": "2026-08-07T05:37:41.952Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (季節:加湿器)"
+  },
+  {
+    "ts": "2026-08-07T05:37:43.607Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ2)"
+  },
+  {
+    "ts": "2026-08-07T05:39:30.805Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-08-07T05:40:24.867Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
   }
 ]
