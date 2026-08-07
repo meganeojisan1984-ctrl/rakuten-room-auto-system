@@ -1109,8 +1109,8 @@
     "captionHead": "まだダンボールの収納に困ってるの？🤔 楽天でこれ",
     "slot": "slot2",
     "itemCodeHash": "3ae4e6eccf40",
-    "likes": 3,
-    "likesUpdatedAt": "2026-08-06T21:37:09.186Z"
+    "likes": 11,
+    "likesUpdatedAt": "2026-08-07T15:34:48.516Z"
   },
   {
     "ts": "2026-08-06T14:16:29.040Z",
@@ -1124,8 +1124,8 @@
     "captionHead": "殿堂入り続出の秘密兵器を見つけた😍！私は最近、家",
     "slot": "slot2",
     "itemCodeHash": "7bc43b5ae184",
-    "likes": 4,
-    "likesUpdatedAt": "2026-08-06T21:37:09.186Z"
+    "likes": 10,
+    "likesUpdatedAt": "2026-08-07T15:34:48.516Z"
   },
   {
     "ts": "2026-08-06T22:00:11.610Z",
@@ -1138,7 +1138,9 @@
     "hook": "empathy",
     "captionHead": "猛暑続きで体力が尽きてしまいそうな人、正直手を挙げ",
     "slot": "slot0",
-    "itemCodeHash": "78692c21f355"
+    "itemCodeHash": "78692c21f355",
+    "likes": 12,
+    "likesUpdatedAt": "2026-08-07T15:34:48.516Z"
   },
   {
     "ts": "2026-08-07T05:40:24.868Z",
@@ -1164,6 +1166,8 @@
     "hook": "surprise",
     "captionHead": "え、待って。8,140円でこれが手に入るの？！🤯",
     "slot": "slot2",
-    "itemCodeHash": "024bcc036a61"
+    "itemCodeHash": "024bcc036a61",
+    "likes": 6,
+    "likesUpdatedAt": "2026-08-07T15:34:48.516Z"
   }
 ]

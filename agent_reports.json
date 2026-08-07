@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-07-22T10:15:59.652Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=成功"
-  },
-  {
-    "ts": "2026-07-22T13:55:03.400Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (キッチン便利グッズ・調理器具)"
-  },
-  {
-    "ts": "2026-07-22T13:55:04.799Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ3)"
-  },
-  {
     "ts": "2026-07-22T13:56:42.964Z",
     "agent": "poster",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-08-07T15:34:48.527Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "19件抽出、履歴4件のいいね数を更新"
+  },
+  {
+    "ts": "2026-08-07T15:34:48.670Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴93件(計測済62) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-08-07T15:34:50.768Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第30世代へ更新 (LLM)、警告0件"
   }
 ]
