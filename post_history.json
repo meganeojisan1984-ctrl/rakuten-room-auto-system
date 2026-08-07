@@ -1169,5 +1169,18 @@
     "itemCodeHash": "024bcc036a61",
     "likes": 6,
     "likesUpdatedAt": "2026-08-07T15:34:48.516Z"
+  },
+  {
+    "ts": "2026-08-07T23:35:27.761Z",
+    "itemCode": "at-rescue:10000171",
+    "itemName": "▶P3倍｜8/17まで◀ 防災セット SHELTER プレミアム 2人用 ＜ 防災士 ✕ 災害備蓄管理士 徹底監修＞防災グッズ 防災リュック 避難リュック 防災バッグ【期限管理アプリ付き】地震対策 非常持ち出し袋 長期保存 家族 一人用 災害セット 防災グッツ シェルター",
+    "genreName": "季節:防災グッズ",
+    "price": 21380,
+    "postType": 1,
+    "hour": 8,
+    "hook": "beforeafter",
+    "captionHead": "先月までの私: 自分と家族の避難用具を整理し直すの",
+    "slot": "slot0",
+    "itemCodeHash": "9ca989245633"
   }
 ]

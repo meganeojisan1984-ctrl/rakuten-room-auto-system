@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-07-22T13:56:42.964Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-07-22T13:57:34.032Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=成功"
-  },
-  {
-    "ts": "2026-07-22T15:45:04.066Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (季節:新学期 準備)"
-  },
-  {
-    "ts": "2026-07-22T15:45:05.573Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ1)"
-  },
-  {
     "ts": "2026-07-22T15:46:42.465Z",
     "agent": "poster",
     "ok": true,
@@ -1198,5 +1174,29 @@
     "agent": "commander",
     "ok": true,
     "summary": "第30世代へ更新 (LLM)、警告0件"
+  },
+  {
+    "ts": "2026-08-07T23:32:46.801Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (季節:防災グッズ)"
+  },
+  {
+    "ts": "2026-08-07T23:32:48.446Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ1)"
+  },
+  {
+    "ts": "2026-08-07T23:34:23.864Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-08-07T23:35:27.761Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
   }
 ]

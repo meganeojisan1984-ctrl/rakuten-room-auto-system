@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "sheil-store:10020438",
     "oujiseiyaku:10000403",
     "oujiseiyaku:10000208",
     "okotico:10028401",
@@ -499,7 +498,8 @@
     "f442011-oita:10000580",
     "biyoudou:10000164",
     "a-price:10783843",
-    "roomy:10015651"
+    "roomy:10015651",
+    "at-rescue:10000171"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
