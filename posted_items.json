@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "oujiseiyaku:10000208",
     "okotico:10028401",
     "1storage:10000180",
     "500works:10007729",
@@ -499,7 +498,8 @@
     "a-price:10783843",
     "roomy:10015651",
     "at-rescue:10000171",
-    "n-raffine:10009918"
+    "n-raffine:10009918",
+    "rugtime:10001016"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
