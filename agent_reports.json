@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-07-22T23:11:56.831Z",
-    "agent": "poster",
-    "ok": false,
-    "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/bo)"
-  },
-  {
-    "ts": "2026-07-23T05:46:02.316Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (生活必需品・補充消耗品)"
-  },
-  {
-    "ts": "2026-07-23T05:46:03.610Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ3)"
-  },
-  {
     "ts": "2026-07-23T05:46:30.208Z",
     "agent": "poster",
     "ok": false,
@@ -1198,5 +1180,23 @@
     "agent": "poster",
     "ok": false,
     "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/bo)"
+  },
+  {
+    "ts": "2026-08-08T15:03:48.911Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "19件抽出、履歴7件のいいね数を更新"
+  },
+  {
+    "ts": "2026-08-08T15:03:48.925Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴95件(計測済63) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-08-08T15:03:51.829Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第31世代へ更新 (LLM)、警告0件"
   }
 ]

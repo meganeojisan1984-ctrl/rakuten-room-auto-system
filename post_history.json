@@ -518,8 +518,8 @@
     "hour": 18,
     "hook": "ranking",
     "captionHead": "🎯 ポイント3倍獲得チャンス！楽天ランキング1位",
-    "likes": 7,
-    "likesUpdatedAt": "2026-07-23T16:14:23.964Z"
+    "likes": 9,
+    "likesUpdatedAt": "2026-08-08T15:03:48.894Z"
   },
   {
     "ts": "2026-07-18T15:03:22.341Z",
@@ -555,8 +555,8 @@
     "hour": 22,
     "hook": "ranking",
     "captionHead": "🎯 ポイント3倍獲得チャンス！リピーター続出の殿",
-    "likes": 7,
-    "likesUpdatedAt": "2026-07-23T16:14:23.964Z"
+    "likes": 9,
+    "likesUpdatedAt": "2026-08-08T15:03:48.894Z"
   },
   {
     "ts": "2026-07-19T15:04:57.599Z",
@@ -1109,8 +1109,8 @@
     "captionHead": "まだダンボールの収納に困ってるの？🤔 楽天でこれ",
     "slot": "slot2",
     "itemCodeHash": "3ae4e6eccf40",
-    "likes": 11,
-    "likesUpdatedAt": "2026-08-07T15:34:48.516Z"
+    "likes": 12,
+    "likesUpdatedAt": "2026-08-08T15:03:48.894Z"
   },
   {
     "ts": "2026-08-06T14:16:29.040Z",
@@ -1124,8 +1124,8 @@
     "captionHead": "殿堂入り続出の秘密兵器を見つけた😍！私は最近、家",
     "slot": "slot2",
     "itemCodeHash": "7bc43b5ae184",
-    "likes": 10,
-    "likesUpdatedAt": "2026-08-07T15:34:48.516Z"
+    "likes": 11,
+    "likesUpdatedAt": "2026-08-08T15:03:48.894Z"
   },
   {
     "ts": "2026-08-06T22:00:11.610Z",
@@ -1139,8 +1139,8 @@
     "captionHead": "猛暑続きで体力が尽きてしまいそうな人、正直手を挙げ",
     "slot": "slot0",
     "itemCodeHash": "78692c21f355",
-    "likes": 12,
-    "likesUpdatedAt": "2026-08-07T15:34:48.516Z"
+    "likes": 20,
+    "likesUpdatedAt": "2026-08-08T15:03:48.894Z"
   },
   {
     "ts": "2026-08-07T05:40:24.868Z",
@@ -1167,8 +1167,8 @@
     "captionHead": "え、待って。8,140円でこれが手に入るの？！🤯",
     "slot": "slot2",
     "itemCodeHash": "024bcc036a61",
-    "likes": 6,
-    "likesUpdatedAt": "2026-08-07T15:34:48.516Z"
+    "likes": 19,
+    "likesUpdatedAt": "2026-08-08T15:03:48.894Z"
   },
   {
     "ts": "2026-08-07T23:35:27.761Z",
@@ -1181,7 +1181,9 @@
     "hook": "beforeafter",
     "captionHead": "先月までの私: 自分と家族の避難用具を整理し直すの",
     "slot": "slot0",
-    "itemCodeHash": "9ca989245633"
+    "itemCodeHash": "9ca989245633",
+    "likes": 9,
+    "likesUpdatedAt": "2026-08-08T15:03:48.894Z"
   },
   {
     "ts": "2026-08-08T04:55:45.844Z",
