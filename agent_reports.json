@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-07-22T16:08:40.725Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第13世代へ更新 (LLM)、警告0件"
-  },
-  {
-    "ts": "2026-07-22T23:11:30.314Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (バス・トイレ用品)"
-  },
-  {
-    "ts": "2026-07-22T23:11:31.560Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ1)"
-  },
-  {
     "ts": "2026-07-22T23:11:56.831Z",
     "agent": "poster",
     "ok": false,
@@ -1198,5 +1180,23 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-08-08T12:48:24.837Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (整理収納・片付けグッズ)"
+  },
+  {
+    "ts": "2026-08-08T12:48:26.191Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ2)"
+  },
+  {
+    "ts": "2026-08-08T12:48:53.334Z",
+    "agent": "poster",
+    "ok": false,
+    "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/bo)"
   }
 ]
