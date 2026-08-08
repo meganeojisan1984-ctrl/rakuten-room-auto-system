@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-07-22T15:46:42.465Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-07-22T15:47:29.861Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=成功"
-  },
-  {
-    "ts": "2026-07-22T16:08:38.235Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "19件抽出、履歴15件のいいね数を更新"
-  },
-  {
-    "ts": "2026-07-22T16:08:38.239Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴63件(計測済39)を集計。ジャンル17種"
-  },
-  {
     "ts": "2026-07-22T16:08:40.725Z",
     "agent": "commander",
     "ok": true,
@@ -1195,6 +1171,30 @@
   },
   {
     "ts": "2026-08-07T23:35:27.761Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-08-08T04:54:51.770Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (ハイエンド・スタイリッシュ家電)"
+  },
+  {
+    "ts": "2026-08-08T04:54:53.500Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ1)"
+  },
+  {
+    "ts": "2026-08-08T04:54:53.500Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "skipped (SKIP_ROOM=1)"
+  },
+  {
+    "ts": "2026-08-08T04:55:45.843Z",
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
