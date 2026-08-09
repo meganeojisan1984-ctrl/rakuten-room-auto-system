@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-07-23T10:12:53.702Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=成功"
-  },
-  {
-    "ts": "2026-07-23T14:00:46.079Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (整理収納・片付けグッズ)"
-  },
-  {
-    "ts": "2026-07-23T14:00:48.321Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ2)"
-  },
-  {
     "ts": "2026-07-23T14:02:29.327Z",
     "agent": "poster",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-08-09T05:01:02.379Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (家事効率化グッズ)"
+  },
+  {
+    "ts": "2026-08-09T05:01:04.422Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ1)"
+  },
+  {
+    "ts": "2026-08-09T05:01:34.642Z",
+    "agent": "poster",
+    "ok": false,
+    "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/st)"
   }
 ]
