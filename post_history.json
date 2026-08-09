@@ -1225,5 +1225,18 @@
     "captionHead": "殿堂入りアイテム発見したのでシェア！ 🎉 ポイン",
     "slot": "slot2",
     "itemCodeHash": "349368613afe"
+  },
+  {
+    "ts": "2026-08-09T23:32:35.950Z",
+    "itemCode": "yama-oatmeal-institute:10000024",
+    "itemName": "[2026年 楽天上半期ランキング1位] 令和7年産 ブレンド米 極味精米 10kg ( きわみせいまい こめ お米 米 白米 全国 送料無料 （北海道 沖縄 離島含む） ブレンド米 安い 生活応援米 備蓄米 不使用 10キロ 5キロ ) 山川食糧",
+    "genreName": "掃除用品・消耗品",
+    "price": 2680,
+    "postType": 3,
+    "hour": 8,
+    "hook": "number",
+    "captionHead": "レビュー5,971件超えのこのお米、見つけたときテ",
+    "slot": "slot0",
+    "itemCodeHash": "241ba983aa3f"
   }
 ]
