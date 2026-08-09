@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-07-23T14:02:29.327Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-07-23T14:03:23.612Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=成功"
-  },
-  {
-    "ts": "2026-07-23T15:57:11.776Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (季節:残暑 対策)"
-  },
-  {
-    "ts": "2026-07-23T15:57:13.093Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ3)"
-  },
-  {
     "ts": "2026-07-23T15:58:53.976Z",
     "agent": "poster",
     "ok": true,
@@ -1198,5 +1174,29 @@
     "agent": "poster",
     "ok": false,
     "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/st)"
+  },
+  {
+    "ts": "2026-08-09T12:50:32.672Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (季節:加湿器)"
+  },
+  {
+    "ts": "2026-08-09T12:50:34.052Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ3)"
+  },
+  {
+    "ts": "2026-08-09T12:52:11.757Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-08-09T12:53:07.542Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
   }
 ]
