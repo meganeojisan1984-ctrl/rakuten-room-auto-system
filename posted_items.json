@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "500works:10007729",
     "kohnan-eshop:10150011",
     "maxshare:10057922",
     "gachinko:10030174",
@@ -499,7 +498,8 @@
     "n-raffine:10009918",
     "rugtime:10001016",
     "kouseisyouten:10001776",
-    "yama-oatmeal-institute:10000024"
+    "yama-oatmeal-institute:10000024",
+    "rack-kan:10006203"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
