@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-07-24T23:10:26.736Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-07-24T23:10:41.182Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-07-25T05:39:25.179Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (生活必需品・補充消耗品)"
-  },
-  {
     "ts": "2026-07-25T05:39:26.648Z",
     "agent": "copywriter",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "poster",
     "ok": false,
     "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/bo)"
+  },
+  {
+    "ts": "2026-08-11T15:36:54.952Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "19件抽出、履歴8件のいいね数を更新"
+  },
+  {
+    "ts": "2026-08-11T15:36:54.963Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴100件(計測済67) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-08-11T15:36:56.994Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第34世代へ更新 (LLM)、警告0件"
   }
 ]
