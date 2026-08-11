@@ -1255,5 +1255,18 @@
     "itemCodeHash": "4130c4a5ca7b",
     "likes": 2,
     "likesUpdatedAt": "2026-08-10T15:36:47.826Z"
+  },
+  {
+    "ts": "2026-08-11T05:08:01.491Z",
+    "itemCode": "rakuten24:11148574",
+    "itemName": "【1種類を選べる】フレア フレグランス IROKA 柔軟剤 詰め替え(650ml×5袋入)【フレアフレグランスIROKA】",
+    "genreName": "家事効率化グッズ",
+    "price": 5811,
+    "postType": 2,
+    "hour": 14,
+    "hook": "loss",
+    "captionHead": "これ知らないと年間5千円損してるかも…😱 猛暑で",
+    "slot": "slot1",
+    "itemCodeHash": "472622fb6ac9"
   }
 ]
