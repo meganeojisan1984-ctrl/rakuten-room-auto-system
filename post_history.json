@@ -1270,5 +1270,18 @@
     "itemCodeHash": "472622fb6ac9",
     "likes": 10,
     "likesUpdatedAt": "2026-08-11T15:36:54.936Z"
+  },
+  {
+    "ts": "2026-08-11T23:42:28.345Z",
+    "itemCode": "rakuten24:11200559",
+    "itemName": "ワイドハイター EXパワー 漂白剤 詰め替え 大サイズ 梱販売用(820ml*15袋入)【ワイドハイター】",
+    "genreName": "キッチン消耗品・日用品",
+    "price": 7305,
+    "postType": 2,
+    "hour": 8,
+    "hook": "question",
+    "captionHead": "まだ洗濯で疲れてるの？🤯 この前、私も毎日の洗濯",
+    "slot": "slot0",
+    "itemCodeHash": "497beb3b108f"
   }
 ]

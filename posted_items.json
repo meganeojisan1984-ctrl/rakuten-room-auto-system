@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "maxshare:10057922",
     "gachinko:10030174",
     "irisplaza-r:10149446",
     "craife:10000306",
@@ -499,7 +498,8 @@
     "kouseisyouten:10001776",
     "yama-oatmeal-institute:10000024",
     "rack-kan:10006203",
-    "rakuten24:11148574"
+    "rakuten24:11148574",
+    "rakuten24:11200559"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
