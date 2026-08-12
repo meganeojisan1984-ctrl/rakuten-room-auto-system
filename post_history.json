@@ -1311,5 +1311,18 @@
     "itemCodeHash": "cf7fd137735a",
     "likes": 2,
     "likesUpdatedAt": "2026-08-12T15:35:57.905Z"
+  },
+  {
+    "ts": "2026-08-12T23:41:56.453Z",
+    "itemCode": "ntvshop:10008341",
+    "itemName": "リファカラットレイ 日テレポシュレ(日本テレビ 通販 ポシュレ)",
+    "genreName": "バス・トイレ用品",
+    "price": 15800,
+    "postType": 2,
+    "hour": 8,
+    "hook": "ranking",
+    "captionHead": "リピーター続出の逸品だからこそお伝えしたい！私はい",
+    "slot": "slot0",
+    "itemCodeHash": "eecd0b9c9674"
   }
 ]

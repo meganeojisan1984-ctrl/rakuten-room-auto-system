@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "craife:10000306",
     "kurashi-zakka:10002312",
     "roomy:10015883",
     "kurashikenkou:10104199",
@@ -499,7 +498,8 @@
     "rakuten24:11148574",
     "rakuten24:11200559",
     "futontown:10002412",
-    "footokyo:10000039"
+    "footokyo:10000039",
+    "ntvshop:10008341"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
