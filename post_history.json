@@ -1283,5 +1283,18 @@
     "captionHead": "まだ洗濯で疲れてるの？🤯 この前、私も毎日の洗濯",
     "slot": "slot0",
     "itemCodeHash": "497beb3b108f"
+  },
+  {
+    "ts": "2026-08-12T05:31:30.838Z",
+    "itemCode": "futontown:10002412",
+    "itemName": "夏 得★最大2万円OFFクーポン 敷きパッド シングル あったか 西川 暖かい 冬用 厚手 吸湿 発熱 冬の人気商品！西川株式会社 アクリル 日本製 秋冬用 敷パッド ウォッシャブル 洗える 敷きパット シングルサイズ",
+    "genreName": "季節:秋 寝具",
+    "price": 8999,
+    "postType": 3,
+    "hour": 14,
+    "hook": "surprise",
+    "captionHead": "え、待って。夏の猛暑対策で家事負担が増えてるときに",
+    "slot": "slot1",
+    "itemCodeHash": "e48cff52d1b8"
   }
 ]

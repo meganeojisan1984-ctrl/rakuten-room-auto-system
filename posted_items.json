@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "gachinko:10030174",
     "irisplaza-r:10149446",
     "craife:10000306",
     "kurashi-zakka:10002312",
@@ -499,7 +498,8 @@
     "yama-oatmeal-institute:10000024",
     "rack-kan:10006203",
     "rakuten24:11148574",
-    "rakuten24:11200559"
+    "rakuten24:11200559",
+    "futontown:10002412"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
