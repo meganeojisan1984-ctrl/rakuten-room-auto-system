@@ -1337,5 +1337,18 @@
     "captionHead": "まだ夏の猛暑で体力が消耗してるの？😓 私はずっと",
     "slot": "slot1",
     "itemCodeHash": "328d8829463a"
+  },
+  {
+    "ts": "2026-08-13T13:13:16.369Z",
+    "itemCode": "drink-partner:10000297",
+    "itemName": "【25%OFFクーポン利用とポイントで実質3,075円！1本あたり65円以下！8/18 09:59まで】コカ・コーラ い・ろ・は・す よりどり 選べる 515ml〜540ml ペットボトル 24本入り×2ケース【送料無料】",
+    "genreName": "整理収納・片付けグッズ",
+    "price": 4980,
+    "postType": 1,
+    "hour": 22,
+    "hook": "loss",
+    "captionHead": "これ知らないと年間1万円以上も使いすぎてしまうかも",
+    "slot": "slot2",
+    "itemCodeHash": "adafd1990ad2"
   }
 ]

@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "roomy:10015883",
     "kurashikenkou:10104199",
     "threenine:10000375",
     "woodpro:10026709",
@@ -499,7 +498,8 @@
     "futontown:10002412",
     "footokyo:10000039",
     "ntvshop:10008341",
-    "kenkocom:12148912"
+    "kenkocom:12148912",
+    "drink-partner:10000297"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
