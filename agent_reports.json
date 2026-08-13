@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-07-26T00:17:35.030Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (季節:圧縮袋)"
-  },
-  {
-    "ts": "2026-07-26T00:17:36.701Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ1)"
-  },
-  {
-    "ts": "2026-07-26T00:19:17.466Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-07-26T00:19:31.046Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
     "ts": "2026-07-26T06:33:00.247Z",
     "agent": "scout",
     "ok": true,
@@ -1195,6 +1171,30 @@
   },
   {
     "ts": "2026-08-12T23:41:56.453Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-08-13T05:37:33.247Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (家事効率化グッズ)"
+  },
+  {
+    "ts": "2026-08-13T05:37:34.748Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ3)"
+  },
+  {
+    "ts": "2026-08-13T05:39:13.624Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-08-13T05:40:14.449Z",
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
