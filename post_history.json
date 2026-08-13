@@ -1354,5 +1354,18 @@
     "itemCodeHash": "adafd1990ad2",
     "likes": 3,
     "likesUpdatedAt": "2026-08-13T15:37:15.312Z"
+  },
+  {
+    "ts": "2026-08-13T23:42:15.418Z",
+    "itemCode": "daiwasangyou:10000124",
+    "itemName": "【クーポン+P10で1988円】 【楽天1位】 加湿器 小型 抗菌鋼片 おしゃれ 超音波 卓上加湿器 オフィス 加湿器 アロマ 静音 除菌 7色LEDランプ 気化式 大容量 250ml 持ち運び便利 空焚き防止 一人暮らし おしゃれ usb 車載 加湿器 ギフト",
+    "genreName": "季節:加湿器",
+    "price": 3960,
+    "postType": 2,
+    "hour": 8,
+    "hook": "empathy",
+    "captionHead": "わかる人にはわかるやつ、夏の暑い日に加湿器がないと",
+    "slot": "slot0",
+    "itemCodeHash": "a0746f8fe4ab"
   }
 ]

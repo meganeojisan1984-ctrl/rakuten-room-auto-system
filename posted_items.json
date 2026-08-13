@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "kurashikenkou:10104199",
     "threenine:10000375",
     "woodpro:10026709",
     "apricot-r:10019858",
@@ -499,7 +498,8 @@
     "footokyo:10000039",
     "ntvshop:10008341",
     "kenkocom:12148912",
-    "drink-partner:10000297"
+    "drink-partner:10000297",
+    "daiwasangyou:10000124"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }

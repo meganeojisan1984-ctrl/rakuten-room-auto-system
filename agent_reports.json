@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-07-26T13:24:42.287Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-07-26T15:45:35.590Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "20件抽出、履歴19件のいいね数を更新"
-  },
-  {
-    "ts": "2026-07-26T15:45:35.601Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴78件(計測済51) 実売0件(¥0) mode=likes"
-  },
-  {
-    "ts": "2026-07-26T15:45:37.213Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第18世代へ更新 (LLM)、警告0件"
-  },
-  {
     "ts": "2026-07-27T00:14:16.281Z",
     "agent": "scout",
     "ok": true,
@@ -1198,5 +1174,29 @@
     "agent": "commander",
     "ok": true,
     "summary": "第36世代へ更新 (LLM)、警告0件"
+  },
+  {
+    "ts": "2026-08-13T23:39:29.367Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (季節:加湿器)"
+  },
+  {
+    "ts": "2026-08-13T23:39:30.710Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ2)"
+  },
+  {
+    "ts": "2026-08-13T23:41:11.036Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-08-13T23:42:15.417Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
   }
 ]
