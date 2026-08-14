@@ -1367,5 +1367,18 @@
     "captionHead": "わかる人にはわかるやつ、夏の暑い日に加湿器がないと",
     "slot": "slot0",
     "itemCodeHash": "a0746f8fe4ab"
+  },
+  {
+    "ts": "2026-08-14T05:31:42.114Z",
+    "itemCode": "futontown:10011900",
+    "itemName": "夏 得★最大2万円OFFクーポン＆P10 綿毛布 シングル 日本製 毛布 春 夏 秋 冬 コットン ケット 吸湿 発熱 ヒート ウォームサポート ロマンス小杉 綿100％ 洗える ブランケット もうふ 綿もうふ ヒート コットンケット",
+    "genreName": "季節:秋 寝具",
+    "price": 11000,
+    "postType": 2,
+    "hour": 14,
+    "hook": "surprise",
+    "captionHead": "え、待って。夏の猛暑対策で家事が増えて大変だなって",
+    "slot": "slot1",
+    "itemCodeHash": "92b584086e95"
   }
 ]

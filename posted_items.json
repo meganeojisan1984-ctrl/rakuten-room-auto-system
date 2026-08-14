@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "threenine:10000375",
     "woodpro:10026709",
     "apricot-r:10019858",
     "bellevie-harima:10163856",
@@ -499,7 +498,8 @@
     "ntvshop:10008341",
     "kenkocom:12148912",
     "drink-partner:10000297",
-    "daiwasangyou:10000124"
+    "daiwasangyou:10000124",
+    "futontown:10011900"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
