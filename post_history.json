@@ -727,8 +727,8 @@
     "hour": 19,
     "hook": "loss",
     "captionHead": "これ知らないと年間5千円損してるかも…🤯 そんな",
-    "likes": 12,
-    "likesUpdatedAt": "2026-08-12T15:35:57.905Z"
+    "likes": 13,
+    "likesUpdatedAt": "2026-08-14T15:29:52.583Z"
   },
   {
     "ts": "2026-07-22T13:57:34.033Z",
@@ -805,8 +805,8 @@
     "hour": 8,
     "hook": "question",
     "captionHead": "まだ高くてお米買い替えしてないの？🤔 そんなあな",
-    "likes": 3,
-    "likesUpdatedAt": "2026-08-13T15:37:15.312Z"
+    "likes": 7,
+    "likesUpdatedAt": "2026-08-14T15:29:52.583Z"
   },
   {
     "ts": "2026-07-24T05:45:34.853Z",
@@ -1109,8 +1109,8 @@
     "captionHead": "まだダンボールの収納に困ってるの？🤔 楽天でこれ",
     "slot": "slot2",
     "itemCodeHash": "3ae4e6eccf40",
-    "likes": 13,
-    "likesUpdatedAt": "2026-08-13T15:37:15.312Z"
+    "likes": 14,
+    "likesUpdatedAt": "2026-08-14T15:29:52.583Z"
   },
   {
     "ts": "2026-08-06T14:16:29.040Z",
@@ -1238,8 +1238,8 @@
     "captionHead": "レビュー5,971件超えのこのお米、見つけたときテ",
     "slot": "slot0",
     "itemCodeHash": "241ba983aa3f",
-    "likes": 21,
-    "likesUpdatedAt": "2026-08-13T15:37:15.312Z"
+    "likes": 22,
+    "likesUpdatedAt": "2026-08-14T15:29:52.583Z"
   },
   {
     "ts": "2026-08-10T13:10:38.821Z",
@@ -1268,8 +1268,8 @@
     "captionHead": "これ知らないと年間5千円損してるかも…😱 猛暑で",
     "slot": "slot1",
     "itemCodeHash": "472622fb6ac9",
-    "likes": 12,
-    "likesUpdatedAt": "2026-08-12T15:35:57.905Z"
+    "likes": 13,
+    "likesUpdatedAt": "2026-08-14T15:29:52.583Z"
   },
   {
     "ts": "2026-08-11T23:42:28.345Z",
@@ -1309,8 +1309,8 @@
     "captionHead": "深夜2時、また髪の手入れに格闘してた…😩 いつも",
     "slot": "slot2",
     "itemCodeHash": "cf7fd137735a",
-    "likes": 11,
-    "likesUpdatedAt": "2026-08-13T15:37:15.312Z"
+    "likes": 15,
+    "likesUpdatedAt": "2026-08-14T15:29:52.583Z"
   },
   {
     "ts": "2026-08-12T23:41:56.453Z",
@@ -1337,8 +1337,8 @@
     "captionHead": "まだ夏の猛暑で体力が消耗してるの？😓 私はずっと",
     "slot": "slot1",
     "itemCodeHash": "328d8829463a",
-    "likes": 16,
-    "likesUpdatedAt": "2026-08-13T15:37:15.312Z"
+    "likes": 18,
+    "likesUpdatedAt": "2026-08-14T15:29:52.583Z"
   },
   {
     "ts": "2026-08-13T13:13:16.369Z",
@@ -1352,8 +1352,8 @@
     "captionHead": "これ知らないと年間1万円以上も使いすぎてしまうかも",
     "slot": "slot2",
     "itemCodeHash": "adafd1990ad2",
-    "likes": 3,
-    "likesUpdatedAt": "2026-08-13T15:37:15.312Z"
+    "likes": 7,
+    "likesUpdatedAt": "2026-08-14T15:29:52.583Z"
   },
   {
     "ts": "2026-08-13T23:42:15.418Z",
@@ -1366,7 +1366,9 @@
     "hook": "empathy",
     "captionHead": "わかる人にはわかるやつ、夏の暑い日に加湿器がないと",
     "slot": "slot0",
-    "itemCodeHash": "a0746f8fe4ab"
+    "itemCodeHash": "a0746f8fe4ab",
+    "likes": 11,
+    "likesUpdatedAt": "2026-08-14T15:29:52.583Z"
   },
   {
     "ts": "2026-08-14T05:31:42.114Z",
@@ -1392,6 +1394,8 @@
     "hook": "beforeafter",
     "captionHead": "先月までの私: 海外旅行の際に充電器や変換プラグが",
     "slot": "slot2",
-    "itemCodeHash": "1891bf0c249f"
+    "itemCodeHash": "1891bf0c249f",
+    "likes": 1,
+    "likesUpdatedAt": "2026-08-14T15:29:52.583Z"
   }
 ]
