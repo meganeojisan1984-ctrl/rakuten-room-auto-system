@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "apricot-r:10019858",
     "bellevie-harima:10163856",
     "mujirushi-ryohin:10004539",
     "actplus:10002347",
@@ -499,7 +498,8 @@
     "drink-partner:10000297",
     "daiwasangyou:10000124",
     "futontown:10011900",
-    "next-online:10000139"
+    "next-online:10000139",
+    "otsuyocontactlens:10000008"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }

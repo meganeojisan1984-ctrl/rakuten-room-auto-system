@@ -1397,5 +1397,18 @@
     "itemCodeHash": "1891bf0c249f",
     "likes": 1,
     "likesUpdatedAt": "2026-08-14T15:29:52.583Z"
+  },
+  {
+    "ts": "2026-08-14T23:22:36.430Z",
+    "itemCode": "otsuyocontactlens:10000008",
+    "itemName": "ボシュロム　メダリスト ワンデープラス　1箱30枚入 6箱　処方箋不要（90枚パック×2箱セットと同じ数量）",
+    "genreName": "生活必需品・補充消耗品",
+    "price": 5704,
+    "postType": 3,
+    "hour": 8,
+    "hook": "empathy",
+    "captionHead": "わかる人にはわかるやつ、夏の暑い日に目が疲れてしま",
+    "slot": "slot0",
+    "itemCodeHash": "a9f4c620c994"
   }
 ]
