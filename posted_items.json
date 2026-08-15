@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "bellevie-harima:10163856",
     "mujirushi-ryohin:10004539",
     "actplus:10002347",
     "model-bon:10027442",
@@ -499,7 +498,8 @@
     "daiwasangyou:10000124",
     "futontown:10011900",
     "next-online:10000139",
-    "otsuyocontactlens:10000008"
+    "otsuyocontactlens:10000008",
+    "ichinen:10000078"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
