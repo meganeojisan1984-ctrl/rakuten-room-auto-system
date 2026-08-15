@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "actplus:10002347",
     "model-bon:10027442",
     "military-base:10014727",
     "risu-onlineshop:10000135",
@@ -499,7 +498,8 @@
     "next-online:10000139",
     "otsuyocontactlens:10000008",
     "ichinen:10000078",
-    "yumenomori:10000194"
+    "yumenomori:10000194",
+    "exception5251:10000794"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }

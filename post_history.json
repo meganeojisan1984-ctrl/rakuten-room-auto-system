@@ -1438,5 +1438,18 @@
     "captionHead": "まだ充電しながら待ってたの？💻🔋 そうだったら",
     "slot": "slot2",
     "itemCodeHash": "281cf2ad33e5"
+  },
+  {
+    "ts": "2026-08-15T23:21:29.342Z",
+    "itemCode": "exception5251:10000794",
+    "itemName": "【新米予約受付中】令和8年産（予約）・令和7年産 徳島県産 コシヒカリ 令和7年産 一等米 単一原料米 新米 白米 5kg 10kg 送料無料 米 お米 国産 ブレンド米ではありません 家庭用 大容量 定食 ご飯 ハンバーグ とんかつ 粘り ふっくら ex-x01028",
+    "genreName": "バス・トイレ用品",
+    "price": 3299,
+    "postType": 2,
+    "hour": 8,
+    "hook": "surprise",
+    "captionHead": "え、待って。コシヒカリを5kgで3,299円ってど",
+    "slot": "slot0",
+    "itemCodeHash": "354607fbbb0c"
   }
 ]

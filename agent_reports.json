@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-07-28T14:10:18.004Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-07-28T16:23:20.278Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "20件抽出、履歴20件のいいね数を更新"
-  },
-  {
-    "ts": "2026-07-28T16:23:20.289Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴84件(計測済55) 実売0件(¥0) mode=likes"
-  },
-  {
-    "ts": "2026-07-28T16:23:22.743Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第20世代へ更新 (LLM)、警告0件"
-  },
-  {
     "ts": "2026-07-29T00:11:04.947Z",
     "agent": "scout",
     "ok": true,
@@ -1198,5 +1174,29 @@
     "agent": "commander",
     "ok": true,
     "summary": "第38世代へ更新 (LLM)、警告0件"
+  },
+  {
+    "ts": "2026-08-15T23:19:03.865Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (バス・トイレ用品)"
+  },
+  {
+    "ts": "2026-08-15T23:19:05.415Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ2)"
+  },
+  {
+    "ts": "2026-08-15T23:20:43.793Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-08-15T23:21:29.341Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
   }
 ]
