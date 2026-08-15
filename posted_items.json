@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "mujirushi-ryohin:10004539",
     "actplus:10002347",
     "model-bon:10027442",
     "military-base:10014727",
@@ -499,7 +498,8 @@
     "futontown:10011900",
     "next-online:10000139",
     "otsuyocontactlens:10000008",
-    "ichinen:10000078"
+    "ichinen:10000078",
+    "yumenomori:10000194"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }

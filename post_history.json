@@ -1423,5 +1423,18 @@
     "captionHead": "161件のレビューで★4.5！そんな凄いプラムを見",
     "slot": "slot1",
     "itemCodeHash": "0c5488b80aeb"
+  },
+  {
+    "ts": "2026-08-15T12:39:47.623Z",
+    "itemCode": "yumenomori:10000194",
+    "itemName": "連続2年受賞！【COUPON+P10倍で1,809円・超お得SALE】 モバイルバッテリー 軽量 小型 22800mAh 累計販売1,000,000個＋ バッテリー 大容量 22.5W 急速充電 5台同時充電 充電器 ケーブル内蔵 携帯充電器 SCP 22.5W/PD 20W/QC 3.0最速 機内持込 防災グッズ ハンディファン",
+    "genreName": "季節:防災グッズ",
+    "price": 3580,
+    "postType": 1,
+    "hour": 21,
+    "hook": "question",
+    "captionHead": "まだ充電しながら待ってたの？💻🔋 そうだったら",
+    "slot": "slot2",
+    "itemCodeHash": "281cf2ad33e5"
   }
 ]
