@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "military-base:10014727",
     "risu-onlineshop:10000135",
     "okeya-2020:10003609",
     "kinakostore:10005923",
@@ -499,7 +498,8 @@
     "ichinen:10000078",
     "yumenomori:10000194",
     "exception5251:10000794",
-    "ennshopstore:10000072"
+    "ennshopstore:10000072",
+    "futon-colors:10000707"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }

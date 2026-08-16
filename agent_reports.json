@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-07-29T06:28:34.430Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ3)"
-  },
-  {
-    "ts": "2026-07-29T06:30:19.893Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-07-29T06:30:34.976Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-07-29T14:11:43.068Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (ハイエンド・スタイリッシュ家電)"
-  },
-  {
     "ts": "2026-07-29T14:11:44.731Z",
     "agent": "copywriter",
     "ok": true,
@@ -1195,6 +1171,30 @@
   },
   {
     "ts": "2026-08-16T04:32:41.522Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-08-16T12:38:41.358Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (季節:秋 寝具)"
+  },
+  {
+    "ts": "2026-08-16T12:38:42.553Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ1)"
+  },
+  {
+    "ts": "2026-08-16T12:40:20.531Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-08-16T12:40:59.824Z",
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
