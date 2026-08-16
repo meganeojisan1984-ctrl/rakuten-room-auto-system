@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-07-29T16:08:57.574Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "20件抽出、履歴8件のいいね数を更新"
-  },
-  {
-    "ts": "2026-07-29T16:08:57.585Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴86件(計測済57) 実売0件(¥0) mode=likes"
-  },
-  {
-    "ts": "2026-07-29T16:08:59.466Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第21世代へ更新 (LLM)、警告0件"
-  },
-  {
-    "ts": "2026-07-30T00:59:10.162Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (キッチン消耗品・日用品)"
-  },
-  {
     "ts": "2026-07-30T00:59:11.484Z",
     "agent": "copywriter",
     "ok": true,
@@ -1198,5 +1174,29 @@
     "agent": "commander",
     "ok": true,
     "summary": "第39世代へ更新 (LLM)、警告0件"
+  },
+  {
+    "ts": "2026-08-16T23:18:09.488Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (季節:秋 寝具)"
+  },
+  {
+    "ts": "2026-08-16T23:18:11.003Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ3)"
+  },
+  {
+    "ts": "2026-08-16T23:19:45.852Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-08-16T23:20:39.655Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
   }
 ]

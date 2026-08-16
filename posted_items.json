@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "risu-onlineshop:10000135",
     "okeya-2020:10003609",
     "kinakostore:10005923",
     "store-marufuku:10000909",
@@ -499,7 +498,8 @@
     "yumenomori:10000194",
     "exception5251:10000794",
     "ennshopstore:10000072",
-    "futon-colors:10000707"
+    "futon-colors:10000707",
+    "esaki210:10001057"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
