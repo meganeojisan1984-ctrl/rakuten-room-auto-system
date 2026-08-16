@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-07-29T00:11:04.947Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (洗濯・衣類ケアグッズ)"
-  },
-  {
-    "ts": "2026-07-29T00:11:06.779Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ2)"
-  },
-  {
-    "ts": "2026-07-29T00:11:35.495Z",
-    "agent": "poster",
-    "ok": false,
-    "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/bo)"
-  },
-  {
-    "ts": "2026-07-29T06:28:33.142Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (季節:秋 衣替え)"
-  },
-  {
     "ts": "2026-07-29T06:28:34.430Z",
     "agent": "copywriter",
     "ok": true,
@@ -1195,6 +1171,30 @@
   },
   {
     "ts": "2026-08-15T23:21:29.341Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-08-16T04:31:43.331Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (ハイエンド・スタイリッシュ家電)"
+  },
+  {
+    "ts": "2026-08-16T04:31:44.789Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ1)"
+  },
+  {
+    "ts": "2026-08-16T04:31:44.790Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "skipped (SKIP_ROOM=1)"
+  },
+  {
+    "ts": "2026-08-16T04:32:41.522Z",
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"

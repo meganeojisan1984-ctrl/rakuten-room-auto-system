@@ -1451,5 +1451,18 @@
     "captionHead": "え、待って。コシヒカリを5kgで3,299円ってど",
     "slot": "slot0",
     "itemCodeHash": "354607fbbb0c"
+  },
+  {
+    "ts": "2026-08-16T04:32:41.523Z",
+    "itemCode": "ennshopstore:10000072",
+    "itemName": "半額！【COUPONで3,190円〜美容師監修＆99%塩素除去】 シャワーヘッド マイクロナノバブル 塩素除去 28億9000万個美容泡 90%節水 シャワーヘッド 水圧 強い水量 6つのモード 手元止水 ミスト 保湿 保温 増圧 シャワーヘッド 節水 毛穴 汚れ除去 美肌美髪 取付簡単",
+    "genreName": "ハイエンド・スタイリッシュ家電",
+    "price": 6380,
+    "postType": 1,
+    "hour": 13,
+    "hook": "beforeafter",
+    "captionHead": "先月までの私: お風呂あがりの乾く肌と毛穴の汚れに",
+    "slot": "slot1",
+    "itemCodeHash": "348e6e6a521f"
   }
 ]
