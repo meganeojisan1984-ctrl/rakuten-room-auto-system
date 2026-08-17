@@ -805,8 +805,8 @@
     "hour": 8,
     "hook": "question",
     "captionHead": "まだ高くてお米買い替えしてないの？🤔 そんなあな",
-    "likes": 9,
-    "likesUpdatedAt": "2026-08-15T14:58:49.973Z"
+    "likes": 10,
+    "likesUpdatedAt": "2026-08-17T14:59:55.157Z"
   },
   {
     "ts": "2026-07-24T05:45:34.853Z",
@@ -1352,8 +1352,8 @@
     "captionHead": "これ知らないと年間1万円以上も使いすぎてしまうかも",
     "slot": "slot2",
     "itemCodeHash": "adafd1990ad2",
-    "likes": 9,
-    "likesUpdatedAt": "2026-08-15T14:58:49.973Z"
+    "likes": 10,
+    "likesUpdatedAt": "2026-08-17T14:59:55.157Z"
   },
   {
     "ts": "2026-08-13T23:42:15.418Z",
@@ -1367,8 +1367,8 @@
     "captionHead": "わかる人にはわかるやつ、夏の暑い日に加湿器がないと",
     "slot": "slot0",
     "itemCodeHash": "a0746f8fe4ab",
-    "likes": 11,
-    "likesUpdatedAt": "2026-08-16T14:58:39.157Z"
+    "likes": 12,
+    "likesUpdatedAt": "2026-08-17T14:59:55.157Z"
   },
   {
     "ts": "2026-08-14T05:31:42.114Z",
@@ -1410,8 +1410,8 @@
     "captionHead": "わかる人にはわかるやつ、夏の暑い日に目が疲れてしま",
     "slot": "slot0",
     "itemCodeHash": "a9f4c620c994",
-    "likes": 11,
-    "likesUpdatedAt": "2026-08-16T14:58:39.157Z"
+    "likes": 12,
+    "likesUpdatedAt": "2026-08-17T14:59:55.157Z"
   },
   {
     "ts": "2026-08-15T04:26:58.528Z",
@@ -1489,7 +1489,9 @@
     "hook": "empathy",
     "captionHead": "わかる人にはわかるやつ💡 今年の夏は特に暑くて、",
     "slot": "slot0",
-    "itemCodeHash": "c224c0d272b1"
+    "itemCodeHash": "c224c0d272b1",
+    "likes": 7,
+    "likesUpdatedAt": "2026-08-17T14:59:55.157Z"
   },
   {
     "ts": "2026-08-17T04:38:19.279Z",
