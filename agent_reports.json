@@ -1,17 +1,5 @@
 [
   {
-    "ts": "2026-08-01T15:43:19.416Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "20件抽出、履歴7件のいいね数を更新"
-  },
-  {
-    "ts": "2026-08-01T15:43:19.425Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴88件(計測済58) 実売0件(¥0) mode=likes"
-  },
-  {
     "ts": "2026-08-01T15:43:21.742Z",
     "agent": "commander",
     "ok": true,
@@ -1198,5 +1186,17 @@
     "agent": "commander",
     "ok": true,
     "summary": "第41世代へ更新 (ルールベース)、警告0件"
+  },
+  {
+    "ts": "2026-08-18T23:20:15.794Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (掃除用品・消耗品)"
+  },
+  {
+    "ts": "2026-08-18T23:20:15.928Z",
+    "agent": "copywriter",
+    "ok": false,
+    "summary": "Error: 紹介文の生成に全て失敗しました"
   }
 ]
