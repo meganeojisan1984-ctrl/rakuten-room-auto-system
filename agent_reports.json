@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-07-31T16:23:26.911Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "20件抽出、履歴7件のいいね数を更新"
-  },
-  {
-    "ts": "2026-07-31T16:23:26.922Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴88件(計測済58) 実売0件(¥0) mode=likes"
-  },
-  {
-    "ts": "2026-07-31T16:23:28.864Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第23世代へ更新 (LLM)、警告0件"
-  },
-  {
     "ts": "2026-08-01T15:43:19.416Z",
     "agent": "metrics",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "copywriter",
     "ok": false,
     "summary": "Error: 紹介文の生成に全て失敗しました"
+  },
+  {
+    "ts": "2026-08-18T15:07:13.635Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "19件抽出、履歴12件のいいね数を更新"
+  },
+  {
+    "ts": "2026-08-18T15:07:13.645Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴117件(計測済74) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-08-18T15:07:14.317Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第41世代へ更新 (ルールベース)、警告0件"
   }
 ]
