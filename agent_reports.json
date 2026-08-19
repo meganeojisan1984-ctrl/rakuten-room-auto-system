@@ -1,17 +1,5 @@
 [
   {
-    "ts": "2026-08-01T15:43:21.742Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第24世代へ更新 (LLM)、警告0件"
-  },
-  {
-    "ts": "2026-08-02T13:21:38.333Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (整理収納・片付けグッズ)"
-  },
-  {
     "ts": "2026-08-02T13:21:39.657Z",
     "agent": "copywriter",
     "ok": true,
@@ -1195,6 +1183,18 @@
   },
   {
     "ts": "2026-08-18T23:20:15.928Z",
+    "agent": "copywriter",
+    "ok": false,
+    "summary": "Error: 紹介文の生成に全て失敗しました"
+  },
+  {
+    "ts": "2026-08-19T04:34:45.858Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (家事効率化グッズ)"
+  },
+  {
+    "ts": "2026-08-19T04:34:45.974Z",
     "agent": "copywriter",
     "ok": false,
     "summary": "Error: 紹介文の生成に全て失敗しました"
