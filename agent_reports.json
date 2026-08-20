@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-08-04T16:31:31.750Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴88件(計測済58) 実売0件(¥0) mode=likes"
-  },
-  {
-    "ts": "2026-08-04T16:31:34.015Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第27世代へ更新 (LLM)、警告0件"
-  },
-  {
-    "ts": "2026-08-05T16:21:22.402Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "39件抽出、履歴11件のいいね数を更新"
-  },
-  {
     "ts": "2026-08-05T16:21:22.470Z",
     "agent": "analyst",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "scout",
     "ok": false,
     "summary": "Error: フィルタリング後に使用可能な商品が0件でした"
+  },
+  {
+    "ts": "2026-08-20T15:16:16.056Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "38件抽出、履歴10件のいいね数を更新"
+  },
+  {
+    "ts": "2026-08-20T15:16:16.066Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴117件(計測済74) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-08-20T15:16:16.826Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第43世代へ更新 (ルールベース)、警告0件"
   }
 ]
