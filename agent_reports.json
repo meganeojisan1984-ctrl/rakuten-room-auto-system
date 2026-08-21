@@ -1,17 +1,5 @@
 [
   {
-    "ts": "2026-08-06T12:04:16.031Z",
-    "agent": "sre",
-    "ok": true,
-    "summary": "OK auto-post.yml rerun"
-  },
-  {
-    "ts": "2026-08-06T12:12:50.131Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (季節:収納用品)"
-  },
-  {
     "ts": "2026-08-06T12:12:51.819Z",
     "agent": "copywriter",
     "ok": true,
@@ -1195,6 +1183,18 @@
   },
   {
     "ts": "2026-08-21T04:34:25.332Z",
+    "agent": "copywriter",
+    "ok": false,
+    "summary": "Error: 紹介文の生成に全て失敗しました"
+  },
+  {
+    "ts": "2026-08-21T12:49:20.904Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (整理収納・片付けグッズ)"
+  },
+  {
+    "ts": "2026-08-21T12:49:21.046Z",
     "agent": "copywriter",
     "ok": false,
     "summary": "Error: 紹介文の生成に全て失敗しました"
