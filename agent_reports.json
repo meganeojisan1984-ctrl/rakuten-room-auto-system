@@ -1,17 +1,5 @@
 [
   {
-    "ts": "2026-08-06T12:00:00.542Z",
-    "agent": "sre",
-    "ok": true,
-    "summary": "OK auto-post.yml rerun"
-  },
-  {
-    "ts": "2026-08-06T12:03:47.856Z",
-    "agent": "sre",
-    "ok": true,
-    "summary": "OK auto-post.yml rerun"
-  },
-  {
     "ts": "2026-08-06T12:04:16.031Z",
     "agent": "sre",
     "ok": true,
@@ -1195,6 +1183,18 @@
   },
   {
     "ts": "2026-08-20T23:23:58.902Z",
+    "agent": "copywriter",
+    "ok": false,
+    "summary": "Error: 紹介文の生成に全て失敗しました"
+  },
+  {
+    "ts": "2026-08-21T04:34:25.246Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (家事効率化グッズ)"
+  },
+  {
+    "ts": "2026-08-21T04:34:25.332Z",
     "agent": "copywriter",
     "ok": false,
     "summary": "Error: 紹介文の生成に全て失敗しました"
