@@ -1,17 +1,5 @@
 [
   {
-    "ts": "2026-08-07T15:34:50.768Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第30世代へ更新 (LLM)、警告0件"
-  },
-  {
-    "ts": "2026-08-07T23:32:46.801Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (季節:防災グッズ)"
-  },
-  {
     "ts": "2026-08-07T23:32:48.446Z",
     "agent": "copywriter",
     "ok": true,
@@ -1198,5 +1186,17 @@
     "agent": "commander",
     "ok": true,
     "summary": "第47世代へ更新 (ルールベース)、警告1件"
+  },
+  {
+    "ts": "2026-08-24T23:20:46.729Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (キッチン消耗品・日用品)"
+  },
+  {
+    "ts": "2026-08-24T23:20:46.822Z",
+    "agent": "copywriter",
+    "ok": false,
+    "summary": "Error: 紹介文の生成に全て失敗しました"
   }
 ]
