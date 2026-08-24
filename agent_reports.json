@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-08-07T13:06:23.232Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-08-07T15:34:48.527Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "19件抽出、履歴4件のいいね数を更新"
-  },
-  {
-    "ts": "2026-08-07T15:34:48.670Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴93件(計測済62) 実売0件(¥0) mode=likes"
-  },
-  {
     "ts": "2026-08-07T15:34:50.768Z",
     "agent": "commander",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "copywriter",
     "ok": false,
     "summary": "Error: 紹介文の生成に全て失敗しました"
+  },
+  {
+    "ts": "2026-08-24T15:22:12.614Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "36件抽出、履歴7件のいいね数を更新"
+  },
+  {
+    "ts": "2026-08-24T15:22:12.624Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴117件(計測済74) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-08-24T15:22:13.485Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第47世代へ更新 (ルールベース)、警告1件"
   }
 ]
