@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-08-08T04:54:53.500Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ1)"
-  },
-  {
-    "ts": "2026-08-08T04:54:53.500Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "skipped (SKIP_ROOM=1)"
-  },
-  {
-    "ts": "2026-08-08T04:55:45.843Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
     "ts": "2026-08-08T12:48:24.837Z",
     "agent": "scout",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "copywriter",
     "ok": false,
     "summary": "Error: 紹介文の生成に全て失敗しました"
+  },
+  {
+    "ts": "2026-08-25T15:27:57.711Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "19件抽出、履歴11件のいいね数を更新"
+  },
+  {
+    "ts": "2026-08-25T15:27:57.721Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴117件(計測済74) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-08-25T15:27:58.468Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第48世代へ更新 (ルールベース)、警告1件"
   }
 ]
