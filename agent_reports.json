@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-08-08T15:03:51.829Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第31世代へ更新 (LLM)、警告0件"
-  },
-  {
-    "ts": "2026-08-08T23:27:21.828Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (季節:秋 衣替え)"
-  },
-  {
-    "ts": "2026-08-08T23:27:23.120Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ1)"
-  },
-  {
     "ts": "2026-08-08T23:29:04.227Z",
     "agent": "poster",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "copywriter",
     "ok": false,
     "summary": "Error: 紹介文の生成に全て失敗しました"
+  },
+  {
+    "ts": "2026-08-26T16:05:52.653Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "18件抽出、履歴6件のいいね数を更新"
+  },
+  {
+    "ts": "2026-08-26T16:05:52.663Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴117件(計測済74) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-08-26T16:05:53.521Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第49世代へ更新 (ルールベース)、警告1件"
   }
 ]
