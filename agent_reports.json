@@ -1,17 +1,5 @@
 [
   {
-    "ts": "2026-08-08T15:03:48.911Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "19件抽出、履歴7件のいいね数を更新"
-  },
-  {
-    "ts": "2026-08-08T15:03:48.925Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴95件(計測済63) 実売0件(¥0) mode=likes"
-  },
-  {
     "ts": "2026-08-08T15:03:51.829Z",
     "agent": "commander",
     "ok": true,
@@ -1195,6 +1183,18 @@
   },
   {
     "ts": "2026-08-26T04:36:17.882Z",
+    "agent": "copywriter",
+    "ok": false,
+    "summary": "Error: 紹介文の生成に全て失敗しました"
+  },
+  {
+    "ts": "2026-08-26T12:53:02.215Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (ハイエンド・スタイリッシュ家電)"
+  },
+  {
+    "ts": "2026-08-26T12:53:02.317Z",
     "agent": "copywriter",
     "ok": false,
     "summary": "Error: 紹介文の生成に全て失敗しました"
