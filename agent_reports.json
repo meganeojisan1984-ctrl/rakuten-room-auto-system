@@ -1,17 +1,5 @@
 [
   {
-    "ts": "2026-08-09T05:01:04.422Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ1)"
-  },
-  {
-    "ts": "2026-08-09T05:01:34.642Z",
-    "agent": "poster",
-    "ok": false,
-    "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/st)"
-  },
-  {
     "ts": "2026-08-09T12:50:32.672Z",
     "agent": "scout",
     "ok": true,
@@ -1195,6 +1183,18 @@
   },
   {
     "ts": "2026-08-27T14:57:54.405Z",
+    "agent": "copywriter",
+    "ok": false,
+    "summary": "Error: 紹介文の生成に全て失敗しました"
+  },
+  {
+    "ts": "2026-08-27T21:52:30.965Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (掃除用品・消耗品)"
+  },
+  {
+    "ts": "2026-08-27T21:52:31.190Z",
     "agent": "copywriter",
     "ok": false,
     "summary": "Error: 紹介文の生成に全て失敗しました"
