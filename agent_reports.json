@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-08-09T12:50:32.672Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (季節:加湿器)"
-  },
-  {
-    "ts": "2026-08-09T12:50:34.052Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ3)"
-  },
-  {
-    "ts": "2026-08-09T12:52:11.757Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
     "ts": "2026-08-09T12:53:07.542Z",
     "agent": "promoter",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "copywriter",
     "ok": false,
     "summary": "Error: 紹介文の生成に全て失敗しました"
+  },
+  {
+    "ts": "2026-08-27T23:59:52.702Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "19件抽出、履歴9件のいいね数を更新"
+  },
+  {
+    "ts": "2026-08-27T23:59:52.713Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴117件(計測済74) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-08-27T23:59:53.879Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第50世代へ更新 (ルールベース)、警告1件"
   }
 ]
