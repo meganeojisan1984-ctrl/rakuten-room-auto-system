@@ -1,11 +1,5 @@
 [
   {
-    "ts": "2026-08-09T12:53:07.542Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
     "ts": "2026-08-09T15:06:11.091Z",
     "agent": "metrics",
     "ok": true,
@@ -1198,5 +1192,11 @@
     "agent": "commander",
     "ok": true,
     "summary": "第50世代へ更新 (ルールベース)、警告1件"
+  },
+  {
+    "ts": "2026-08-28T15:56:11.026Z",
+    "agent": "scout",
+    "ok": false,
+    "summary": "Error: フィルタリング後に使用可能な商品が0件でした"
   }
 ]
