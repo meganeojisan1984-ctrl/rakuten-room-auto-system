@@ -1,17 +1,5 @@
 [
   {
-    "ts": "2026-08-09T15:06:11.091Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "19件抽出、履歴8件のいいね数を更新"
-  },
-  {
-    "ts": "2026-08-09T15:06:11.100Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴97件(計測済64) 実売0件(¥0) mode=likes"
-  },
-  {
     "ts": "2026-08-09T15:06:13.195Z",
     "agent": "commander",
     "ok": true,
@@ -1198,5 +1186,17 @@
     "agent": "scout",
     "ok": false,
     "summary": "Error: フィルタリング後に使用可能な商品が0件でした"
+  },
+  {
+    "ts": "2026-08-28T21:46:16.217Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (生活必需品・補充消耗品)"
+  },
+  {
+    "ts": "2026-08-28T21:46:16.352Z",
+    "agent": "copywriter",
+    "ok": false,
+    "summary": "Error: 紹介文の生成に全て失敗しました"
   }
 ]
