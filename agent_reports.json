@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-08-10T05:23:30.196Z",
-    "agent": "poster",
-    "ok": false,
-    "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/bo)"
-  },
-  {
-    "ts": "2026-08-10T13:07:59.804Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (季節:収納用品)"
-  },
-  {
-    "ts": "2026-08-10T13:08:01.263Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ3)"
-  },
-  {
     "ts": "2026-08-10T13:09:39.534Z",
     "agent": "poster",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "scout",
     "ok": false,
     "summary": "Error: フィルタリング後に使用可能な商品が0件でした"
+  },
+  {
+    "ts": "2026-08-29T17:54:45.350Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "19件抽出、履歴6件のいいね数を更新"
+  },
+  {
+    "ts": "2026-08-29T17:54:45.360Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴117件(計測済74) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-08-29T17:54:46.252Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第52世代へ更新 (ルールベース)、警告1件"
   }
 ]
