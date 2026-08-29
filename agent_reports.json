@@ -1,17 +1,5 @@
 [
   {
-    "ts": "2026-08-09T23:32:35.949Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-08-10T05:22:58.032Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (家事効率化グッズ)"
-  },
-  {
     "ts": "2026-08-10T05:22:59.392Z",
     "agent": "copywriter",
     "ok": true,
@@ -1198,5 +1186,17 @@
     "agent": "scout",
     "ok": false,
     "summary": "Error: フィルタリング後に使用可能な商品が0件でした"
+  },
+  {
+    "ts": "2026-08-29T10:43:11.677Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (ハイエンド・スタイリッシュ家電)"
+  },
+  {
+    "ts": "2026-08-29T10:43:11.858Z",
+    "agent": "copywriter",
+    "ok": false,
+    "summary": "Error: 紹介文の生成に全て失敗しました"
   }
 ]
