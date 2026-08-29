@@ -1,11 +1,5 @@
 [
   {
-    "ts": "2026-08-09T23:31:42.845Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
     "ts": "2026-08-09T23:32:35.949Z",
     "agent": "promoter",
     "ok": true,
@@ -1198,5 +1192,11 @@
     "agent": "commander",
     "ok": true,
     "summary": "第51世代へ更新 (ルールベース)、警告1件"
+  },
+  {
+    "ts": "2026-08-29T04:06:04.920Z",
+    "agent": "scout",
+    "ok": false,
+    "summary": "Error: フィルタリング後に使用可能な商品が0件でした"
   }
 ]
