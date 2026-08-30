@@ -15,45 +15,65 @@ const MAX_PRICE = parseInt(process.env.MAX_PRICE ?? "5000", 10);
 const MIN_PRICE = parseInt(process.env.MIN_PRICE ?? "1000", 10);
 const TARGET_GENRE = process.env.TARGET_GENRE ?? "general";
 
-// メインジャンル: QOLが向上する家事用品（投稿の6〜7割）
-// 条件: 商品数多い・注目度高い・悩みが明確・消耗品&買い替え需要あり
-const MAIN_GENRES = [
-  { name: "日用品雑貨・掃除・洗濯用品", genreId: "215684", minPrice: 1000, maxPrice: 5000 },
-  { name: "整理収納・片付けグッズ", genreId: "215697", minPrice: 1000, maxPrice: 5000 },
-  { name: "掃除用品・消耗品", genreId: "215684", minPrice: 1000, maxPrice: 5000 },
-  { name: "洗濯・衣類ケアグッズ", genreId: "215684", minPrice: 1000, maxPrice: 5000 },
-  { name: "キッチン消耗品・日用品", genreId: "216129", minPrice: 1000, maxPrice: 5000 },
-  { name: "バス・トイレ用品", genreId: "215684", minPrice: 1000, maxPrice: 5000 },
-  { name: "家事効率化グッズ", genreId: "215684", minPrice: 1000, maxPrice: 5000 },
+export interface ProductCategory {
+  name: string;
+  keywords: string[];
+  minPrice: number;
+  maxPrice: number;
+}
+
+export const PRODUCT_CATEGORIES: ProductCategory[] = [
+  {
+    name: "暮らし・インテリア",
+    keywords: ["インテリア 収納 人気", "暮らし 便利グッズ", "北欧 インテリア 雑貨", "キッチン 収納 便利", "生活雑貨 人気"],
+    minPrice: 1000,
+    maxPrice: 30000,
+  },
+  {
+    name: "ファッション・子供服",
+    keywords: ["レディース ファッション 人気", "子供服 人気", "キッズ 服 おしゃれ", "バッグ レディース 人気", "親子コーデ"],
+    minPrice: 1000,
+    maxPrice: 20000,
+  },
+  {
+    name: "グルメ・スイーツ",
+    keywords: ["スイーツ 人気 お取り寄せ", "グルメ お取り寄せ 人気", "食品 送料無料 人気", "ご褒美 スイーツ", "訳あり グルメ"],
+    minPrice: 1000,
+    maxPrice: 30000,
+  },
+  {
+    name: "美容・コスメ",
+    keywords: ["コスメ 人気", "美容 グッズ 人気", "スキンケア 人気", "ヘアケア 人気", "メイクアップ 人気"],
+    minPrice: 1000,
+    maxPrice: 20000,
+  },
+  {
+    name: "家電・ガジェット",
+    keywords: ["家電 便利 人気", "ガジェット 人気", "時短 家電", "スマホ 周辺機器 人気", "一人暮らし 家電"],
+    minPrice: 1000,
+    maxPrice: 50000,
+  },
 ];
 
-// サブジャンル: メインジャンル関連・同悩みの延長・使用シーン重複
-const SUB_GENRES = [
-  { name: "ハイエンド・スタイリッシュ家電", genreId: "215783", minPrice: 1000, maxPrice: 5000 },
-  { name: "時短ガジェット・小型家電", genreId: "215783", minPrice: 1000, maxPrice: 5000 },
-  { name: "キッチン便利グッズ・調理器具", genreId: "216129", minPrice: 1000, maxPrice: 5000 },
-  { name: "生活必需品・補充消耗品", genreId: "215684", minPrice: 1000, maxPrice: 5000 },
-  { name: "省エネ・節約家電小物", genreId: "215783", minPrice: 1000, maxPrice: 5000 },
-];
+export function pickProductCategory(seed: number = Math.random()): ProductCategory {
+  const safeSeed = Math.min(Math.max(seed, 0), 0.999999);
+  return PRODUCT_CATEGORIES[Math.floor(safeSeed * PRODUCT_CATEGORIES.length)]!;
+}
+
+// 旧ロジックのフォールバック用。通常運用は PRODUCT_CATEGORIES のキーワード検索を優先する。
+const MAIN_GENRES = PRODUCT_CATEGORIES.map((category) => ({
+  name: category.name,
+  genreId: "",
+  minPrice: category.minPrice,
+  maxPrice: category.maxPrice,
+}));
+
+const SUB_GENRES: typeof MAIN_GENRES = [];
 
 // 検索APIフォールバック用キーワードプール (QOL家事系の文脈に合致)
 // ランキングが枯れた時の無限供給源: 各キーワード×page 1-3 で最大~9000商品にアクセス可能
 const SEARCH_FALLBACK_KEYWORDS = [
-  "掃除 便利グッズ",
-  "洗濯 便利",
-  "キッチン 便利",
-  "収納 アイデア",
-  "生活雑貨 人気",
-  "時短 家電",
-  "トイレ 掃除",
-  "お風呂 グッズ",
-  "消耗品 まとめ買い",
-  "日用品 セット",
-  "ランドリー 収納",
-  "玄関 収納",
-  "隙間 収納",
-  "水回り 掃除",
-  "スポンジ 洗剤",
+  ...PRODUCT_CATEGORIES.flatMap((category) => category.keywords),
 ];
 
 // ジャンルID設定（後方互換）
@@ -617,6 +637,34 @@ async function fetchSearchWithRotation(
   return [];
 }
 
+async function fetchProductCategoryWithRotation(
+  category: ProductCategory,
+  excludeCodes: Set<string>,
+): Promise<RakutenItem[]> {
+  const keywords = [...category.keywords].sort(() => Math.random() - 0.5);
+  for (const keyword of keywords) {
+    for (let page = 1; page <= 2; page++) {
+      let rawItems: RakutenItem[];
+      try {
+        rawItems = await fetchItemSearch(keyword, category.minPrice, category.maxPrice, undefined, page);
+      } catch (err) {
+        console.warn(`[fetcher] カテゴリ "${category.name}" キーワード "${keyword}" p${page} 失敗: ${String(err)}`);
+        break;
+      }
+      if (rawItems.length === 0) break;
+      const filtered = applyItemFilter(
+        rawItems,
+        category.minPrice,
+        category.maxPrice,
+        excludeCodes,
+        `${category.name}: ${keyword} p${page}`,
+      );
+      if (filtered.length > 0) return filtered;
+    }
+  }
+  return [];
+}
+
 /**
  * ターゲットジャンルに基づき商品を取得・フィルタリングして返す
  */
@@ -629,14 +677,18 @@ export async function fetchItems(
     throw new Error("RAKUTEN_APP_ID が未設定です");
   }
 
-  // Phase 2: slot が渡ってきた場合、MAIN/SUB ジャンルをその whitelist に絞る
+  // Phase 2: slot が渡ってきた場合、許可カテゴリを絞る
   const whitelistSet = genreWhitelist && genreWhitelist.length > 0 ? new Set(genreWhitelist) : null;
+  const categories = whitelistSet
+    ? PRODUCT_CATEGORIES.filter((category) => whitelistSet.has(category.name))
+    : PRODUCT_CATEGORIES;
   const mainGenres = whitelistSet ? MAIN_GENRES.filter((g) => whitelistSet.has(g.name)) : MAIN_GENRES;
   const subGenres = whitelistSet ? SUB_GENRES.filter((g) => whitelistSet.has(g.name)) : SUB_GENRES;
-  if (whitelistSet && mainGenres.length === 0 && subGenres.length === 0) {
-    console.warn(`[fetcher] genreWhitelist=${JSON.stringify(genreWhitelist)} が MAIN/SUB のどれとも一致しません。フルレンジにフォールバックします`);
+  if (whitelistSet && categories.length === 0 && mainGenres.length === 0 && subGenres.length === 0) {
+    console.warn(`[fetcher] genreWhitelist=${JSON.stringify(genreWhitelist)} が商品カテゴリのどれとも一致しません。フルレンジにフォールバックします`);
   }
-  const useAllGenres = whitelistSet && (mainGenres.length === 0 && subGenres.length === 0);
+  const useAllGenres = whitelistSet && (categories.length === 0 && mainGenres.length === 0 && subGenres.length === 0);
+  const effectiveCategories = useAllGenres ? PRODUCT_CATEGORIES : categories;
   const effectiveMain = useAllGenres ? MAIN_GENRES : mainGenres;
   const effectiveSub = useAllGenres ? SUB_GENRES : subGenres;
 
@@ -648,33 +700,13 @@ export async function fetchItems(
   // generalの場合は司令官の戦略（価格帯・季節キーワード・ジャンル重み）に従って選定
   let seasonalKeyword: string | undefined;
   if (TARGET_GENRE === "general" || !TARGET_GENRE) {
-    const strategy = loadStrategy();
-
-    // 価格帯を司令官の学習済み重みで選択（高単価枠を含む）
-    const bandKey = weightedPick(Object.keys(PRICE_BANDS), (k) => k, strategy.priceBandWeights);
-    const band = PRICE_BANDS[bandKey]!;
-    minPrice = band.min;
-    maxPrice = band.max;
-
-    // 約3割は司令官が指定した季節先取りキーワードで商品検索（ニーズの波を掴む）
-    if (strategy.seasonalKeywords.length > 0 && Math.random() < 0.3) {
-      seasonalKeyword =
-        strategy.seasonalKeywords[Math.floor(Math.random() * strategy.seasonalKeywords.length)];
-      selectedGenreName = `季節: ${seasonalKeyword}`;
-      lastSelectedGenreName = `季節:${seasonalKeyword}`;
-      console.log(`[fetcher] 季節キーワード選択: 「${seasonalKeyword}」 価格帯: ${bandKey}円`);
-    } else {
-      // メインを6〜7割、サブを3〜4割の比率で選択し、ジャンル重みで重み付き選択
-      const useMain = Math.random() < 0.65;
-      // Phase 2: slot whitelist が絞った pool を優先。空なら他方にフォールバック
-      let pool = useMain ? effectiveMain : effectiveSub;
-      if (pool.length === 0) pool = useMain ? effectiveSub : effectiveMain;
-      const selected = weightedPick(pool, (g) => g.name, strategy.genreWeights);
-      genreId = selected.genreId;
-      selectedGenreName = `${useMain ? "メイン" : "サブ"}: ${selected.name}`;
-      lastSelectedGenreName = selected.name;
-      console.log(`[fetcher] ジャンル選択: ${selectedGenreName} 価格帯: ${bandKey}円`);
-    }
+    const categoryPool = effectiveCategories.length > 0 ? effectiveCategories : PRODUCT_CATEGORIES;
+    const selectedCategory = categoryPool[Math.floor(Math.random() * categoryPool.length)] ?? pickProductCategory();
+    minPrice = selectedCategory.minPrice;
+    maxPrice = selectedCategory.maxPrice;
+    selectedGenreName = selectedCategory.name;
+    lastSelectedGenreName = selectedCategory.name;
+    console.log(`[fetcher] 商品カテゴリ選択: ${selectedCategory.name} (${minPrice}〜${maxPrice}円)`);
   } else {
     const priceOverride = GENRE_PRICE_OVERRIDES[TARGET_GENRE];
     minPrice = priceOverride?.min ?? MIN_PRICE;
@@ -684,7 +716,20 @@ export async function fetchItems(
 
   let filtered: RakutenItem[];
   try {
-    if (TARGET_GENRE === "1000yen") {
+    if (TARGET_GENRE === "general" || !TARGET_GENRE) {
+      const selectedCategory = PRODUCT_CATEGORIES.find((category) => category.name === selectedGenreName) ?? pickProductCategory();
+      filtered = await fetchProductCategoryWithRotation(selectedCategory, excludeCodes);
+      if (filtered.length === 0) {
+        console.warn(`[fetcher] カテゴリ "${selectedCategory.name}" で0件、旧フォールバックへ`);
+        filtered = await fetchRankingWithFallback(
+          genreId,
+          selectedGenreName,
+          minPrice,
+          maxPrice,
+          excludeCodes,
+        );
+      }
+    } else if (TARGET_GENRE === "1000yen") {
       const rawItems = await fetchItemSearch("1000円ポッキリ 送料無料", minPrice, maxPrice);
       filtered = applyItemFilter(rawItems, minPrice, maxPrice, excludeCodes, "1000円ポッキリ");
     } else if (seasonalKeyword) {

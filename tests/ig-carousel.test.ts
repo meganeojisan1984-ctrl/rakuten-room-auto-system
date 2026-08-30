@@ -29,16 +29,14 @@ const item: RakutenItem = {
   reviewCount: 128,
 };
 
-test("buildCarouselSlides creates seven mobile-readable slides", () => {
+test("buildCarouselSlides creates five mobile-readable slides", () => {
   const slides = buildCarouselSlides(item);
-  assert.equal(slides.length, 7);
+  assert.equal(slides.length, 5);
   assert.deepEqual(slides.map((s) => s.kind), [
     "hook",
     "problem",
-    "discovery",
     "use_case",
     "proof",
-    "room_bridge",
     "cta",
   ]);
   for (const slide of slides) {
@@ -94,9 +92,9 @@ test("carousel copy is stronger and product text stays inside the card area", ()
   };
   const slides = buildCarouselSlides(longNameItem);
   assert.match(slides[1]!.body, /今ラクにしておくと/);
-  assert.match(slides[2]!.body, /使いやすさ/);
-  assert.match(slides[4]!.body, /迷ったら/);
-  assert.match(slides[6]!.body, /保存/);
+  assert.match(slides[2]!.body, /キッチン、洗面台、玄関/);
+  assert.match(slides[3]!.body, /迷ったら/);
+  assert.match(slides[4]!.body, /保存/);
 
   const svg = renderSlideSvg(slides[1]!, longNameItem);
   assert.doesNotMatch(svg, /20％ポイントバック 〜08\/14\(金\)9:59まで【DEAL】毎日使える高見えアクセサリー収納ケース/);
@@ -105,7 +103,7 @@ test("carousel copy is stronger and product text stays inside the card area", ()
   assert.match(svg, /<text x="88" y="966" class="productMeta">/);
 });
 
-test("writeCarouselSlides writes seven svg files with stable public urls", () => {
+test("writeCarouselSlides writes five svg files with stable public urls", () => {
   const dir = fs.mkdtempSync(path.join(process.cwd(), "tmp-carousel-"));
   try {
     const slides = buildCarouselSlides(item);
@@ -114,7 +112,7 @@ test("writeCarouselSlides writes seven svg files with stable public urls", () =>
       publicBaseUrl: "https://cdn.example.com/ig",
       now: new Date("2026-07-30T00:00:00Z"),
     });
-    assert.equal(assets.length, 7);
+    assert.equal(assets.length, 5);
     assert.ok(fs.existsSync(assets[0]!.filePath));
     assert.equal(assets[0]!.publicUrl.startsWith("https://cdn.example.com/ig/2026-07-30-"), true);
     assert.equal(assets.every((asset: CarouselAsset) => asset.publicUrl.endsWith(".svg")), true);
@@ -136,7 +134,7 @@ test("writeCarouselImages writes jpeg files for Instagram media URLs", async () 
         fs.writeFileSync(filePath, "fake-jpeg");
       },
     });
-    assert.equal(assets.length, 7);
+    assert.equal(assets.length, 5);
     assert.ok(fs.existsSync(assets[0]!.filePath));
     assert.equal(assets.every((asset: CarouselAsset) => asset.filePath.endsWith(".jpg")), true);
     assert.equal(assets.every((asset: CarouselAsset) => asset.publicUrl.endsWith(".jpg")), true);

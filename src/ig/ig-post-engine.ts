@@ -3,6 +3,7 @@ import { buildInstagramFinalCaption, upscaleImageUrl } from "../sns";
 import { notifyError } from "../notifiers";
 import type { PersonaSlot } from "../persona/persona";
 import type { RakutenItem } from "../fetcher";
+import { generateAiLifestyleImages, isAiLifestyleImagesEnabled } from "./ai-image";
 import {
   buildCarouselSlides,
   getCarouselWriteOptions,
@@ -10,7 +11,9 @@ import {
   publishCarouselAssetsToGitHub,
   publishInstagramCarousel,
   writeCarouselImages,
+  type CarouselAsset,
 } from "./carousel";
+import { isXDraftMailEnabled, sendXDraftMail } from "./x-draft-mailer";
 
 // sns.ts と揃える (Instagram Graph API 独自エンドポイント)
 const GRAPH_API = "https://graph.instagram.com/v21.0";
@@ -36,6 +39,39 @@ function withPersonaFooter(caption: string, persona: PersonaSlot): string {
   return `${caption.trimEnd()}\n\n${persona.ctaLine}\n\n${hashtags}`;
 }
 
+function buildXDraftText(item: RakutenItem, finalCaption: string, assets: CarouselAsset[]): string {
+  return [
+    "Instagram投稿が完了しました。Xへの手動投稿用に本文と画像を添付します。",
+    "",
+    "【X投稿本文】",
+    finalCaption,
+    "",
+    "【商品URL】",
+    item.itemUrl,
+    "",
+    "【画像URL】",
+    assets.map((asset) => `- ${asset.publicUrl}`).join("\n"),
+  ].join("\n");
+}
+
+async function sendXDraftIfEnabled(item: RakutenItem, finalCaption: string, assets: CarouselAsset[]): Promise<void> {
+  if (!isXDraftMailEnabled(process.env)) return;
+  try {
+    await sendXDraftMail({
+      to: env("X_DRAFT_EMAIL_TO"),
+      from: env("SMTP_FROM") || env("SMTP_USER"),
+      subject: `X投稿用: ${item.itemName.slice(0, 40)}`,
+      text: buildXDraftText(item, finalCaption, assets),
+      attachments: assets.map((asset) => ({ filePath: asset.filePath })),
+    });
+    console.log("[ig-post-engine] X投稿用メール送信完了");
+  } catch (err) {
+    const msg = String(err).slice(0, 500);
+    console.warn("[ig-post-engine] X投稿用メール送信失敗:", msg);
+    await notifyError("X投稿用メール送信失敗", msg);
+  }
+}
+
 export async function postToInstagramWithPersona(
   item: RakutenItem,
   roomCaption: string,
@@ -58,8 +94,20 @@ export async function postToInstagramWithPersona(
     if (isCarouselEnabled(process.env)) {
       try {
         console.log(`[ig-post-engine] slot=${persona.id} carousel media creating...`);
-        const slides = buildCarouselSlides(item);
-        let assets = await writeCarouselImages(item, slides, getCarouselWriteOptions(process.env));
+        const writeOptions = getCarouselWriteOptions(process.env);
+        let assets: CarouselAsset[] | undefined;
+        if (isAiLifestyleImagesEnabled(process.env)) {
+          try {
+            console.log(`[ig-post-engine] slot=${persona.id} AI lifestyle images generating...`);
+            assets = await generateAiLifestyleImages(item, persona, writeOptions);
+          } catch (err) {
+            console.warn(`[ig-post-engine] AI lifestyle images failed, falling back to rendered carousel: ${String(err).slice(0, 200)}`);
+          }
+        }
+        if (!assets) {
+          const slides = buildCarouselSlides(item);
+          assets = await writeCarouselImages(item, slides, writeOptions);
+        }
         if (process.env.IG_CAROUSEL_GITHUB_UPLOAD === "1") {
           assets = await publishCarouselAssetsToGitHub(assets, {
             repository: process.env.GITHUB_REPOSITORY ?? "",
@@ -75,6 +123,7 @@ export async function postToInstagramWithPersona(
           assets,
         });
         console.log(`[ig-post-engine] ✓ carousel post success: ${item.itemName.slice(0, 30)}`);
+        await sendXDraftIfEnabled(item, finalCaption, assets);
         return true;
       } catch (err) {
         console.warn(`[ig-post-engine] carousel failed, falling back to single image: ${String(err).slice(0, 200)}`);

@@ -1,8 +1,13 @@
-import Groq from "groq-sdk";
 import * as dotenv from "dotenv";
 import type { RakutenItem } from "./fetcher";
 import { loadStrategy, loadHistory, weightedPick } from "./agents/store";
-import { resolveGroqModel } from "./groq-model";
+import {
+  buildOpenAiTextRequest,
+  defaultOpenAiTextClient,
+  extractOpenAiText,
+  resolveOpenAiTextModel,
+  type OpenAiTextClient,
+} from "./openai-text";
 dotenv.config();
 
 // ============================================================
@@ -20,6 +25,14 @@ export const HOOK_PATTERNS: Record<string, string> = {
   story: "ストーリー型: 「深夜2時、また〇〇と格闘してた…」のような情景が浮かぶ物語の一場面から始める",
   ranking: "権威型: 「楽天ランキング1位」「殿堂入り」「リピーター続出」のような実績・権威から始める",
 };
+
+export const HUMAN_BUYER_COPY_RULES = `
+【AIっぽさを消して購入したくなる紹介文にする追加ルール】
+- 実際に購入済み・実際に使用済みと断言しない。ただし「使うならこう便利」「こういう生活の困りごとに刺さる」と具体的に描く
+- 広告コピーのような大げさな最上級、根拠のない効果保証、テンプレ感のある言い回しを避ける
+- 読者が購入前に気にするサイズ感・使う場所・失敗しにくい選び方・保存したくなる理由を自然に入れる
+- AIっぽい整いすぎた文章ではなく、友達が本当に良かった物を教えるような短い本音のリズムにする
+`.trim();
 
 /** フックを学習済み重みで選択し、直近の書き出しを重複回避リストとして返す */
 export function pickHook(): { hookKey: string; hookInstruction: string; recentHeads: string[] } {
@@ -44,8 +57,8 @@ function getStyleHintsBlock(): string {
   return `\n【過去実績から学習した勝ちパターン（必ず反映すること）】\n${hints.map((h) => `- ${h}`).join("\n")}\n`;
 }
 
-const GROQ_API_KEY = process.env.GROQ_API_KEY ?? "";
-const MODEL_NAME = resolveGroqModel();
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY ?? "";
+const MODEL_NAME = resolveOpenAiTextModel();
 
 const REQUEST_INTERVAL_MS = 2000;
 const MAX_RETRIES = 3;
@@ -64,32 +77,27 @@ function sleep(ms: number): Promise<void> {
 }
 
 async function generateWithRetry(
-  client: Groq,
+  client: OpenAiTextClient,
   prompt: string,
   temperature: number,
   attempt: number = 0
 ): Promise<string> {
   try {
-    const completion = await client.chat.completions.create({
-      model: MODEL_NAME,
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 512,
-      temperature,
-    });
-    const text = completion.choices[0]?.message?.content ?? "";
-    if (!text) throw new Error("Groq APIからの応答が空です");
-    return text;
+    void temperature;
+    const response = await client(buildOpenAiTextRequest(prompt, { OPENAI_TEXT_MODEL: MODEL_NAME }), OPENAI_API_KEY);
+    return extractOpenAiText(response);
   } catch (err: unknown) {
     const errorMsg = String(err);
     const isRateLimit =
       errorMsg.includes("429") ||
       errorMsg.includes("rate_limit") ||
       errorMsg.includes("Rate limit");
+    const isEmptyResponse = errorMsg.includes("OpenAI APIからの応答が空です");
 
-    if (isRateLimit && attempt < MAX_RETRIES) {
+    if ((isRateLimit || isEmptyResponse) && attempt < MAX_RETRIES) {
       const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt);
       console.warn(
-        `[generator] レート制限に達しました。${delay / 1000}秒後にリトライ (${attempt + 1}/${MAX_RETRIES})`
+        `[generator] ${isEmptyResponse ? "応答が空でした" : "レート制限に達しました"}。${delay / 1000}秒後にリトライ (${attempt + 1}/${MAX_RETRIES})`
       );
       await sleep(delay);
       return generateWithRetry(client, prompt, temperature, attempt + 1);
@@ -205,12 +213,13 @@ ${item.reviewAverage && item.reviewCount ? `- レビュー: ★${item.reviewAver
 
 【季節の文脈】いまは「${getSeasonContext()}」の時期。自然に絡められる場合のみ絡めること（無理やりはNG）。
 ${getStyleHintsBlock()}
+${HUMAN_BUYER_COPY_RULES}
 【今回のフック指定（冒頭は必ずこのパターンで書くこと）】
 ${hookInstruction ?? "自由（読者が思わず止まるものにする）"}
 ${recentHeads.length > 0 ? `\n【直近投稿の書き出し（これらと似た書き出しは絶対NG。違う言葉・違うリズムで）】\n${recentHeads.map((h) => `- ${h}`).join("\n")}\n` : ""}
 【トップインフルエンサーの書き方ルール（必ず全部守ること）】
 1. 冒頭1〜2行は指定フックで「思わず止まってしまう」ものにする
-2. 「使う前は〇〇で困ってた」→「使い始めたら△△が変わった！」という体験談スタイルで書く（スペック羅列は絶対NG）
+2. 実体験を断言せず、読者が自分の生活に置き換えられる使用シーンで書く（スペック羅列は絶対NG）
 3. 必ず「◯◯と組み合わせると最強」「△△と一緒に使うともっと便利」という"組み合わせ提案"を1回入れる
 4. 文章に緩急をつけ、絵文字を感情の強弱に合わせて戦略的に使う（多すぎず少なすぎず）
 5. AI感・広告感・コピペ感ゼロ。友達に「これ絶対いいよ！」と勧めるときのリアルな口調で書く
@@ -253,8 +262,18 @@ ${reviewInfo ? `- ${reviewInfo}` : ""}
 - 友達LINEのような口語体。AI感ゼロ
 - 絵文字で感情の強弱をつける
 ${getStyleHintsBlock()}
+${HUMAN_BUYER_COPY_RULES}
 
 投稿文のみを出力してください（前置き・説明不要）:`;
+}
+
+/** 外部LLMが一時的に空応答を返しても、1件の投稿で全体を止めないための保険。 */
+export function buildFallbackCaption(item: RakutenItem): string {
+  const review = item.reviewAverage && item.reviewCount
+    ? `★${item.reviewAverage}・${item.reviewCount.toLocaleString()}件のレビューも参考になります。`
+    : "気になる人はサイズや仕様を確認してから選ぶのがおすすめです。";
+  const price = `${item.itemPrice.toLocaleString()}円`;
+  return `${item.itemName.slice(0, 70)}\n\n${item.itemCaption.slice(0, 110)}\n\n${price}で、暮らしの中の「あと少し不便」を見直したい人に。置く場所や使う場面を想像して、合いそうならチェックしてみてください。\n\n${review}\n\nあとで比較できるように保存しておくと便利です📌\n\n#楽天ROOM #買ってよかった #QOL向上 #暮らしのアイテム`;
 }
 
 /**
@@ -264,8 +283,8 @@ export async function generateTrendCaptions(
   keyword: string,
   items: RakutenItem[]
 ): Promise<Array<{ item: RakutenItem; caption: string; hook: string }>> {
-  if (!GROQ_API_KEY) throw new Error("GROQ_API_KEY が未設定です");
-  const client = new Groq({ apiKey: GROQ_API_KEY });
+  if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY が未設定です");
+  const client = defaultOpenAiTextClient;
   const results: Array<{ item: RakutenItem; caption: string; hook: string }> = [];
 
   for (let i = 0; i < items.length; i++) {
@@ -336,8 +355,8 @@ export async function generateInstagramCaption(
   item: RakutenItem,
   roomCaption: string
 ): Promise<{ body: string; tags: string }> {
-  if (!GROQ_API_KEY) throw new Error("GROQ_API_KEY が未設定です");
-  const client = new Groq({ apiKey: GROQ_API_KEY });
+  if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY が未設定です");
+  const client = defaultOpenAiTextClient;
   console.log(`[generator] Instagram専用キャプション生成中: ${item.itemName.slice(0, 30)}...`);
   const raw = await generateWithRetry(client, buildInstagramPrompt(item, roomCaption), 0.9);
   const cleaned = sanitizeCaption(raw);
@@ -360,11 +379,11 @@ export async function generateCaption(
   item: RakutenItem,
   postType: PostType = 2
 ): Promise<{ caption: string; hook: string }> {
-  if (!GROQ_API_KEY) {
-    throw new Error("GROQ_API_KEY が未設定です");
+  if (!OPENAI_API_KEY) {
+    throw new Error("OPENAI_API_KEY が未設定です");
   }
 
-  const client = new Groq({ apiKey: GROQ_API_KEY });
+  const client = defaultOpenAiTextClient;
   // OODA: 司令官の学習済みフック重みで書き出しパターンを選択し、直近と同じ書き出しを禁止
   const { hookKey, hookInstruction, recentHeads } = pickHook();
   const prompt = buildPrompt(item, postType, hookInstruction, recentHeads);
@@ -392,6 +411,8 @@ export async function generateCaptions(
       results.push({ item, caption, hook });
     } catch (err) {
       console.error(`[generator] 商品「${item.itemName.slice(0, 30)}」の生成失敗:`, err);
+      results.push({ item, caption: buildFallbackCaption(item), hook: "fallback" });
+      console.warn(`[generator] 商品「${item.itemName.slice(0, 30)}」は保険の紹介文で続行します`);
     }
 
     if (i < items.length - 1) {

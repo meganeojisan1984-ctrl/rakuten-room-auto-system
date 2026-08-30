@@ -33,7 +33,12 @@ GitHubのリポジトリページ → **Settings → Secrets and variables → A
 | `ROOM_COOKIE` | `.env`の`ROOM_COOKIE`の値 | 楽天ROOMのCookie（最重要） |
 | `RAKUTEN_APP_ID` | `.env`の`RAKUTEN_APP_ID`の値 | 楽天API ID |
 | `RAKUTEN_ACCESS_KEY` | `.env`の`RAKUTEN_ACCESS_KEY`の値 | 楽天APIキー |
-| `GROQ_API_KEY` | `.env`の`GROQ_API_KEY`の値 | Groq API（紹介文生成） |
+| `OPENAI_API_KEY` | `.env`の`OPENAI_API_KEY`の値 | OpenAI API（紹介文・画像生成） |
+| `GROQ_API_KEY` | `.env`の`GROQ_API_KEY`の値 | 学習・アフィリエイト系の内部LLM（任意） |
+| `OPENAI_API_KEY` | OpenAI APIキー | Instagram用AI日常画像生成 |
+| `SMTP_USER` | Gmailアドレス | X手動投稿用メール送信 |
+| `SMTP_PASS` | Gmailアプリパスワード | X手動投稿用メール送信 |
+| `SMTP_FROM` | 送信元メールアドレス | 任意。未設定なら `SMTP_USER` |
 | `DISCORD_WEBHOOK_URL` | `.env`の`DISCORD_WEBHOOK_URL`の値 | エラー通知先（任意） |
 | `X_API_KEY` | `.env`の`X_API_KEY`の値 | X投稿用（任意） |
 | `X_API_SECRET` | `.env`の`X_API_SECRET`の値 | X投稿用（任意） |
@@ -62,7 +67,7 @@ GitHubのリポジトリページ → **Settings → Secrets and variables → A
 
 | 機能 | 日本時間 | GitHub Actions cron (UTC) |
 |---|---|---|
-| **自動コレ投稿** | 毎日 8・12・16・20・22時 | `.github/workflows/auto-post.yml` |
+| **自動コレ投稿** | 毎日 8・13・21時 | `.github/workflows/auto-post.yml` |
 | **自動いいね** | 毎日 10:30・19:30 | `.github/workflows/auto-like.yml` |
 | **自動フォロー** | 毎日 11:00 | `.github/workflows/auto-follow.yml` |
 | **自動削除** | 毎週日曜 3:00 | `.github/workflows/auto-delete.yml` |
@@ -170,6 +175,10 @@ Phase 2 では 3 価格帯ペルソナ（低単価高回転 / 中単価QOL / 高
 - JST 21:00 → slot2 (ふるさと納税) - ROOM + IG
 
 Net: 3 IG 投稿/日, 2 ROOM 投稿/日
+
+Instagramカルーセルは既定で5枚です。`AI_IMAGE_ENABLED=1` かつ `OPENAI_API_KEY` が設定されている場合、5枚すべてを `gpt-image-2` の `AI_IMAGE_QUALITY=low` で日常利用の実写風画像として生成します。生成に失敗した場合は既存のJPEGカルーセル生成へフォールバックします。
+
+Instagram投稿が成功し、`SMTP_USER` / `SMTP_PASS` / `X_DRAFT_EMAIL_TO` が設定されている場合、Xへ手動投稿するための本文と生成画像5枚をメールで送ります。`X_DRAFT_EMAIL_TO` の既定値は `meganeojisan1984@gmail.com` です。
 
 ### ペルソナの編集
 
