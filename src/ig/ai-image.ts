@@ -27,6 +27,37 @@ function cleanText(value: string, max = 140): string {
   return value.replace(/\s+/g, " ").trim().slice(0, max);
 }
 
+function productTitle(item: RakutenItem): string {
+  return cleanText(item.itemName.replace(/[【】≪≫＜＞()[\]{}]/g, " "), 42);
+}
+
+function productBenefits(item: RakutenItem): string[] {
+  const text = `${item.itemName} ${item.itemCaption}`;
+  if (/食品|米|水|コーヒー|お茶|菓子|チョコ|うなぎ|肉|魚|プロテイン|スイーツ|グルメ/.test(text)) {
+    return ["手軽に楽しめる", "家でちょっと贅沢", "ストックしやすい"];
+  }
+  if (/服|キッズ|子供服|バッグ|靴|ワンピ|シャツ|パンツ|ニット|ファッション/.test(text)) {
+    return ["着回しやすい", "毎日使いやすい", "写真でも映える"];
+  }
+  if (/美容|コスメ|スキンケア|ヘアケア|メイク|化粧|リップ|美容液/.test(text)) {
+    return ["毎日のケアに足せる", "見た目の印象アップ", "気分が上がる"];
+  }
+  if (/家電|ガジェット|スマホ|充電|イヤホン|加湿器|ライト|掃除機/.test(text)) {
+    return ["時短になる", "置き場所に困りにくい", "使うたびラク"];
+  }
+  return ["片付けがラク", "生活感を抑える", "毎日使いやすい"];
+}
+
+function productFeatures(item: RakutenItem): string[] {
+  const features: string[] = [];
+  if (item.hasCoupon) features.push("クーポンあり");
+  if (item.hasPointBonus) features.push("ポイントUP");
+  if ((item.reviewAverage ?? 0) >= 4.3) features.push(`高評価 ${item.reviewAverage!.toFixed(1)}`);
+  if ((item.reviewCount ?? 0) >= 50) features.push(`レビュー${item.reviewCount}件`);
+  features.push(`${item.itemPrice.toLocaleString("ja-JP")}円`);
+  return features.slice(0, 4);
+}
+
 function timestamp(now: Date): string {
   return now.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
 }
@@ -70,23 +101,28 @@ function sceneHints(item: RakutenItem): string[] {
 }
 
 export function buildAiLifestyleImagePrompts(item: RakutenItem, persona: PersonaSlot): string[] {
-  const name = cleanText(item.itemName);
+  const name = productTitle(item);
   const description = cleanText(item.itemCaption, 220);
   const genre = persona.genres[0] ?? persona.name;
+  const benefits = productBenefits(item);
+  const features = productFeatures(item);
   const base =
-    `photorealistic Japanese Instagram lifestyle photo, authentic user-generated smartphone photography, ` +
-    `natural daylight, realistic home interior, real buyer trust, subtle imperfect composition, no text, no captions, no watermark, ` +
-    `no brand logos, no artificial CGI look, no illustration, no over-polished advertisement, avoid plastic-looking skin or objects. ` +
-    `The scene should suggest a person could be using this product category in daily life without claiming actual ownership. ` +
-    `Product reference: ${name}. Category: ${genre}. Description: ${description}.`;
+    `photorealistic Japanese Instagram carousel design, authentic product-review post, real buyer trust, ` +
+    `Japanese text inside the image, crisp readable Japanese typography, bold friendly SNS fonts, large high-contrast headings, ` +
+    `short text only, clean magazine-like layout, natural daylight product photography, realistic home interior, ` +
+    `subtle imperfect smartphone-photo texture, no watermark, no random logo, no garbled characters, no tiny text, ` +
+    `no artificial CGI look, no over-polished advertisement, avoid plastic-looking skin or objects. ` +
+    `The post may recommend the product category, but must not falsely claim the creator personally bought or used it. ` +
+    `Product reference: ${name}. Product image URL for visual reference if accessible: ${item.imageUrl}. Category: ${genre}. Description: ${description}.`;
 
-  return sceneHints(item).map((scene, index) => {
-    const focus =
-      index === 0
-        ? "Make this the cover image: inviting, useful, scroll-stopping, but still candid."
-        : "Make it feel like a different real moment from the same daily routine.";
-    return `${base} Scene: ${scene}. ${focus}`;
-  });
+  const scenes = sceneHints(item);
+  return [
+    `${base} Slide 1: cover. Compose a scroll-stopping Japanese Instagram cover with a large title and a clear product photo. Put this exact Japanese headline in the image: 「これ、地味に助かる」. Add a smaller readable product title: 「${name}」. Scene: ${scenes[0]}. Use pink, cream, black, and warm yellow accents like a popular Japanese product carousel.`,
+    `${base} Slide 2: before-use problem. Show a realistic person or room looking mildly troubled before using the product, not exaggerated. Put this Japanese headline in the image: 「こんな悩みない？」. Add 2 short pain points as readable Japanese labels: 「ごちゃつく」「選ぶのが面倒」. Scene: ${scenes[1]}.`,
+    `${base} Slide 3: solution list. Make a clean list-style Japanese carousel page with a realistic usage image on the right. Put this Japanese headline in the image: 「これでラクになる」. Add these readable checklist items in Japanese: 「${benefits[0]}」「${benefits[1]}」「${benefits[2]}」. Scene: ${scenes[2]}.`,
+    `${base} Slide 4: product features. Show the product photo large with friendly handwritten-style annotations and feature badges. Put this Japanese headline in the image: 「推せるポイント」. Add these readable Japanese feature labels: 「${features.join("」「")}」. Scene: ${scenes[3]}.`,
+    `${base} Slide 5: thank-you and profile CTA. Create a clean profile-guidance final slide with a soft screenshot-like profile area on the right, no real account name or real profile photo. Put this Japanese message in the image: 「最後までありがとう」 and 「気になる人はプロフィールへ」. Also include a big simple arrow shape pointing to the profile area. Scene: ${scenes[4]}.`,
+  ];
 }
 
 async function defaultOpenAiClient(body: Record<string, unknown>, apiKey: string): Promise<OpenAiImageResponse> {

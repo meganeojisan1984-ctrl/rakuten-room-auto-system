@@ -34,14 +34,20 @@ const persona: PersonaSlot = {
   ctaLine: "詳細はプロフのリンク",
 };
 
-test("buildAiLifestyleImagePrompts creates five realistic no-text photo prompts", () => {
+test("buildAiLifestyleImagePrompts creates five Japanese text-in-image carousel prompts", () => {
   const prompts = buildAiLifestyleImagePrompts(item, persona);
   assert.equal(prompts.length, 5);
   assert.equal(prompts[0]!.includes("photorealistic"), true);
-  assert.equal(prompts[0]!.includes("no text"), true);
+  assert.equal(prompts[0]!.includes("Japanese text inside the image"), true);
   assert.equal(prompts[0]!.includes("real buyer trust"), true);
   assert.equal(prompts[0]!.includes("avoid plastic-looking"), true);
   assert.equal(prompts[0]!.includes(item.itemName), true);
+  assert.equal(prompts[0]!.includes("Slide 1: cover"), true);
+  assert.equal(prompts[1]!.includes("Slide 2: before-use problem"), true);
+  assert.equal(prompts[2]!.includes("Slide 3: solution list"), true);
+  assert.equal(prompts[3]!.includes("Slide 4: product features"), true);
+  assert.equal(prompts[4]!.includes("Slide 5: thank-you and profile CTA"), true);
+  assert.equal(prompts[4]!.includes("プロフィール"), true);
   assert.equal(prompts.some((prompt) => prompt.includes("kitchen")), true);
   assert.equal(prompts.some((prompt) => prompt.includes("bathroom") || prompt.includes("washstand")), true);
 });
