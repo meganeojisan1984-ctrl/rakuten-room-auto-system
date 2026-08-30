@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "ichikawa929:10000444",
     "misae:10001110",
     "toyo-kyozai:10003985",
     "bellemaison-disney:10071657",
@@ -499,7 +498,8 @@
     "esaki210:10001057",
     "x-plosion:10000023",
     "canpanera:10000145",
-    "cheeky:10357238"
+    "cheeky:10357238",
+    "atnet-cl:10002280"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }

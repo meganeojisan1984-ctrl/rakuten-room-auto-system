@@ -1531,5 +1531,18 @@
     "captionHead": "え、待って。これ500gで3,375円って本当…？",
     "slot": "slot2",
     "itemCodeHash": "fa42ba1e811c"
+  },
+  {
+    "ts": "2026-08-30T16:16:03.964Z",
+    "itemCode": "atnet-cl:10002280",
+    "itemName": "【500円OFFクーポン!! ※当店初回限定】コンタクトレンズ ワンデーピュアうるおいプラス 96枚入 2箱セット コンタクト 1日使い捨て / ワンデーピュア うるおいプラス 96枚パック / 1dayPureうるおいプラス / シード / SEED / クリアレンズ 1dayタイプ",
+    "genreName": "ファッション・子供服",
+    "price": 8970,
+    "postType": 2,
+    "hour": 1,
+    "hook": "beforeafter",
+    "captionHead": "先月までの私: 夕方になると目がゴロゴロしてコンタ",
+    "slot": "slot0",
+    "itemCodeHash": "7c4877f623cd"
   }
 ]
