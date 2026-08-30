@@ -1518,5 +1518,18 @@
     "captionHead": "レビュー10,000件超＆★4.58の信頼感、まず",
     "slot": "slot1",
     "itemCodeHash": "51f2ecda7e12"
+  },
+  {
+    "ts": "2026-08-30T09:45:56.047Z",
+    "itemCode": "cheeky:10357238",
+    "itemName": "千年前の食品舎 だし&栄養スープ 500g 無添加 塩分不使用 粉末 天然ペプチドリップ 国産 和風出汁だし 栄養スープ ギフト 出汁 栄養スープ",
+    "genreName": "グルメ・スイーツ",
+    "price": 3375,
+    "postType": 1,
+    "hour": 18,
+    "hook": "surprise",
+    "captionHead": "え、待って。これ500gで3,375円って本当…？",
+    "slot": "slot2",
+    "itemCodeHash": "fa42ba1e811c"
   }
 ]
