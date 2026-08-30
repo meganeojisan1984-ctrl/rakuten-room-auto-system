@@ -250,8 +250,8 @@
     "hour": 23,
     "hook": "beforeafter",
     "captionHead": "先月までの私: 衣類が散らかって部屋が狭くてストレ",
-    "likes": 13,
-    "likesUpdatedAt": "2026-08-29T17:54:45.331Z"
+    "likes": 14,
+    "likesUpdatedAt": "2026-08-30T18:12:39.287Z"
   },
   {
     "ts": "2026-07-13T16:41:18.506Z",
@@ -805,8 +805,8 @@
     "hour": 8,
     "hook": "question",
     "captionHead": "まだ高くてお米買い替えしてないの？🤔 そんなあな",
-    "likes": 21,
-    "likesUpdatedAt": "2026-08-28T23:41:43.407Z"
+    "likes": 22,
+    "likesUpdatedAt": "2026-08-30T18:12:39.287Z"
   },
   {
     "ts": "2026-07-24T05:45:34.853Z",
@@ -1167,8 +1167,8 @@
     "captionHead": "え、待って。8,140円でこれが手に入るの？！🤯",
     "slot": "slot2",
     "itemCodeHash": "024bcc036a61",
-    "likes": 36,
-    "likesUpdatedAt": "2026-08-26T16:05:52.638Z"
+    "likes": 37,
+    "likesUpdatedAt": "2026-08-30T18:12:39.287Z"
   },
   {
     "ts": "2026-08-07T23:35:27.761Z",
@@ -1253,8 +1253,8 @@
     "captionHead": "え、待って。このチェスト見つけたときテンション上が",
     "slot": "slot2",
     "itemCodeHash": "4130c4a5ca7b",
-    "likes": 13,
-    "likesUpdatedAt": "2026-08-29T17:54:45.331Z"
+    "likes": 14,
+    "likesUpdatedAt": "2026-08-30T18:12:39.287Z"
   },
   {
     "ts": "2026-08-11T05:08:01.491Z",
@@ -1352,8 +1352,8 @@
     "captionHead": "これ知らないと年間1万円以上も使いすぎてしまうかも",
     "slot": "slot2",
     "itemCodeHash": "adafd1990ad2",
-    "likes": 21,
-    "likesUpdatedAt": "2026-08-28T23:41:43.407Z"
+    "likes": 22,
+    "likesUpdatedAt": "2026-08-30T18:12:39.287Z"
   },
   {
     "ts": "2026-08-13T23:42:15.418Z",
@@ -1367,8 +1367,8 @@
     "captionHead": "わかる人にはわかるやつ、夏の暑い日に加湿器がないと",
     "slot": "slot0",
     "itemCodeHash": "a0746f8fe4ab",
-    "likes": 46,
-    "likesUpdatedAt": "2026-08-29T17:54:45.331Z"
+    "likes": 33,
+    "likesUpdatedAt": "2026-08-30T18:12:39.287Z"
   },
   {
     "ts": "2026-08-14T05:31:42.114Z",
@@ -1410,8 +1410,8 @@
     "captionHead": "わかる人にはわかるやつ、夏の暑い日に目が疲れてしま",
     "slot": "slot0",
     "itemCodeHash": "a9f4c620c994",
-    "likes": 46,
-    "likesUpdatedAt": "2026-08-29T17:54:45.331Z"
+    "likes": 33,
+    "likesUpdatedAt": "2026-08-30T18:12:39.287Z"
   },
   {
     "ts": "2026-08-15T04:26:58.528Z",
@@ -1490,8 +1490,8 @@
     "captionHead": "わかる人にはわかるやつ💡 今年の夏は特に暑くて、",
     "slot": "slot0",
     "itemCodeHash": "c224c0d272b1",
-    "likes": 97,
-    "likesUpdatedAt": "2026-08-29T17:54:45.331Z"
+    "likes": 99,
+    "likesUpdatedAt": "2026-08-30T18:12:39.287Z"
   },
   {
     "ts": "2026-08-17T04:38:19.279Z",
@@ -1517,7 +1517,9 @@
     "hook": "number",
     "captionHead": "レビュー10,000件超＆★4.58の信頼感、まず",
     "slot": "slot1",
-    "itemCodeHash": "51f2ecda7e12"
+    "itemCodeHash": "51f2ecda7e12",
+    "likes": 7,
+    "likesUpdatedAt": "2026-08-30T18:12:39.287Z"
   },
   {
     "ts": "2026-08-30T09:45:56.047Z",
@@ -1530,7 +1532,9 @@
     "hook": "surprise",
     "captionHead": "え、待って。これ500gで3,375円って本当…？",
     "slot": "slot2",
-    "itemCodeHash": "fa42ba1e811c"
+    "itemCodeHash": "fa42ba1e811c",
+    "likes": 8,
+    "likesUpdatedAt": "2026-08-30T18:12:39.287Z"
   },
   {
     "ts": "2026-08-30T16:16:03.964Z",
@@ -1543,6 +1547,8 @@
     "hook": "beforeafter",
     "captionHead": "先月までの私: 夕方になると目がゴロゴロしてコンタ",
     "slot": "slot0",
-    "itemCodeHash": "7c4877f623cd"
+    "itemCodeHash": "7c4877f623cd",
+    "likes": 47,
+    "likesUpdatedAt": "2026-08-30T18:12:39.287Z"
   }
 ]

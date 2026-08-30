@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-08-11T15:36:54.963Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴100件(計測済67) 実売0件(¥0) mode=likes"
-  },
-  {
-    "ts": "2026-08-11T15:36:56.994Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第34世代へ更新 (LLM)、警告0件"
-  },
-  {
-    "ts": "2026-08-11T23:39:42.008Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (キッチン消耗品・日用品)"
-  },
-  {
     "ts": "2026-08-11T23:39:43.348Z",
     "agent": "copywriter",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-08-30T18:12:39.300Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "18件抽出、履歴11件のいいね数を更新"
+  },
+  {
+    "ts": "2026-08-30T18:12:39.509Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴120件(計測済77) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-08-30T18:12:42.930Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第53世代へ更新 (ルールベース)、警告1件"
   }
 ]
