@@ -1,17 +1,5 @@
 [
   {
-    "ts": "2026-08-10T15:36:47.850Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "39件抽出、履歴13件のいいね数を更新"
-  },
-  {
-    "ts": "2026-08-10T15:36:47.860Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴99件(計測済66) 実売0件(¥0) mode=likes"
-  },
-  {
     "ts": "2026-08-10T15:36:49.835Z",
     "agent": "commander",
     "ok": true,
@@ -1195,6 +1183,18 @@
   },
   {
     "ts": "2026-08-30T01:05:15.696Z",
+    "agent": "copywriter",
+    "ok": false,
+    "summary": "Error: 紹介文の生成に全て失敗しました"
+  },
+  {
+    "ts": "2026-08-30T06:14:17.602Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (家事効率化グッズ)"
+  },
+  {
+    "ts": "2026-08-30T06:14:19.114Z",
     "agent": "copywriter",
     "ok": false,
     "summary": "Error: 紹介文の生成に全て失敗しました"
