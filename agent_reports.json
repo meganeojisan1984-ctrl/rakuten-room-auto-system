@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-08-10T15:36:49.835Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第33世代へ更新 (LLM)、警告0件"
-  },
-  {
-    "ts": "2026-08-10T23:34:35.492Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (キッチン消耗品・日用品)"
-  },
-  {
-    "ts": "2026-08-10T23:34:37.464Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ2)"
-  },
-  {
-    "ts": "2026-08-10T23:35:06.636Z",
-    "agent": "poster",
-    "ok": false,
-    "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/bo)"
-  },
-  {
     "ts": "2026-08-11T05:05:31.933Z",
     "agent": "scout",
     "ok": true,
@@ -1198,5 +1174,29 @@
     "agent": "copywriter",
     "ok": false,
     "summary": "Error: 紹介文の生成に全て失敗しました"
+  },
+  {
+    "ts": "2026-08-30T07:48:25.375Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (グルメ・スイーツ)"
+  },
+  {
+    "ts": "2026-08-30T07:48:31.558Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ2)"
+  },
+  {
+    "ts": "2026-08-30T07:50:05.935Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-08-30T07:52:07.988Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
   }
 ]

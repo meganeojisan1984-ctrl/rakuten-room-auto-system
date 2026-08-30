@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "kinakostore:10005923",
     "store-marufuku:10000909",
     "ichikawa929:10000444",
     "misae:10001110",
@@ -499,7 +498,8 @@
     "ennshopstore:10000072",
     "futon-colors:10000707",
     "esaki210:10001057",
-    "x-plosion:10000023"
+    "x-plosion:10000023",
+    "canpanera:10000145"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
