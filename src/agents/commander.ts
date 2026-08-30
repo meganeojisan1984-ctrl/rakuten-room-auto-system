@@ -22,8 +22,9 @@ import {
 } from "./store";
 import type { AnalysisResult } from "./analyst-agent";
 import { notifyError, notifyReport } from "../notifiers";
+import { resolveGroqModel } from "../groq-model";
 
-const MODEL_NAME = "llama-3.3-70b-versatile";
+const MODEL_NAME = resolveGroqModel();
 
 // ============================================================
 // 1. 監視（ルールベース: LLMに任せず確実に検知する）

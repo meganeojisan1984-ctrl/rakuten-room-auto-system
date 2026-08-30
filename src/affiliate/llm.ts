@@ -7,10 +7,11 @@
  */
 import Groq from "groq-sdk";
 import * as dotenv from "dotenv";
+import { resolveGroqModel } from "../groq-model";
 dotenv.config();
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY ?? "";
-const MODEL_NAME = process.env.AFFILIATE_LLM_MODEL ?? "llama-3.3-70b-versatile";
+const MODEL_NAME = resolveGroqModel(process.env, "AFFILIATE_LLM_MODEL");
 
 const REQUEST_INTERVAL_MS = 2500;
 const MAX_RETRIES = 5;

@@ -2,6 +2,7 @@ import Groq from "groq-sdk";
 import * as dotenv from "dotenv";
 import type { RakutenItem } from "./fetcher";
 import { loadStrategy, loadHistory, weightedPick } from "./agents/store";
+import { resolveGroqModel } from "./groq-model";
 dotenv.config();
 
 // ============================================================
@@ -44,7 +45,7 @@ function getStyleHintsBlock(): string {
 }
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY ?? "";
-const MODEL_NAME = "llama-3.3-70b-versatile";
+const MODEL_NAME = resolveGroqModel();
 
 const REQUEST_INTERVAL_MS = 2000;
 const MAX_RETRIES = 3;

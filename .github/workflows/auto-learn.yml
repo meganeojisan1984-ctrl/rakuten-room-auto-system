@@ -39,6 +39,7 @@ jobs:
           CI: "true"
           ROOM_COOKIE: ${{ secrets.ROOM_COOKIE }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GROQ_MODEL: ${{ vars.GROQ_MODEL || 'openai/gpt-oss-120b' }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           ROOM_PROFILE_URL: ${{ secrets.ROOM_PROFILE_URL || vars.ROOM_PROFILE_URL || '' }}
         run: npx tsx src/run_learn.ts
