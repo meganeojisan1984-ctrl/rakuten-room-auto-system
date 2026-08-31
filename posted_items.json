@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "toyo-kyozai:10003985",
     "bellemaison-disney:10071657",
     "luminous-club:10008068",
     "tenmafitsworld:10003603",
@@ -499,7 +498,8 @@
     "canpanera:10000145",
     "cheeky:10357238",
     "atnet-cl:10002280",
-    "earth-contact:10000641"
+    "earth-contact:10000641",
+    "hotch-potch:10017854"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
