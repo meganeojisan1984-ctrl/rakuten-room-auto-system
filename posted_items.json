@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "misae:10001110",
     "toyo-kyozai:10003985",
     "bellemaison-disney:10071657",
     "luminous-club:10008068",
@@ -499,7 +498,8 @@
     "x-plosion:10000023",
     "canpanera:10000145",
     "cheeky:10357238",
-    "atnet-cl:10002280"
+    "atnet-cl:10002280",
+    "earth-contact:10000641"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
