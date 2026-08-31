@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-08-12T23:41:56.453Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-08-13T05:37:33.247Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (家事効率化グッズ)"
-  },
-  {
-    "ts": "2026-08-13T05:37:34.748Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ3)"
-  },
-  {
     "ts": "2026-08-13T05:39:13.624Z",
     "agent": "poster",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-08-31T20:23:31.474Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "18件抽出、履歴11件のいいね数を更新"
+  },
+  {
+    "ts": "2026-08-31T20:23:31.484Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴124件(計測済80) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-08-31T20:23:34.712Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第54世代へ更新 (ルールベース)、警告1件"
   }
 ]
