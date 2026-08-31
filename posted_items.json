@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "luminous-club:10008068",
     "tenmafitsworld:10003603",
     "dajie:10000003",
     "abaskdesign:10001748",
@@ -499,7 +498,8 @@
     "atnet-cl:10002280",
     "earth-contact:10000641",
     "hotch-potch:10017854",
-    "tu-hacci:10000858"
+    "tu-hacci:10000858",
+    "roomy:10018139"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }

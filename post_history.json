@@ -1589,5 +1589,18 @@
     "captionHead": "暑すぎて家で楽したい人、正直手を挙げて🙋！楽天で",
     "slot": "slot2",
     "itemCodeHash": "ef28bd9caecf"
+  },
+  {
+    "ts": "2026-08-31T18:57:15.377Z",
+    "itemCode": "roomy:10018139",
+    "itemName": "【特典付】【36種類レシピ付】レコルト スープメーカー 豆乳メーカー スープ 全自動 豆乳機 自動調理 ポタージュメーカー ミキサー ブレンダー 保温 豆乳 おかゆ お粥 離乳食 自動調理器 スムージー 味噌汁 レシピ 800mL 1L 大容量 RSY-3［ recolte 自動調理ポット ラージ ］",
+    "genreName": "暮らし・インテリア",
+    "price": 17930,
+    "postType": 2,
+    "hour": 3,
+    "hook": "question",
+    "captionHead": "まだ「暑くて料理手を抜きまくり」してない？正直、買",
+    "slot": "slot0",
+    "itemCodeHash": "f1321db563e2"
   }
 ]
