@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { buildAiLifestyleImagePrompts, generateAiLifestyleImages } from "../src/ig/ai-image";
+import { createInstagramCarouselAssets } from "../src/ig/ig-post-engine";
 import type { RakutenItem } from "../src/fetcher";
 import type { PersonaSlot } from "../src/persona/persona";
 
@@ -52,6 +53,20 @@ test("buildAiLifestyleImagePrompts creates five Japanese text-in-image carousel 
   assert.equal(prompts.some((prompt) => prompt.includes("bathroom") || prompt.includes("washstand")), true);
 });
 
+test("buildAiLifestyleImagePrompts accepts Rakuten review numbers delivered as strings", () => {
+  const itemWithStringReview = {
+    ...item,
+    reviewAverage: "4.71",
+    reviewCount: "11954",
+  } as unknown as RakutenItem;
+
+  const prompts = buildAiLifestyleImagePrompts(itemWithStringReview, persona);
+
+  assert.equal(prompts.length, 5);
+  assert.equal(prompts[3]!.includes("高評価 4.7"), true);
+  assert.equal(prompts[3]!.includes("レビュー11,954件"), true);
+});
+
 test("generateAiLifestyleImages writes five jpeg assets using low quality", async () => {
   const dir = fs.mkdtempSync(path.join(process.cwd(), "tmp-ai-images-"));
   try {
@@ -82,4 +97,55 @@ test("generateAiLifestyleImages writes five jpeg assets using low quality", asyn
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test("createInstagramCarouselAssets does not fall back to rendered carousel when AI images are enabled", async () => {
+  let renderedFallbackCalled = false;
+
+  await assert.rejects(
+    () =>
+      createInstagramCarouselAssets(item, persona, {
+        env: {
+          IG_CAROUSEL_ENABLED: "1",
+          IG_CAROUSEL_PUBLIC_BASE_URL: "https://cdn.example.com/ig",
+          AI_IMAGE_ENABLED: "1",
+          OPENAI_API_KEY: "test-key",
+        } as NodeJS.ProcessEnv,
+        generateAiImages: async () => {
+          throw new Error("ChatGPT image generation failed");
+        },
+        renderCarouselImages: async () => {
+          renderedFallbackCalled = true;
+          return [];
+        },
+      }),
+    /ChatGPT image generation failed/,
+  );
+
+  assert.equal(renderedFallbackCalled, false);
+});
+
+test("createInstagramCarouselAssets uses AI images by default when an OpenAI key is present", async () => {
+  let aiImageCalled = false;
+  let renderedFallbackCalled = false;
+
+  const assets = await createInstagramCarouselAssets(item, persona, {
+    env: {
+      IG_CAROUSEL_ENABLED: "1",
+      IG_CAROUSEL_PUBLIC_BASE_URL: "https://cdn.example.com/ig",
+      OPENAI_API_KEY: "test-key",
+    } as NodeJS.ProcessEnv,
+    generateAiImages: async () => {
+      aiImageCalled = true;
+      return [{ filePath: "ai-01.jpg", publicUrl: "https://cdn.example.com/ig/ai-01.jpg", page: 1 }];
+    },
+    renderCarouselImages: async () => {
+      renderedFallbackCalled = true;
+      return [];
+    },
+  });
+
+  assert.equal(aiImageCalled, true);
+  assert.equal(renderedFallbackCalled, false);
+  assert.equal(assets[0]!.filePath, "ai-01.jpg");
 });

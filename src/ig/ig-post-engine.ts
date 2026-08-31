@@ -3,7 +3,7 @@ import { buildInstagramFinalCaption, upscaleImageUrl } from "../sns";
 import { notifyError } from "../notifiers";
 import type { PersonaSlot } from "../persona/persona";
 import type { RakutenItem } from "../fetcher";
-import { generateAiLifestyleImages, isAiLifestyleImagesEnabled } from "./ai-image";
+import { generateAiLifestyleImages } from "./ai-image";
 import {
   buildCarouselSlides,
   getCarouselWriteOptions,
@@ -54,6 +54,35 @@ function buildXDraftText(item: RakutenItem, finalCaption: string, assets: Carous
   ].join("\n");
 }
 
+interface CreateInstagramCarouselAssetsOptions {
+  env?: NodeJS.ProcessEnv;
+  generateAiImages?: typeof generateAiLifestyleImages;
+  renderCarouselImages?: typeof writeCarouselImages;
+}
+
+function wantsAiLifestyleImages(envVars: NodeJS.ProcessEnv): boolean {
+  return envVars.AI_IMAGE_ENABLED !== "0" && !!envVars.OPENAI_API_KEY;
+}
+
+export async function createInstagramCarouselAssets(
+  item: RakutenItem,
+  persona: PersonaSlot,
+  options: CreateInstagramCarouselAssetsOptions = {},
+): Promise<CarouselAsset[]> {
+  const envVars = options.env ?? process.env;
+  const writeOptions = getCarouselWriteOptions(envVars);
+  const generateAiImages = options.generateAiImages ?? generateAiLifestyleImages;
+  const renderCarouselImages = options.renderCarouselImages ?? writeCarouselImages;
+
+  if (wantsAiLifestyleImages(envVars)) {
+    console.log(`[ig-post-engine] slot=${persona.id} ChatGPT text-in-image carousel generating...`);
+    return generateAiImages(item, persona, writeOptions);
+  }
+
+  const slides = buildCarouselSlides(item);
+  return renderCarouselImages(item, slides, writeOptions);
+}
+
 async function sendXDraftIfEnabled(item: RakutenItem, finalCaption: string, assets: CarouselAsset[]): Promise<void> {
   if (!isXDraftMailEnabled(process.env)) return;
   try {
@@ -94,20 +123,7 @@ export async function postToInstagramWithPersona(
     if (isCarouselEnabled(process.env)) {
       try {
         console.log(`[ig-post-engine] slot=${persona.id} carousel media creating...`);
-        const writeOptions = getCarouselWriteOptions(process.env);
-        let assets: CarouselAsset[] | undefined;
-        if (isAiLifestyleImagesEnabled(process.env)) {
-          try {
-            console.log(`[ig-post-engine] slot=${persona.id} AI lifestyle images generating...`);
-            assets = await generateAiLifestyleImages(item, persona, writeOptions);
-          } catch (err) {
-            console.warn(`[ig-post-engine] AI lifestyle images failed, falling back to rendered carousel: ${String(err).slice(0, 200)}`);
-          }
-        }
-        if (!assets) {
-          const slides = buildCarouselSlides(item);
-          assets = await writeCarouselImages(item, slides, writeOptions);
-        }
+        let assets = await createInstagramCarouselAssets(item, persona);
         if (process.env.IG_CAROUSEL_GITHUB_UPLOAD === "1") {
           assets = await publishCarouselAssetsToGitHub(assets, {
             repository: process.env.GITHUB_REPOSITORY ?? "",
@@ -126,6 +142,12 @@ export async function postToInstagramWithPersona(
         await sendXDraftIfEnabled(item, finalCaption, assets);
         return true;
       } catch (err) {
+        const msg = String(err).slice(0, 500);
+        if (wantsAiLifestyleImages(process.env)) {
+          console.warn(`[ig-post-engine] ChatGPT text-in-image carousel failed; old carousel fallback is disabled: ${msg}`);
+          await notifyError("ChatGPT画像生成失敗", msg);
+          return false;
+        }
         console.warn(`[ig-post-engine] carousel failed, falling back to single image: ${String(err).slice(0, 200)}`);
       }
     }

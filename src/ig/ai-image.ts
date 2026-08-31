@@ -48,13 +48,25 @@ function productBenefits(item: RakutenItem): string[] {
   return ["片付けがラク", "生活感を抑える", "毎日使いやすい"];
 }
 
+function finiteNumber(value: unknown): number | undefined {
+  if (typeof value === "number") return Number.isFinite(value) ? value : undefined;
+  if (typeof value === "string") {
+    const parsed = Number(value.replace(/,/g, "").trim());
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+  return undefined;
+}
+
 function productFeatures(item: RakutenItem): string[] {
   const features: string[] = [];
+  const reviewAverage = finiteNumber(item.reviewAverage);
+  const reviewCount = finiteNumber(item.reviewCount);
+  const itemPrice = finiteNumber(item.itemPrice) ?? 0;
   if (item.hasCoupon) features.push("クーポンあり");
   if (item.hasPointBonus) features.push("ポイントUP");
-  if ((item.reviewAverage ?? 0) >= 4.3) features.push(`高評価 ${item.reviewAverage!.toFixed(1)}`);
-  if ((item.reviewCount ?? 0) >= 50) features.push(`レビュー${item.reviewCount}件`);
-  features.push(`${item.itemPrice.toLocaleString("ja-JP")}円`);
+  if ((reviewAverage ?? 0) >= 4.3) features.push(`高評価 ${reviewAverage!.toFixed(1)}`);
+  if ((reviewCount ?? 0) >= 50) features.push(`レビュー${Math.round(reviewCount!).toLocaleString("ja-JP")}件`);
+  features.push(`${Math.round(itemPrice).toLocaleString("ja-JP")}円`);
   return features.slice(0, 4);
 }
 
@@ -142,7 +154,7 @@ async function defaultOpenAiClient(body: Record<string, unknown>, apiKey: string
 }
 
 export function isAiLifestyleImagesEnabled(env: NodeJS.ProcessEnv): boolean {
-  return env.AI_IMAGE_ENABLED === "1" && !!env.OPENAI_API_KEY;
+  return env.AI_IMAGE_ENABLED !== "0" && !!env.OPENAI_API_KEY;
 }
 
 export async function generateAiLifestyleImages(
