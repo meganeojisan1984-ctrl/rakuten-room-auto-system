@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "abaskdesign:10001748",
     "interior-palette:10037506",
     "roomy:10015093",
     "sheil-store:10020081",
@@ -499,7 +498,8 @@
     "tu-hacci:10000858",
     "roomy:10018139",
     "lifedrinkcompany:10000014",
-    "roomy:10016698"
+    "roomy:10016698",
+    "lensfree:10000056"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }

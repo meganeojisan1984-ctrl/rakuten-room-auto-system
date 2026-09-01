@@ -1634,5 +1634,18 @@
     "captionHead": "料理を時短したい人、手を挙げて🙋‍♀️ 見つけた",
     "slot": "slot2",
     "itemCodeHash": "0ec7509b9418"
+  },
+  {
+    "ts": "2026-09-01T16:16:48.118Z",
+    "itemCode": "lensfree:10000056",
+    "itemName": "メダリストワンデープラス 90枚パック ×2箱セット ボシュロム コンタクトレンズ ワンデー コンタクト 1day 1日使い捨て",
+    "genreName": "グルメ・スイーツ",
+    "price": 5705,
+    "postType": 2,
+    "hour": 1,
+    "hook": "empathy",
+    "captionHead": "コンタクト使いの人、乾きやゴロつきでイライラしてる",
+    "slot": "slot0",
+    "itemCodeHash": "c26723f5ce64"
   }
 ]
