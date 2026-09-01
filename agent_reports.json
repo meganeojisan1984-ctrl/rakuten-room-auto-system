@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-08-13T23:42:15.417Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-08-14T05:29:03.772Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (季節:秋 寝具)"
-  },
-  {
-    "ts": "2026-08-14T05:29:05.549Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ2)"
-  },
-  {
     "ts": "2026-08-14T05:30:42.927Z",
     "agent": "poster",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-09-01T17:58:10.214Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "18件抽出、履歴12件のいいね数を更新"
+  },
+  {
+    "ts": "2026-09-01T17:58:10.224Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴127件(計測済82) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-09-01T17:58:13.346Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第55世代へ更新 (ルールベース)、警告1件"
   }
 ]

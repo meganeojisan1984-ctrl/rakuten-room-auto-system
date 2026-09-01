@@ -202,8 +202,8 @@
     "hour": 0,
     "hook": "beforeafter",
     "captionHead": "先月までの私: コンタクトレンズの度数が合わなくて",
-    "likes": 8,
-    "likesUpdatedAt": "2026-08-31T20:23:31.456Z"
+    "likes": 9,
+    "likesUpdatedAt": "2026-09-01T17:58:10.198Z"
   },
   {
     "ts": "2026-07-12T22:59:56.567Z",
@@ -337,8 +337,8 @@
     "hour": 8,
     "hook": "question",
     "captionHead": "まだ暑い夏が続いてるよね😓 その夏の毎日を快適に",
-    "likes": 8,
-    "likesUpdatedAt": "2026-08-31T20:23:31.456Z"
+    "likes": 9,
+    "likesUpdatedAt": "2026-09-01T17:58:10.198Z"
   },
   {
     "ts": "2026-07-15T05:26:00.323Z",
@@ -677,8 +677,8 @@
     "hour": 22,
     "hook": "empathy",
     "captionHead": "夏本番、暑い日にめんどうなコンタクトの手入れ🙋‍",
-    "likes": 8,
-    "likesUpdatedAt": "2026-08-31T20:23:31.456Z"
+    "likes": 9,
+    "likesUpdatedAt": "2026-09-01T17:58:10.198Z"
   },
   {
     "ts": "2026-07-21T15:49:22.739Z",
@@ -1238,8 +1238,8 @@
     "captionHead": "レビュー5,971件超えのこのお米、見つけたときテ",
     "slot": "slot0",
     "itemCodeHash": "241ba983aa3f",
-    "likes": 27,
-    "likesUpdatedAt": "2026-08-24T15:22:12.596Z"
+    "likes": 28,
+    "likesUpdatedAt": "2026-09-01T17:58:10.198Z"
   },
   {
     "ts": "2026-08-10T13:10:38.821Z",
@@ -1367,8 +1367,8 @@
     "captionHead": "わかる人にはわかるやつ、夏の暑い日に加湿器がないと",
     "slot": "slot0",
     "itemCodeHash": "a0746f8fe4ab",
-    "likes": 47,
-    "likesUpdatedAt": "2026-08-31T20:23:31.456Z"
+    "likes": 35,
+    "likesUpdatedAt": "2026-09-01T17:58:10.198Z"
   },
   {
     "ts": "2026-08-14T05:31:42.114Z",
@@ -1410,8 +1410,8 @@
     "captionHead": "わかる人にはわかるやつ、夏の暑い日に目が疲れてしま",
     "slot": "slot0",
     "itemCodeHash": "a9f4c620c994",
-    "likes": 47,
-    "likesUpdatedAt": "2026-08-31T20:23:31.456Z"
+    "likes": 35,
+    "likesUpdatedAt": "2026-09-01T17:58:10.198Z"
   },
   {
     "ts": "2026-08-15T04:26:58.528Z",
@@ -1490,8 +1490,8 @@
     "captionHead": "わかる人にはわかるやつ💡 今年の夏は特に暑くて、",
     "slot": "slot0",
     "itemCodeHash": "c224c0d272b1",
-    "likes": 99,
-    "likesUpdatedAt": "2026-08-30T18:12:39.287Z"
+    "likes": 100,
+    "likesUpdatedAt": "2026-09-01T17:58:10.198Z"
   },
   {
     "ts": "2026-08-17T04:38:19.279Z",
@@ -1563,8 +1563,8 @@
     "captionHead": "これ知らないと年間で結構損してるかも…！コンタクト",
     "slot": "slot0",
     "itemCodeHash": "1195fe80bca2",
-    "likes": 8,
-    "likesUpdatedAt": "2026-08-31T20:23:31.456Z"
+    "likes": 9,
+    "likesUpdatedAt": "2026-09-01T17:58:10.198Z"
   },
   {
     "ts": "2026-08-31T10:31:21.853Z",
@@ -1578,8 +1578,8 @@
     "captionHead": "楽天ランキング1位＆レビュー11954件で★4.7",
     "slot": "slot2",
     "itemCodeHash": "7f3146835e50",
-    "likes": 14,
-    "likesUpdatedAt": "2026-08-31T20:23:31.456Z"
+    "likes": 20,
+    "likesUpdatedAt": "2026-09-01T17:58:10.198Z"
   },
   {
     "ts": "2026-08-31T11:31:43.090Z",
@@ -1606,8 +1606,8 @@
     "captionHead": "まだ「暑くて料理手を抜きまくり」してない？正直、買",
     "slot": "slot0",
     "itemCodeHash": "f1321db563e2",
-    "likes": 4,
-    "likesUpdatedAt": "2026-08-31T20:23:31.456Z"
+    "likes": 13,
+    "likesUpdatedAt": "2026-09-01T17:58:10.198Z"
   },
   {
     "ts": "2026-09-01T01:43:29.310Z",
@@ -1633,7 +1633,9 @@
     "hook": "empathy",
     "captionHead": "料理を時短したい人、手を挙げて🙋‍♀️ 見つけた",
     "slot": "slot2",
-    "itemCodeHash": "0ec7509b9418"
+    "itemCodeHash": "0ec7509b9418",
+    "likes": 4,
+    "likesUpdatedAt": "2026-09-01T17:58:10.198Z"
   },
   {
     "ts": "2026-09-01T16:16:48.118Z",
@@ -1646,6 +1648,8 @@
     "hook": "empathy",
     "captionHead": "コンタクト使いの人、乾きやゴロつきでイライラしてる",
     "slot": "slot0",
-    "itemCodeHash": "c26723f5ce64"
+    "itemCodeHash": "c26723f5ce64",
+    "likes": 3,
+    "likesUpdatedAt": "2026-09-01T17:58:10.198Z"
   }
 ]
