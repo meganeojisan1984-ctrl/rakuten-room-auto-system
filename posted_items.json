@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "dajie:10000003",
     "abaskdesign:10001748",
     "interior-palette:10037506",
     "roomy:10015093",
@@ -499,7 +498,8 @@
     "hotch-potch:10017854",
     "tu-hacci:10000858",
     "roomy:10018139",
-    "lifedrinkcompany:10000014"
+    "lifedrinkcompany:10000014",
+    "roomy:10016698"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
