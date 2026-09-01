@@ -1608,5 +1608,18 @@
     "itemCodeHash": "f1321db563e2",
     "likes": 4,
     "likesUpdatedAt": "2026-08-31T20:23:31.456Z"
+  },
+  {
+    "ts": "2026-09-01T01:43:29.310Z",
+    "itemCode": "lifedrinkcompany:10000014",
+    "itemName": "【8/30限定！店内全品10％OFFクーポン】水 ミネラルウォーター 彩水-あやみず- やさしい軟水 500ml 48本 送料無料※一部地域除く ペットボトル ラベルレス ライフドリンクカンパニー LIFEDRINK 国産 天然水 軟水 備蓄水 非常用 (※採水地指定不可）",
+    "genreName": "家電・ガジェット",
+    "price": 2270,
+    "postType": 3,
+    "hour": 10,
+    "hook": "question",
+    "captionHead": "まだ備蓄水、用意してる？🎯 🎫 クーポン・割引",
+    "slot": "slot0",
+    "itemCodeHash": "dcd7f8cc1873"
   }
 ]

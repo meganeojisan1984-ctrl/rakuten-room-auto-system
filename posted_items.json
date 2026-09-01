@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "tenmafitsworld:10003603",
     "dajie:10000003",
     "abaskdesign:10001748",
     "interior-palette:10037506",
@@ -499,7 +498,8 @@
     "earth-contact:10000641",
     "hotch-potch:10017854",
     "tu-hacci:10000858",
-    "roomy:10018139"
+    "roomy:10018139",
+    "lifedrinkcompany:10000014"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
