@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "sheil-store:10020081",
     "imeilifestyle:10011632",
     "sheil-store:10019883",
     "ashop:10003886",
@@ -499,7 +498,8 @@
     "roomy:10016698",
     "lensfree:10000056",
     "hotch-potch:10018321",
-    "lens-1:10002142"
+    "lens-1:10002142",
+    "kyunan:10020444"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
