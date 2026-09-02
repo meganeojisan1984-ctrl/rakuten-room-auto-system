@@ -4,6 +4,7 @@ import * as path from "path";
 import type { RakutenItem } from "../fetcher";
 import type { PersonaSlot } from "../persona/persona";
 import { mapAssetToPublicUrl, type CarouselAsset } from "./carousel";
+import { buildProductStoryProfile } from "./product-story";
 
 interface OpenAiImageResponse {
   data?: Array<{ b64_json?: string; url?: string }>;
@@ -29,23 +30,6 @@ function cleanText(value: string, max = 140): string {
 
 function productTitle(item: RakutenItem): string {
   return cleanText(item.itemName.replace(/[【】≪≫＜＞()[\]{}]/g, " "), 42);
-}
-
-function productBenefits(item: RakutenItem): string[] {
-  const text = `${item.itemName} ${item.itemCaption}`;
-  if (/食品|米|水|コーヒー|お茶|菓子|チョコ|うなぎ|肉|魚|プロテイン|スイーツ|グルメ/.test(text)) {
-    return ["手軽に楽しめる", "家でちょっと贅沢", "ストックしやすい"];
-  }
-  if (/服|キッズ|子供服|バッグ|靴|ワンピ|シャツ|パンツ|ニット|ファッション/.test(text)) {
-    return ["着回しやすい", "毎日使いやすい", "写真でも映える"];
-  }
-  if (/美容|コスメ|スキンケア|ヘアケア|メイク|化粧|リップ|美容液/.test(text)) {
-    return ["毎日のケアに足せる", "見た目の印象アップ", "気分が上がる"];
-  }
-  if (/家電|ガジェット|スマホ|充電|イヤホン|加湿器|ライト|掃除機/.test(text)) {
-    return ["時短になる", "置き場所に困りにくい", "使うたびラク"];
-  }
-  return ["片付けがラク", "生活感を抑える", "毎日使いやすい"];
 }
 
 function finiteNumber(value: unknown): number | undefined {
@@ -116,7 +100,8 @@ export function buildAiLifestyleImagePrompts(item: RakutenItem, persona: Persona
   const name = productTitle(item);
   const description = cleanText(item.itemCaption, 220);
   const genre = persona.genres[0] ?? persona.name;
-  const benefits = productBenefits(item);
+  const story = buildProductStoryProfile(item);
+  const benefits = story.benefits;
   const features = productFeatures(item);
   const base =
     `photorealistic Japanese Instagram carousel design, authentic product-review post, real buyer trust, ` +
@@ -129,9 +114,9 @@ export function buildAiLifestyleImagePrompts(item: RakutenItem, persona: Persona
 
   const scenes = sceneHints(item);
   return [
-    `${base} Slide 1: cover. Compose a scroll-stopping Japanese Instagram cover with a large title and a clear product photo. Put this exact Japanese headline in the image: 「これ、地味に助かる」. Add a smaller readable product title: 「${name}」. Scene: ${scenes[0]}. Use pink, cream, black, and warm yellow accents like a popular Japanese product carousel.`,
-    `${base} Slide 2: before-use problem. Show a realistic person or room looking mildly troubled before using the product, not exaggerated. Put this Japanese headline in the image: 「こんな悩みない？」. Add 2 short pain points as readable Japanese labels: 「ごちゃつく」「選ぶのが面倒」. Scene: ${scenes[1]}.`,
-    `${base} Slide 3: solution list. Make a clean list-style Japanese carousel page with a realistic usage image on the right. Put this Japanese headline in the image: 「これでラクになる」. Add these readable checklist items in Japanese: 「${benefits[0]}」「${benefits[1]}」「${benefits[2]}」. Scene: ${scenes[2]}.`,
+    `${base} Slide 1: cover. Compose a scroll-stopping Japanese Instagram cover with a large title and a clear product photo. Put this exact Japanese headline in the image: 「${story.coverHeadline}」. Add a smaller readable kicker: 「${story.coverKicker}」. Add a smaller readable product title: 「${name}」. Scene: ${scenes[0]}, ${story.coverSceneTone}. Use ${story.paletteHint} like a popular Japanese product carousel.`,
+    `${base} Slide 2: before-use problem. Show a realistic person or room looking mildly troubled before using the product, not exaggerated. Put this Japanese headline in the image: 「${story.problemHeadline}」. Add 2 short pain points as readable Japanese labels: 「${story.painPoints[0]}」「${story.painPoints[1]}」. Scene: ${scenes[1]}.`,
+    `${base} Slide 3: solution list. Make a clean list-style Japanese carousel page with a realistic usage image on the right. Put this Japanese headline in the image: 「${story.solutionHeadline}」. Add these readable checklist items in Japanese: 「${benefits[0]}」「${benefits[1]}」「${benefits[2]}」. Scene: ${scenes[2]}.`,
     `${base} Slide 4: product features. Show the product photo large with friendly handwritten-style annotations and feature badges. Put this Japanese headline in the image: 「推せるポイント」. Add these readable Japanese feature labels: 「${features.join("」「")}」. Scene: ${scenes[3]}.`,
     `${base} Slide 5: thank-you and profile CTA. Create a clean profile-guidance final slide with a soft screenshot-like profile area on the right, no real account name or real profile photo. Put this Japanese message in the image: 「最後までありがとう」 and 「気になる人はプロフィールへ」. Also include a big simple arrow shape pointing to the profile area. Scene: ${scenes[4]}.`,
   ];

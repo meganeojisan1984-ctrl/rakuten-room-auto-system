@@ -3,6 +3,7 @@ import * as crypto from "crypto";
 import * as fs from "fs";
 import * as path from "path";
 import type { RakutenItem } from "../fetcher";
+import { buildProductStoryProfile } from "./product-story";
 
 export type CarouselSlideKind =
   | "hook"
@@ -129,27 +130,28 @@ function actionLabel(kind: CarouselSlideKind): string {
 
 export function buildCarouselSlides(item: RakutenItem): CarouselSlide[] {
   const name = truncate(item.itemName, 18);
+  const story = buildProductStoryProfile(item);
   return [
     {
       index: 1,
       kind: "hook",
       badge: "01",
-      headline: truncate("これ、地味に生活変わる", 34),
-      body: truncate(`✨ ${name}、毎日の小さな不便をラクにしてくれる注目アイテムです。`, 82),
+      headline: truncate(story.coverHeadline, 34),
+      body: truncate(`✨ ${name}。${story.coverKicker}、ちょっと見てほしい注目アイテムです。`, 82),
     },
     {
       index: 2,
       kind: "problem",
       badge: "02",
-      headline: truncate("その小さな不便、放置しがち", 34),
-      body: truncate("😳 毎日使う場所ほど、少しの面倒が積み重なります。今ラクにしておくと、家事の気分まで軽くなります。", 82),
+      headline: truncate(story.problemHeadline, 34),
+      body: truncate(`😳 ${story.painPoints[0]}。${story.painPoints[1]}。今ラクにしておくと、選ぶ時間まで軽くなります。`, 82),
     },
     {
       index: 3,
       kind: "use_case",
       badge: "03",
-      headline: truncate("使う場面が想像しやすい", 34),
-      body: truncate("🙌 キッチン、洗面台、玄関まわりに。使う場所がハマると、片付けや準備の手間が目に見えて減ります。", 82),
+      headline: truncate(story.solutionHeadline, 34),
+      body: truncate(story.useCaseBody, 82),
     },
     {
       index: 4,

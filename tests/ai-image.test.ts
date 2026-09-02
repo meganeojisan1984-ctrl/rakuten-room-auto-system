@@ -67,6 +67,38 @@ test("buildAiLifestyleImagePrompts accepts Rakuten review numbers delivered as s
   assert.equal(prompts[3]!.includes("レビュー11,954件"), true);
 });
 
+test("buildAiLifestyleImagePrompts adapts the first three slides to the product category", () => {
+  const foodItem: RakutenItem = {
+    ...item,
+    itemName: "訳あり濃厚チーズケーキ お取り寄せスイーツ",
+    itemCaption: "冷凍庫にあると週末のおやつや来客時にも便利な人気スイーツです。",
+    itemCode: "sweets:test",
+  };
+
+  const prompts = buildAiLifestyleImagePrompts(foodItem, persona);
+
+  assert.match(prompts[0]!, /週末|ご褒美|おうちカフェ/);
+  assert.match(prompts[1]!, /甘いもの|来客|おやつ/);
+  assert.match(prompts[2]!, /手軽に楽しめる|家でちょっと贅沢/);
+  assert.doesNotMatch(prompts.slice(0, 3).join("\n"), /ごちゃつく|選ぶのが面倒/);
+});
+
+test("buildAiLifestyleImagePrompts varies the cover mood by product instead of using one fixed top image", () => {
+  const storagePrompts = buildAiLifestyleImagePrompts(item, persona);
+  const foodPrompts = buildAiLifestyleImagePrompts(
+    {
+      ...item,
+      itemName: "訳あり濃厚チーズケーキ お取り寄せスイーツ",
+      itemCaption: "冷凍庫にあると週末のおやつや来客時にも便利な人気スイーツです。",
+      itemCode: "sweets:test",
+    },
+    persona,
+  );
+
+  assert.notEqual(storagePrompts[0], foodPrompts[0]);
+  assert.doesNotMatch(foodPrompts[0]!, /これ、地味に助かる/);
+});
+
 test("generateAiLifestyleImages writes five jpeg assets using low quality", async () => {
   const dir = fs.mkdtempSync(path.join(process.cwd(), "tmp-ai-images-"));
   try {

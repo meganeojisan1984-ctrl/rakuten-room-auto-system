@@ -103,6 +103,22 @@ test("carousel copy is stronger and product text stays inside the card area", ()
   assert.match(svg, /<text x="88" y="966" class="productMeta">/);
 });
 
+test("buildCarouselSlides adapts hook and benefit copy for food products", () => {
+  const foodItem: RakutenItem = {
+    ...item,
+    itemName: "訳あり濃厚チーズケーキ お取り寄せスイーツ",
+    itemCaption: "冷凍庫にあると週末のおやつや来客時にも便利な人気スイーツです。",
+    itemCode: "sweets:test",
+  };
+
+  const slides = buildCarouselSlides(foodItem);
+
+  assert.match(slides[0]!.headline, /ご褒美|おうちカフェ|週末/);
+  assert.match(slides[1]!.body, /甘いもの|おやつ|来客/);
+  assert.match(slides[2]!.body, /家で|ストック|手軽/);
+  assert.doesNotMatch(slides[2]!.body, /キッチン、洗面台、玄関/);
+});
+
 test("writeCarouselSlides writes five svg files with stable public urls", () => {
   const dir = fs.mkdtempSync(path.join(process.cwd(), "tmp-carousel-"));
   try {
