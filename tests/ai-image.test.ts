@@ -44,8 +44,8 @@ test("buildAiLifestyleImagePrompts creates five Japanese text-in-image carousel 
   assert.equal(prompts[0]!.includes("avoid plastic-looking"), true);
   assert.equal(prompts[0]!.includes(item.itemName), true);
   assert.equal(prompts[0]!.includes("Slide 1: cover"), true);
-  assert.equal(prompts[1]!.includes("Slide 2: before-use problem"), true);
-  assert.equal(prompts[2]!.includes("Slide 3: solution list"), true);
+  assert.equal(prompts[1]!.includes("Slide 2: swipe hook"), true);
+  assert.equal(prompts[2]!.includes("Slide 3: benefit reveal"), true);
   assert.equal(prompts[3]!.includes("Slide 4: product features"), true);
   assert.equal(prompts[4]!.includes("Slide 5: thank-you and profile CTA"), true);
   assert.equal(prompts[4]!.includes("プロフィール"), true);
@@ -97,6 +97,21 @@ test("buildAiLifestyleImagePrompts varies the cover mood by product instead of u
 
   assert.notEqual(storagePrompts[0], foodPrompts[0]);
   assert.doesNotMatch(foodPrompts[0]!, /これ、地味に助かる/);
+});
+
+test("buildAiLifestyleImagePrompts rotates visual structure by day and time while matching the product", () => {
+  const morningPrompts = buildAiLifestyleImagePrompts(item, persona, {
+    now: new Date("2026-09-07T07:30:00+09:00"),
+  });
+  const nightPrompts = buildAiLifestyleImagePrompts(item, persona, {
+    now: new Date("2026-09-07T21:30:00+09:00"),
+  });
+
+  assert.notEqual(morningPrompts[0], nightPrompts[0]);
+  assert.match(morningPrompts[0]!, /morning|time-saving|before-after|magazine cover|catalog|bold sale/);
+  assert.match(nightPrompts[0]!, /night|reward|before-after|magazine cover|catalog|bold sale/);
+  assert.match(morningPrompts.slice(0, 3).join("\n"), /収納|片付け|washstand|storage|tidy/);
+  assert.match(nightPrompts.slice(0, 3).join("\n"), /収納|片付け|washstand|storage|tidy/);
 });
 
 test("generateAiLifestyleImages writes five jpeg assets using low quality", async () => {

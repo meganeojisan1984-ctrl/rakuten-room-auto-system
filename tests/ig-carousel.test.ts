@@ -119,6 +119,19 @@ test("buildCarouselSlides adapts hook and benefit copy for food products", () =>
   assert.doesNotMatch(slides[2]!.body, /キッチン、洗面台、玄関/);
 });
 
+test("buildCarouselSlides rotates hooks by time while staying aligned to the product", () => {
+  const morningSlides = buildCarouselSlides(item, {
+    now: new Date("2026-09-07T07:30:00+09:00"),
+  });
+  const nightSlides = buildCarouselSlides(item, {
+    now: new Date("2026-09-07T21:30:00+09:00"),
+  });
+
+  assert.notEqual(morningSlides[0]!.headline, nightSlides[0]!.headline);
+  assert.match(morningSlides[0]!.body, /収納|片付け|整/);
+  assert.match(nightSlides[0]!.body, /収納|片付け|整/);
+});
+
 test("writeCarouselSlides writes five svg files with stable public urls", () => {
   const dir = fs.mkdtempSync(path.join(process.cwd(), "tmp-carousel-"));
   try {

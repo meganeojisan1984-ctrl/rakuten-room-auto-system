@@ -21,6 +21,10 @@ export interface GenerateAiLifestyleImagesOptions {
   client?: (body: Record<string, unknown>, apiKey: string) => Promise<OpenAiImageResponse>;
 }
 
+export interface AiLifestyleImagePromptOptions {
+  now?: Date;
+}
+
 const DEFAULT_OUTPUT_DIR = path.join(process.cwd(), "public", "generated", "instagram");
 const DEFAULT_MODEL = "gpt-image-2";
 
@@ -96,11 +100,15 @@ function sceneHints(item: RakutenItem): string[] {
   ];
 }
 
-export function buildAiLifestyleImagePrompts(item: RakutenItem, persona: PersonaSlot): string[] {
+export function buildAiLifestyleImagePrompts(
+  item: RakutenItem,
+  persona: PersonaSlot,
+  options: AiLifestyleImagePromptOptions = {},
+): string[] {
   const name = productTitle(item);
   const description = cleanText(item.itemCaption, 220);
   const genre = persona.genres[0] ?? persona.name;
-  const story = buildProductStoryProfile(item);
+  const story = buildProductStoryProfile(item, { now: options.now });
   const benefits = story.benefits;
   const features = productFeatures(item);
   const base =
@@ -110,13 +118,15 @@ export function buildAiLifestyleImagePrompts(item: RakutenItem, persona: Persona
     `subtle imperfect smartphone-photo texture, no watermark, no random logo, no garbled characters, no tiny text, ` +
     `no artificial CGI look, no over-polished advertisement, avoid plastic-looking skin or objects. ` +
     `The post may recommend the product category, but must not falsely claim the creator personally bought or used it. ` +
-    `Product reference: ${name}. Product image URL for visual reference if accessible: ${item.imageUrl}. Category: ${genre}. Description: ${description}.`;
+    `Product reference: ${name}. Product image URL for visual reference if accessible: ${item.imageUrl}. Category: ${genre}. Description: ${description}. ` +
+    `Creative rule for this post: ${story.visualTemplate}. Hook angle: ${story.hookAngle}. Layout mood: ${story.layoutMood}. Time context: ${story.timeMood}. ` +
+    `Keep all slides visually coherent as one carousel, but change composition, scale, cropping, badges, and text placement from slide to slide.`;
 
   const scenes = sceneHints(item);
   return [
-    `${base} Slide 1: cover. Compose a scroll-stopping Japanese Instagram cover with a large title and a clear product photo. Put this exact Japanese headline in the image: 「${story.coverHeadline}」. Add a smaller readable kicker: 「${story.coverKicker}」. Add a smaller readable product title: 「${name}」. Scene: ${scenes[0]}, ${story.coverSceneTone}. Use ${story.paletteHint} like a popular Japanese product carousel.`,
-    `${base} Slide 2: before-use problem. Show a realistic person or room looking mildly troubled before using the product, not exaggerated. Put this Japanese headline in the image: 「${story.problemHeadline}」. Add 2 short pain points as readable Japanese labels: 「${story.painPoints[0]}」「${story.painPoints[1]}」. Scene: ${scenes[1]}.`,
-    `${base} Slide 3: solution list. Make a clean list-style Japanese carousel page with a realistic usage image on the right. Put this Japanese headline in the image: 「${story.solutionHeadline}」. Add these readable checklist items in Japanese: 「${benefits[0]}」「${benefits[1]}」「${benefits[2]}」. Scene: ${scenes[2]}.`,
+    `${base} Slide 1: cover. Compose a scroll-stopping Japanese Instagram cover with the selected visual template, a large title, and a clear product photo. Make it feel different from a plain review card. Put this exact Japanese headline in the image: 「${story.coverHeadline}」. Add a smaller readable kicker: 「${story.coverKicker}」. Add a smaller readable product title: 「${name}」. Scene: ${scenes[0]}, ${story.coverSceneTone}. Use ${story.paletteHint} like a popular Japanese product carousel.`,
+    `${base} Slide 2: swipe hook. Use a different composition than slide 1: comparison card, speech bubble, circled details, or bold warning badge depending on the hook angle. Show a realistic person or room before the benefit, not exaggerated. Put this Japanese headline in the image: 「${story.problemHeadline}」. Add 2 short pain points as readable Japanese labels: 「${story.painPoints[0]}」「${story.painPoints[1]}」. Scene: ${scenes[1]}.`,
+    `${base} Slide 3: benefit reveal. Do not repeat the slide 2 structure. Use checklist, before-after, three-scene mini catalog, or annotation layout. Put this Japanese headline in the image: 「${story.solutionHeadline}」. Add these readable checklist items in Japanese: 「${benefits[0]}」「${benefits[1]}」「${benefits[2]}」. Scene: ${scenes[2]}.`,
     `${base} Slide 4: product features. Show the product photo large with friendly handwritten-style annotations and feature badges. Put this Japanese headline in the image: 「推せるポイント」. Add these readable Japanese feature labels: 「${features.join("」「")}」. Scene: ${scenes[3]}.`,
     `${base} Slide 5: thank-you and profile CTA. Create a clean profile-guidance final slide with a soft screenshot-like profile area on the right, no real account name or real profile photo. Put this Japanese message in the image: 「最後までありがとう」 and 「気になる人はプロフィールへ」. Also include a big simple arrow shape pointing to the profile area. Scene: ${scenes[4]}.`,
   ];
@@ -163,7 +173,7 @@ export async function generateAiLifestyleImages(
 
   fs.mkdirSync(outputDir, { recursive: true });
 
-  const prompts = buildAiLifestyleImagePrompts(item, persona);
+  const prompts = buildAiLifestyleImagePrompts(item, persona, { now });
   const assets: CarouselAsset[] = [];
   for (let i = 0; i < prompts.length; i++) {
     const body: Record<string, unknown> = {

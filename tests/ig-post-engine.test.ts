@@ -102,7 +102,9 @@ test("buildXDraftText formats X copy as a two-post thread with reply link guidan
   assert.match(text, /#楽天ROOM/);
   assert.match(text, /【添付】画像1〜4を1通目に添付/);
   assert.match(text, /【X 2通目（リプ欄）】/);
-  assert.match(text, /毎日、1,000円台で買える「本当に良いモノ」だけ厳選して紹介しています。/);
+  assert.doesNotMatch(text, /1,000円台|１０００円台/);
+  assert.match(text, /価格|レビュー|クーポン|ポイント/);
+  assert.match(text, /画像/);
   assert.match(text, /https:\/\/example\.com\/item/);
   assert.match(text, /【予備画像URL】/);
   assert.match(text, /https:\/\/cdn\.example\.com\/slide-5\.jpg/);

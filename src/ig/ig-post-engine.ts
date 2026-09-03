@@ -86,7 +86,7 @@ export function buildXDraftText(item: RakutenItem, finalCaption: string, assets:
     "【添付】画像1〜4を1通目に添付",
     "",
     "【X 2通目（リプ欄）】",
-    "毎日、1,000円台で買える「本当に良いモノ」だけ厳選して紹介しています。フォローしてチェック！✨",
+    "価格・レビュー・クーポンまで見て、気になるものだけ楽天ROOMにまとめています。画像で雰囲気を見てからチェックしてね✨",
     item.itemUrl,
     "",
     "【元キャプション（必要なら調整用）】",

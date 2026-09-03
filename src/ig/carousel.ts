@@ -37,6 +37,10 @@ export interface CarouselWriteOptions {
   backgroundImagePath?: string;
 }
 
+export interface CarouselBuildOptions {
+  now?: Date;
+}
+
 interface HttpClient {
   post<T>(url: string, body: unknown, options: { params: Record<string, unknown>; timeout?: number }): Promise<{ data: T }>;
   get<T>(url: string, options: { params: Record<string, unknown>; timeout?: number }): Promise<{ data: T }>;
@@ -128,9 +132,9 @@ function actionLabel(kind: CarouselSlideKind): string {
   }
 }
 
-export function buildCarouselSlides(item: RakutenItem): CarouselSlide[] {
+export function buildCarouselSlides(item: RakutenItem, options: CarouselBuildOptions = {}): CarouselSlide[] {
   const name = truncate(item.itemName, 18);
-  const story = buildProductStoryProfile(item);
+  const story = buildProductStoryProfile(item, { now: options.now });
   return [
     {
       index: 1,
