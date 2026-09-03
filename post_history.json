@@ -1707,5 +1707,18 @@
     "captionHead": "レビュー6216件で★4.64！🎫 クーポンあり",
     "slot": "slot0",
     "itemCodeHash": "c16f71646ccc"
+  },
+  {
+    "ts": "2026-09-03T08:37:22.600Z",
+    "itemCode": "cuisinart-official:10000006",
+    "itemName": "【期間限定価格】9/11まで15,950円！9/12以降は22,880円 クイジナート TOA-29SJ ノンフライオーブントースター シルバー レシピブック 魚 ノンフライ 熱風調理 ヘルシー 揚げ直し ノンフライ調理 シンプル操作 スタイリッシュ【Cuisinart公式ショップ】",
+    "genreName": "グルメ・スイーツ",
+    "price": 15950,
+    "postType": 1,
+    "hour": 17,
+    "hook": "beforeafter",
+    "captionHead": "先月までの私: 揚げ物はトースターでベチャッ／今の",
+    "slot": "slot1",
+    "itemCodeHash": "1730a113dbc4"
   }
 ]

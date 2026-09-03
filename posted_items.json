@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "sheil-store:10019883",
     "ashop:10003886",
     "jewelrysunflower:10014816",
     "pykespeak:10002322",
@@ -499,7 +498,8 @@
     "hotch-potch:10018321",
     "lens-1:10002142",
     "kyunan:10020444",
-    "maruka-foods:10000233"
+    "maruka-foods:10000233",
+    "cuisinart-official:10000006"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
