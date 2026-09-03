@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-08-15T23:21:29.341Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-08-16T04:31:43.331Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (ハイエンド・スタイリッシュ家電)"
-  },
-  {
-    "ts": "2026-08-16T04:31:44.789Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ1)"
-  },
-  {
     "ts": "2026-08-16T04:31:44.790Z",
     "agent": "poster",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-09-03T18:04:50.658Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "37件抽出、履歴7件のいいね数を更新"
+  },
+  {
+    "ts": "2026-09-03T18:04:50.669Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴133件(計測済85) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-09-03T18:04:53.699Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第57世代へ更新 (ルールベース)、警告0件"
   }
 ]
