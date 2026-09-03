@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-08-15T04:26:01.420Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "skipped (SKIP_ROOM=1)"
-  },
-  {
-    "ts": "2026-08-15T04:26:58.528Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-08-15T12:37:13.212Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (季節:防災グッズ)"
-  },
-  {
-    "ts": "2026-08-15T12:37:14.425Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ1)"
-  },
-  {
     "ts": "2026-08-15T12:38:48.041Z",
     "agent": "poster",
     "ok": true,
@@ -1198,5 +1174,29 @@
     "agent": "commander",
     "ok": true,
     "summary": "第56世代へ更新 (ルールベース)、警告0件"
+  },
+  {
+    "ts": "2026-09-03T00:58:56.705Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (美容・コスメ)"
+  },
+  {
+    "ts": "2026-09-03T00:59:01.395Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ1)"
+  },
+  {
+    "ts": "2026-09-03T01:00:36.985Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-09-03T01:02:42.001Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
   }
 ]
