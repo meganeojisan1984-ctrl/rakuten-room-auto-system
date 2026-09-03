@@ -1720,5 +1720,18 @@
     "captionHead": "先月までの私: 揚げ物はトースターでベチャッ／今の",
     "slot": "slot1",
     "itemCodeHash": "1730a113dbc4"
+  },
+  {
+    "ts": "2026-09-03T16:00:47.582Z",
+    "itemCode": "takami-labo:10000561",
+    "itemName": "ビタミンC美容液◆黄金ビタミン・ショット タカミエッセンス5CEプレミアム 毛穴 機能性美容液 20mL TAKAMI 美容液 ビタミンC誘導体 ビタミンC 美容 保湿 肌荒れ 敏感肌 乾燥肌 スキンケア 角質 角栓 ナイアシンアミド グルタチオン エンドフェトール 【正規品】",
+    "genreName": "家電・ガジェット",
+    "price": 8250,
+    "postType": 1,
+    "hour": 1,
+    "hook": "surprise",
+    "captionHead": "え、待って。ビタミンC美容液でここまで毛穴に効くっ",
+    "slot": "slot2",
+    "itemCodeHash": "9a16f55d016a"
   }
 ]
