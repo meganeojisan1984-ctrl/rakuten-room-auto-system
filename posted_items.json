@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "pykespeak:10002322",
     "mecu:10002514",
     "smile-int:10007126",
     "craife:10000740",
@@ -499,7 +498,8 @@
     "maruka-foods:10000233",
     "cuisinart-official:10000006",
     "takami-labo:10000561",
-    "kobe-beauty-labo:10002620"
+    "kobe-beauty-labo:10002620",
+    "yunth:10000000"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
