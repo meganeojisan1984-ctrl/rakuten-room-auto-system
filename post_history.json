@@ -1735,5 +1735,18 @@
     "captionHead": "え、待って。ビタミンC美容液でここまで毛穴に効くっ",
     "slot": "slot2",
     "itemCodeHash": "9a16f55d016a"
+  },
+  {
+    "ts": "2026-09-04T00:52:24.959Z",
+    "itemCode": "kobe-beauty-labo:10002620",
+    "itemName": "【 Qurap シャンプー トリートメント サシェ3点 】■ リニューアル品予約開始 ■ダメージケア カラー パーマ ツヤ 色落ち うねり タンパク質 ビタミン アミノ酸 キュラップ",
+    "genreName": "暮らし・インテリア",
+    "price": 3300,
+    "postType": 1,
+    "hour": 9,
+    "hook": "story",
+    "captionHead": "深夜0時、洗面所で髪のもつれと格闘してたら「え、サ",
+    "slot": "slot0",
+    "itemCodeHash": "79dda3cdc0f5"
   }
 ]

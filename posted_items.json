@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "jewelrysunflower:10014816",
     "pykespeak:10002322",
     "mecu:10002514",
     "smile-int:10007126",
@@ -499,7 +498,8 @@
     "kyunan:10020444",
     "maruka-foods:10000233",
     "cuisinart-official:10000006",
-    "takami-labo:10000561"
+    "takami-labo:10000561",
+    "kobe-beauty-labo:10002620"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
