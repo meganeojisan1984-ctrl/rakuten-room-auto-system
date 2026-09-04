@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "mecu:10002514",
     "smile-int:10007126",
     "craife:10000740",
     "gekiyasukaguya:10004739",
@@ -499,7 +498,8 @@
     "cuisinart-official:10000006",
     "takami-labo:10000561",
     "kobe-beauty-labo:10002620",
-    "yunth:10000000"
+    "yunth:10000000",
+    "wakasugi:10000295"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
