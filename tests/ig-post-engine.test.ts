@@ -87,27 +87,80 @@ test("postToInstagramWithPersona falls back to single product image when carouse
   }
 });
 
-test("buildXDraftText formats X copy as a two-post thread with reply link guidance", () => {
+test("buildXDraftText wraps AI-generated Threads copy with attachment and spare-image guidance", async () => {
   const assets = [1, 2, 3, 4, 5].map((page) => ({
     filePath: `slide-${page}.jpg`,
     publicUrl: `https://cdn.example.com/slide-${page}.jpg`,
     page,
   }));
 
-  const text = buildXDraftText(item, "寝るときも授乳も“涼しくキレイ”でいたいあなたへ\n\nレビューは★4.62/4440件と信頼感もバッチリ", assets);
+  const previousEnv = { ...process.env };
+  process.env.OPENAI_API_KEY = "test-openai-key";
+  try {
+    const text = await buildXDraftText(
+      item,
+      "寝るときも授乳も“涼しくキレイ”でいたいあなたへ\n\nレビューは★4.62/4440件と信頼感もバッチリ",
+      assets,
+      persona,
+      {
+        generateThreadsCopy: async (calledItem, context) => {
+          assert.equal(calledItem, item);
+          assert.equal(context.genre, "整理収納・片付けグッズ");
+          return "【パターンA｜価格ギャップ重視型】\n伸びる確率：88％\n\n本文サンプル";
+        },
+      },
+    );
 
-  assert.match(text, /【X 1通目】/);
-  assert.match(text, /友達にこっそり教えたくなるやつ見つけた！/);
-  assert.match(text, /これならちょっと見てみたいかも/);
-  assert.match(text, /#楽天ROOM/);
-  assert.match(text, /【添付】画像1〜4を1通目に添付/);
-  assert.match(text, /【X 2通目（リプ欄）】/);
-  assert.doesNotMatch(text, /1,000円台|１０００円台/);
-  assert.match(text, /価格|レビュー|クーポン|ポイント/);
-  assert.match(text, /画像/);
-  assert.match(text, /https:\/\/example\.com\/item/);
-  assert.match(text, /【予備画像URL】/);
-  assert.match(text, /https:\/\/cdn\.example\.com\/slide-5\.jpg/);
+    assert.match(text, /Threadsへの手動投稿用です/);
+    assert.match(text, /【パターンA｜価格ギャップ重視型】/);
+    assert.match(text, /伸びる確率：88％/);
+    assert.match(text, /【添付】画像1〜4を投稿に添付/);
+    assert.match(text, /【元キャプション（必要なら調整用）】/);
+    assert.match(text, /【予備画像URL】/);
+    assert.match(text, /https:\/\/cdn\.example\.com\/slide-5\.jpg/);
+  } finally {
+    process.env = previousEnv;
+  }
+});
+
+test("buildXDraftText falls back to a manual-copy notice when Threads copy generation fails", async () => {
+  const assets = [1, 2, 3, 4].map((page) => ({
+    filePath: `slide-${page}.jpg`,
+    publicUrl: `https://cdn.example.com/slide-${page}.jpg`,
+    page,
+  }));
+
+  const previousEnv = { ...process.env };
+  process.env.OPENAI_API_KEY = "test-openai-key";
+  try {
+    const text = await buildXDraftText(item, "元キャプション本文", assets, persona, {
+      generateThreadsCopy: async () => {
+        throw new Error("rate limited");
+      },
+    });
+
+    assert.match(text, /AI生成に失敗したため/);
+    assert.match(text, /元キャプション本文/);
+  } finally {
+    process.env = previousEnv;
+  }
+});
+
+test("buildXDraftText skips AI generation when OPENAI_API_KEY is not set", async () => {
+  const assets = [1, 2, 3, 4].map((page) => ({
+    filePath: `slide-${page}.jpg`,
+    publicUrl: `https://cdn.example.com/slide-${page}.jpg`,
+    page,
+  }));
+
+  const previousEnv = { ...process.env };
+  delete process.env.OPENAI_API_KEY;
+  try {
+    const text = await buildXDraftText(item, "元キャプション本文", assets, persona);
+    assert.match(text, /OPENAI_API_KEY未設定のためAI生成をスキップ/);
+  } finally {
+    process.env = previousEnv;
+  }
 });
 
 test("buildXDraftAttachments keeps the first four images for the main X post", () => {
