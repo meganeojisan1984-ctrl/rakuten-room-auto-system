@@ -14,6 +14,7 @@ import {
   type CarouselAsset,
 } from "./carousel";
 import { isXDraftMailEnabled, sendXDraftMail } from "./x-draft-mailer";
+import { generateThreadsCopy, isThreadsCopyEnabled } from "./threads-copy";
 
 // sns.ts と揃える (Instagram Graph API 独自エンドポイント)
 const GRAPH_API = "https://graph.instagram.com/v21.0";
@@ -54,40 +55,40 @@ function withPersonaFooter(caption: string, persona: PersonaSlot): string {
   return `${caption.trimEnd()}\n\n${persona.ctaLine}\n\n${hashtags}`;
 }
 
-function firstUsefulLine(text: string): string {
-  return text
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .find((line) => line.length > 0 && !line.startsWith("#")) ?? "";
+export interface BuildXDraftTextOptions {
+  generateThreadsCopy?: typeof generateThreadsCopy;
 }
 
-function compactProductName(itemName: string): string {
-  return itemName
-    .replace(/[【】《》「」]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 34);
-}
-
-export function buildXDraftText(item: RakutenItem, finalCaption: string, assets: CarouselAsset[]): string {
-  const hook = firstUsefulLine(finalCaption) || `${compactProductName(item.itemName)}、これ良さそう！`;
+export async function buildXDraftText(
+  item: RakutenItem,
+  finalCaption: string,
+  assets: CarouselAsset[],
+  persona: PersonaSlot,
+  options: BuildXDraftTextOptions = {},
+): Promise<string> {
   const spareAssets = assets.slice(4);
+  const generate = options.generateThreadsCopy ?? generateThreadsCopy;
+  const genre = persona.genres[0] ?? persona.name;
+
+  let threadsCopyBlock: string;
+  if (!isThreadsCopyEnabled(process.env)) {
+    threadsCopyBlock = "(OPENAI_API_KEY未設定のためAI生成をスキップしました。下記の元キャプションを参考に手動で投稿文を作成してください)";
+  } else {
+    try {
+      threadsCopyBlock = await generate(item, { genre });
+    } catch (err) {
+      const msg = String(err).slice(0, 300);
+      console.warn("[ig-post-engine] Threads投稿文のAI生成に失敗、元キャプションのみ案内します:", msg);
+      threadsCopyBlock = `(AI生成に失敗したため、下記の元キャプションを参考に手動で投稿文を作成してください)\n${msg}`;
+    }
+  }
+
   return [
-    "Xへの手動投稿用です。1通目を投稿してから、2通目をリプ欄に続けてください。",
+    "Threadsへの手動投稿用です。以下3パターンから気に入ったものを選んで投稿し、画像1〜4を添付してください。",
     "",
-    "【X 1通目】",
-    "友達にこっそり教えたくなるやつ見つけた！",
-    hook,
-    "これならちょっと見てみたいかも。",
-    "画像も一緒に見ると伝わるやつ✨",
-    "これから友達にも紹介してやる☺",
-    "#楽天ROOM #買ってよかった #暮らしのアイテム",
+    threadsCopyBlock,
     "",
-    "【添付】画像1〜4を1通目に添付",
-    "",
-    "【X 2通目（リプ欄）】",
-    "価格・レビュー・クーポンまで見て、気になるものだけ楽天ROOMにまとめています。画像で雰囲気を見てからチェックしてね✨",
-    item.itemUrl,
+    "【添付】画像1〜4を投稿に添付",
     "",
     "【元キャプション（必要なら調整用）】",
     finalCaption,
@@ -135,14 +136,19 @@ export async function createInstagramCarouselAssets(
   return renderCarouselImages(item, slides, writeOptions);
 }
 
-async function sendXDraftIfEnabled(item: RakutenItem, finalCaption: string, assets: CarouselAsset[]): Promise<void> {
+async function sendXDraftIfEnabled(
+  item: RakutenItem,
+  finalCaption: string,
+  assets: CarouselAsset[],
+  persona: PersonaSlot,
+): Promise<void> {
   if (!isXDraftMailEnabled(process.env)) return;
   try {
     await sendXDraftMail({
       to: env("X_DRAFT_EMAIL_TO"),
       from: env("SMTP_FROM") || env("SMTP_USER"),
       subject: `X投稿用: ${item.itemName.slice(0, 40)}`,
-      text: buildXDraftText(item, finalCaption, assets),
+      text: await buildXDraftText(item, finalCaption, assets, persona),
       attachments: buildXDraftAttachments(assets),
     });
     console.log("[ig-post-engine] X投稿用メール送信完了");
@@ -235,7 +241,7 @@ export async function postToInstagramWithPersona(
           assets,
         });
         console.log(`[ig-post-engine] ✓ carousel post success: ${item.itemName.slice(0, 30)}`);
-        await sendXDraft(item, finalCaption, assets);
+        await sendXDraft(item, finalCaption, assets, persona);
         return true;
       } catch (err) {
         const msg = String(err).slice(0, 500);
@@ -246,7 +252,7 @@ export async function postToInstagramWithPersona(
     await publishSingleInstagramImage(item, finalCaption, singleImageClient, waitMs);
     console.log(`[ig-post-engine] ✅ slot=${persona.id} 1枚画像投稿成功: ${item.itemName.slice(0, 30)}`);
     if (xDraftAssets.length > 0) {
-      await sendXDraft(item, finalCaption, xDraftAssets);
+      await sendXDraft(item, finalCaption, xDraftAssets, persona);
     }
     return true;
   } catch (err) {
