@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "craife:10000740",
     "gekiyasukaguya:10004739",
     "hono:10005348",
     "charisma-bon:10039016",
@@ -499,7 +498,8 @@
     "kobe-beauty-labo:10002620",
     "yunth:10000000",
     "wakasugi:10000295",
-    "apr-japan:10000839"
+    "apr-japan:10000839",
+    "vtcosmetic-official:10000829"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
