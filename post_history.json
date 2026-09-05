@@ -1804,5 +1804,18 @@
     "captionHead": "毛穴・くすみが気になる人、正直手を挙げて🙋 買う",
     "slot": "slot1",
     "itemCodeHash": "d471e1b3cbd0"
+  },
+  {
+    "ts": "2026-09-05T14:48:32.533Z",
+    "itemCode": "matsuya:10000085",
+    "itemName": "S【条件達成でP最大10倍！1食205円~！最大59％OFF】 牛めしの具（プレミアム仕様）135g 牛めし 選択制 大容量リピ確定BOX 松屋 公式 牛丼の具 まつや 牛丼 食品 非常食 セール 半額 ＜松屋60周年＞ スーパーセール スーパーsale",
+    "genreName": "美容・コスメ",
+    "price": 2980,
+    "postType": 2,
+    "hour": 23,
+    "hook": "surprise",
+    "captionHead": "え、待って。冷凍庫に常備するだけでこんなに楽になる",
+    "slot": "slot2",
+    "itemCodeHash": "d4b7b56a1d5a"
   }
 ]
