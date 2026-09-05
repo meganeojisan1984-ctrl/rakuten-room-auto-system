@@ -73,7 +73,7 @@ function sceneHints(item: RakutenItem): string[] {
       "a calm self-care moment scene that feels fresh and inviting",
     ];
   }
-  if (/食品|お米|お水|ミネラルウォーター|コーヒー|お茶|菓子|チョコ|うなぎ|お肉|鮮魚|干物|プロテイン/.test(text)) {
+  if (/食品|お米|お水|ミネラルウォーター|コーヒー|お茶|菓子|チョコ|うなぎ|お肉|鮮魚|干物|プロテイン|牛めし|牛丼|どんぶりの具|ごはんの具|レトルト|惣菜|おかず|時短ごはん|時短ご飯|冷凍食品|冷凍ごはん|冷凍ご飯|常備食|非常食/.test(text)) {
     return [
       "a cozy kitchen counter with the product naturally prepared for breakfast",
       "a dining table moment with appetizing food styling and real household dishes",
@@ -129,7 +129,8 @@ export function buildAiLifestyleImagePrompts(
     `The post may recommend the product category, but must not falsely claim the creator personally bought or used it. ` +
     `Product reference: ${name}. Product image URL for visual reference if accessible: ${item.imageUrl}. Category: ${genre}. Description: ${description}. ` +
     `Creative rule for this post: ${story.visualTemplate}. Hook angle: ${story.hookAngle}. Layout mood: ${story.layoutMood}. Time context: ${story.timeMood}. ` +
-    `Keep all slides visually coherent as one carousel, but change composition, scale, cropping, badges, and text placement from slide to slide.`;
+    `Keep all slides visually coherent as one carousel, but change composition, scale, cropping, badges, and text placement from slide to slide. ` +
+    `Do not draw any "swipe", "swipe for more", next-arrow, page-dot, or other navigation/continuation graphic or text on any slide — each slide must look complete and self-contained on its own, since it may be shown alone or as the last image in a set.`;
 
   const scenes = sceneHints(item);
   return [

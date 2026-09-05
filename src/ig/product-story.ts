@@ -136,20 +136,6 @@ export function buildProductStoryProfile(item: RakutenItem, options: ProductStor
     };
     return withRotation(base, item, now);
   }
-  if (matches(item, /服|キッズ|子供服|バッグ|靴|ワンピ|シャツ|パンツ|ニット|ファッション|アクセサリー/)) {
-    base = {
-      coverHeadline: "今日の服に合わせたい",
-      coverKicker: "写真でも気分が上がる",
-      problemHeadline: "コーデ、迷いがち",
-      painPoints: ["合わせ方に悩む", "安っぽく見せたくない"],
-      solutionHeadline: "毎日に使いやすい",
-      benefits: ["着回しやすい", "毎日使いやすい", "写真でも映える"],
-      useCaseBody: "🙌 いつもの服に足すだけで、外出前の迷いが減って写真にも残したくなります。",
-      coverSceneTone: "bright outfit flat-lay or mirror-check moment, stylish but everyday",
-      paletteHint: "soft white, charcoal, muted rose, and fresh green accents",
-    };
-    return withRotation(base, item, now);
-  }
   if (matches(item, /収納|片付け|ハンガー|ラック|チェスト|ケース|ボックス|衣類|整理/)) {
     base = {
       coverHeadline: "片付いた瞬間が気持ちいい",
@@ -161,6 +147,20 @@ export function buildProductStoryProfile(item: RakutenItem, options: ProductStor
       useCaseBody: "🙌 キッチン、洗面台、玄関まわりに。場所がハマると片付けや準備の手間が減ります。",
       coverSceneTone: "tidy home corner, satisfying before-after feeling, everyday storage joy",
       paletteHint: "sage green, cream, black, and warm yellow accents",
+    };
+    return withRotation(base, item, now);
+  }
+  if (matches(item, /服|キッズ|子供服|バッグ|靴|ワンピ|シャツ|パンツ|ニット|ファッション|アクセサリー/)) {
+    base = {
+      coverHeadline: "今日の服に合わせたい",
+      coverKicker: "写真でも気分が上がる",
+      problemHeadline: "コーデ、迷いがち",
+      painPoints: ["合わせ方に悩む", "安っぽく見せたくない"],
+      solutionHeadline: "毎日に使いやすい",
+      benefits: ["着回しやすい", "毎日使いやすい", "写真でも映える"],
+      useCaseBody: "🙌 いつもの服に足すだけで、外出前の迷いが減って写真にも残したくなります。",
+      coverSceneTone: "bright outfit flat-lay or mirror-check moment, stylish but everyday",
+      paletteHint: "soft white, charcoal, muted rose, and fresh green accents",
     };
     return withRotation(base, item, now);
   }
@@ -178,7 +178,21 @@ export function buildProductStoryProfile(item: RakutenItem, options: ProductStor
     };
     return withRotation(base, item, now);
   }
-  if (matches(item, /食品|お米|お水|ミネラルウォーター|コーヒー|お茶|菓子|チョコ|ケーキ|スイーツ|うなぎ|お肉|鮮魚|干物|プロテイン|グルメ|お取り寄せ|冷凍食品/)) {
+  if (matches(item, /牛めし|牛丼|どんぶりの具|ごはんの具|レトルト|惣菜|おかず|時短ごはん|時短ご飯|冷凍食品|冷凍ごはん|冷凍ご飯|常備食|非常食|お取り寄せグルメ|うなぎ|お肉|鮮魚|干物/)) {
+    base = {
+      coverHeadline: "常備しておくと安心",
+      coverKicker: "「今日ごはんどうしよう」が減る",
+      problemHeadline: "夕方の「どうしよう」に困りがち",
+      painPoints: ["献立を考えるのが面倒", "疲れた日は外食に頼りがち"],
+      solutionHeadline: "レンチンですぐ完成",
+      benefits: ["調理がスピーディー", "コスパよく満足感あり", "ストックしやすい"],
+      useCaseBody: "🙌 冷凍庫や棚にストックできると、疲れた日や忙しい日の「今日どうしよう」がすぐ解決します。",
+      coverSceneTone: "practical kitchen stock scene, freezer or pantry shelf, everyday convenience mood",
+      paletteHint: "warm beige, deep brown, cream, and soft orange accents",
+    };
+    return withRotation(base, item, now);
+  }
+  if (matches(item, /食品|お米|お水|ミネラルウォーター|コーヒー|お茶|菓子|チョコ|ケーキ|スイーツ|プロテイン|グルメ/)) {
     base = {
       coverHeadline: "週末のご褒美にしたい",
       coverKicker: "おうちカフェ気分が上がる",
