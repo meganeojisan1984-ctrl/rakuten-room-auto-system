@@ -122,31 +122,17 @@ function withRotation(
 export function buildProductStoryProfile(item: RakutenItem, options: ProductStoryOptions = {}): ProductStoryProfile {
   const now = options.now ?? new Date();
   let base: Omit<ProductStoryProfile, "visualTemplate" | "hookAngle" | "layoutMood" | "timeMood">;
-  if (matches(item, /食品|米|水|コーヒー|お茶|菓子|チョコ|ケーキ|スイーツ|うなぎ|肉|魚|プロテイン|グルメ|お取り寄せ|冷凍/)) {
+  if (matches(item, /美容|コスメ|スキンケア|ヘアケア|メイク|化粧|リップ|美容液|香水/)) {
     base = {
-      coverHeadline: "週末のご褒美にしたい",
-      coverKicker: "おうちカフェ気分が上がる",
-      problemHeadline: "甘いもの、切らしがち",
-      painPoints: ["おやつがマンネリ", "来客時に慌てる"],
-      solutionHeadline: "家でちょっと贅沢",
-      benefits: ["手軽に楽しめる", "家でちょっと贅沢", "ストックしやすい"],
-      useCaseBody: "🙌 冷凍庫や棚にストックできると、週末のおやつ・来客・夜のご褒美にすぐ出せます。",
-      coverSceneTone: "warm dessert-table excitement, weekend treat, cozy home cafe mood",
-      paletteHint: "berry red, cream, chocolate brown, and warm yellow accents",
-    };
-    return withRotation(base, item, now);
-  }
-  if (matches(item, /収納|片付け|ハンガー|ラック|チェスト|ケース|ボックス|衣類|整理/)) {
-    base = {
-      coverHeadline: "片付いた瞬間が気持ちいい",
-      coverKicker: "暮らしが整って見える",
-      problemHeadline: "ごちゃつき、放置しがち",
-      painPoints: ["置き場所に困る", "生活感が出る"],
-      solutionHeadline: "すっきり整うのがうれしい",
-      benefits: ["片付けがラク", "生活感を抑える", "毎日使いやすい"],
-      useCaseBody: "🙌 キッチン、洗面台、玄関まわりに。場所がハマると片付けや準備の手間が減ります。",
-      coverSceneTone: "tidy home corner, satisfying before-after feeling, everyday storage joy",
-      paletteHint: "sage green, cream, black, and warm yellow accents",
+      coverHeadline: "朝の気分が変わるやつ",
+      coverKicker: "鏡を見る時間が楽しみに",
+      problemHeadline: "ケア、後回しにしがち",
+      painPoints: ["時短で整えたい", "気分を上げたい"],
+      solutionHeadline: "いつものケアに足せる",
+      benefits: ["毎日のケアに足せる", "見た目の印象アップ", "気分が上がる"],
+      useCaseBody: "🙌 洗面台やポーチに置いておくと、忙しい朝でも自分を整えるきっかけになります。",
+      coverSceneTone: "soft morning vanity scene, cosmetic texture, self-care excitement",
+      paletteHint: "clear white, coral pink, soft gold, and ink black accents",
     };
     return withRotation(base, item, now);
   }
@@ -164,17 +150,17 @@ export function buildProductStoryProfile(item: RakutenItem, options: ProductStor
     };
     return withRotation(base, item, now);
   }
-  if (matches(item, /美容|コスメ|スキンケア|ヘアケア|メイク|化粧|リップ|美容液|香水/)) {
+  if (matches(item, /収納|片付け|ハンガー|ラック|チェスト|ケース|ボックス|衣類|整理/)) {
     base = {
-      coverHeadline: "朝の気分が変わるやつ",
-      coverKicker: "鏡を見る時間が楽しみに",
-      problemHeadline: "ケア、後回しにしがち",
-      painPoints: ["時短で整えたい", "気分を上げたい"],
-      solutionHeadline: "いつものケアに足せる",
-      benefits: ["毎日のケアに足せる", "見た目の印象アップ", "気分が上がる"],
-      useCaseBody: "🙌 洗面台やポーチに置いておくと、忙しい朝でも自分を整えるきっかけになります。",
-      coverSceneTone: "soft morning vanity scene, cosmetic texture, self-care excitement",
-      paletteHint: "clear white, coral pink, soft gold, and ink black accents",
+      coverHeadline: "片付いた瞬間が気持ちいい",
+      coverKicker: "暮らしが整って見える",
+      problemHeadline: "ごちゃつき、放置しがち",
+      painPoints: ["置き場所に困る", "生活感が出る"],
+      solutionHeadline: "すっきり整うのがうれしい",
+      benefits: ["片付けがラク", "生活感を抑える", "毎日使いやすい"],
+      useCaseBody: "🙌 キッチン、洗面台、玄関まわりに。場所がハマると片付けや準備の手間が減ります。",
+      coverSceneTone: "tidy home corner, satisfying before-after feeling, everyday storage joy",
+      paletteHint: "sage green, cream, black, and warm yellow accents",
     };
     return withRotation(base, item, now);
   }
@@ -189,6 +175,20 @@ export function buildProductStoryProfile(item: RakutenItem, options: ProductStor
       useCaseBody: "🙌 朝の支度や家事の合間に使いやすいと、毎日の小さなストレスが減ります。",
       coverSceneTone: "clean modern room, device in use, satisfying time-saving moment",
       paletteHint: "fresh blue, white, graphite, and warm yellow accents",
+    };
+    return withRotation(base, item, now);
+  }
+  if (matches(item, /食品|お米|お水|ミネラルウォーター|コーヒー|お茶|菓子|チョコ|ケーキ|スイーツ|うなぎ|お肉|鮮魚|干物|プロテイン|グルメ|お取り寄せ|冷凍食品/)) {
+    base = {
+      coverHeadline: "週末のご褒美にしたい",
+      coverKicker: "おうちカフェ気分が上がる",
+      problemHeadline: "甘いもの、切らしがち",
+      painPoints: ["おやつがマンネリ", "来客時に慌てる"],
+      solutionHeadline: "家でちょっと贅沢",
+      benefits: ["手軽に楽しめる", "家でちょっと贅沢", "ストックしやすい"],
+      useCaseBody: "🙌 冷凍庫や棚にストックできると、週末のおやつ・来客・夜のご褒美にすぐ出せます。",
+      coverSceneTone: "warm dessert-table excitement, weekend treat, cozy home cafe mood",
+      paletteHint: "berry red, cream, chocolate brown, and warm yellow accents",
     };
     return withRotation(base, item, now);
   }

@@ -64,7 +64,16 @@ function timestamp(now: Date): string {
 
 function sceneHints(item: RakutenItem): string[] {
   const text = `${item.itemName} ${item.itemCaption}`.toLowerCase();
-  if (/食品|米|水|コーヒー|お茶|菓子|チョコ|うなぎ|肉|魚|プロテイン/.test(text)) {
+  if (/美容|コスメ|スキンケア|ヘアケア|メイク|化粧|リップ|美容液|香水/.test(text)) {
+    return [
+      "a soft morning vanity scene with the product neatly placed near a mirror",
+      "a close-up hand applying the product with clean, soft-focus skin texture",
+      "a bathroom or washstand shelf scene with cosmetic bottles and natural light",
+      "a hand-held smartphone snapshot of the product on a bedside table",
+      "a calm self-care moment scene that feels fresh and inviting",
+    ];
+  }
+  if (/食品|お米|お水|ミネラルウォーター|コーヒー|お茶|菓子|チョコ|うなぎ|お肉|鮮魚|干物|プロテイン/.test(text)) {
     return [
       "a cozy kitchen counter with the product naturally prepared for breakfast",
       "a dining table moment with appetizing food styling and real household dishes",
