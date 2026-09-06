@@ -29,6 +29,10 @@ test("buildThreadsCopyMessages embeds the product variables and link placeholder
   assert.match(system, /パターンA｜価格ギャップ重視型/);
   assert.match(system, /パターンB｜時短・手軽さ重視型/);
   assert.match(system, /パターンC｜逆張り・共感重視型/);
+  assert.match(system, /1文目を投稿し、その投稿に自分でリプライする形で2〜5文目をまとめて投稿する/);
+  assert.match(system, /1文目〜5文目は、それぞれ単独で160文字以上200文字以内とすること/);
+  assert.match(system, /【投稿（1文目）】/);
+  assert.match(system, /【リプライ（2〜5文目）】/);
   assert.match(user, /松屋 牛めしの具 プレミアム仕様/);
   assert.match(user, /2,980円/);
   assert.match(user, /★4\.63/);
