@@ -1847,5 +1847,18 @@
     "captionHead": "深夜2時、鏡の前で「あれ、またザラついてる…？」と",
     "slot": "slot1",
     "itemCodeHash": "f83a21857b50"
+  },
+  {
+    "ts": "2026-09-06T15:06:25.436Z",
+    "itemCode": "sanwa-junkei:10000571",
+    "itemName": "【期間限定30%OFF】名古屋コーチン つくね 1kg 冷凍 惣菜 おかず おつまみ 冷凍食品 肉団子 鶏肉 お取り寄せ グルメ 鍋 弁当 業務用 大容量 名古屋 お土産 送料無料 鶏三和 三和 さんわ 三和の純鶏名古屋コーチン",
+    "genreName": "ファッション・子供服",
+    "price": 2086,
+    "postType": 2,
+    "hour": 0,
+    "hook": "loss",
+    "captionHead": "これ知らないと年間○○円損してるかも…って思うレベ",
+    "slot": "slot2",
+    "itemCodeHash": "d498e769920a"
   }
 ]
