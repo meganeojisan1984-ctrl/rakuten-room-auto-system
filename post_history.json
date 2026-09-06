@@ -1821,5 +1821,18 @@
     "captionHead": "え、待って。冷凍庫に常備するだけでこんなに楽になる",
     "slot": "slot2",
     "itemCodeHash": "d4b7b56a1d5a"
+  },
+  {
+    "ts": "2026-09-06T00:40:20.311Z",
+    "itemCode": "vtcosmetic-official:10001951",
+    "itemName": "【9/5限定クーポン】＼最大67％OFF＋ギフト＋送料無料／【VT公式】【 彩り豊かな フルケア セット 5種】リードルショット マスクパック シートマスク 美容液 PDRN ビタミンCアスタキサンチン レチノール レチナール アゼライン酸 保湿 ハリ 弾力 毛穴 キメ 透明感",
+    "genreName": "家電・ガジェット",
+    "price": 4800,
+    "postType": 2,
+    "hour": 9,
+    "hook": "beforeafter",
+    "captionHead": "先月までの私: 朝の肌がザラついて化粧ノリ最悪／今",
+    "slot": "slot0",
+    "itemCodeHash": "2e0a5b63738c"
   }
 ]

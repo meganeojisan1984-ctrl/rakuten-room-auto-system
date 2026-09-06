@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "hono:10005348",
     "charisma-bon:10039016",
     "tomiyo-plus:10000022",
     "swarotonya:10002564",
@@ -499,7 +498,8 @@
     "wakasugi:10000295",
     "apr-japan:10000839",
     "vtcosmetic-official:10000829",
-    "matsuya:10000085"
+    "matsuya:10000085",
+    "vtcosmetic-official:10001951"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
