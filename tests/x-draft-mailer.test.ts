@@ -33,6 +33,9 @@ test("buildXDraftMail includes plain text body and image attachments", () => {
     assert.match(mail, /Subject: =\?UTF-8\?B\?/);
     assert.match(mail, /Content-Type: text\/plain; charset=UTF-8/);
     assert.match(mail, /Instagram投稿が完了しました/);
+    // 本文の改行は SMTP 準拠の CRLF に正規化されていること（LF のままだと受信側で1行に潰れる）
+    assert.match(mail, /Instagram投稿が完了しました。\r\n\r\n本文\r\n\r\nhttps:\/\/example\.com\/item/);
+    assert.equal(/[^\r]\n/.test(mail), false);
     assert.match(mail, /Content-Disposition: attachment; filename="slide-01.jpg"/);
     assert.match(mail, new RegExp(Buffer.from("jpeg-bytes").toString("base64")));
   } finally {

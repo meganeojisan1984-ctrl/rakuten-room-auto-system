@@ -82,7 +82,12 @@ export function buildThreadsCopyMessages(
     "→ 疑問形で締めてコメント欄に「確かに」を集める。",
     "",
     "【5文目】",
-    `ターゲットへリンクへ誘導する文章と商品リンク。リンクは必ず "${LINK_PLACEHOLDER}" というプレースホルダーをそのまま出力すること(実際のURLは後でこちらで差し込みます)。プレースホルダーの後ろに半角スペースを入れて「PR」と入力しておいてください。`,
+    `ターゲットへリンクへ誘導する文章と商品リンク。リンクは必ず "${LINK_PLACEHOLDER}" というプレースホルダーをそのまま出力すること(実際のURLと「PR」表記は後でこちらで差し込むので、自分で「PR」とは書かないこと)。`,
+    "",
+    "## 本文の必須要件（これを満たさない出力は不可）",
+    "- 各パターンの本文は必ず1文目〜4文目をすべて書くこと。1文だけ・2文だけの出力は不可。",
+    "- 1文目の直後だけ改行し、2〜4文目は改行せず1つの段落として続けて書く。",
+    "- 4文目のあとに空行を入れ、5文目(リンク誘導文＋プレースホルダー)を置く。",
     "",
     "## 3パターン作成ルール",
     "以下3つの異なる切り口で投稿を作成してください。それぞれ別の角度から刺すこと。",
@@ -120,7 +125,10 @@ export function buildThreadsCopyMessages(
     "【パターンA｜価格ギャップ重視型】",
     "伸びる確率：〇〇％",
     "",
-    "（本文）",
+    "（1文目）",
+    "（2文目〜4文目を改行せず1段落で）",
+    "",
+    "（5文目：リンク誘導文＋" + LINK_PLACEHOLDER + "）",
     "",
     "採点内訳：",
     "・フック力：〇/20",
@@ -132,7 +140,10 @@ export function buildThreadsCopyMessages(
     "【パターンB｜時短・手軽さ重視型】",
     "伸びる確率：〇〇％",
     "",
-    "（本文）",
+    "（1文目）",
+    "（2文目〜4文目を改行せず1段落で）",
+    "",
+    "（5文目：リンク誘導文＋" + LINK_PLACEHOLDER + "）",
     "",
     "採点内訳：",
     "・フック力：〇/20",
@@ -144,7 +155,10 @@ export function buildThreadsCopyMessages(
     "【パターンC｜逆張り・共感重視型】",
     "伸びる確率：〇〇％",
     "",
-    "（本文）",
+    "（1文目）",
+    "（2文目〜4文目を改行せず1段落で）",
+    "",
+    "（5文目：リンク誘導文＋" + LINK_PLACEHOLDER + "）",
     "",
     "採点内訳：",
     "・フック力：〇/20",
@@ -217,5 +231,9 @@ export async function generateThreadsCopy(
   const content = response.choices?.[0]?.message?.content;
   if (!content) throw new Error("OpenAI chat completion response did not include content");
 
-  return content.split(LINK_PLACEHOLDER).join(`${item.itemUrl} PR`);
+  // モデルが指示に反して自分で「PR」を書いてしまった場合の二重表記を防ぐ
+  return content
+    .split(LINK_PLACEHOLDER)
+    .join(`${item.itemUrl} PR`)
+    .replace(/(\sPR)(\s+PR)+/g, "$1");
 }

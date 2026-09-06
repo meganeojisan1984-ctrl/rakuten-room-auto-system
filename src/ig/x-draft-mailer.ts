@@ -34,6 +34,12 @@ function escapeBoundaryValue(value: string): string {
   return value.replace(/"/g, "'");
 }
 
+// SMTPの本文は CRLF 改行が必須。LF のまま送ると受信側クライアントによっては
+// 改行が失われ、複数文の投稿文が1行に潰れて表示されてしまう。
+function normalizeEol(value: string): string {
+  return value.replace(/\r\n|\r|\n/g, "\r\n");
+}
+
 export function isXDraftMailEnabled(env: NodeJS.ProcessEnv): boolean {
   return !!(env.X_DRAFT_EMAIL_TO && env.SMTP_USER && env.SMTP_PASS);
 }
@@ -48,10 +54,10 @@ export function buildXDraftMail(mail: XDraftMail): string {
     `Content-Type: multipart/mixed; boundary="${boundary}"`,
     "",
     `--${boundary}`,
-    "Content-Type: text/plain; charset=UTF-8",
+    "Content-Type: text/plain; charset=UTF-8; format=fixed",
     "Content-Transfer-Encoding: 8bit",
     "",
-    mail.text,
+    normalizeEol(mail.text),
   ];
 
   for (const attachment of mail.attachments) {

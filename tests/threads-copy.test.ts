@@ -29,6 +29,7 @@ test("buildThreadsCopyMessages embeds the product variables and link placeholder
   assert.match(system, /パターンA｜価格ギャップ重視型/);
   assert.match(system, /パターンB｜時短・手軽さ重視型/);
   assert.match(system, /パターンC｜逆張り・共感重視型/);
+  assert.match(system, /各パターンの本文は必ず1文目〜4文目をすべて書くこと/);
   assert.match(user, /松屋 牛めしの具 プレミアム仕様/);
   assert.match(user, /2,980円/);
   assert.match(user, /★4\.63/);
@@ -47,6 +48,21 @@ test("generateThreadsCopy substitutes the link placeholder with the real item UR
   );
 
   assert.equal(text, "本文の続き\nhttps://item.rakuten.co.jp/matsuya/us30/ PR");
+});
+
+test("generateThreadsCopy collapses a duplicated PR label when the model writes one itself", async () => {
+  const text = await generateThreadsCopy(
+    item,
+    { genre: "食品・冷凍食品" },
+    {
+      apiKey: "test-key",
+      client: async () => ({
+        choices: [{ message: { content: "チェックしてみて→ {{RAKUTEN_LINK}} PR" } }],
+      }),
+    },
+  );
+
+  assert.equal(text, "チェックしてみて→ https://item.rakuten.co.jp/matsuya/us30/ PR");
 });
 
 test("generateThreadsCopy throws when no API key is available", async () => {
