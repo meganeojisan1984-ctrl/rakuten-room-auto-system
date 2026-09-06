@@ -32,6 +32,36 @@ function productFactsLine(item: RakutenItem): string {
   return facts.join(" / ");
 }
 
+function buildPatternOutputTemplate(patternLabel: string): string[] {
+  return [
+    "━━━━━━━━━━━━━━━",
+    `【${patternLabel}】`,
+    "伸びる確率：〇〇％",
+    "",
+    "【投稿（1文目）】",
+    "（1文目本文。160〜200文字）",
+    "",
+    "【リプライ1（2文目）】",
+    "（2文目本文。160〜200文字）",
+    "",
+    "【リプライ2（3文目）】",
+    "（3文目本文。160〜200文字）",
+    "",
+    "【リプライ3（4文目）】",
+    "（4文目本文。160〜200文字）",
+    "",
+    "【リプライ4（5文目）】",
+    "（5文目本文。リンク＋PR表記を含めて160〜200文字）",
+    "",
+    "採点内訳：",
+    "・フック力：〇/20",
+    "・具体性：〇/20",
+    "・逆張り強度：〇/20",
+    "・共感性：〇/20",
+    "・コメント誘発力：〇/20",
+  ];
+}
+
 export function buildThreadsCopyMessages(
   item: RakutenItem,
   context: ThreadsCopyContext,
@@ -52,39 +82,36 @@ export function buildThreadsCopyMessages(
     `- 口調：${tone}`,
     "",
     "## 投稿構成ルール（最重要・厳守）",
-    "この投稿は「1文目を投稿し、その投稿に自分でリプライする形で2〜5文目をまとめて投稿する」2段構成にします。",
-    "- 1文目：単独の投稿本体として出力する",
-    "- 2文目〜5文目：1文目へのリプライとして、改行せず1つの段落として続けて書く（句点「。」で文を区切るが改行はしない）",
+    "この投稿は「1文目を投稿し、その投稿に自分で4回リプライして2文目・3文目・4文目・5文目を1つずつ投稿する」5連投稿にします。",
+    "- 1文目：単独の投稿本体",
+    "- 2文目・3文目・4文目・5文目：それぞれ独立した1つのリプライ投稿",
+    "- 5つの文を1つにまとめて出力することは絶対に禁止。必ず【投稿（1文目）】【リプライ1（2文目）】【リプライ2（3文目）】【リプライ3（4文目）】【リプライ4（5文目）】の5つの見出しに分けて、5ブロックすべてを出力すること。",
     "",
-    "【正しい形式の例】",
-    "```",
-    "【投稿（1文目）】",
-    "（1文目本文。160〜200文字）",
+    "## 文字数ルール（最重要・厳守）",
+    "1文目・2文目・3文目・4文目・5文目は、それぞれ単独で160文字以上200文字以内とすること（5文合計ではなく、1ブロックごとに厳守）。",
+    "- 各ブロックは1つの投稿としてそのまま貼り付けられる完結した文章にすること",
+    "- 出力前に各ブロックの文字数を必ず数え、160文字未満なら描写を足し、200文字を超えたら削って調整すること",
+    "- 5文目の文字数にはリンクとPR表記も含めて160〜200文字に収めること",
     "",
-    "【リプライ（2〜5文目）】",
-    "（2文目）〜🥹（3文目）〜絶対試して。（4文目）〜良くない？🥹（5文目：リンク誘導文＋商品リンク）",
-    "```",
-    "",
-    "## 構成ルール（厳守）",
-    "1文目〜5文目は、それぞれ単独で160文字以上200文字以内とすること（合計ではなく各文ごとに厳守）。",
+    "## 各文の役割（厳守）",
     "",
     "【1文目｜悩み特定フック】※単独の投稿本体",
     "「（ターゲットの悩み）に悩んでる人、（商品/カテゴリ）使った方がいい。」",
     "→ 当事者が1秒で「自分のことだ」と気づく断定文を軸に、160〜200文字になるよう悩みの具体的な背景や共感できる状況描写を厚めに書く。",
     "",
-    "【2文目｜ギャップ提示】※リプライの冒頭、改行せず続ける",
+    "【2文目｜ギャップ提示】※1文目へのリプライ（単独投稿）",
     "「だって、（価格や手軽さなどのハードルの低さ）なのに（得られる嬉しい結果）🥹」",
     "→ コスト＜効果のギャップで驚きを作る。具体的な数字や結果を入れつつ160〜200文字になるよう詳しく書く。",
     "",
-    "【3文目｜逆張りで名指し】※リプライ内、改行せず続ける",
+    "【3文目｜逆張りで名指し】※2文目へのリプライ（単独投稿）",
     "「（高価格帯・手間のかかる既存の選択肢）使ってて（悩み状態）な人絶対試して。」",
     "→ 既存の選択肢を使っている層を名指しで挑発し、保存・コメントを誘発。160〜200文字になるよう具体的に書く。",
     "",
-    "【4文目｜共感問いかけ】※リプライ内、改行せず続ける",
+    "【4文目｜共感問いかけ】※3文目へのリプライ（単独投稿）",
     "「（手間のかかる現状）より（この商品で得られる楽な未来）方が良くない？🥹」",
     "→ 疑問形で締めてコメント欄に「確かに」を集める。160〜200文字になるよう具体的に書く。",
     "",
-    "【5文目｜リンク誘導】※リプライの最後、改行せず続ける、ここで投稿終了",
+    "【5文目｜リンク誘導】※4文目へのリプライ（単独投稿）、ここで投稿終了",
     `ターゲットへリンクへ誘導する文章と商品リンク。160〜200文字になるよう誘導文を厚めに書きつつ、リンクは必ず "${LINK_PLACEHOLDER}" というプレースホルダーをそのまま出力すること(実際のURLは後でこちらで差し込みます)。プレースホルダーの後ろに半角スペースを入れて「PR」と入力しておいてください。`,
     "",
     "## 3パターン作成ルール",
@@ -117,56 +144,11 @@ export function buildThreadsCopyMessages(
     "- 具体的な数字（価格・時間など）を必ず1つ以上入れる",
     "",
     "## 出力形式",
-    "以下のフォーマットで出力してください（解説・前置き不要）。",
+    "以下のフォーマットで出力してください（解説・前置き不要）。パターンごとに5つの見出しをすべて出力すること。",
     "",
-    "━━━━━━━━━━━━━━━",
-    "【パターンA｜価格ギャップ重視型】",
-    "伸びる確率：〇〇％",
-    "",
-    "【投稿（1文目）】",
-    "（1文目本文。160〜200文字）",
-    "",
-    "【リプライ（2〜5文目）】",
-    "（2文目〜5文目を改行せず1つの段落として続けた本文。各文160〜200文字）",
-    "",
-    "採点内訳：",
-    "・フック力：〇/20",
-    "・具体性：〇/20",
-    "・逆張り強度：〇/20",
-    "・共感性：〇/20",
-    "・コメント誘発力：〇/20",
-    "━━━━━━━━━━━━━━━",
-    "【パターンB｜時短・手軽さ重視型】",
-    "伸びる確率：〇〇％",
-    "",
-    "【投稿（1文目）】",
-    "（1文目本文。160〜200文字）",
-    "",
-    "【リプライ（2〜5文目）】",
-    "（2文目〜5文目を改行せず1つの段落として続けた本文。各文160〜200文字）",
-    "",
-    "採点内訳：",
-    "・フック力：〇/20",
-    "・具体性：〇/20",
-    "・逆張り強度：〇/20",
-    "・共感性：〇/20",
-    "・コメント誘発力：〇/20",
-    "━━━━━━━━━━━━━━━",
-    "【パターンC｜逆張り・共感重視型】",
-    "伸びる確率：〇〇％",
-    "",
-    "【投稿（1文目）】",
-    "（1文目本文。160〜200文字）",
-    "",
-    "【リプライ（2〜5文目）】",
-    "（2文目〜5文目を改行せず1つの段落として続けた本文。各文160〜200文字）",
-    "",
-    "採点内訳：",
-    "・フック力：〇/20",
-    "・具体性：〇/20",
-    "・逆張り強度：〇/20",
-    "・共感性：〇/20",
-    "・コメント誘発力：〇/20",
+    ...buildPatternOutputTemplate("パターンA｜価格ギャップ重視型"),
+    ...buildPatternOutputTemplate("パターンB｜時短・手軽さ重視型"),
+    ...buildPatternOutputTemplate("パターンC｜逆張り・共感重視型"),
     "━━━━━━━━━━━━━━━",
     "",
     "【総合おすすめ】",
@@ -180,6 +162,7 @@ export function buildThreadsCopyMessages(
     `商品の説明・キャプション: ${cleanText(item.itemCaption, 300)}`,
     productFactsLine(item),
     "上記の商品情報をもとに、指示された役割・ルールに厳密に従って3パターンを作成してください。",
+    "各パターンで【投稿（1文目）】【リプライ1（2文目）】【リプライ2（3文目）】【リプライ3（4文目）】【リプライ4（5文目）】の5ブロックを必ず分けて出力し、各ブロックを160〜200文字にしてください。",
   ].join("\n");
 
   return { system, user };
@@ -205,6 +188,19 @@ export function isThreadsCopyEnabled(env: NodeJS.ProcessEnv): boolean {
   return env.THREADS_COPY_ENABLED !== "0" && !!env.OPENAI_API_KEY;
 }
 
+const REPLY_BLOCK_HEADINGS = ["【リプライ1（2文目）】", "【リプライ2（3文目）】", "【リプライ3（4文目）】", "【リプライ4（5文目）】"];
+
+const SPLIT_REPLY_RETRY_INSTRUCTION = [
+  "2文目〜5文目がまとまってしまっています。もう一度、3パターンすべてを出力し直してください。",
+  "各パターンで【投稿（1文目）】【リプライ1（2文目）】【リプライ2（3文目）】【リプライ3（4文目）】【リプライ4（5文目）】の5つの見出しを必ず立て、",
+  "見出しごとに1投稿分の本文（それぞれ160〜200文字）を書いてください。まとめ書きは禁止です。",
+].join("\n");
+
+/** 3パターンすべてで2〜5文目が個別の見出しに分かれているか */
+export function hasSplitReplyBlocks(content: string, patternCount = 3): boolean {
+  return REPLY_BLOCK_HEADINGS.every((heading) => content.split(heading).length - 1 >= patternCount);
+}
+
 export async function generateThreadsCopy(
   item: RakutenItem,
   context: ThreadsCopyContext,
@@ -217,20 +213,25 @@ export async function generateThreadsCopy(
   const client = options.client ?? defaultOpenAiChatClient;
   const { system, user } = buildThreadsCopyMessages(item, context);
 
-  const response = await client(
-    {
-      model,
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
-      ],
-      temperature: 0.9,
-    },
-    apiKey,
-  );
+  const messages: Array<{ role: string; content: string }> = [
+    { role: "system", content: system },
+    { role: "user", content: user },
+  ];
 
-  const content = response.choices?.[0]?.message?.content;
-  if (!content) throw new Error("OpenAI chat completion response did not include content");
+  const request = async (): Promise<string> => {
+    const response = await client({ model, messages: [...messages], temperature: 0.9 }, apiKey);
+    const content = response.choices?.[0]?.message?.content;
+    if (!content) throw new Error("OpenAI chat completion response did not include content");
+    return content;
+  };
+
+  let content = await request();
+  if (!hasSplitReplyBlocks(content)) {
+    console.warn("[threads-copy] 2〜5文目が分割されていない出力を検出、フォーマットを指定して再生成します");
+    messages.push({ role: "assistant", content });
+    messages.push({ role: "user", content: SPLIT_REPLY_RETRY_INSTRUCTION });
+    content = await request();
+  }
 
   return content.split(LINK_PLACEHOLDER).join(`${item.itemUrl} PR`);
 }
