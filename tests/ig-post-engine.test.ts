@@ -112,9 +112,10 @@ test("buildXDraftText wraps AI-generated Threads copy with attachment and spare-
     );
 
     assert.match(text, /Threadsへの手動投稿用です/);
+    assert.match(text, /その投稿に自分でリプライする形で【リプライ（2〜5文目）】を続けて投稿してください/);
     assert.match(text, /【パターンA｜価格ギャップ重視型】/);
     assert.match(text, /伸びる確率：88％/);
-    assert.match(text, /【添付】画像1〜4を投稿に添付/);
+    assert.match(text, /【添付】画像1〜4を1文目の投稿に添付/);
     assert.match(text, /【元キャプション（必要なら調整用）】/);
     assert.match(text, /【予備画像URL】/);
     assert.match(text, /https:\/\/cdn\.example\.com\/slide-5\.jpg/);
