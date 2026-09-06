@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-08-19T12:50:10.468Z",
-    "agent": "copywriter",
-    "ok": false,
-    "summary": "Error: 紹介文の生成に全て失敗しました"
-  },
-  {
-    "ts": "2026-08-19T15:07:23.885Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "38件抽出、履歴13件のいいね数を更新"
-  },
-  {
-    "ts": "2026-08-19T15:07:23.895Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴117件(計測済74) 実売0件(¥0) mode=likes"
-  },
-  {
-    "ts": "2026-08-19T15:07:24.382Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第42世代へ更新 (ルールベース)、警告0件"
-  },
-  {
     "ts": "2026-08-19T23:21:15.936Z",
     "agent": "scout",
     "ok": true,
@@ -1195,6 +1171,30 @@
   },
   {
     "ts": "2026-09-06T00:40:20.310Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-09-06T08:20:51.068Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (美容・コスメ)"
+  },
+  {
+    "ts": "2026-09-06T08:20:57.146Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ1)"
+  },
+  {
+    "ts": "2026-09-06T08:22:35.631Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-09-06T08:24:56.111Z",
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"

@@ -1834,5 +1834,18 @@
     "captionHead": "先月までの私: 朝の肌がザラついて化粧ノリ最悪／今",
     "slot": "slot0",
     "itemCodeHash": "2e0a5b63738c"
+  },
+  {
+    "ts": "2026-09-06T08:24:56.112Z",
+    "itemCode": "takami-labo:10000519",
+    "itemName": "タカミスキンピール◆送料無料│2本～購入で特典付き◆角質美容水 美容皮膚発想 スキンケア 毛穴 キメ くすみ タカミ スキンピール 角質ケア 美容液 肌荒れ ザラつき 敏感肌 TAKAMI 30mL",
+    "genreName": "美容・コスメ",
+    "price": 5720,
+    "postType": 1,
+    "hour": 17,
+    "hook": "story",
+    "captionHead": "深夜2時、鏡の前で「あれ、またザラついてる…？」と",
+    "slot": "slot1",
+    "itemCodeHash": "f83a21857b50"
   }
 ]
