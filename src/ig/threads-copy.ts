@@ -18,6 +18,10 @@ interface OpenAiChatResponse {
 const DEFAULT_MODEL = "gpt-4o-mini";
 const LINK_PLACEHOLDER = "{{RAKUTEN_LINK}}";
 const DEFAULT_TONE = "親しみやすいけど丁寧な感じで";
+/** 1文目〜4文目の合計文字数（5文目のリンク行は含めない） */
+export const BODY_MIN_CHARS = 160;
+export const BODY_MAX_CHARS = 200;
+const MAX_ATTEMPTS = 2;
 
 function cleanText(value: string, max = 200): string {
   return value.replace(/\s+/g, " ").trim().slice(0, max);
@@ -62,22 +66,32 @@ export function buildThreadsCopyMessages(
     "2文目だって、〜🥹3文目〜絶対試して。4文目〜良くない？🥹",
     "```",
     "",
-    "## 構成ルール（厳守）",
-    "合計160〜200文字以内。",
+    "## 文字数ルール（最重要・厳守）",
+    `1文目〜4文目の合計は必ず${BODY_MIN_CHARS}〜${BODY_MAX_CHARS}文字。${BODY_MIN_CHARS}文字未満は不可(短すぎる投稿は伸びない)。`,
+    "各文の目安は以下。下限を下回った文には具体的な描写・数字・体験を足して必ず埋めること。",
+    "- 1文目（悩み特定フック）：40〜50文字",
+    "- 2文目（ギャップ提示）：45〜55文字",
+    "- 3文目（逆張りで名指し）：45〜55文字",
+    "- 4文目（共感問いかけ）：30〜40文字",
+    `※上記4つの下限の合計がちょうど${BODY_MIN_CHARS}文字。書き終えたら必ず自分で文字数を数え、${BODY_MIN_CHARS}文字未満なら書き直してから出力すること。`,
+    "※5文目（リンク誘導文と商品リンク）はこの文字数に含めない。",
+    "※句読点・カギカッコ・絵文字も1文字として数える。",
     "",
-    "【1文目｜悩み特定フック】※この後だけ改行",
+    "## 構成ルール（厳守）",
+    "",
+    "【1文目｜悩み特定フック】40〜50文字 ※この後だけ改行",
     "「（ターゲットの悩み）に悩んでる人、（商品/カテゴリ）使った方がいい。」",
     "→ 当事者が1秒で「自分のことだ」と気づく断定文。",
     "",
-    "【2文目｜ギャップ提示】※改行せず続ける",
+    "【2文目｜ギャップ提示】45〜55文字 ※改行せず続ける",
     "「だって、（価格や手軽さなどのハードルの低さ）なのに（得られる嬉しい結果）🥹」",
     "→ コスト＜効果のギャップで驚きを作る。具体的な数字や結果を入れる。",
     "",
-    "【3文目｜逆張りで名指し】※改行せず続ける",
+    "【3文目｜逆張りで名指し】45〜55文字 ※改行せず続ける",
     "「（高価格帯・手間のかかる既存の選択肢）使ってて（悩み状態）な人絶対試して。」",
     "→ 既存の選択肢を使っている層を名指しで挑発し、保存・コメントを誘発。",
     "",
-    "【4文目｜共感問いかけ】※改行せず続ける、ここで投稿終了",
+    "【4文目｜共感問いかけ】30〜40文字 ※改行せず続ける、ここで投稿終了",
     "「（手間のかかる現状）より（この商品で得られる楽な未来）方が良くない？🥹」",
     "→ 疑問形で締めてコメント欄に「確かに」を集める。",
     "",
@@ -88,6 +102,7 @@ export function buildThreadsCopyMessages(
     "- 各パターンの本文は必ず1文目〜4文目をすべて書くこと。1文だけ・2文だけの出力は不可。",
     "- 1文目の直後だけ改行し、2〜4文目は改行せず1つの段落として続けて書く。",
     "- 4文目のあとに空行を入れ、5文目(リンク誘導文＋プレースホルダー)を置く。",
+    `- 1文目〜4文目の合計が${BODY_MIN_CHARS}文字未満の出力は不可。必ず数えてから出力すること。`,
     "",
     "## 3パターン作成ルール",
     "以下3つの異なる切り口で投稿を作成してください。それぞれ別の角度から刺すこと。",
@@ -204,6 +219,55 @@ export function isThreadsCopyEnabled(env: NodeJS.ProcessEnv): boolean {
   return env.THREADS_COPY_ENABLED !== "0" && !!env.OPENAI_API_KEY;
 }
 
+const PATTERN_LABELS = ["A", "B", "C"];
+
+/** 生成結果から各パターンの本文(1文目〜4文目)だけを抜き出す。リンク行と採点内訳は除外する。 */
+export function extractPatternBodies(content: string): string[] {
+  const bodies: string[] = [];
+  for (const block of content.split(/^[━─-]{3,}$/m)) {
+    if (!/【パターン/.test(block)) continue;
+    const collected: string[] = [];
+    let started = false;
+    for (const raw of block.split(/\r?\n/)) {
+      const line = raw.trim();
+      if (!started) {
+        if (/^伸びる確率/.test(line)) started = true;
+        continue;
+      }
+      if (!line) {
+        if (collected.length > 0) break;
+        continue;
+      }
+      if (/^(採点内訳|・|【|【総合)/.test(line)) break;
+      if (line.includes(LINK_PLACEHOLDER) || /https?:\/\//.test(line)) break;
+      collected.push(line);
+    }
+    if (collected.length > 0) bodies.push(collected.join(""));
+  }
+  return bodies;
+}
+
+function countChars(value: string): number {
+  return Array.from(value).length;
+}
+
+/** 文字数・文数ルールに違反しているパターンを人が読める形で返す（違反なしなら空配列） */
+export function findCopyRuleViolations(content: string): string[] {
+  const bodies = extractPatternBodies(content);
+  if (bodies.length === 0) return [];
+  const violations: string[] = [];
+  bodies.forEach((body, index) => {
+    const label = PATTERN_LABELS[index] ?? `#${index + 1}`;
+    const chars = countChars(body);
+    // 2文目・4文目は句点ではなく🥹で終わる指示なので、絵文字も文末記号として数える
+    const sentences = (body.match(/[。？！]|🥹/gu) ?? []).length;
+    if (chars < BODY_MIN_CHARS) violations.push(`パターン${label}: ${chars}文字（${BODY_MIN_CHARS}文字未満）`);
+    else if (chars > BODY_MAX_CHARS) violations.push(`パターン${label}: ${chars}文字（${BODY_MAX_CHARS}文字超過）`);
+    if (sentences < 4) violations.push(`パターン${label}: ${sentences}文（1文目〜4文目が揃っていない）`);
+  });
+  return violations;
+}
+
 export async function generateThreadsCopy(
   item: RakutenItem,
   context: ThreadsCopyContext,
@@ -216,20 +280,37 @@ export async function generateThreadsCopy(
   const client = options.client ?? defaultOpenAiChatClient;
   const { system, user } = buildThreadsCopyMessages(item, context);
 
-  const response = await client(
-    {
-      model,
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
-      ],
-      temperature: 0.9,
-    },
-    apiKey,
-  );
+  const messages: Array<{ role: string; content: string }> = [
+    { role: "system", content: system },
+    { role: "user", content: user },
+  ];
 
-  const content = response.choices?.[0]?.message?.content;
-  if (!content) throw new Error("OpenAI chat completion response did not include content");
+  let content = "";
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
+    const response = await client({ model, messages: [...messages], temperature: 0.9 }, apiKey);
+    const text = response.choices?.[0]?.message?.content;
+    if (!text) throw new Error("OpenAI chat completion response did not include content");
+    content = text;
+
+    const violations = findCopyRuleViolations(text);
+    if (violations.length === 0) break;
+    if (attempt === MAX_ATTEMPTS) {
+      console.warn("[threads-copy] 文字数ルールを満たさないまま出力しました:", violations.join(" / "));
+      break;
+    }
+    console.warn("[threads-copy] 文字数ルール違反のため再生成します:", violations.join(" / "));
+    messages.push(
+      { role: "assistant", content: text },
+      {
+        role: "user",
+        content: [
+          `直前の出力は文字数ルール違反です（${violations.join(" / ")}）。`,
+          `全パターンについて、1文目〜4文目の合計が必ず${BODY_MIN_CHARS}〜${BODY_MAX_CHARS}文字になるように書き直してください。`,
+          "各文に具体的な描写・数字・使用シーンを足して字数を埋めること。構成と出力フォーマットは一切変えないこと。",
+        ].join(""),
+      },
+    );
+  }
 
   // モデルが指示に反して自分で「PR」を書いてしまった場合の二重表記を防ぐ
   return content
