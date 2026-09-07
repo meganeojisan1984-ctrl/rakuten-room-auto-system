@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "zakka-elements:10004195",
     "okotico:10038565",
     "bellevie-harima:10152805",
     "long-lifeservice:10002867",
@@ -499,7 +498,8 @@
     "takami-labo:10000519",
     "sanwa-junkei:10000571",
     "kurashikenkou:10225492",
-    "yamagoiida:10000084"
+    "yamagoiida:10000084",
+    "suigodori:10000552"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
