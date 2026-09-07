@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "swarotonya:10002564",
     "enetroom:10045707",
     "zakka-elements:10004195",
     "okotico:10038565",
@@ -499,7 +498,8 @@
     "matsuya:10000085",
     "vtcosmetic-official:10001951",
     "takami-labo:10000519",
-    "sanwa-junkei:10000571"
+    "sanwa-junkei:10000571",
+    "kurashikenkou:10225492"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
