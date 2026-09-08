@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "long-lifeservice:10002867",
     "1storage:10000181",
     "craife:10000487",
     "livingut:10231179",
@@ -499,7 +498,8 @@
     "yamagoiida:10000084",
     "suigodori:10000552",
     "tu-hacci:10005079",
-    "vtcosmetic-official:10001971"
+    "vtcosmetic-official:10001971",
+    "ringerhut:10000132"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
