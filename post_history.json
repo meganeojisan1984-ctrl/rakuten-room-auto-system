@@ -1920,5 +1920,18 @@
     "captionHead": "え、待って。これ楽天で見つけたときテンション上がり",
     "slot": "slot0",
     "itemCodeHash": "acab4a91d55f"
+  },
+  {
+    "ts": "2026-09-08T08:40:20.209Z",
+    "itemCode": "vtcosmetic-official:10001971",
+    "itemName": "＼最大58％OFF＋ギフト＋送料無料／【 VT リードルショット 】ハローキティ【選べる 2点】【VT公式】美容液 導入液 ブースター シカ CICA PDRN シカ ニードル 美容成分 エイジングケア 保湿 角質 毛穴 浸透 ツヤ 美肌 韓国 コスメ スキンケア サンリオ",
+    "genreName": "ファッション・子供服",
+    "price": 3990,
+    "postType": 1,
+    "hour": 17,
+    "hook": "question",
+    "captionHead": "肌の導入液、まだ軽視してない？これ知らなかったら損",
+    "slot": "slot1",
+    "itemCodeHash": "535b063ade61"
   }
 ]

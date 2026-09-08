@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "bellevie-harima:10152805",
     "long-lifeservice:10002867",
     "1storage:10000181",
     "craife:10000487",
@@ -499,7 +498,8 @@
     "kurashikenkou:10225492",
     "yamagoiida:10000084",
     "suigodori:10000552",
-    "tu-hacci:10005079"
+    "tu-hacci:10005079",
+    "vtcosmetic-official:10001971"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
