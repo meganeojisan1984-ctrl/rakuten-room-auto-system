@@ -1,0 +1,127 @@
+{
+ "hero": "c06_v13_180",
+ "tab": "c09_v13_288",
+ "stickers": [
+  {
+   "file": "01.png",
+   "cut": "c01_v13_000",
+   "bytes": 282315
+  },
+  {
+   "file": "02.png",
+   "cut": "c02_v13_036",
+   "bytes": 248855
+  },
+  {
+   "file": "03.png",
+   "cut": "c06_v13_180",
+   "bytes": 254914
+  },
+  {
+   "file": "04.png",
+   "cut": "c08_v13_252",
+   "bytes": 257981
+  },
+  {
+   "file": "05.png",
+   "cut": "c09_v13_288",
+   "bytes": 290223
+  },
+  {
+   "file": "06.png",
+   "cut": "c10_v13_324",
+   "bytes": 298378
+  },
+  {
+   "file": "07.png",
+   "cut": "c03_v13_072",
+   "bytes": 271050
+  },
+  {
+   "file": "08.png",
+   "cut": "c04_v13_108",
+   "bytes": 251572
+  },
+  {
+   "file": "09.png",
+   "cut": "c27_v17_176",
+   "bytes": 168416
+  },
+  {
+   "file": "10.png",
+   "cut": "c29_v17_285",
+   "bytes": 216487
+  },
+  {
+   "file": "11.png",
+   "cut": "c26_v17_108",
+   "bytes": 145875
+  },
+  {
+   "file": "12.png",
+   "cut": "c24_v17_036",
+   "bytes": 85568
+  },
+  {
+   "file": "13.png",
+   "cut": "c12_v14_156",
+   "bytes": 180575
+  },
+  {
+   "file": "14.png",
+   "cut": "c11_v14_120",
+   "bytes": 270940
+  },
+  {
+   "file": "15.png",
+   "cut": "c18_v15_180",
+   "bytes": 289919
+  },
+  {
+   "file": "16.png",
+   "cut": "c19_v15_216",
+   "bytes": 304792
+  },
+  {
+   "file": "17.png",
+   "cut": "c07_v13_216",
+   "bytes": 216055
+  },
+  {
+   "file": "18.png",
+   "cut": "c17_v15_144",
+   "bytes": 241964
+  },
+  {
+   "file": "19.png",
+   "cut": "c14_v15_036",
+   "bytes": 297268
+  },
+  {
+   "file": "20.png",
+   "cut": "c15_v15_072",
+   "bytes": 275946
+  },
+  {
+   "file": "21.png",
+   "cut": "c16_v15_108",
+   "bytes": 300961
+  },
+  {
+   "file": "22.png",
+   "cut": "c20_v15_252",
+   "bytes": 305578
+  },
+  {
+   "file": "23.png",
+   "cut": "c22_v15_324",
+   "bytes": 280287
+  },
+  {
+   "file": "24.png",
+   "cut": "c28_v17_249",
+   "bytes": 159308
+  }
+ ],
+ "zip": "assets/line-stickers/line-sticker-set24.zip"
+}

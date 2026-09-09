@@ -1,0 +1,294 @@
+{
+ "cuts": [
+  {
+   "id": "c01_v13_000",
+   "src": "source/v13.mp4",
+   "start": 0,
+   "count": 36,
+   "size": [
+    736,
+    800
+   ]
+  },
+  {
+   "id": "c02_v13_036",
+   "src": "source/v13.mp4",
+   "start": 36,
+   "count": 36,
+   "size": [
+    736,
+    800
+   ]
+  },
+  {
+   "id": "c03_v13_072",
+   "src": "source/v13.mp4",
+   "start": 72,
+   "count": 36,
+   "size": [
+    736,
+    800
+   ]
+  },
+  {
+   "id": "c04_v13_108",
+   "src": "source/v13.mp4",
+   "start": 108,
+   "count": 36,
+   "size": [
+    736,
+    800
+   ]
+  },
+  {
+   "id": "c05_v13_144",
+   "src": "source/v13.mp4",
+   "start": 144,
+   "count": 36,
+   "size": [
+    736,
+    800
+   ]
+  },
+  {
+   "id": "c06_v13_180",
+   "src": "source/v13.mp4",
+   "start": 180,
+   "count": 36,
+   "size": [
+    736,
+    800
+   ]
+  },
+  {
+   "id": "c07_v13_216",
+   "src": "source/v13.mp4",
+   "start": 216,
+   "count": 36,
+   "size": [
+    736,
+    800
+   ]
+  },
+  {
+   "id": "c08_v13_252",
+   "src": "source/v13.mp4",
+   "start": 252,
+   "count": 36,
+   "size": [
+    736,
+    800
+   ]
+  },
+  {
+   "id": "c09_v13_288",
+   "src": "source/v13.mp4",
+   "start": 288,
+   "count": 36,
+   "size": [
+    736,
+    800
+   ]
+  },
+  {
+   "id": "c10_v13_324",
+   "src": "source/v13.mp4",
+   "start": 324,
+   "count": 36,
+   "size": [
+    736,
+    800
+   ]
+  },
+  {
+   "id": "c11_v14_120",
+   "src": "source/v14.mp4",
+   "start": 120,
+   "count": 36,
+   "size": [
+    736,
+    800
+   ]
+  },
+  {
+   "id": "c12_v14_156",
+   "src": "source/v14.mp4",
+   "start": 156,
+   "count": 36,
+   "size": [
+    736,
+    800
+   ]
+  },
+  {
+   "id": "c13_v15_000",
+   "src": "source/v15.mp4",
+   "start": 0,
+   "count": 36,
+   "size": [
+    736,
+    800
+   ]
+  },
+  {
+   "id": "c14_v15_036",
+   "src": "source/v15.mp4",
+   "start": 36,
+   "count": 36,
+   "size": [
+    736,
+    800
+   ]
+  },
+  {
+   "id": "c15_v15_072",
+   "src": "source/v15.mp4",
+   "start": 72,
+   "count": 36,
+   "size": [
+    736,
+    800
+   ]
+  },
+  {
+   "id": "c16_v15_108",
+   "src": "source/v15.mp4",
+   "start": 108,
+   "count": 36,
+   "size": [
+    736,
+    800
+   ]
+  },
+  {
+   "id": "c17_v15_144",
+   "src": "source/v15.mp4",
+   "start": 144,
+   "count": 36,
+   "size": [
+    736,
+    800
+   ]
+  },
+  {
+   "id": "c18_v15_180",
+   "src": "source/v15.mp4",
+   "start": 180,
+   "count": 36,
+   "size": [
+    736,
+    800
+   ]
+  },
+  {
+   "id": "c19_v15_216",
+   "src": "source/v15.mp4",
+   "start": 216,
+   "count": 36,
+   "size": [
+    736,
+    800
+   ]
+  },
+  {
+   "id": "c20_v15_252",
+   "src": "source/v15.mp4",
+   "start": 252,
+   "count": 36,
+   "size": [
+    736,
+    800
+   ]
+  },
+  {
+   "id": "c21_v15_288",
+   "src": "source/v15.mp4",
+   "start": 288,
+   "count": 36,
+   "size": [
+    736,
+    800
+   ]
+  },
+  {
+   "id": "c22_v15_324",
+   "src": "source/v15.mp4",
+   "start": 324,
+   "count": 36,
+   "size": [
+    736,
+    800
+   ]
+  },
+  {
+   "id": "c23_v17_000",
+   "src": "source/v17.mp4",
+   "start": 0,
+   "count": 36,
+   "size": [
+    480,
+    544
+   ]
+  },
+  {
+   "id": "c24_v17_036",
+   "src": "source/v17.mp4",
+   "start": 36,
+   "count": 36,
+   "size": [
+    480,
+    544
+   ]
+  },
+  {
+   "id": "c25_v17_072",
+   "src": "source/v17.mp4",
+   "start": 72,
+   "count": 36,
+   "size": [
+    480,
+    544
+   ]
+  },
+  {
+   "id": "c26_v17_108",
+   "src": "source/v17.mp4",
+   "start": 108,
+   "count": 36,
+   "size": [
+    480,
+    544
+   ]
+  },
+  {
+   "id": "c27_v17_176",
+   "src": "source/v17.mp4",
+   "start": 176,
+   "count": 36,
+   "size": [
+    480,
+    544
+   ]
+  },
+  {
+   "id": "c28_v17_249",
+   "src": "source/v17.mp4",
+   "start": 249,
+   "count": 36,
+   "size": [
+    480,
+    544
+   ]
+  },
+  {
+   "id": "c29_v17_285",
+   "src": "source/v17.mp4",
+   "start": 285,
+   "count": 36,
+   "size": [
+    480,
+    544
+   ]
+  }
+ ]
+}
