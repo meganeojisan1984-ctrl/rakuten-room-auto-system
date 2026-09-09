@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-08-24T15:22:12.614Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "36件抽出、履歴7件のいいね数を更新"
-  },
-  {
-    "ts": "2026-08-24T15:22:12.624Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴117件(計測済74) 実売0件(¥0) mode=likes"
-  },
-  {
-    "ts": "2026-08-24T15:22:13.485Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第47世代へ更新 (ルールベース)、警告1件"
-  },
-  {
-    "ts": "2026-08-24T23:20:46.729Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (キッチン消耗品・日用品)"
-  },
-  {
     "ts": "2026-08-24T23:20:46.822Z",
     "agent": "copywriter",
     "ok": false,
@@ -1198,5 +1174,29 @@
     "agent": "commander",
     "ok": true,
     "summary": "第62世代へ更新 (ルールベース)、警告0件"
+  },
+  {
+    "ts": "2026-09-09T01:05:24.426Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (ファッション・子供服)"
+  },
+  {
+    "ts": "2026-09-09T01:05:29.391Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ2)"
+  },
+  {
+    "ts": "2026-09-09T01:07:21.256Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-09-09T01:09:40.651Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
   }
 ]

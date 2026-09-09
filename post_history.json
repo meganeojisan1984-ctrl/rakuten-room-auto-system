@@ -1950,5 +1950,18 @@
     "captionHead": "冷凍庫、ちゃんぽんで埋めてない？まだレトルトばかり",
     "slot": "slot0",
     "itemCodeHash": "b955b253269a"
+  },
+  {
+    "ts": "2026-09-09T01:09:40.652Z",
+    "itemCode": "cerestbread:10000185",
+    "itemName": "セレストブレッドオリジナル もちもち ベーグル 選べる12個セット 4種類×3個 ローファット［冷凍のみ］【送料無料】【4～5営業日以内に出荷】",
+    "genreName": "ファッション・子供服",
+    "price": 5960,
+    "postType": 2,
+    "hour": 10,
+    "hook": "question",
+    "captionHead": "冷凍庫、毎朝「朝ごはん何にしよう」で損してない？ ",
+    "slot": "slot0",
+    "itemCodeHash": "8b122b60834a"
   }
 ]
