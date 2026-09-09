@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "craife:10000487",
     "livingut:10231179",
     "annon:10027563",
     "ajiro:10002091",
@@ -499,7 +498,8 @@
     "tu-hacci:10005079",
     "vtcosmetic-official:10001971",
     "ringerhut:10000132",
-    "cerestbread:10000185"
+    "cerestbread:10000185",
+    "tsurunishi:10000943"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }

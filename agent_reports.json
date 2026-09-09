@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-08-24T23:20:46.822Z",
-    "agent": "copywriter",
-    "ok": false,
-    "summary": "Error: 紹介文の生成に全て失敗しました"
-  },
-  {
-    "ts": "2026-08-25T04:35:15.665Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (家事効率化グッズ)"
-  },
-  {
-    "ts": "2026-08-25T04:35:15.856Z",
-    "agent": "copywriter",
-    "ok": false,
-    "summary": "Error: 紹介文の生成に全て失敗しました"
-  },
-  {
-    "ts": "2026-08-25T12:46:53.666Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (ハイエンド・スタイリッシュ家電)"
-  },
-  {
     "ts": "2026-08-25T12:46:53.794Z",
     "agent": "copywriter",
     "ok": false,
@@ -1195,6 +1171,30 @@
   },
   {
     "ts": "2026-09-09T01:09:40.651Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-09-09T08:36:51.432Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (美容・コスメ)"
+  },
+  {
+    "ts": "2026-09-09T08:36:56.783Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ2)"
+  },
+  {
+    "ts": "2026-09-09T08:38:36.864Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-09-09T08:41:25.726Z",
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"

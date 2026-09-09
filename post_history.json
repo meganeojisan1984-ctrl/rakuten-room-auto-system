@@ -1963,5 +1963,18 @@
     "captionHead": "冷凍庫、毎朝「朝ごはん何にしよう」で損してない？ ",
     "slot": "slot0",
     "itemCodeHash": "8b122b60834a"
+  },
+  {
+    "ts": "2026-09-09T08:41:25.727Z",
+    "itemCode": "tsurunishi:10000943",
+    "itemName": "【おまけ付き】7,900円OFFクーポン有！9/9 02:00 ~ 9/11 09:59まで！【公式】オルナオーガニック【 福袋 】 クレンジング 洗顔 化粧水 (200ml) 美容液 (47ml) 乳液 (150ml) クレンジングジェル (130g) 泥洗顔 (130g)",
+    "genreName": "美容・コスメ",
+    "price": 12380,
+    "postType": 2,
+    "hour": 17,
+    "hook": "empathy",
+    "captionHead": "乾燥や毛穴の悩みで困ってる人、正直手を挙げて🙋 ",
+    "slot": "slot1",
+    "itemCodeHash": "6ba4709a57a0"
   }
 ]
