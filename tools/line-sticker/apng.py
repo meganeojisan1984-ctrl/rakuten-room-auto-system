@@ -76,30 +76,19 @@ def _diff_rect(cur, prev):
     return int(xs[0]), int(ys[0]), int(xs[-1]) + 1, int(ys[-1]) + 1
 
 
-def write_apng(path, frames, delay_num, delay_den, palette=None, loops=0):
+def write_apng(path, frames, delay_num, delay_den, loops=1):
     """frames: list of (h, w, 4) uint8 RGBA, all the same size.
 
-    palette: optional (rgba_palette (n,4) uint8, index_frames list of (h,w) uint8)
-    to emit a colour-type-3 APNG instead of colour-type-6.
+    Always written as colour type 6 (true-colour RGBA). LINE Creators Market
+    requires RGB colour mode, so an indexed-colour APNG is rejected at upload
+    even though it is a valid APNG -- reduce colours before calling this and
+    let deflate exploit the repetition instead.
     """
-    if palette is not None:
-        pal, idx_frames = palette
-        h, w = idx_frames[0].shape
-        ihdr = struct.pack(">IIBBBBB", w, h, 8, 3, 0, 0, 0)
-        extra = [_chunk(b"PLTE", bytes(pal[:, :3].reshape(-1)))]
-        alpha = pal[:, 3]
-        if (alpha != 255).any():
-            # tRNS may be truncated: entries past the last non-opaque one default to 255.
-            keep = len(alpha) - int(np.argmax(alpha[::-1] != 255))
-            extra.append(_chunk(b"tRNS", bytes(alpha[:keep])))
-        data = [f[:, :, None] for f in idx_frames]
-        bpp = 1
-    else:
-        h, w = frames[0].shape[:2]
-        ihdr = struct.pack(">IIBBBBB", w, h, 8, 6, 0, 0, 0)
-        extra = []
-        data = frames
-        bpp = 4
+    h, w = frames[0].shape[:2]
+    ihdr = struct.pack(">IIBBBBB", w, h, 8, 6, 0, 0, 0)
+    extra = []
+    data = frames
+    bpp = 4
 
     out = [SIG, _chunk(b"IHDR", ihdr)]
     out += extra

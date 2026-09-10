@@ -8,8 +8,10 @@ import numpy as np
 from PIL import Image
 from scipy import ndimage
 
-MAX_BYTES = 300 * 1024
+# LINE Creators Market limits: 1MB per file, 1-4 loops, 4s of total playback.
+MAX_BYTES = 1024 * 1024
 OK_SECONDS = (1.0, 2.0, 3.0, 4.0)
+MAX_TOTAL_SECONDS = 4.0
 
 
 def read_actl(path):
@@ -17,6 +19,7 @@ def read_actl(path):
     blob = open(path, "rb").read()
     if blob[:8] != b"\x89PNG\r\n\x1a\n":
         raise ValueError("not a PNG")
+    colour_type = blob[25]
     pos, n_frames, plays, total = 8, None, None, 0.0
     while pos < len(blob):
         ln = struct.unpack(">I", blob[pos:pos + 4])[0]
@@ -28,23 +31,29 @@ def read_actl(path):
             num, den = struct.unpack(">HH", data[20:24])
             total += num / (den or 100)
         pos += 12 + ln
-    return n_frames, plays, total
+    return n_frames, plays, total, colour_type
 
 
 def check(path):
     errs = []
     size = os.path.getsize(path)
-    n_frames, plays, total = read_actl(path)
+    n_frames, plays, total, colour_type = read_actl(path)
     if n_frames is None:
         errs.append("not an APNG (no acTL)")
     if size > MAX_BYTES:
         errs.append(f"size {size / 1024:.1f}KB > 300KB")
     if not (5 <= (n_frames or 0) <= 20):
         errs.append(f"frame count {n_frames} outside 5-20")
-    if plays != 0:
-        errs.append(f"loop count {plays} is not infinite")
+    if colour_type != 6:
+        # An indexed-colour APNG is valid PNG but LINE requires RGB colour mode
+        # and its uploader rejects the file outright.
+        errs.append(f"colour type {colour_type} is not 6 (RGBA)")
+    if not 1 <= (plays or 0) <= 4:
+        errs.append(f"loop count {plays} outside LINE's 1-4")
     if not any(abs(total - s) < 1e-6 for s in OK_SECONDS):
         errs.append(f"duration {total:.6f}s is not exactly 1/2/3/4s")
+    if total * (plays or 0) > MAX_TOTAL_SECONDS + 1e-6:
+        errs.append(f"total playback {total * (plays or 0):.3f}s exceeds 4s")
 
     im = Image.open(path)
     if im.size != (320, 270):
@@ -67,8 +76,8 @@ def check(path):
     if margin < 10:
         errs.append(f"margin {margin}px < 10px")
     return {"file": os.path.basename(path), "kb": round(size / 1024, 1),
-            "frames": n_frames, "seconds": round(total, 4), "margin": margin,
-            "errors": errs}
+            "frames": n_frames, "seconds": round(total, 4), "loops": plays,
+            "margin": margin, "errors": errs}
 
 
 def main():
@@ -77,7 +86,7 @@ def main():
     for r in rows:
         flag = "NG" if r["errors"] else "ok"
         print(f"{flag}  {r['file']:<28} {r['kb']:>6.1f}KB  {r['frames']:>2}f  "
-              f"{r['seconds']}s  margin={r['margin']}px")
+              f"{r['seconds']}s x{r['loops']}  margin={r['margin']}px")
         for e in r["errors"]:
             print(f"      -> {e}")
             bad += 1

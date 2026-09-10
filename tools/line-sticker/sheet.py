@@ -4,19 +4,48 @@ import base64
 import json
 import os
 import sys
+import tempfile
+
+import numpy as np
+from PIL import Image
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import build as B
+from apng import write_apng
 from verify import read_actl
 
-LABELS = {}
+# The submission files total ~13MB, past what a single page can carry, so the
+# sheet embeds a lighter re-encode. Same canvas, same transparency, same
+# 2.000s loop -- half the frame rate and fewer colours.
+PREVIEW_FRAMES = 10
+PREVIEW_COLOURS = 48
 
 
 def data_uri(path):
     return "data:image/png;base64," + base64.b64encode(open(path, "rb").read()).decode()
 
 
+def preview_uri(path):
+    im = Image.open(path)
+    if getattr(im, "n_frames", 1) == 1:
+        return data_uri(path)
+    idx = np.linspace(0, im.n_frames, PREVIEW_FRAMES, endpoint=False).round().astype(int)
+    sel = []
+    for i in idx:
+        im.seek(int(i))
+        sel.append(np.asarray(im.convert("RGBA")).copy())
+    pal, ifr = B.quantise(sel, PREVIEW_COLOURS)
+    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as fh:
+        tmp = fh.name
+    try:
+        write_apng(tmp, [pal[j] for j in ifr], 1, PREVIEW_FRAMES // 2, loops=2)
+        return data_uri(tmp)
+    finally:
+        os.unlink(tmp)
+
+
 def spec_row(path):
-    n, plays, total = read_actl(path)
+    n, plays, total, _ = read_actl(path)
     return {"frames": n, "seconds": round(total, 3),
             "kb": round(os.path.getsize(path) / 1024, 1), "loop": plays}
 
@@ -28,10 +57,10 @@ def build(setdir, labels, out):
         p = os.path.join(setdir, s["file"])
         row = spec_row(p)
         row.update(no=f"{i:02d}", file=s["file"], cut=s["cut"],
-                   label=labels.get(s["file"], ""), uri=data_uri(p))
+                   label=labels.get(s["file"], ""), uri=preview_uri(p))
         items.append(row)
     main = spec_row(os.path.join(setdir, "main.png"))
-    main["uri"] = data_uri(os.path.join(setdir, "main.png"))
+    main["uri"] = preview_uri(os.path.join(setdir, "main.png"))
     tab = {"kb": round(os.path.getsize(os.path.join(setdir, "tab.png")) / 1024, 1),
            "uri": data_uri(os.path.join(setdir, "tab.png"))}
     html = render(items, main, tab)
@@ -43,12 +72,12 @@ def render(items, main, tab):
     kbs = [i["kb"] for i in items]
     frames = sorted({i["frames"] for i in items})
     checks = [
-        ("形式", "APNG（拡張子 .png）", "全24点"),
+        ("形式", "APNG・カラーモード RGB", "全24点 colour type 6"),
         ("サイズ", "320 × 270 px", "上限ちょうど"),
         ("余白", "10 px 以上", "全辺 10px"),
         ("フレーム数", "5 〜 20", f"{min(frames)} 〜 {max(frames)}"),
-        ("再生時間", "1 / 2 / 3 / 4 秒", "2.000 秒・無限ループ"),
-        ("ファイルサイズ", "300 KB 以下", f"{min(kbs)} 〜 {max(kbs)} KB"),
+        ("再生時間", "1 / 2 / 3 / 4 秒", "2.000 秒 × 2 ループ = 4.000 秒"),
+        ("ファイルサイズ", "1 MB 以下", f"{min(kbs)} 〜 {max(kbs)} KB"),
         ("背景", "完全透過", "内部の透過穴 0 件"),
         ("セット数", "8 / 16 / 24", "24 点"),
     ]
@@ -57,7 +86,7 @@ def render(items, main, tab):
         <figcaption>
           <span class="no">{i['no']}</span>
           <span class="label">{i['label']}</span>
-          <span class="spec">{i['frames']}f · {i['seconds']:.3f}s · {i['kb']} KB</span>
+          <span class="spec">{i['frames']}f · {i['seconds']:.3f}s ×{i['loop']} · {i['kb']} KB</span>
           <span class="cut">{i['cut']}</span>
         </figcaption>
       </figure>''' for i in items)
@@ -279,7 +308,8 @@ footer code {{ font-family: var(--mono); font-size: 12px; }}
     <p class="eyebrow">LINE Creators Market / animation sticker</p>
     <h1>アニメスタンプ24点 申請チェック</h1>
     <p class="lede">グリーンバックのモーション動画 5 本から 1.5 秒カットを 30 本切り出し、
-      規格を満たした 24 点を採用しました。下のスタンプはすべて実ファイルそのものです（動いて見えているのが申請する APNG です）。</p>
+      規格を満たした 24 点を採用しました。表示は軽量化した 10 フレーム版です（申請ファイルは 16〜20 フレーム）。
+      枠の大きさ・透過・ループの長さは申請ファイルと同じで、下に出ている数値も実ファイルの実測値です。</p>
   </header>
 
   <div class="verdict">

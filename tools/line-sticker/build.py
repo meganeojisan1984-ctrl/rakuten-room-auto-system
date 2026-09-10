@@ -20,16 +20,22 @@ from keying import read_frames, key_frame, seal_interior, clean_specks
 CANVAS = (320, 270)
 MARGIN = 10
 CONTENT = (CANVAS[0] - 2 * MARGIN, CANVAS[1] - 2 * MARGIN)  # 300 x 250
-MAX_BYTES = 300 * 1024
+# LINE Creators Market: 1 file <= 1MB, loop count 1-4 per sticker.
+# 2.000s per loop x 2 loops = 4.000s total, which satisfies both the
+# "loop 1-4 times" rule and the 4 second ceiling on total playback.
+MAX_BYTES = 700 * 1024
+LOOPS = 2
 
 # (frame count, delay numerator, delay denominator) -- every row loops in 2.000s.
 # Palette depth barely matters for flat cartoon art (64 colours is visually
 # identical to full RGBA here), so spend the byte budget on frame count first.
+# Below ~48 colours the median cut drops the mouth's red (a small, saturated
+# minority colour), so frames are given up before colour depth is.
 LADDER = [
     (20, 1, 10), (20, 1, 10), (20, 1, 10), (16, 1, 8),
-    (12, 1, 6), (10, 1, 5), (8, 1, 4), (6, 1, 3),
+    (16, 1, 8), (12, 1, 6), (10, 1, 5), (8, 1, 4),
 ]
-COLOURS = [128, 96, 64, 64, 64, 48, 32, 24]
+COLOURS = [128, 96, 72, 96, 64, 64, 56, 48]
 
 
 def premultiply(rgba):
@@ -154,21 +160,23 @@ def quantise(frames, ncolours):
 
 
 def encode(path, frames):
-    """Walk the quality ladder until the file fits under 300KB."""
+    """Walk the quality ladder until the file fits under the size cap."""
     for (n, dn, dd), ncol in zip(LADDER, COLOURS):
         idx = np.linspace(0, len(frames), n, endpoint=False).round().astype(int)
         idx = np.clip(idx, 0, len(frames) - 1)
         sel = [frames[i] for i in idx]
-        if ncol is None:
-            size = write_apng(path, sel, dn, dd)
-        else:
+        if ncol is not None:
             pal, ifr = quantise(sel, ncol)
-            size = write_apng(path, sel, dn, dd, palette=(pal, ifr))
+            # Reduce colours, then expand back to true-colour RGBA: LINE
+            # rejects indexed-colour PNGs, but deflate still gets most of the
+            # benefit because only `ncol` distinct pixel values remain.
+            sel = [pal[i] for i in ifr]
+        size = write_apng(path, sel, dn, dd, loops=LOOPS)
         if size <= MAX_BYTES:
             return {"frames": n, "delay": f"{dn}/{dd}", "seconds": round(n * dn / dd, 3),
-                    "colours": ncol or "rgba8888", "bytes": size}
+                    "loops": LOOPS, "colours": ncol or "rgba8888", "bytes": size}
     return {"frames": n, "delay": f"{dn}/{dd}", "seconds": round(n * dn / dd, 3),
-            "colours": ncol, "bytes": size, "over_limit": True}
+            "loops": LOOPS, "colours": ncol, "bytes": size, "over_limit": True}
 
 
 def build_cut(src, start, count, size, out_path):

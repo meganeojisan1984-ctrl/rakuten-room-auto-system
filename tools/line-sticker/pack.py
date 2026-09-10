@@ -64,14 +64,16 @@ def main():
                          "bytes": os.path.getsize(dst)})
 
     hero = cuts[args.hero]
-    # main.png: 240x240 APNG, same 2.000s loop as the stickers.
+    # main.png: 240x240 APNG, same 2.000s loop and loop count as the stickers.
     frames = render(hero, (240, 240), 10, 20)
-    pal, idx = B.quantise(frames, 128)
-    n = write_apng(os.path.join(args.out, "main.png"), frames, 1, 10, palette=(pal, idx))
-    if n > B.MAX_BYTES:
-        frames = frames[::2]
-        pal, idx = B.quantise(frames, 64)
-        n = write_apng(os.path.join(args.out, "main.png"), frames, 1, 5, palette=(pal, idx))
+    for ncol, (dn, dd) in ((128, (1, 10)), (72, (1, 10)), (64, (1, 8))):
+        if dd == 8:
+            frames = frames[:16]
+        pal, idx = B.quantise(frames, ncol)
+        n = write_apng(os.path.join(args.out, "main.png"),
+                       [pal[i] for i in idx], dn, dd, loops=B.LOOPS)
+        if n <= B.MAX_BYTES:
+            break
 
     tab = render(cuts[args.tab or args.hero], (96, 74), TAB_MARGIN, 1)[0]
     Image.fromarray(tab).save(os.path.join(args.out, "tab.png"), optimize=True)
