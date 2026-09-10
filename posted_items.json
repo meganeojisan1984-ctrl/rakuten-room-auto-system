@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "radianne:10000880",
     "smile88:10066763",
     "aizu-corp:10055511",
     "petit-lulu-shop:10000000",
@@ -499,7 +498,8 @@
     "tsurunishi:10000943",
     "formalklein:10001456",
     "ken:10000363",
-    "konnybaby:10000037"
+    "konnybaby:10000037",
+    "dalba:10000011"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }

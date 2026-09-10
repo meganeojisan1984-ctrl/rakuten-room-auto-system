@@ -2015,5 +2015,18 @@
     "captionHead": "これ知らないと年間で地味に損してるかも…忙しい朝の",
     "slot": "slot1",
     "itemCodeHash": "2795af0b7910"
+  },
+  {
+    "ts": "2026-09-10T16:01:43.233Z",
+    "itemCode": "dalba:10000011",
+    "itemName": "【期間限定20％OFF＆トーンアップUV下地10ml贈呈】【秋の乾燥対策】【 d'Alba ( ダルバ ) 公式 】【 組み合わせ自由！選べる ホワイトトリュフ スプレー セラム 】 ビタミンCミスト 導入美容液 化粧水 保湿 ゆらぎ肌ケア 潤い",
+    "genreName": "ファッション・子供服",
+    "price": 1616,
+    "postType": 3,
+    "hour": 1,
+    "hook": "empathy",
+    "captionHead": "乾燥シーズン前に保湿アイテム足りてない人、正直手を",
+    "slot": "slot2",
+    "itemCodeHash": "b24205a166fb"
   }
 ]
