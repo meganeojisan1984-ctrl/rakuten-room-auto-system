@@ -35,6 +35,19 @@ python3 tools/line-sticker/pack.py \
   --select "c01_v13_000,c02_v13_036,..."
 ```
 
+## 工程プロンプト
+
+制作フロー側のプロンプトは `prompts.py` が正本。`prompts_page.py` が
+コピーできる確認用ページを書き出す。
+
+```bash
+python3 tools/line-sticker/prompts_page.py --out prompts.html
+```
+
+今回の申請エラー（カラーモード・ループ回数）と、動画素材の歩留まりの悪さ
+（背景が途中で情景に変わる／小道具が写り込む）は、どちらも工程プロンプトの
+指定漏れが原因だった。対応表は生成ページの冒頭にある。
+
 ## 構成
 
 - `keying.py` — グリーンバックのキーイング。背景色をフレーム外周から実測し、
