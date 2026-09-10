@@ -48,6 +48,8 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--hero", required=True, help="cut id used for main.png")
     ap.add_argument("--tab", help="cut id used for tab.png (defaults to --hero)")
+    ap.add_argument("--tab-frame", type=int, default=18,
+                    help="frame offset inside that cut to freeze for tab.png")
     args = ap.parse_args()
 
     cuts = {c["id"]: c for c in json.load(open(args.plan))["cuts"]}
@@ -71,7 +73,6 @@ def main():
         pal, idx = B.quantise(frames, 64)
         n = write_apng(os.path.join(args.out, "main.png"), frames, 1, 5, palette=(pal, idx))
 
-    # tab.png: single static transparent frame.
     tab = render(cuts[args.tab or args.hero], (96, 74), TAB_MARGIN, 1)[0]
     Image.fromarray(tab).save(os.path.join(args.out, "tab.png"), optimize=True)
 
