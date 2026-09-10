@@ -68,7 +68,8 @@ def render(items, main, tab):
           <span class="ck-got">{got}</span>
         </div>''' for n, req, got in checks)
     excluded = [
-        ("c05_v13_144", "08 と同じハートのポーズが重複。腕と体で囲まれた面積が大きく、穴埋めの白が目立つため見送り。"),
+        ("c04_v13_108", "両手ハート。腕と体で囲まれた内側が大きく、内部透過を塞ぐと白で埋まってしまうため 08 は敬礼に差し替え。"),
+        ("c05_v13_144", "同じくハートのポーズ。前半が c04 と重複。"),
         ("c13_v15_000", "01 と同じ待機ポーズから始まるため重複。"),
         ("c21_v15_288", "22 の後半と 23 の前半をつないだだけの繋ぎ区間。"),
         ("c23_v17_000", "壁の角の線だけが残り、動きがほぼない。"),
@@ -76,7 +77,7 @@ def render(items, main, tab):
     ]
     exrows = "\n".join(f'''        <tr><th scope="row">{c}</th><td>{r}</td></tr>''' for c, r in excluded)
     sources = [
-        ("sticker_00013", "0 – 361", "全編グリーンバック", "10 カット"),
+        ("sticker_00013", "0 – 361", "全編グリーンバック", "11 カット"),
         ("sticker_00014", "120 – 219", "他は室内背景のため不使用", "2 カット"),
         ("sticker_00015", "0 – 361", "全編グリーンバック", "10 カット"),
         ("sticker_00018", "—", "ほぼ全編がレンガ壁の背景", "0 カット"),
@@ -277,7 +278,7 @@ footer code {{ font-family: var(--mono); font-size: 12px; }}
   <header class="mast">
     <p class="eyebrow">LINE Creators Market / animation sticker</p>
     <h1>アニメスタンプ24点 申請チェック</h1>
-    <p class="lede">グリーンバックのモーション動画 5 本から 1.5 秒カットを 29 本切り出し、
+    <p class="lede">グリーンバックのモーション動画 5 本から 1.5 秒カットを 30 本切り出し、
       規格を満たした 24 点を採用しました。下のスタンプはすべて実ファイルそのものです（動いて見えているのが申請する APNG です）。</p>
   </header>
 
@@ -355,8 +356,8 @@ footer code {{ font-family: var(--mono); font-size: 12px; }}
 
   <section>
     <div class="head"><div>
-      <h2 class="sec">見送った候補 5 本</h2>
-      <p class="hint">29 本すべて規格は通っています。24 点に絞る際、内容が重複するものを外しました。差し替えたい場合はこの 5 本が控えです。</p>
+      <h2 class="sec">見送った候補 6 本</h2>
+      <p class="hint">30 本すべて規格は通っています。24 点に絞る際、内容が重複するものを外しました。差し替えたい場合はこの 6 本が控えです。</p>
     </div></div>
     <div class="scroll"><table>
       <thead><tr><th scope="col">カット</th><th scope="col">見送った理由</th></tr></thead>
