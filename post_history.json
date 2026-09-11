@@ -2053,5 +2053,18 @@
     "captionHead": "先月までの私: 晩ごはんのメニューで悩みがち / ",
     "slot": "slot0",
     "itemCodeHash": "ea96fd542777"
+  },
+  {
+    "ts": "2026-09-11T08:36:30.760Z",
+    "itemCode": "dalba:10000516",
+    "itemName": "【10～11日限定1+1 ＆ 28％OFF】【 d'Alba ( ダルバ ) 公式 】【 ミスト ソリューション 3種 キット 】プレゼント ミスト 導入美容液 パック マスク 保湿 ゆらぎ肌ケア 鎮静 潤い ツヤ 弾力 メイク アロマ インナードライ クーリングケア",
+    "genreName": "美容・コスメ",
+    "price": 3456,
+    "postType": 3,
+    "hour": 17,
+    "hook": "beforeafter",
+    "captionHead": "先月までの私: マスク下の乾燥と化粧ヨレにイライラ",
+    "slot": "slot1",
+    "itemCodeHash": "76b5dbe28587"
   }
 ]

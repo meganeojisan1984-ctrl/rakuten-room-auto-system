@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "aizu-corp:10055511",
     "petit-lulu-shop:10000000",
     "natural-style-nana:10009145",
     "puro-ya:10005006",
@@ -499,7 +498,8 @@
     "ken:10000363",
     "konnybaby:10000037",
     "dalba:10000011",
-    "yamagoiida:10000149"
+    "yamagoiida:10000149",
+    "dalba:10000516"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
