@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-08-27T23:59:53.879Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第50世代へ更新 (ルールベース)、警告1件"
-  },
-  {
-    "ts": "2026-08-28T15:56:11.026Z",
-    "agent": "scout",
-    "ok": false,
-    "summary": "Error: フィルタリング後に使用可能な商品が0件でした"
-  },
-  {
-    "ts": "2026-08-28T21:46:16.217Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (生活必需品・補充消耗品)"
-  },
-  {
-    "ts": "2026-08-28T21:46:16.352Z",
-    "agent": "copywriter",
-    "ok": false,
-    "summary": "Error: 紹介文の生成に全て失敗しました"
-  },
-  {
     "ts": "2026-08-28T23:41:43.432Z",
     "agent": "metrics",
     "ok": true,
@@ -1198,5 +1174,29 @@
     "agent": "commander",
     "ok": true,
     "summary": "第63世代へ更新 (ルールベース)、警告0件"
+  },
+  {
+    "ts": "2026-09-11T00:51:41.343Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (グルメ・スイーツ)"
+  },
+  {
+    "ts": "2026-09-11T00:51:48.990Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ3)"
+  },
+  {
+    "ts": "2026-09-11T00:53:24.966Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-09-11T00:56:22.345Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
   }
 ]

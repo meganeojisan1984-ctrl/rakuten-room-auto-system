@@ -2040,5 +2040,18 @@
     "captionHead": "乾燥シーズン前に保湿アイテム足りてない人、正直手を",
     "slot": "slot2",
     "itemCodeHash": "b24205a166fb"
+  },
+  {
+    "ts": "2026-09-11T00:56:22.346Z",
+    "itemCode": "yamagoiida:10000149",
+    "itemName": "【11日正午まで半額】〈有塩〉骨取り銀さけ 訳あり 鮭 （選べる1kg・2kg）｜骨なし チリ産 養殖 さけ 銀鮭 厚切り 切身 冷凍 ストック 業務用 食品 離乳食 お弁当 プロテイン アスタキサンチン 一部地域除き 送料無料",
+    "genreName": "グルメ・スイーツ",
+    "price": 3990,
+    "postType": 3,
+    "hour": 9,
+    "hook": "beforeafter",
+    "captionHead": "先月までの私: 晩ごはんのメニューで悩みがち / ",
+    "slot": "slot0",
+    "itemCodeHash": "ea96fd542777"
   }
 ]
