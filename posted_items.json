@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "petit-lulu-shop:10000000",
     "natural-style-nana:10009145",
     "puro-ya:10005006",
     "yamazenyamaya:10000002",
@@ -499,7 +498,8 @@
     "konnybaby:10000037",
     "dalba:10000011",
     "yamagoiida:10000149",
-    "dalba:10000516"
+    "dalba:10000516",
+    "kobe-beauty-labo:10002802"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
