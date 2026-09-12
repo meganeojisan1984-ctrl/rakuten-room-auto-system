@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-08-30T01:05:15.696Z",
-    "agent": "copywriter",
-    "ok": false,
-    "summary": "Error: 紹介文の生成に全て失敗しました"
-  },
-  {
-    "ts": "2026-08-30T06:14:17.602Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (家事効率化グッズ)"
-  },
-  {
-    "ts": "2026-08-30T06:14:19.114Z",
-    "agent": "copywriter",
-    "ok": false,
-    "summary": "Error: 紹介文の生成に全て失敗しました"
-  },
-  {
     "ts": "2026-08-30T07:48:25.375Z",
     "agent": "scout",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "commander",
     "ok": true,
     "summary": "第64世代へ更新 (ルールベース)、警告0件"
+  },
+  {
+    "ts": "2026-09-12T00:55:38.529Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (ファッション・子供服)"
+  },
+  {
+    "ts": "2026-09-12T00:55:49.043Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ1)"
+  },
+  {
+    "ts": "2026-09-12T00:56:18.842Z",
+    "agent": "poster",
+    "ok": false,
+    "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/bo)"
   }
 ]
