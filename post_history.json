@@ -805,8 +805,8 @@
     "hour": 8,
     "hook": "question",
     "captionHead": "まだ高くてお米買い替えしてないの？🤔 そんなあな",
-    "likes": 22,
-    "likesUpdatedAt": "2026-09-11T17:55:10.394Z"
+    "likes": 24,
+    "likesUpdatedAt": "2026-09-12T17:27:28.695Z"
   },
   {
     "ts": "2026-07-24T05:45:34.853Z",
@@ -1382,8 +1382,8 @@
     "captionHead": "え、待って。夏の猛暑対策で家事が増えて大変だなって",
     "slot": "slot1",
     "itemCodeHash": "92b584086e95",
-    "likes": 22,
-    "likesUpdatedAt": "2026-09-11T17:55:10.394Z"
+    "likes": 24,
+    "likesUpdatedAt": "2026-09-12T17:27:28.695Z"
   },
   {
     "ts": "2026-08-14T13:08:47.520Z",
@@ -1795,8 +1795,8 @@
     "captionHead": "レビュー926件で★4.54！ポイント2倍＆クーポ",
     "slot": "slot0",
     "itemCodeHash": "b3b9fd6610e6",
-    "likes": 14,
-    "likesUpdatedAt": "2026-09-08T18:06:07.662Z"
+    "likes": 15,
+    "likesUpdatedAt": "2026-09-12T17:27:28.695Z"
   },
   {
     "ts": "2026-09-05T08:06:24.733Z",
@@ -1810,8 +1810,8 @@
     "captionHead": "毛穴・くすみが気になる人、正直手を挙げて🙋 買う",
     "slot": "slot1",
     "itemCodeHash": "d471e1b3cbd0",
-    "likes": 8,
-    "likesUpdatedAt": "2026-09-10T17:53:13.474Z"
+    "likes": 9,
+    "likesUpdatedAt": "2026-09-12T17:27:28.695Z"
   },
   {
     "ts": "2026-09-05T14:48:32.533Z",
@@ -1937,8 +1937,8 @@
     "captionHead": "肌の導入液、まだ軽視してない？これ知らなかったら損",
     "slot": "slot1",
     "itemCodeHash": "535b063ade61",
-    "likes": 25,
-    "likesUpdatedAt": "2026-09-11T17:55:10.394Z"
+    "likes": 26,
+    "likesUpdatedAt": "2026-09-12T17:27:28.695Z"
   },
   {
     "ts": "2026-09-08T16:12:41.894Z",
@@ -1965,8 +1965,8 @@
     "captionHead": "冷凍庫、毎朝「朝ごはん何にしよう」で損してない？ ",
     "slot": "slot0",
     "itemCodeHash": "8b122b60834a",
-    "likes": 25,
-    "likesUpdatedAt": "2026-09-11T17:55:10.394Z"
+    "likes": 26,
+    "likesUpdatedAt": "2026-09-12T17:27:28.695Z"
   },
   {
     "ts": "2026-09-09T08:41:25.727Z",
@@ -1980,8 +1980,8 @@
     "captionHead": "乾燥や毛穴の悩みで困ってる人、正直手を挙げて🙋 ",
     "slot": "slot1",
     "itemCodeHash": "6ba4709a57a0",
-    "likes": 22,
-    "likesUpdatedAt": "2026-09-11T17:55:10.394Z"
+    "likes": 24,
+    "likesUpdatedAt": "2026-09-12T17:27:28.695Z"
   },
   {
     "ts": "2026-09-09T16:08:02.986Z",
@@ -2010,8 +2010,8 @@
     "captionHead": "レビュー886件で★4.67！見つけた瞬間テンショ",
     "slot": "slot0",
     "itemCodeHash": "9b264f979e17",
-    "likes": 14,
-    "likesUpdatedAt": "2026-09-11T17:55:10.394Z"
+    "likes": 16,
+    "likesUpdatedAt": "2026-09-12T17:27:28.695Z"
   },
   {
     "ts": "2026-09-10T08:43:46.512Z",
@@ -2025,8 +2025,8 @@
     "captionHead": "これ知らないと年間で地味に損してるかも…忙しい朝の",
     "slot": "slot1",
     "itemCodeHash": "2795af0b7910",
-    "likes": 17,
-    "likesUpdatedAt": "2026-09-11T17:55:10.394Z"
+    "likes": 18,
+    "likesUpdatedAt": "2026-09-12T17:27:28.695Z"
   },
   {
     "ts": "2026-09-10T16:01:43.233Z",
@@ -2066,8 +2066,8 @@
     "captionHead": "先月までの私: マスク下の乾燥と化粧ヨレにイライラ",
     "slot": "slot1",
     "itemCodeHash": "76b5dbe28587",
-    "likes": 12,
-    "likesUpdatedAt": "2026-09-11T17:55:10.394Z"
+    "likes": 13,
+    "likesUpdatedAt": "2026-09-12T17:27:28.695Z"
   },
   {
     "ts": "2026-09-11T16:04:26.569Z",
@@ -2081,8 +2081,8 @@
     "captionHead": "まだ風邪や乾燥で髪パサついて損してない？楽天でこれ",
     "slot": "slot2",
     "itemCodeHash": "bbf83cf50328",
-    "likes": 2,
-    "likesUpdatedAt": "2026-09-11T17:55:10.394Z"
+    "likes": 10,
+    "likesUpdatedAt": "2026-09-12T17:27:28.695Z"
   },
   {
     "ts": "2026-09-12T08:24:38.854Z",
@@ -2095,7 +2095,9 @@
     "hook": "number",
     "captionHead": "レビュー14,738件で★4.56！楽天でこれ見つ",
     "slot": "slot1",
-    "itemCodeHash": "f173aa2ec7ee"
+    "itemCodeHash": "f173aa2ec7ee",
+    "likes": 14,
+    "likesUpdatedAt": "2026-09-12T17:27:28.695Z"
   },
   {
     "ts": "2026-09-12T15:14:34.173Z",
@@ -2108,6 +2110,8 @@
     "hook": "surprise",
     "captionHead": "え、待って。天板だけでここまで変わるの…？！ 楽天",
     "slot": "slot2",
-    "itemCodeHash": "0c04f2a091ad"
+    "itemCodeHash": "0c04f2a091ad",
+    "likes": 3,
+    "likesUpdatedAt": "2026-09-12T17:27:28.695Z"
   }
 ]
