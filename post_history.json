@@ -2083,5 +2083,18 @@
     "itemCodeHash": "bbf83cf50328",
     "likes": 2,
     "likesUpdatedAt": "2026-09-11T17:55:10.394Z"
+  },
+  {
+    "ts": "2026-09-12T08:24:38.854Z",
+    "itemCode": "kouragumi:10000207",
+    "itemName": "赤字覚悟のお試し送料無料4,999円！北海道産の【訳あり】割れ/不揃い/小サイズ 生ほたて貝柱どっさり1kg 帆立 ホタテ ほたて【P】",
+    "genreName": "美容・コスメ",
+    "price": 4999,
+    "postType": 3,
+    "hour": 17,
+    "hook": "number",
+    "captionHead": "レビュー14,738件で★4.56！楽天でこれ見つ",
+    "slot": "slot1",
+    "itemCodeHash": "f173aa2ec7ee"
   }
 ]
