@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "yamazenyamaya:10000002",
     "craife:10000096",
     "rcmdin:11411226",
     "craife:10000840",
@@ -499,7 +498,8 @@
     "dalba:10000516",
     "kobe-beauty-labo:10002802",
     "kouragumi:10000207",
-    "e-kurashi:10048739"
+    "e-kurashi:10048739",
+    "oujiseiyaku:10000038"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }

@@ -2113,5 +2113,18 @@
     "itemCodeHash": "0c04f2a091ad",
     "likes": 3,
     "likesUpdatedAt": "2026-09-12T17:27:28.695Z"
+  },
+  {
+    "ts": "2026-09-13T00:42:38.705Z",
+    "itemCode": "oujiseiyaku:10000038",
+    "itemName": "【王子製薬公式】【日用品ランキング1位】 柔軟剤入り洗剤 アフューム アモーレ 詰替セット(60粒×2袋) 大容量 ベルガモット＆ジャスミンの香り 5in1 ジェルマジックボール 洗濯洗剤 部屋干し 消臭 抗菌 色落ち防止 王子製薬",
+    "genreName": "暮らし・インテリア",
+    "price": 5940,
+    "postType": 1,
+    "hour": 9,
+    "hook": "surprise",
+    "captionHead": "え、待って。洗剤が香水並みに香る時代来てたの…？！",
+    "slot": "slot0",
+    "itemCodeHash": "a27caf871fef"
   }
 ]
