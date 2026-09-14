@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "craife:10000840",
     "unidy:10970676",
     "yamada-denki:10461502",
     "kaumall:10057771",
@@ -499,7 +498,8 @@
     "e-kurashi:10048739",
     "oujiseiyaku:10000038",
     "ropping:10011472",
-    "wavecontactlenses:10000330"
+    "wavecontactlenses:10000330",
+    "radianne:10000667"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
