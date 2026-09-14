@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-08-31T10:31:21.852Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-08-31T11:26:54.298Z",
-    "agent": "scout",
-    "ok": false,
-    "summary": "Error: フィルタリング後に使用可能な商品が0件でした"
-  },
-  {
-    "ts": "2026-08-31T11:28:11.537Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (ファッション・子供服)"
-  },
-  {
     "ts": "2026-08-31T11:28:16.986Z",
     "agent": "copywriter",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "commander",
     "ok": true,
     "summary": "第66世代へ更新 (ルールベース)、警告0件"
+  },
+  {
+    "ts": "2026-09-14T00:45:50.630Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (ファッション・子供服)"
+  },
+  {
+    "ts": "2026-09-14T00:45:56.331Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ1)"
+  },
+  {
+    "ts": "2026-09-14T00:46:23.749Z",
+    "agent": "poster",
+    "ok": false,
+    "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/bo)"
   }
 ]
