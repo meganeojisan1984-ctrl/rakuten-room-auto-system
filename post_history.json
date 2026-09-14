@@ -202,8 +202,8 @@
     "hour": 0,
     "hook": "beforeafter",
     "captionHead": "先月までの私: コンタクトレンズの度数が合わなくて",
-    "likes": 12,
-    "likesUpdatedAt": "2026-09-13T17:39:52.378Z"
+    "likes": 6,
+    "likesUpdatedAt": "2026-09-14T19:36:33.676Z"
   },
   {
     "ts": "2026-07-12T22:59:56.567Z",
@@ -337,8 +337,8 @@
     "hour": 8,
     "hook": "question",
     "captionHead": "まだ暑い夏が続いてるよね😓 その夏の毎日を快適に",
-    "likes": 12,
-    "likesUpdatedAt": "2026-09-13T17:39:52.378Z"
+    "likes": 6,
+    "likesUpdatedAt": "2026-09-14T19:36:33.676Z"
   },
   {
     "ts": "2026-07-15T05:26:00.323Z",
@@ -805,8 +805,8 @@
     "hour": 8,
     "hook": "question",
     "captionHead": "まだ高くてお米買い替えしてないの？🤔 そんなあな",
-    "likes": 23,
-    "likesUpdatedAt": "2026-09-13T17:39:52.378Z"
+    "likes": 27,
+    "likesUpdatedAt": "2026-09-14T19:36:33.676Z"
   },
   {
     "ts": "2026-07-24T05:45:34.853Z",
@@ -1382,8 +1382,8 @@
     "captionHead": "え、待って。夏の猛暑対策で家事が増えて大変だなって",
     "slot": "slot1",
     "itemCodeHash": "92b584086e95",
-    "likes": 25,
-    "likesUpdatedAt": "2026-09-13T17:39:52.378Z"
+    "likes": 27,
+    "likesUpdatedAt": "2026-09-14T19:36:33.676Z"
   },
   {
     "ts": "2026-08-14T13:08:47.520Z",
@@ -1980,8 +1980,8 @@
     "captionHead": "乾燥や毛穴の悩みで困ってる人、正直手を挙げて🙋 ",
     "slot": "slot1",
     "itemCodeHash": "6ba4709a57a0",
-    "likes": 25,
-    "likesUpdatedAt": "2026-09-13T17:39:52.378Z"
+    "likes": 27,
+    "likesUpdatedAt": "2026-09-14T19:36:33.676Z"
   },
   {
     "ts": "2026-09-09T16:08:02.986Z",
@@ -2025,8 +2025,8 @@
     "captionHead": "これ知らないと年間で地味に損してるかも…忙しい朝の",
     "slot": "slot1",
     "itemCodeHash": "2795af0b7910",
-    "likes": 20,
-    "likesUpdatedAt": "2026-09-13T17:39:52.378Z"
+    "likes": 21,
+    "likesUpdatedAt": "2026-09-14T19:36:33.676Z"
   },
   {
     "ts": "2026-09-10T16:01:43.233Z",
@@ -2081,8 +2081,8 @@
     "captionHead": "まだ風邪や乾燥で髪パサついて損してない？楽天でこれ",
     "slot": "slot2",
     "itemCodeHash": "bbf83cf50328",
-    "likes": 17,
-    "likesUpdatedAt": "2026-09-13T17:39:52.378Z"
+    "likes": 18,
+    "likesUpdatedAt": "2026-09-14T19:36:33.676Z"
   },
   {
     "ts": "2026-09-12T08:24:38.854Z",
@@ -2096,8 +2096,8 @@
     "captionHead": "レビュー14,738件で★4.56！楽天でこれ見つ",
     "slot": "slot1",
     "itemCodeHash": "f173aa2ec7ee",
-    "likes": 22,
-    "likesUpdatedAt": "2026-09-13T17:39:52.378Z"
+    "likes": 27,
+    "likesUpdatedAt": "2026-09-14T19:36:33.676Z"
   },
   {
     "ts": "2026-09-12T15:14:34.173Z",
@@ -2111,8 +2111,8 @@
     "captionHead": "え、待って。天板だけでここまで変わるの…？！ 楽天",
     "slot": "slot2",
     "itemCodeHash": "0c04f2a091ad",
-    "likes": 17,
-    "likesUpdatedAt": "2026-09-13T17:39:52.378Z"
+    "likes": 22,
+    "likesUpdatedAt": "2026-09-14T19:36:33.676Z"
   },
   {
     "ts": "2026-09-13T00:42:38.705Z",
@@ -2151,7 +2151,9 @@
     "hook": "question",
     "captionHead": "まだ使い捨てコンタクトで目がゴロゴロしてない？これ",
     "slot": "slot2",
-    "itemCodeHash": "d6930e448589"
+    "itemCodeHash": "d6930e448589",
+    "likes": 6,
+    "likesUpdatedAt": "2026-09-14T19:36:33.676Z"
   },
   {
     "ts": "2026-09-14T17:55:20.761Z",
