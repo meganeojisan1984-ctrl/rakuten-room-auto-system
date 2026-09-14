@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "rcmdin:11411226",
     "craife:10000840",
     "unidy:10970676",
     "yamada-denki:10461502",
@@ -499,7 +498,8 @@
     "kouragumi:10000207",
     "e-kurashi:10048739",
     "oujiseiyaku:10000038",
-    "ropping:10011472"
+    "ropping:10011472",
+    "wavecontactlenses:10000330"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }

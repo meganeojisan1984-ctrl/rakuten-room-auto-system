@@ -2139,5 +2139,18 @@
     "captionHead": "殿堂入り＆リピーター続出アイテム発見！🎯 🎫ク",
     "slot": "slot2",
     "itemCodeHash": "6d0f48ce50c4"
+  },
+  {
+    "ts": "2026-09-14T09:36:41.011Z",
+    "itemCode": "wavecontactlenses:10000330",
+    "itemName": "シード ワンデーピュアうるおいプラス 96枚入り×2箱セット シード コンタクトレンズ ワンデー コンタクト 1day 1日使い捨て",
+    "genreName": "グルメ・スイーツ",
+    "price": 8970,
+    "postType": 2,
+    "hour": 18,
+    "hook": "question",
+    "captionHead": "まだ使い捨てコンタクトで目がゴロゴロしてない？これ",
+    "slot": "slot2",
+    "itemCodeHash": "d6930e448589"
   }
 ]
