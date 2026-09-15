@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "kaumall:10057771",
     "roomy:10015065",
     "compmoto-r:12536662",
     "net-c5:10025152",
@@ -499,7 +498,8 @@
     "wavecontactlenses:10000330",
     "radianne:10000667",
     "kurashi-zakka:10002336",
-    "kawasaki-beikoku:10000016"
+    "kawasaki-beikoku:10000016",
+    "red-jpn:10000027"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
