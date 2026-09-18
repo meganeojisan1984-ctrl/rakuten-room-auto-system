@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-09-04T08:35:07.385Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-09-04T15:53:25.035Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (暮らし・インテリア)"
-  },
-  {
-    "ts": "2026-09-04T15:53:29.720Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ2)"
-  },
-  {
     "ts": "2026-09-04T15:55:04.370Z",
     "agent": "poster",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-09-18T17:53:26.803Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "38件抽出、履歴17件のいいね数を更新"
+  },
+  {
+    "ts": "2026-09-18T17:53:26.915Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴169件(計測済111) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-09-18T17:53:29.896Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第71世代へ更新 (ルールベース)、警告0件"
   }
 ]
