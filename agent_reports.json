@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-09-03T16:00:47.581Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-09-03T18:04:50.658Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "37件抽出、履歴7件のいいね数を更新"
-  },
-  {
-    "ts": "2026-09-03T18:04:50.669Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴133件(計測済85) 実売0件(¥0) mode=likes"
-  },
-  {
     "ts": "2026-09-03T18:04:53.699Z",
     "agent": "commander",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "commander",
     "ok": true,
     "summary": "第70世代へ更新 (ルールベース)、警告0件"
+  },
+  {
+    "ts": "2026-09-18T01:03:31.346Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (暮らし・インテリア)"
+  },
+  {
+    "ts": "2026-09-18T01:03:36.103Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ1)"
+  },
+  {
+    "ts": "2026-09-18T01:04:05.045Z",
+    "agent": "poster",
+    "ok": false,
+    "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/bo)"
   }
 ]
