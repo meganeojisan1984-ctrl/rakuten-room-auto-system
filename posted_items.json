@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "compmoto-r:12536662",
     "net-c5:10025152",
     "lanmanya:10006265",
     "shopworld:10139097",
@@ -499,7 +498,8 @@
     "kurashi-zakka:10002336",
     "kawasaki-beikoku:10000016",
     "red-jpn:10000027",
-    "medicalbreathshop:10000000"
+    "medicalbreathshop:10000000",
+    "e-zakkokumai:10002941"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
