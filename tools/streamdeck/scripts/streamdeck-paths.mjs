@@ -3,6 +3,8 @@
  */
 import { execSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+
+import { countActions } from "./profile-store.mjs";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -83,15 +85,17 @@ export function detectProfiles(dataDir = streamDeckDataDir()) {
     } catch {
       continue;
     }
-    found.push({
+    const profile = {
       root: path.dirname(dir),
       dir,
       manifestPath,
       manifest,
       name: manifest.Name || path.basename(dir),
       device: deviceFields(manifest),
-      actionCount: Object.keys(manifest.Actions || {}).length,
-    });
+      actionCount: 0,
+    };
+    profile.actionCount = countActions(profile); // V3 はページ側にキーがある
+    found.push(profile);
   }
   return found;
 }

@@ -25,6 +25,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { assignPositions, buildProfileArchive, DEFAULT_KEYS, buildProfileManifest, resolveDeviceFields } from "./scripts/make-profile.mjs";
+import { resolveKeyStore } from "./scripts/profile-store.mjs";
 import {
   ACTION_UUID,
   PLUGIN_UUID,
@@ -219,24 +220,22 @@ export function applyToCurrentProfile(keys, dryRun, options = {}) {
     ? profiles.find((p) => p.name === options.profileName)
     : pickPrimaryProfile(profiles);
   if (!target) {
-    if (options.profileName) {
-      log(`! プロファイル "${options.profileName}" が見つかりません。検出済み: ${profiles.map((p) => p.name).join(" / ") || "なし"}`);
-    } else {
-      log("! 既存プロファイルが見つからないため、直接書き込みはスキップしました。");
-    }
+    if (options.profileName || options.device) log("! 対象プロファイルが見つかりません。--list-profiles で一覧を確認してください。");
+    else log("! 既存プロファイルが見つからないため、直接書き込みはスキップしました。");
     return false;
   }
 
-  const existing = target.manifest.Actions;
-  if (!existing || typeof existing !== "object" || Array.isArray(existing)) {
-    // キーの持ち方が想定と違うプロファイルに書くと既存ボタンを壊しかねないので中断する
+  const store = resolveKeyStore(target);
+  if (!store) {
+    // キーの持ち方が判別できないプロファイルに書くと既存ボタンを壊しかねないので中断する
     log(
-      `! プロファイル "${target.name}" は想定外の形式です（Actions が見つかりません）。\n` +
+      `! プロファイル "${target.name}" のキー保存先を判別できませんでした。\n` +
         "  node tools/streamdeck/scripts/dump-profile.mjs の出力を添えて報告してください。"
     );
     return false;
   }
-  const placement = placeKeys(keys, existing, { row: options.row, startCol: options.startCol });
+
+  const placement = placeKeys(keys, store.actions, { row: options.row, startCol: options.startCol });
   if (!placement) {
     log(
       `! プロファイル "${target.name}" に ${keys.length} 個ぶんの連続した空きキーが見つかりませんでした。\n` +
@@ -245,36 +244,83 @@ export function applyToCurrentProfile(keys, dryRun, options = {}) {
     return false;
   }
 
-  const manifest = JSON.parse(JSON.stringify(target.manifest));
-  const generated = buildProfileManifest({ keys: placement.keys });
-  manifest.Actions = { ...existing, ...generated.Actions };
-
-  log(`- 書き込み先: ${target.manifestPath}  (プロファイル "${target.name}")`);
+  const device = target.manifest.Device || {};
+  const generated = buildProfileManifest({ keys: placement.keys }).Actions;
+  log(`- 書き込み先: ${store.path}`);
+  log(`  プロファイル "${target.name}" / デバイス ${device.Model || "不明"} / 形式 ${store.kind}`);
   log(`- キー配置  : ${placement.keys.map((k) => `${k.position}=${k.provider}/${k.window}`).join(", ")}`);
   if (placement.overwrites.length > 0) log(`! 上書きされるキー: ${placement.overwrites.join(", ")}`);
-  const backup = `${target.manifestPath}.bak-${Date.now()}`;
+  const backup = store.write({ ...store.actions, ...generated }, dryRun);
   log(`- バックアップ: ${backup}`);
-  if (dryRun) return true;
-  fs.copyFileSync(target.manifestPath, backup);
-  fs.writeFileSync(target.manifestPath, JSON.stringify(manifest, null, 2), "utf8");
   return true;
 }
 
-/** 直近のバックアップから manifest.json を書き戻す */
+/**
+ * 以前のバージョンがプロファイル直下に誤って書いた Actions を取り除く。
+ * V3 では読まれないだけだが、残っていると紛らわしいので掃除する。
+ */
+export function cleanupStrayActions(dryRun, options = {}) {
+  let cleaned = 0;
+  for (const profile of filterByDevice(detectProfiles(), options.device)) {
+    if (!String(profile.manifest.Version || "").startsWith("3")) continue;
+    const actions = profile.manifest.Actions;
+    if (!actions || typeof actions !== "object") continue;
+    const ourPositions = Object.entries(actions)
+      .filter(([, action]) => action && action.UUID === ACTION_UUID)
+      .map(([position]) => position);
+    if (ourPositions.length === 0) continue;
+
+    const rest = Object.fromEntries(Object.entries(actions).filter(([position]) => !ourPositions.includes(position)));
+    const next = { ...profile.manifest };
+    if (Object.keys(rest).length > 0) next.Actions = rest;
+    else delete next.Actions;
+    log(`- 不要な記述を削除: ${profile.manifestPath}（${ourPositions.length} 件）`);
+    if (!dryRun) {
+      fs.copyFileSync(profile.manifestPath, `${profile.manifestPath}.bak-${Date.now()}`);
+      fs.writeFileSync(profile.manifestPath, JSON.stringify(next, null, 2), "utf8");
+    }
+    cleaned += 1;
+  }
+  return cleaned;
+}
+
+/** ディレクトリを再帰列挙（バックアップ探索用・深さ制限あり） */
+function collectDirs(root, depth = 0, results = []) {
+  if (depth > 3) return results;
+  results.push(root);
+  let entries = [];
+  try {
+    entries = fs.readdirSync(root, { withFileTypes: true });
+  } catch {
+    return results;
+  }
+  for (const entry of entries) {
+    if (entry.isDirectory() && entry.name !== "Images") collectDirs(path.join(root, entry.name), depth + 1, results);
+  }
+  return results;
+}
+
+/** 直近のバックアップから manifest.json を書き戻す（ページ側の manifest も対象） */
 export function restoreFromBackup(dryRun, options = {}) {
-  const profiles = detectProfiles();
-  const targets = options.profileName ? profiles.filter((p) => p.name === options.profileName) : profiles;
+  const profiles = filterByDevice(detectProfiles(), options.device).filter(
+    (profile) => !options.profileName || profile.name === options.profileName
+  );
   let restored = 0;
-  for (const profile of targets) {
-    const backups = fs
-      .readdirSync(profile.dir)
-      .filter((file) => file.includes("manifest.json.bak-"))
-      .sort();
-    if (backups.length === 0) continue;
-    const latest = path.join(profile.dir, backups[backups.length - 1]);
-    log(`- 復元: ${latest}\n  → ${profile.manifestPath}  (プロファイル "${profile.name}")`);
-    if (!dryRun) fs.copyFileSync(latest, profile.manifestPath);
-    restored += 1;
+  for (const profile of profiles) {
+    for (const dir of collectDirs(profile.dir)) {
+      let backups = [];
+      try {
+        backups = fs.readdirSync(dir).filter((file) => file.startsWith("manifest.json.bak-")).sort();
+      } catch {
+        continue;
+      }
+      if (backups.length === 0) continue;
+      const latest = path.join(dir, backups[backups.length - 1]);
+      const manifest = path.join(dir, "manifest.json");
+      log(`- 復元: ${latest}\n  → ${manifest}`);
+      if (!dryRun) fs.copyFileSync(latest, manifest);
+      restored += 1;
+    }
   }
   if (restored === 0) log("! 復元できるバックアップが見つかりませんでした。");
   return restored > 0;
@@ -332,9 +378,10 @@ export function main() {
 
   let profileFile = null;
   if (args.restore) {
-    restoreFromBackup(args.dryRun, { profileName: args.profileName });
+    restoreFromBackup(args.dryRun, { profileName: args.profileName, device: args.device });
   } else if (args.profile) {
     if (args.applyCurrent) {
+      cleanupStrayActions(args.dryRun, { device: args.device });
       applyToCurrentProfile(keys, args.dryRun, {
         row: args.row,
         startCol: args.startCol,

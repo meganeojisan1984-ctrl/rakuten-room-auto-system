@@ -377,3 +377,116 @@ test("filterByDevice: Model / シリアルの部分一致でプロファイル�
     fs.rmSync(dataDir, { recursive: true, force: true });
   }
 });
+
+/* ---------------- Stream Deck 7.x (ProfilesV3) ---------------- */
+
+/** V3 のプロファイル一式（プロファイル manifest + ページ manifest）を作る */
+function writeV3Profile(
+  dataDir: string,
+  id: string,
+  device: { Model: string; UUID: string },
+  pageId: string,
+  actions: Record<string, unknown>
+) {
+  const profileDir = path.join(dataDir, "ProfilesV3", `${id}.sdProfile`);
+  const pageDir = path.join(profileDir, "Profiles", pageId.toUpperCase());
+  fs.mkdirSync(pageDir, { recursive: true });
+  fs.writeFileSync(
+    path.join(profileDir, "manifest.json"),
+    JSON.stringify({ Device: device, Name: "Default Profile", Pages: { Current: pageId, Default: pageId, Pages: [pageId] }, Version: "3.0" })
+  );
+  fs.writeFileSync(path.join(pageDir, "manifest.json"), JSON.stringify({ Controllers: [{ Actions: actions, Type: "Keypad" }], Icon: "", Name: "" }));
+  return { profileDir, pageDir, pageManifest: path.join(pageDir, "manifest.json") };
+}
+
+const OCCUPIED = ["0,0", "1,0", "2,0", "3,0", "4,0", "0,2", "1,2", "2,2", "3,2", "4,2"];
+const occupiedActions = () => Object.fromEntries(OCCUPIED.map((p) => [p, { UUID: "com.elgato.other", Name: p }]));
+
+test("resolveKeyStore: V3 はページ側の Controllers[].Actions を読み書きする", async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "sdv3-"));
+  const { pageManifest } = writeV3Profile(dataDir, "A", { Model: "20GBA9901", UUID: "u" }, "4beed196-57a0-483a-a0a4-85b0ffd5d162", {
+    "0,0": { UUID: "cpu" },
+  });
+  const { detectProfiles } = await importTool("scripts/streamdeck-paths.mjs");
+  const { resolveKeyStore } = await importTool("scripts/profile-store.mjs");
+  try {
+    const profile = detectProfiles(dataDir)[0];
+    assert.equal(profile.actionCount, 1, "キー数はページ側から数える");
+    const store = resolveKeyStore(profile);
+    assert.equal(store.kind, "v3");
+    assert.equal(store.path, pageManifest, "書き込み先はページの manifest");
+    assert.deepEqual(Object.keys(store.actions), ["0,0"]);
+
+    store.write({ ...store.actions, "0,1": { UUID: "ai" } });
+    const page = JSON.parse(fs.readFileSync(pageManifest, "utf8"));
+    assert.deepEqual(Object.keys(page.Controllers[0].Actions), ["0,0", "0,1"]);
+    assert.equal(page.Controllers[0].Type, "Keypad", "コントローラの他の項目を壊さない");
+    assert.equal(fs.readdirSync(path.dirname(pageManifest)).filter((f) => f.includes(".bak-")).length, 1);
+  } finally {
+    fs.rmSync(dataDir, { recursive: true, force: true });
+  }
+});
+
+test("applyToCurrentProfile: V3 + 実機デバイス指定で空き行に書き込む", async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "sdv3-"));
+  // 実機（20GBA9901）とバーチャル（VSD2/WiFi）が同名で共存する実環境を再現
+  const virtual = writeV3Profile(dataDir, "VIRTUAL", { Model: "VSD2/WiFi", UUID: "@(32)[ce40]" }, "589dab6c", {});
+  const real = writeV3Profile(dataDir, "REAL", { Model: "20GBA9901", UUID: "@(1)[4057/128/A00SA5332MNFK5]" }, "4beed196", occupiedActions());
+  const { applyToCurrentProfile, parseKeysSpec } = await importTool("install.mjs");
+  try {
+    const applied = await withDataDir(dataDir, () =>
+      applyToCurrentProfile(parseKeysSpec(undefined), false, { device: "A00SA5332MNFK5" })
+    );
+    assert.equal(applied, true);
+
+    const page = JSON.parse(fs.readFileSync(real.pageManifest, "utf8")).Controllers[0].Actions;
+    assert.equal(page["0,1"].Settings.provider, "codex");
+    assert.equal(page["1,1"].Settings.provider, "claude");
+    assert.equal(page["2,1"].Settings.window, "5h");
+    for (const position of OCCUPIED) assert.equal(page[position].UUID, "com.elgato.other", `${position} は元のまま`);
+
+    const virtualPage = JSON.parse(fs.readFileSync(virtual.pageManifest, "utf8")).Controllers[0].Actions;
+    assert.deepEqual(virtualPage, {}, "指定していないデバイスには書かない");
+  } finally {
+    fs.rmSync(dataDir, { recursive: true, force: true });
+  }
+});
+
+test("cleanupStrayActions: V3 プロファイル直下に誤って書かれた Actions を消す", async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "sdv3-"));
+  const { profileDir } = writeV3Profile(dataDir, "A", { Model: "VSD2/WiFi", UUID: "u" }, "589dab6c", {});
+  const manifestPath = path.join(profileDir, "manifest.json");
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  manifest.Actions = {
+    "0,0": { UUID: "jp.rakutenroom.aiusage.meter" },
+    "1,0": { UUID: "jp.rakutenroom.aiusage.meter" },
+    "4,4": { UUID: "com.example.other" },
+  };
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest));
+  const { cleanupStrayActions } = await importTool("install.mjs");
+  try {
+    assert.equal(await withDataDir(dataDir, () => cleanupStrayActions(false)), 1);
+    const after = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+    assert.deepEqual(Object.keys(after.Actions), ["4,4"], "自分のキーだけ消し、他人のものは残す");
+    assert.equal(await withDataDir(dataDir, () => cleanupStrayActions(false)), 0, "2回目は何もしない");
+  } finally {
+    fs.rmSync(dataDir, { recursive: true, force: true });
+  }
+});
+
+test("restoreFromBackup: ページ側 manifest のバックアップも書き戻す", async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "sdv3-"));
+  const { pageManifest } = writeV3Profile(dataDir, "A", { Model: "20GBA9901", UUID: "u" }, "4beed196", occupiedActions());
+  const { applyToCurrentProfile, parseKeysSpec, restoreFromBackup } = await importTool("install.mjs");
+  try {
+    const before = fs.readFileSync(pageManifest, "utf8");
+    await withDataDir(dataDir, () => applyToCurrentProfile(parseKeysSpec(undefined), false));
+    assert.notEqual(fs.readFileSync(pageManifest, "utf8"), before, "いったん書き換わる");
+
+    assert.equal(await withDataDir(dataDir, () => restoreFromBackup(false)), true);
+    const restored = JSON.parse(fs.readFileSync(pageManifest, "utf8")).Controllers[0].Actions;
+    assert.deepEqual(Object.keys(restored).sort(), [...OCCUPIED].sort(), "元のキー構成に戻る");
+  } finally {
+    fs.rmSync(dataDir, { recursive: true, force: true });
+  }
+});

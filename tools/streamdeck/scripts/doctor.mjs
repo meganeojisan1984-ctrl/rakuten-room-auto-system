@@ -13,6 +13,7 @@ import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 
 import { ACTION_UUID, PLUGIN_UUID, detectProfiles, isStreamDeckRunning, pluginsDir, streamDeckDataDir } from "./streamdeck-paths.mjs";
+import { resolveKeyStore } from "./profile-store.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
@@ -144,10 +145,17 @@ if (profiles.length === 0) {
 } else {
   let placed = 0;
   for (const profile of profiles) {
-    const slots = Object.entries(profile.manifest.Actions || {}).filter(([, action]) => action && action.UUID === ACTION_UUID);
+    const store = resolveKeyStore(profile);
+    const device = profile.manifest.Device || {};
+    if (!store) {
+      info(`${profile.name} [${device.Model || "不明"}]: キー保存先を判別できません`);
+      continue;
+    }
+    const slots = Object.entries(store.actions).filter(([, action]) => action && action.UUID === ACTION_UUID);
     placed += slots.length;
     const detail = slots.map(([position, action]) => `${position}(${action.Settings?.provider}/${action.Settings?.window})`).join(", ");
-    info(`${profile.name}: 全${profile.actionCount}キー中 ${slots.length} キー${detail ? ` → ${detail}` : ""}`);
+    info(`${profile.name} [${device.Model || "不明"}]: 全${profile.actionCount}キー中 ${slots.length} キー${detail ? ` → ${detail}` : ""}`);
+    info(`  保存先: ${store.path} (${store.kind})`);
   }
   if (placed === 0) ng("どのプロファイルにも配置されていません", "npm run streamdeck:install -- --apply-current を実行するか、右パネルから手動でドラッグしてください");
   else ok(`配置済み: 合計 ${placed} キー`);
