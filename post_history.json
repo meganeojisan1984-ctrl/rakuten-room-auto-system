@@ -202,8 +202,8 @@
     "hour": 0,
     "hook": "beforeafter",
     "captionHead": "先月までの私: コンタクトレンズの度数が合わなくて",
-    "likes": 13,
-    "likesUpdatedAt": "2026-09-17T18:33:43.207Z"
+    "likes": 14,
+    "likesUpdatedAt": "2026-09-19T17:27:23.287Z"
   },
   {
     "ts": "2026-07-12T22:59:56.567Z",
@@ -337,8 +337,8 @@
     "hour": 8,
     "hook": "question",
     "captionHead": "まだ暑い夏が続いてるよね😓 その夏の毎日を快適に",
-    "likes": 13,
-    "likesUpdatedAt": "2026-09-17T18:33:43.207Z"
+    "likes": 14,
+    "likesUpdatedAt": "2026-09-19T17:27:23.287Z"
   },
   {
     "ts": "2026-07-15T05:26:00.323Z",
@@ -2081,8 +2081,8 @@
     "captionHead": "まだ風邪や乾燥で髪パサついて損してない？楽天でこれ",
     "slot": "slot2",
     "itemCodeHash": "bbf83cf50328",
-    "likes": 21,
-    "likesUpdatedAt": "2026-09-18T17:53:26.764Z"
+    "likes": 22,
+    "likesUpdatedAt": "2026-09-19T17:27:23.287Z"
   },
   {
     "ts": "2026-09-12T08:24:38.854Z",
@@ -2096,8 +2096,8 @@
     "captionHead": "レビュー14,738件で★4.56！楽天でこれ見つ",
     "slot": "slot1",
     "itemCodeHash": "f173aa2ec7ee",
-    "likes": 35,
-    "likesUpdatedAt": "2026-09-17T18:33:43.207Z"
+    "likes": 38,
+    "likesUpdatedAt": "2026-09-19T17:27:23.287Z"
   },
   {
     "ts": "2026-09-12T15:14:34.173Z",
@@ -2111,8 +2111,8 @@
     "captionHead": "え、待って。天板だけでここまで変わるの…？！ 楽天",
     "slot": "slot2",
     "itemCodeHash": "0c04f2a091ad",
-    "likes": 31,
-    "likesUpdatedAt": "2026-09-18T17:53:26.764Z"
+    "likes": 33,
+    "likesUpdatedAt": "2026-09-19T17:27:23.287Z"
   },
   {
     "ts": "2026-09-13T00:42:38.705Z",
@@ -2152,8 +2152,8 @@
     "captionHead": "まだ使い捨てコンタクトで目がゴロゴロしてない？これ",
     "slot": "slot2",
     "itemCodeHash": "d6930e448589",
-    "likes": 13,
-    "likesUpdatedAt": "2026-09-17T18:33:43.207Z"
+    "likes": 14,
+    "likesUpdatedAt": "2026-09-19T17:27:23.287Z"
   },
   {
     "ts": "2026-09-14T17:55:20.761Z",
@@ -2180,8 +2180,8 @@
     "captionHead": "え、待って。こんなにスッキリする水切りラック、楽天",
     "slot": "slot0",
     "itemCodeHash": "c24c7d78a508",
-    "likes": 18,
-    "likesUpdatedAt": "2026-09-18T17:53:26.764Z"
+    "likes": 21,
+    "likesUpdatedAt": "2026-09-19T17:27:23.287Z"
   },
   {
     "ts": "2026-09-15T09:16:58.637Z",
@@ -2195,8 +2195,8 @@
     "captionHead": "レビュー11,205件で★4.75って見た瞬間、正",
     "slot": "slot2",
     "itemCodeHash": "55ddedf597e4",
-    "likes": 14,
-    "likesUpdatedAt": "2026-09-18T17:53:26.764Z"
+    "likes": 16,
+    "likesUpdatedAt": "2026-09-19T17:27:23.287Z"
   },
   {
     "ts": "2026-09-15T16:30:44.337Z",
@@ -2210,8 +2210,8 @@
     "captionHead": "これ知らないと年間でしんどさにお金使い続けるかも…",
     "slot": "slot0",
     "itemCodeHash": "188257e85cf9",
-    "likes": 23,
-    "likesUpdatedAt": "2026-09-18T17:53:26.764Z"
+    "likes": 26,
+    "likesUpdatedAt": "2026-09-19T17:27:23.287Z"
   },
   {
     "ts": "2026-09-17T09:16:11.679Z",
@@ -2238,8 +2238,8 @@
     "captionHead": "先月までの私: コンビニおにぎり率高め / 今の私",
     "slot": "slot1",
     "itemCodeHash": "a2643302d305",
-    "likes": 15,
-    "likesUpdatedAt": "2026-09-18T17:53:26.764Z"
+    "likes": 18,
+    "likesUpdatedAt": "2026-09-19T17:27:23.287Z"
   },
   {
     "ts": "2026-09-18T16:03:27.009Z",
@@ -2253,8 +2253,8 @@
     "captionHead": "外食多めでタンパク足りてない人、正直手を挙げて🙋",
     "slot": "slot2",
     "itemCodeHash": "c5fd5f359fbd",
-    "likes": 6,
-    "likesUpdatedAt": "2026-09-18T17:53:26.764Z"
+    "likes": 16,
+    "likesUpdatedAt": "2026-09-19T17:27:23.287Z"
   },
   {
     "ts": "2026-09-19T08:35:05.272Z",
@@ -2267,7 +2267,9 @@
     "hook": "empathy",
     "captionHead": "子育てバタバタ派、正直手を挙げて🙋 秋の衣替えで",
     "slot": "slot1",
-    "itemCodeHash": "129ebfe2d8f7"
+    "itemCodeHash": "129ebfe2d8f7",
+    "likes": 5,
+    "likesUpdatedAt": "2026-09-19T17:27:23.287Z"
   },
   {
     "ts": "2026-09-19T15:33:54.772Z",
@@ -2280,6 +2282,8 @@
     "hook": "ranking",
     "captionHead": "楽天ランキング常連＆リピーター続出！これは見つけた",
     "slot": "slot2",
-    "itemCodeHash": "96c3fe2c9517"
+    "itemCodeHash": "96c3fe2c9517",
+    "likes": 4,
+    "likesUpdatedAt": "2026-09-19T17:27:23.287Z"
   }
 ]
