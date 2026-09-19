@@ -79,7 +79,7 @@ Stream Deck のバージョンでキーの保存場所が異なるため、両�
 | サービス | 取得方法 |
 |---|---|
 | **Codex** | `~/.codex/sessions/**/rollout-*.jsonl` の最新セッションから、最後に記録された `rate_limits`（`primary` = 5時間枠 / `secondary` = 週間枠）を読み取る。`CODEX_HOME` 環境変数に対応 |
-| **Claude** | Claude Code のログイン情報（macOS はキーチェーン `Claude Code-credentials`、それ以外は `~/.claude/.credentials.json`）のアクセストークンで `https://api.anthropic.com/api/oauth/usage` を参照（`/usage` と同じ情報源） |
+| **Claude** | Claude Code のログイン情報のアクセストークンで `https://api.anthropic.com/api/oauth/usage` を参照（`/usage` と同じ情報源）。探索順は ①環境変数 `CLAUDE_CODE_OAUTH_TOKEN` ②macOS キーチェーン / **Windows 資格情報マネージャー** ③`~/.claude/.credentials.json` |
 
 いずれも **ローカルの認証情報をその PC 内で使うだけ**で、外部へ送信するのは Anthropic の使用量 API への問い合わせのみです。
 
@@ -110,8 +110,18 @@ npm run streamdeck:doctor
 
 ### うまく取得できないとき
 
+- **Codex の 5時間枠が `--%`** … プランによっては週間枠（`window_minutes: 10080`）しか記録されません（例: `plan_type: prolite`）。`node tools/streamdeck/usage-cli.mjs raw` で実際に記録されている枠を確認できます。
 - **Codex が「レート制限の記録が見つかりません」** … Codex CLI で 1 回会話すると記録されます。Codex を別の場所にインストールしている場合は `CODEX_HOME` を設定してください。
 - **Claude が「ログイン情報が見つかりません」／HTTP 401** … `claude` を起動して `/login` し直すとトークンが更新されます。
+  `node tools/streamdeck/usage-cli.mjs auth` で、どこにトークンがあるか（ファイル / キーチェーン / 資格情報マネージャー / 環境変数）と検出可否を確認できます（値は表示しません）。
+  Windows で `~/.claude/.credentials.json` の `accessToken` が空文字の場合、実体は資格情報マネージャー側にあります。それでも読めないときは、次の方法が確実です。
+
+  ```cmd
+  claude setup-token
+  setx CLAUDE_CODE_OAUTH_TOKEN "<表示されたトークン>"
+  ```
+
+  設定後に Stream Deck を再起動すると、プラグインが環境変数からトークンを読みます。
 - **キーが `--%` のまま** … Stream Deck の右クリック → 「ログを開く」でプラグインのログ（`[ai-usage] …`）を確認してください。
 - **どうしても自動取得できない環境** … `~/.ai-usage-meter/override.json` を置くと、その値が最優先で表示されます（他ツールから値を流し込む用）。
 

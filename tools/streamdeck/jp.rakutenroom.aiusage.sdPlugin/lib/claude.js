@@ -65,9 +65,75 @@ function describeCredentials(value, depth = 0) {
   return typeof value;
 }
 
+/** Windows 資格情報マネージャーに登録されている Claude 関連のターゲット名を集める */
+function windowsCredentialTargets() {
+  const defaults = ["Claude Code-credentials", "Claude Code", "claude-code-credentials"];
+  try {
+    const out = execFileSync("cmdkey", ["/list"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+    const found = [...out.matchAll(/Target:\s*(.+)/gi)]
+      .map((match) => match[1].trim())
+      .map((target) => (target.includes("target=") ? target.slice(target.indexOf("target=") + 7) : target))
+      .filter((target) => /claude/i.test(target));
+    return [...new Set([...found, ...defaults])];
+  } catch {
+    return defaults;
+  }
+}
+
+/**
+ * Windows 資格情報マネージャーから 1 件読む。
+ * PowerShell 経由で CredRead を呼び、中身を base64 で受け取る（値はログに出さない）。
+ */
+function readWindowsCredential(target) {
+  const script = `
+$ErrorActionPreference='Stop'
+Add-Type -TypeDefinition @"
+using System;
+using System.Runtime.InteropServices;
+public class SdCred {
+  [StructLayout(LayoutKind.Sequential, CharSet=CharSet.Unicode)]
+  public struct CREDENTIAL {
+    public int Flags; public int Type; public IntPtr TargetName; public IntPtr Comment;
+    public long LastWritten; public int CredentialBlobSize; public IntPtr CredentialBlob;
+    public int Persist; public int AttributeCount; public IntPtr Attributes;
+    public IntPtr TargetAlias; public IntPtr UserName;
+  }
+  [DllImport("advapi32.dll", SetLastError=true, CharSet=CharSet.Unicode, EntryPoint="CredReadW")]
+  public static extern bool CredRead(string target, int type, int flags, out IntPtr credential);
+}
+"@
+$ptr=[IntPtr]::Zero
+if ([SdCred]::CredRead(${JSON.stringify(target)}, 1, 0, [ref]$ptr)) {
+  $cred=[SdCred+CREDENTIAL][System.Runtime.InteropServices.Marshal]::PtrToStructure($ptr,[type][SdCred+CREDENTIAL])
+  if ($cred.CredentialBlobSize -gt 0) {
+    $bytes=New-Object byte[] $cred.CredentialBlobSize
+    [System.Runtime.InteropServices.Marshal]::Copy($cred.CredentialBlob,$bytes,0,$cred.CredentialBlobSize)
+    [Convert]::ToBase64String($bytes)
+  }
+}`;
+  try {
+    const encoded = Buffer.from(script, "utf16le").toString("base64");
+    const out = execFileSync("powershell", ["-NoProfile", "-NonInteractive", "-EncodedCommand", encoded], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+      timeout: 10000,
+    }).trim();
+    if (!out) return null;
+    const buf = Buffer.from(out, "base64");
+    // keytar は UTF-8、Windows 標準は UTF-16LE で保存されることがあるため両方試す
+    for (const encoding of ["utf8", "utf16le"]) {
+      const text = buf.toString(encoding).replace(/\u0000+$/, "");
+      if (text.trim().startsWith("{")) return text;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * アクセストークンを探す。
- * 1) 環境変数  2) macOS キーチェーン  3) ~/.claude/.credentials.json
+ * 1) 環境変数  2) macOS キーチェーン / Windows 資格情報マネージャー  3) ~/.claude/.credentials.json
  */
 function readAccessToken() {
   const envToken = process.env.CLAUDE_CODE_OAUTH_TOKEN || process.env.CLAUDE_OAUTH_TOKEN;
@@ -83,6 +149,20 @@ function readAccessToken() {
       if (token) return { token, source: "macOS キーチェーン" };
     } catch {
       /* キーチェーンに無い場合はファイルへフォールバック */
+    }
+  }
+
+  if (process.platform === "win32") {
+    for (const target of windowsCredentialTargets()) {
+      const raw = readWindowsCredential(target);
+      if (!raw) continue;
+      let token = null;
+      try {
+        token = pickAccessToken(JSON.parse(raw));
+      } catch {
+        token = raw.trim().length > 20 && !raw.includes("{") ? raw.trim() : null;
+      }
+      if (token) return { token, source: `Windows 資格情報マネージャー (${target})` };
     }
   }
 
@@ -174,7 +254,10 @@ async function readClaudeUsage() {
     return {
       ok: false,
       source: null,
-      error: "Claude Code のログイン情報が見つかりません（claude /login 済みか確認）",
+      error:
+        "Claude Code のログイン情報が見つかりません" +
+        "（claude で /login するか、claude setup-token で発行したトークンを " +
+        "環境変数 CLAUDE_CODE_OAUTH_TOKEN に設定してください）",
       observedAt: new Date(),
       windows: {},
     };
@@ -205,6 +288,8 @@ async function readClaudeUsage() {
 module.exports = {
   USAGE_URL,
   describeCredentials,
+  windowsCredentialTargets,
+  readWindowsCredential,
   credentialPaths,
   pickAccessToken,
   readAccessToken,
