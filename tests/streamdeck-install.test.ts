@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -203,6 +204,48 @@ test("applyToCurrentProfile: --profile で書き込み先を名前指定でき�
     assert.equal(manifest.Actions["0,0"].UUID, "jp.rakutenroom.aiusage.meter");
     // 名前が一致しない場合は何もしない
     assert.equal(await withDataDir(dir, () => applyToCurrentProfile(parseKeysSpec(undefined), false, { profileName: "存在しない" })), false);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+/* ---------------- 直接実行の判定（Windows で main が走らなかった不具合の回帰テスト） ---------------- */
+
+test("isEntrypoint: URL と argv[1] を正規化して比較する", async () => {
+  const { isEntrypoint } = await importTool("scripts/streamdeck-paths.mjs");
+  const self = path.join(STREAMDECK_DIR, "install.mjs");
+  const selfUrl = new URL(`file://${self}`).href;
+  assert.equal(isEntrypoint(selfUrl, self), true, "同じファイルなら true");
+  assert.equal(isEntrypoint(selfUrl, path.join(STREAMDECK_DIR, "usage-cli.mjs")), false, "別ファイルなら false");
+  assert.equal(isEntrypoint(selfUrl, undefined), false);
+  assert.equal(isEntrypoint("not-a-url", self), false, "壊れた URL でも例外にしない");
+});
+
+test("install.mjs: node で直接実行すると処理が走る", () => {
+  const dest = fs.mkdtempSync(path.join(os.tmpdir(), "sd-dest-"));
+  try {
+    const stdout = execFileSync(process.execPath, [path.join(STREAMDECK_DIR, "install.mjs"), "--dry-run", "--dest", dest], {
+      encoding: "utf8",
+      env: { ...process.env, AI_USAGE_METER_QUIET: "" },
+    });
+    assert.match(stdout, /Stream Deck AI Usage Meter セットアップ/, "見出しが出力される（無反応で終了しない）");
+    assert.match(stdout, /導入先/);
+  } finally {
+    fs.rmSync(dest, { recursive: true, force: true });
+  }
+});
+
+test("make-profile.mjs: node で直接実行するとプロファイルが書き出される", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "sd-out-"));
+  const out = path.join(dir, "AI-Usage.streamDeckProfile");
+  try {
+    execFileSync(
+      process.execPath,
+      [path.join(STREAMDECK_DIR, "scripts", "make-profile.mjs"), "--device-model", "20GAA9901", "--out", out],
+      { encoding: "utf8" }
+    );
+    assert.ok(fs.existsSync(out), "ファイルが生成される（無反応で終了しない）");
+    assert.equal(fs.readFileSync(out).subarray(0, 2).toString("ascii"), "PK");
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }

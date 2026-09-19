@@ -26,6 +26,7 @@ import {
   ACTION_UUID,
   PLUGIN_UUID,
   detectProfiles,
+  isEntrypoint,
   isStreamDeckRunning,
   pickPrimaryProfile,
   pluginsDir,
@@ -298,4 +299,4 @@ export function main() {
   log(`アクション UUID: ${ACTION_UUID}`);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main();
+if (isEntrypoint(import.meta.url)) main();

@@ -13,7 +13,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import { createZip } from "./zip.mjs";
-import { ACTION_UUID, detectProfiles, pickPrimaryProfile } from "./streamdeck-paths.mjs";
+import { ACTION_UUID, detectProfiles, isEntrypoint, pickPrimaryProfile } from "./streamdeck-paths.mjs";
 
 /** 写真と同じ並び。左から Codex 週間 → Claude 週間 → Claude 5時間 */
 export const DEFAULT_KEYS = [
@@ -106,7 +106,7 @@ export function resolveDeviceFields(deviceModelOverride) {
   return primary.device;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isEntrypoint(import.meta.url)) {
   const args = parseArgs(process.argv.slice(2));
   const deviceFields = resolveDeviceFields(args.deviceModel);
   if (!deviceFields) {
