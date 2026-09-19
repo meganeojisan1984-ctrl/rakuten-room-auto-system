@@ -1,0 +1,8 @@
+{
+  "name": "jp.rakutenroom.aiusage",
+  "private": true,
+  "version": "1.0.0",
+  "type": "commonjs",
+  "main": "plugin.js",
+  "description": "Stream Deck plugin: Codex / Claude usage meter"
+}
