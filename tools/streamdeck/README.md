@@ -42,6 +42,9 @@ npm run streamdeck:install
 | `--row <n>` | 配置する行を指定（0 始まり）。未指定なら、必要数ぶん連続して空いている場所を上の行から探します |
 | `--col <n>` | 配置を始める列（0 始まり・既定 0） |
 | `--profile "<名前>"` | 書き込む既存プロファイルを名前で指定（`--apply-current` 用。未指定ならキー数が最も多いものを選択） |
+| `--device <Model/シリアル>` | 対象デバイスを指定（例: `--device A00SA5332MNFK5`）。実機とバーチャルデバイスで同名プロファイルがある場合に必要 |
+| `--list-profiles` | 検出したプロファイルとデバイスを一覧表示して終了 |
+| `--restore` | 直近のバックアップ（`manifest.json.bak-*`）から書き戻す |
 | `--keys "codex:weekly,claude:weekly,claude:5h"` | 配置するキーを指定（`codex` / `claude` × `weekly` / `5h` / `weekly_opus`）。`codex:weekly@0,1` のように `@列,行` で位置も指定できます |
 | `--no-profile` | プラグイン導入だけ行う |
 | `--no-restart` | Stream Deck アプリを終了・再起動しない |
@@ -59,6 +62,17 @@ npm run streamdeck:install
 | 更新間隔 | 既定 60 秒（最短 15 秒） |
 
 設定画面下部に現在の取得結果と情報源が表示されるので、動作確認はここが早いです。
+
+## プロファイルの保存形式について
+
+Stream Deck のバージョンでキーの保存場所が異なるため、両方に対応しています。
+
+| 形式 | キーの保存先 |
+|---|---|
+| V2 以前 | `<プロファイル>.sdProfile/manifest.json` の `Actions` |
+| **V3（Stream Deck 7.x）** | `<プロファイル>.sdProfile/Profiles/<ページID>/manifest.json` の `Controllers[].Actions`（プロファイル側にはページ ID の一覧のみ） |
+
+判別できない形式の場合は**書き込まずに中断**します（既存キーを壊さないため）。その際は `node tools/streamdeck/scripts/dump-profile.mjs` の出力を添えて報告してください。
 
 ## データの取得元
 
