@@ -17,10 +17,22 @@ import { ACTION_UUID, detectProfiles, pickPrimaryProfile } from "./streamdeck-pa
 
 /** 写真と同じ並び。左から Codex 週間 → Claude 週間 → Claude 5時間 */
 export const DEFAULT_KEYS = [
-  { position: "0,0", label: "CODEX", provider: "codex", window: "weekly" },
-  { position: "1,0", label: "CLAUDE", provider: "claude", window: "weekly" },
-  { position: "2,0", label: "CLAUDE", provider: "claude", window: "5h" },
+  { label: "CODEX", provider: "codex", window: "weekly" },
+  { label: "CLAUDE", provider: "claude", window: "weekly" },
+  { label: "CLAUDE", provider: "claude", window: "5h" },
 ];
+
+/**
+ * 位置未指定のキーに "列,行" を順番に割り当てる（既に position があればそのまま）。
+ * @param {object[]} keys
+ * @param {{row?: number, startCol?: number}} [options]
+ */
+export function assignPositions(keys, options = {}) {
+  const row = options.row ?? 0;
+  const startCol = options.startCol ?? 0;
+  let next = startCol;
+  return keys.map((key) => (key.position ? key : { ...key, position: `${next++},${row}` }));
+}
 
 const uuid = () => crypto.randomUUID().toUpperCase().replace(/-/g, "");
 
@@ -57,7 +69,7 @@ function actionEntry(key) {
  * @param {{deviceFields?: object, name?: string, keys?: object[]}} options
  */
 export function buildProfileManifest(options = {}) {
-  const keys = options.keys || DEFAULT_KEYS;
+  const keys = assignPositions(options.keys || DEFAULT_KEYS, { row: options.row, startCol: options.startCol });
   const actions = {};
   for (const key of keys) actions[key.position] = actionEntry(key);
   return {

@@ -13,8 +13,10 @@ Stream Deck のキーに **Codex / Claude の利用枠の残り％** と **リ�
 Stream Deck アプリが入っている PC（macOS / Windows）で、このリポジトリを clone して実行します。
 
 ```bash
-node tools/streamdeck/install.mjs
-# npm 経由でも同じ
+# 今使っているプロファイルの空いている行に 3 キーを追加する（おすすめ）
+npm run streamdeck:install -- --apply-current
+
+# 専用プロファイルを新規に作って取り込む
 npm run streamdeck:install
 ```
 
@@ -25,6 +27,9 @@ npm run streamdeck:install
 3. 写真と同じ 3 キー配置のプロファイル `tools/streamdeck/dist/AI-Usage.streamDeckProfile` を生成
 4. Stream Deck アプリを再起動し、生成したプロファイルを開いてインポート（確認ダイアログが出たら「インポート」）
 
+> `--apply-current` は、既存レイアウトを崩さずに **空いている行（例: 2段目）** を自動で探して 3 キーを並べます。
+> 場所を決め打ちしたいときは `--row 1`（2段目）や `--keys "codex:weekly@0,1,claude:weekly@1,1,claude:5h@2,1"` を使ってください。
+>
 > プロファイルのデバイス種別は、PC に既にある Stream Deck プロファイルから自動判別します。
 > 判別できない場合はプラグイン導入のみ行われるので、Stream Deck の右パネル「AI Usage」カテゴリから
 > **AI 使用量** アクションを 3 キーにドラッグしてください（設定内容は下表）。
@@ -33,8 +38,11 @@ npm run streamdeck:install
 
 | オプション | 説明 |
 |---|---|
-| `--apply-current` | 新規プロファイルを作らず、**今使っているプロファイルの 0,0 / 1,0 / 2,0 に直接**書き込む（`manifest.json.bak-<時刻>` にバックアップを作成） |
-| `--keys "codex:weekly,claude:weekly,claude:5h"` | 配置するキーを指定（`codex` / `claude` × `weekly` / `5h` / `weekly_opus`） |
+| `--apply-current` | 新規プロファイルを作らず、**今使っているプロファイルの空いている行**に直接書き込む（`manifest.json.bak-<時刻>` にバックアップを作成。使用中のキーは踏みません） |
+| `--row <n>` | 配置する行を指定（0 始まり）。未指定なら、必要数ぶん連続して空いている場所を上の行から探します |
+| `--col <n>` | 配置を始める列（0 始まり・既定 0） |
+| `--profile "<名前>"` | 書き込む既存プロファイルを名前で指定（`--apply-current` 用。未指定ならキー数が最も多いものを選択） |
+| `--keys "codex:weekly,claude:weekly,claude:5h"` | 配置するキーを指定（`codex` / `claude` × `weekly` / `5h` / `weekly_opus`）。`codex:weekly@0,1` のように `@列,行` で位置も指定できます |
 | `--no-profile` | プラグイン導入だけ行う |
 | `--no-restart` | Stream Deck アプリを終了・再起動しない |
 | `--dry-run` | 何も書き換えず、実行内容だけ表示 |
