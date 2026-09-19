@@ -310,3 +310,43 @@ test("applyToCurrentProfile: デバイス別レイアウトでも空き行に書
     fs.rmSync(dataDir, { recursive: true, force: true });
   }
 });
+
+test("applyToCurrentProfile: Actions を持たない未知形式には書き込まない", async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "sdv3-"));
+  const dir = writeProfile(dataDir, path.join("ProfilesV3", "X.sdProfile"), { Name: "V3", Controllers: [{ Actions: {} }] });
+  const before = fs.readFileSync(path.join(dir, "manifest.json"), "utf8");
+  const { applyToCurrentProfile, parseKeysSpec } = await importTool("install.mjs");
+  try {
+    assert.equal(await withDataDir(dataDir, () => applyToCurrentProfile(parseKeysSpec(undefined), false)), false);
+    assert.equal(fs.readFileSync(path.join(dir, "manifest.json"), "utf8"), before, "既存ボタンを壊さない");
+    assert.equal(fs.readdirSync(dir).filter((f) => f.includes(".bak-")).length, 0, "バックアップも作らない");
+  } finally {
+    fs.rmSync(dataDir, { recursive: true, force: true });
+  }
+});
+
+test("restoreFromBackup: 直近のバックアップから書き戻す", async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "sd-restore-"));
+  const dir = writeProfile(dataDir, path.join("ProfilesV3", "X.sdProfile"), { Name: "P", Actions: { "0,0": { UUID: "壊れた後" } } });
+  fs.writeFileSync(path.join(dir, "manifest.json.bak-1000"), JSON.stringify({ Name: "P", Actions: { "0,0": { UUID: "古い" } } }));
+  fs.writeFileSync(path.join(dir, "manifest.json.bak-2000"), JSON.stringify({ Name: "P", Actions: { "0,0": { UUID: "元の状態" } } }));
+  const { restoreFromBackup } = await importTool("install.mjs");
+  try {
+    assert.equal(await withDataDir(dataDir, () => restoreFromBackup(false)), true);
+    const manifest = JSON.parse(fs.readFileSync(path.join(dir, "manifest.json"), "utf8"));
+    assert.equal(manifest.Actions["0,0"].UUID, "元の状態", "最新のバックアップを使う");
+  } finally {
+    fs.rmSync(dataDir, { recursive: true, force: true });
+  }
+});
+
+test("restoreFromBackup: バックアップが無ければ false", async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "sd-restore-"));
+  writeProfile(dataDir, path.join("ProfilesV3", "X.sdProfile"), { Name: "P", Actions: {} });
+  const { restoreFromBackup } = await importTool("install.mjs");
+  try {
+    assert.equal(await withDataDir(dataDir, () => restoreFromBackup(false)), false);
+  } finally {
+    fs.rmSync(dataDir, { recursive: true, force: true });
+  }
+});
