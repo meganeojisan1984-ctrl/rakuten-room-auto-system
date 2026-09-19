@@ -2,6 +2,7 @@
  * Stream Deck アプリのデータ配置を OS ごとに解決するユーティリティ。
  */
 import { execSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -106,4 +107,18 @@ export function isStreamDeckRunning() {
     }
   } catch {}
   return false;
+}
+
+/**
+ * そのファイルが「node で直接実行された」かどうか。
+ * import.meta.url と argv[1] の単純な文字列比較は Windows で必ず不一致になる
+ * （file:///C:/... と C:\... を比べることになる）ため、パスに正規化して比較する。
+ */
+export function isEntrypoint(importMetaUrl, argv1 = process.argv[1]) {
+  if (!importMetaUrl || !argv1) return false;
+  try {
+    return path.resolve(fileURLToPath(importMetaUrl)) === path.resolve(argv1);
+  } catch {
+    return false;
+  }
 }
