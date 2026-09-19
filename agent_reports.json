@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-09-05T00:40:21.189Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-09-05T00:42:08.151Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-09-05T08:01:58.707Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (家電・ガジェット)"
-  },
-  {
-    "ts": "2026-09-05T08:02:03.508Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ2)"
-  },
-  {
     "ts": "2026-09-05T08:03:36.757Z",
     "agent": "poster",
     "ok": true,
@@ -1195,6 +1171,30 @@
   },
   {
     "ts": "2026-09-19T08:35:05.272Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-09-19T15:29:50.310Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (ファッション・子供服)"
+  },
+  {
+    "ts": "2026-09-19T15:29:55.296Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ1)"
+  },
+  {
+    "ts": "2026-09-19T15:31:31.618Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-09-19T15:33:54.772Z",
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
