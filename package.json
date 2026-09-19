@@ -17,6 +17,7 @@
     "diagnose": "npx tsx src/utils/cookie-diagnose.ts",
     "streamdeck:install": "node tools/streamdeck/install.mjs",
     "streamdeck:probe": "node tools/streamdeck/usage-cli.mjs probe",
+    "streamdeck:doctor": "node tools/streamdeck/scripts/doctor.mjs",
     "streamdeck:preview": "node tools/streamdeck/usage-cli.mjs preview",
     "streamdeck:profile": "node tools/streamdeck/scripts/make-profile.mjs",
     "streamdeck:icons": "node tools/streamdeck/scripts/make-icons.mjs",
