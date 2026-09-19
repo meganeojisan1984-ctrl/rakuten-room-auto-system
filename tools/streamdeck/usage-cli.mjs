@@ -123,8 +123,34 @@ function showAuth() {
       console.log(`  有効期限: ${at.toISOString()} (${at.getTime() < Date.now() ? "期限切れ" : "有効"})`);
     }
   }
+  if (process.platform === "win32") {
+    console.log("Windows 資格情報マネージャー:");
+    for (const target of claude.windowsCredentialTargets()) {
+      const raw = claude.readWindowsCredential(target);
+      if (!raw) {
+        console.log(`  ${target}: 読み取れません`);
+        continue;
+      }
+      let structure = "(JSON ではない値)";
+      let token = null;
+      try {
+        const json = JSON.parse(raw);
+        structure = JSON.stringify(claude.describeCredentials(json));
+        token = claude.pickAccessToken(json);
+      } catch {
+        token = raw.trim().length > 20 ? raw.trim() : null;
+      }
+      console.log(`  ${target}: ${structure} / トークン ${token ? `検出（${token.length}文字）` : "無し"}`);
+    }
+  }
+
   const env = process.env.CLAUDE_CODE_OAUTH_TOKEN || process.env.CLAUDE_OAUTH_TOKEN;
   console.log(`環境変数のトークン: ${env ? "あり" : "なし"}`);
+
+  const resolved = claude.readAccessToken();
+  console.log(
+    `最終判定: ${resolved.token ? `トークン検出（${resolved.token.length}文字 / 取得元: ${resolved.source}）` : "トークンが見つかりません"}`
+  );
 }
 
 if (command === "raw") {

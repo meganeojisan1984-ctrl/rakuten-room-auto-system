@@ -145,6 +145,38 @@ function quitStreamDeck() {
   }
 }
 
+/** 同期的に少し待つ（プロセス終了やファイルロック解放待ち用） */
+function sleepSync(ms) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
+
+/** Stream Deck のプロセスが消えるまで待つ */
+function waitForStreamDeckExit(timeoutMs = 10000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (!isStreamDeckRunning()) return true;
+    sleepSync(400);
+  }
+  return false;
+}
+
+/**
+ * 既存プラグインを削除する。終了直後はファイルがロックされていることがあるためリトライする。
+ * 削除できなくても上書きコピーで済む場合があるので、失敗は例外にしない。
+ */
+function removePluginDir(target, attempts = 12) {
+  for (let i = 0; i < attempts; i++) {
+    try {
+      fs.rmSync(target, { recursive: true, force: true });
+      return true;
+    } catch (err) {
+      if (!["EPERM", "EBUSY", "ENOTEMPTY", "EACCES"].includes(err.code)) throw err;
+      sleepSync(500);
+    }
+  }
+  return false;
+}
+
 /** 起動に失敗してもプロセスを落とさないよう error を握りつぶして detach する */
 function spawnDetached(command, args, options = {}) {
   const child = spawn(command, args, { detached: true, stdio: "ignore", ...options });
@@ -363,15 +395,26 @@ export function main() {
   if (running && args.restart && !args.dryRun) {
     log("- Stream Deck を終了します…");
     quitStreamDeck();
+    if (!waitForStreamDeckExit()) log("! Stream Deck の終了を確認できませんでした（このまま続行します）。");
   } else if (running && !args.restart) {
     log("! Stream Deck が起動中です。プラグインを反映するには手動で再起動してください。");
   }
 
   if (!args.dryRun) {
     fs.mkdirSync(dest, { recursive: true });
-    fs.rmSync(target, { recursive: true, force: true });
-    fs.cpSync(SOURCE_PLUGIN, target, { recursive: true });
-    log("- プラグインをコピーしました。");
+    if (fs.existsSync(target) && !removePluginDir(target)) {
+      log("! 既存プラグインを削除できませんでした（ファイルが使用中）。上書きコピーを試みます。");
+    }
+    try {
+      fs.cpSync(SOURCE_PLUGIN, target, { recursive: true, force: true });
+      log("- プラグインをコピーしました。");
+    } catch (err) {
+      console.error(
+        `プラグインのコピーに失敗しました: ${err.message}\n` +
+          "Stream Deck を完全に終了してから、もう一度実行してください（タスクトレイのアイコンからも終了できます）。"
+      );
+      process.exit(1);
+    }
   } else {
     log("- (dry-run) コピーは行いません。");
   }

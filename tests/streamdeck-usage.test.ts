@@ -317,3 +317,31 @@ test("describeCredentials: 値を出さず構造だけを返す", () => {
   assert.equal(described.claudeAiOauth.accessToken, "string(12文字)");
   assert.equal(described.claudeAiOauth.scopes, "配列(1)");
 });
+
+test("windowsCredentialTargets: 既定のターゲット名を含む", () => {
+  const targets = claude.windowsCredentialTargets();
+  assert.ok(targets.includes("Claude Code-credentials"));
+  assert.ok(targets.every((t: string) => typeof t === "string"));
+});
+
+test("readWindowsCredential: Windows 以外でも例外を投げず null を返す", () => {
+  assert.equal(claude.readWindowsCredential("Claude Code-credentials"), null);
+});
+
+test("readClaudeUsage: 未ログイン時は再ログイン手段を案内する", async () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "claude-home-"));
+  const previousHome = process.env.HOME;
+  const previousToken = process.env.CLAUDE_CODE_OAUTH_TOKEN;
+  process.env.HOME = home;
+  delete process.env.CLAUDE_CODE_OAUTH_TOKEN;
+  try {
+    const snapshot = await claude.readClaudeUsage();
+    assert.equal(snapshot.ok, false);
+    assert.match(snapshot.error, /setup-token|CLAUDE_CODE_OAUTH_TOKEN/);
+  } finally {
+    if (previousHome === undefined) delete process.env.HOME;
+    else process.env.HOME = previousHome;
+    if (previousToken !== undefined) process.env.CLAUDE_CODE_OAUTH_TOKEN = previousToken;
+    fs.rmSync(home, { recursive: true, force: true });
+  }
+});
