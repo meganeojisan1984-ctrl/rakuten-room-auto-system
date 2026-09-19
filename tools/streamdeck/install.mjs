@@ -138,10 +138,18 @@ function quitStreamDeck() {
   }
 }
 
+/** 起動に失敗してもプロセスを落とさないよう error を握りつぶして detach する */
+function spawnDetached(command, args, options = {}) {
+  const child = spawn(command, args, { detached: true, stdio: "ignore", ...options });
+  child.on("error", () => {}); // EACCES などで 'error' が投げっぱなしになるのを防ぐ
+  child.unref();
+  return child;
+}
+
 function launchStreamDeck() {
   try {
     if (process.platform === "darwin") {
-      spawn("open", ["-a", "Stream Deck"], { detached: true, stdio: "ignore" }).unref();
+      spawnDetached("open", ["-a", "Stream Deck"]);
       return true;
     }
     if (process.platform === "win32") {
@@ -151,7 +159,8 @@ function launchStreamDeck() {
       ];
       const exe = candidates.find((file) => fs.existsSync(file));
       if (!exe) return false;
-      spawn(exe, [], { detached: true, stdio: "ignore" }).unref();
+      // exe を直接 spawn すると環境によって EACCES になるため cmd の start 経由で起動する
+      spawnDetached("cmd", ["/c", "start", "", exe], { windowsHide: true });
       return true;
     }
   } catch {}
@@ -160,8 +169,8 @@ function launchStreamDeck() {
 
 function openFile(file) {
   try {
-    if (process.platform === "darwin") spawn("open", [file], { detached: true, stdio: "ignore" }).unref();
-    else if (process.platform === "win32") spawn("cmd", ["/c", "start", "", file], { detached: true, stdio: "ignore" }).unref();
+    if (process.platform === "darwin") spawnDetached("open", [file]);
+    else if (process.platform === "win32") spawnDetached("cmd", ["/c", "start", "", file], { windowsHide: true });
     else return false;
     return true;
   } catch {
@@ -285,7 +294,7 @@ export function main() {
 
   if (args.restart && !args.dryRun) {
     log("- Stream Deck を起動します…");
-    launchStreamDeck();
+    if (!launchStreamDeck()) log("! 自動起動できませんでした。Stream Deck を手動で起動してください。");
   }
 
   if (profileFile && !args.dryRun) {

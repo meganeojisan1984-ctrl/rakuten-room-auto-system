@@ -44,35 +44,54 @@ export function profilesRoots(dataDir = streamDeckDataDir()) {
   return ["ProfilesV2", "Profiles"].map((name) => path.join(dataDir, name)).filter(isDir);
 }
 
+// 走査しても無駄なディレクトリ（巨大 or プロファイルを含まない）
+const SKIP_DIRS = new Set(["Plugins", "logs", "Logs", "node_modules", "CustomImages", "Temp", "Cache"]);
+
+/**
+ * `*.sdProfile`（manifest.json を持つディレクトリ）を再帰的に探す。
+ * Stream Deck のバージョンによって ProfilesV2 直下だったりデバイス別だったりするため、
+ * 決め打ちせずデータディレクトリ配下を掘る。
+ */
+export function findProfileDirs(root, depth = 0, results = []) {
+  if (!root || depth > 4) return results;
+  let entries;
+  try {
+    entries = fs.readdirSync(root, { withFileTypes: true });
+  } catch {
+    return results;
+  }
+  for (const entry of entries) {
+    if (!entry.isDirectory() || SKIP_DIRS.has(entry.name)) continue;
+    const full = path.join(root, entry.name);
+    if (entry.name.endsWith(".sdProfile")) {
+      if (isDir(full) && fs.existsSync(path.join(full, "manifest.json"))) results.push(full);
+      continue; // プロファイル内は掘らない（入れ子プロファイル対策）
+    }
+    findProfileDirs(full, depth + 1, results);
+  }
+  return results;
+}
+
 /** 既存プロファイルの manifest.json を読み、デバイス情報を集める */
 export function detectProfiles(dataDir = streamDeckDataDir()) {
   const found = [];
-  for (const root of profilesRoots(dataDir)) {
-    let entries = [];
+  for (const dir of findProfileDirs(dataDir)) {
+    const manifestPath = path.join(dir, "manifest.json");
+    let manifest;
     try {
-      entries = fs.readdirSync(root, { withFileTypes: true });
+      manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
     } catch {
       continue;
     }
-    for (const entry of entries) {
-      if (!entry.isDirectory()) continue;
-      const manifestPath = path.join(root, entry.name, "manifest.json");
-      let manifest;
-      try {
-        manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-      } catch {
-        continue;
-      }
-      found.push({
-        root,
-        dir: path.join(root, entry.name),
-        manifestPath,
-        manifest,
-        name: manifest.Name || entry.name,
-        device: deviceFields(manifest),
-        actionCount: Object.keys(manifest.Actions || {}).length,
-      });
-    }
+    found.push({
+      root: path.dirname(dir),
+      dir,
+      manifestPath,
+      manifest,
+      name: manifest.Name || path.basename(dir),
+      device: deviceFields(manifest),
+      actionCount: Object.keys(manifest.Actions || {}).length,
+    });
   }
   return found;
 }
