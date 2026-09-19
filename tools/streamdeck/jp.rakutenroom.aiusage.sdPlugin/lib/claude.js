@@ -16,6 +16,14 @@ const { execFileSync } = require("child_process");
 const USAGE_URL = "https://api.anthropic.com/api/oauth/usage";
 const OAUTH_BETA = "oauth-2025-04-20";
 
+/** 認証情報ファイルの候補 */
+function credentialPaths() {
+  return [
+    path.join(os.homedir(), ".claude", ".credentials.json"),
+    path.join(os.homedir(), ".config", "claude", ".credentials.json"),
+  ];
+}
+
 function readJsonFile(file) {
   try {
     return JSON.parse(fs.readFileSync(file, "utf8"));
@@ -24,12 +32,37 @@ function readJsonFile(file) {
   }
 }
 
-/** 認証情報 JSON から accessToken を取り出す（形式差異に寛容に） */
-function pickAccessToken(creds) {
-  if (!creds || typeof creds !== "object") return null;
+/**
+ * 認証情報 JSON から accessToken を取り出す。
+ * Claude Code のバージョンで入れ子や名前が変わるため、よくある場所を見たうえで
+ * 見つからなければ access token 系のキーを再帰的に探す。
+ */
+function pickAccessToken(creds, depth = 0) {
+  if (!creds || typeof creds !== "object" || depth > 4) return null;
   const oauth = creds.claudeAiOauth || creds.oauth || creds;
-  const token = oauth.accessToken || oauth.access_token;
-  return typeof token === "string" && token.length > 0 ? token : null;
+  const direct = oauth.accessToken || oauth.access_token;
+  if (typeof direct === "string" && direct.length > 0) return direct;
+
+  for (const [key, value] of Object.entries(creds)) {
+    if (typeof value === "string" && value.length > 20 && /access[_-]?token/i.test(key)) return value;
+    if (value && typeof value === "object") {
+      const found = pickAccessToken(value, depth + 1);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+/** 認証情報の構造だけを返す（値は出さない）。診断用 */
+function describeCredentials(value, depth = 0) {
+  if (value === null) return "null";
+  if (Array.isArray(value)) return `配列(${value.length})`;
+  if (typeof value === "object") {
+    if (depth > 3) return "オブジェクト(…)";
+    return Object.fromEntries(Object.entries(value).map(([key, inner]) => [key, describeCredentials(inner, depth + 1)]));
+  }
+  if (typeof value === "string") return `string(${value.length}文字)`;
+  return typeof value;
 }
 
 /**
@@ -53,11 +86,7 @@ function readAccessToken() {
     }
   }
 
-  const candidates = [
-    path.join(os.homedir(), ".claude", ".credentials.json"),
-    path.join(os.homedir(), ".config", "claude", ".credentials.json"),
-  ];
-  for (const file of candidates) {
+  for (const file of credentialPaths()) {
     const token = pickAccessToken(readJsonFile(file));
     if (token) return { token, source: file };
   }
@@ -175,6 +204,8 @@ async function readClaudeUsage() {
 
 module.exports = {
   USAGE_URL,
+  describeCredentials,
+  credentialPaths,
   pickAccessToken,
   readAccessToken,
   normalizeWindow,
