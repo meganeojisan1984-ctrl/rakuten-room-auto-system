@@ -134,6 +134,13 @@ section("3. プロファイルへの配置");
 const profiles = detectProfiles();
 if (profiles.length === 0) {
   ng("プロファイルを検出できません", "Stream Deck アプリを一度起動してから再実行してください");
+  // 新しいアプリでは保存場所が変わっている可能性があるため、実際の中身を出しておく
+  if (dataDir && exists(dataDir)) {
+    info(`${dataDir} の中身:`);
+    for (const entry of fs.readdirSync(dataDir, { withFileTypes: true })) {
+      info(`  ${entry.isDirectory() ? "[dir] " : "      "}${entry.name}`);
+    }
+  }
 } else {
   let placed = 0;
   for (const profile of profiles) {
