@@ -250,3 +250,63 @@ test("make-profile.mjs: node で直接実行するとプロファイルが書き
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
+
+/* ---------------- プロファイルの探索（Stream Deck 7.x で見つからなかった不具合の回帰テスト） ---------------- */
+
+/** 任意の相対パスに .sdProfile を作る */
+function writeProfile(dataDir: string, relative: string, manifest: Record<string, unknown>) {
+  const dir = path.join(dataDir, relative);
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, "manifest.json"), JSON.stringify(manifest));
+  return dir;
+}
+
+test("detectProfiles: ProfilesV2 以外（デバイス別の入れ子）でも見つける", async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "sd7-"));
+  const { detectProfiles } = await importTool("scripts/streamdeck-paths.mjs");
+  try {
+    writeProfile(dataDir, path.join("Devices", "A00SA5332MNFK5", "Profiles", "ABC.sdProfile"), {
+      Name: "Default Profile",
+      Device: { Model: "20GBA9901", UUID: "SD2" },
+      Actions: { "0,0": { UUID: "com.example.other" } },
+    });
+    const found = detectProfiles(dataDir);
+    assert.equal(found.length, 1);
+    assert.equal(found[0].name, "Default Profile");
+    assert.equal(found[0].actionCount, 1);
+    assert.deepEqual(found[0].device, { Device: { Model: "20GBA9901", UUID: "SD2" } });
+  } finally {
+    fs.rmSync(dataDir, { recursive: true, force: true });
+  }
+});
+
+test("detectProfiles: Plugins 配下は探索しない", async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "sd7-"));
+  const { detectProfiles } = await importTool("scripts/streamdeck-paths.mjs");
+  try {
+    writeProfile(dataDir, path.join("Plugins", "x.sdPlugin", "sample.sdProfile"), { Name: "同梱サンプル", Actions: {} });
+    assert.deepEqual(detectProfiles(dataDir), []);
+  } finally {
+    fs.rmSync(dataDir, { recursive: true, force: true });
+  }
+});
+
+test("applyToCurrentProfile: デバイス別レイアウトでも空き行に書き込める", async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "sd7-"));
+  const occupied = ["0,0", "1,0", "2,0", "3,0", "4,0", "0,2", "1,2", "2,2", "3,2", "4,2"];
+  const dir = writeProfile(dataDir, path.join("Devices", "SD2", "Profiles", "ABC.sdProfile"), {
+    Name: "Default Profile",
+    Device: { Model: "20GBA9901", UUID: "SD2" },
+    Actions: Object.fromEntries(occupied.map((p) => [p, { UUID: "com.example.other" }])),
+  });
+  const { applyToCurrentProfile, parseKeysSpec } = await importTool("install.mjs");
+  try {
+    assert.equal(await withDataDir(dataDir, () => applyToCurrentProfile(parseKeysSpec(undefined), false)), true);
+    const manifest = JSON.parse(fs.readFileSync(path.join(dir, "manifest.json"), "utf8"));
+    assert.equal(manifest.Actions["0,1"].Settings.provider, "codex");
+    assert.equal(manifest.Actions["2,1"].Settings.window, "5h");
+    assert.equal(manifest.Actions["4,2"].UUID, "com.example.other");
+  } finally {
+    fs.rmSync(dataDir, { recursive: true, force: true });
+  }
+});
