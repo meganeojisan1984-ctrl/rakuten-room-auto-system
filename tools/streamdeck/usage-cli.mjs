@@ -5,6 +5,7 @@
  *   node tools/streamdeck/usage-cli.mjs probe     # Codex / Claude の残量を取得して表示
  *   node tools/streamdeck/usage-cli.mjs json      # 機械可読な JSON で出力
  *   node tools/streamdeck/usage-cli.mjs preview   # キー画像のプレビュー SVG を書き出す
+ *   node tools/streamdeck/usage-cli.mjs raw       # Codex ログの rate_limits を生のまま表示（調査用）
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -16,6 +17,7 @@ const require = createRequire(import.meta.url);
 const lib = (name) => require(path.join(here, "jp.rakutenroom.aiusage.sdPlugin", "lib", name));
 
 const { getUsage } = lib("usage.js");
+const codex = lib("codex.js");
 const { renderKeySvg } = lib("render.js");
 const { formatJstShort, formatRemaining } = lib("jst.js");
 
@@ -67,6 +69,41 @@ function previewSvg(snapshots) {
 }
 
 const command = process.argv[2] || "probe";
+
+/** Codex のセッションログから rate_limits を生のまま取り出す（キー名の差異を調べる用） */
+function showRaw() {
+  const home = codex.codexHome();
+  const files = codex.findRecentSessionFiles(path.join(home, "sessions"), 5);
+  console.log(`Codex ディレクトリ: ${home}`);
+  console.log(`最近のセッション: ${files.length} 件`);
+  let shown = 0;
+  for (const file of files) {
+    let parsed;
+    try {
+      const size = fs.statSync(file).size;
+      const fd = fs.openSync(file, "r");
+      const length = Math.min(size, 512 * 1024);
+      const buf = Buffer.alloc(length);
+      fs.readSync(fd, buf, 0, length, size - length);
+      fs.closeSync(fd);
+      parsed = codex.parseTailForRateLimits(buf.toString("utf8"));
+    } catch {
+      continue;
+    }
+    if (!parsed) continue;
+    console.log(`\n--- ${path.basename(file)} ---`);
+    console.log(`記録時刻: ${parsed.at ? parsed.at.toISOString() : "不明"}`);
+    console.log(JSON.stringify(parsed.rateLimits, null, 2));
+    if (++shown >= 2) break;
+  }
+  if (shown === 0) console.log("rate_limits を含む記録が見つかりませんでした。");
+}
+
+if (command === "raw") {
+  showRaw();
+  process.exit(0);
+}
+
 const snapshots = await collect();
 
 if (command === "json") {
