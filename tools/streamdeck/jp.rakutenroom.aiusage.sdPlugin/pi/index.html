@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <title>AI 使用量メーター</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #2d2d2d;
+        --fg: #d8d8d8;
+        --muted: #9a9a9a;
+        --line: #3d3d3d;
+        --accent: #5aa9ff;
+      }
+      body {
+        margin: 0;
+        padding: 12px;
+        background: var(--bg);
+        color: var(--fg);
+        font: 13px/1.5 -apple-system, "Segoe UI", "Hiragino Sans", "Yu Gothic UI", sans-serif;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .row > label {
+        flex: 0 0 96px;
+        text-align: right;
+        color: var(--muted);
+      }
+      select,
+      input {
+        flex: 1;
+        min-width: 0;
+        background: #3d3d3d;
+        color: var(--fg);
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        padding: 4px 6px;
+        font: inherit;
+      }
+      button {
+        background: #4a4a4a;
+        color: var(--fg);
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        padding: 5px 10px;
+        font: inherit;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #565656;
+      }
+      .status {
+        margin-top: 10px;
+        padding: 8px;
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        background: #262626;
+        white-space: pre-wrap;
+        word-break: break-all;
+        color: var(--muted);
+      }
+      .status.ok {
+        color: #7ee787;
+      }
+      .status.ng {
+        color: #ff9292;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="row">
+      <label for="provider">サービス</label>
+      <select id="provider">
+        <option value="codex">Codex</option>
+        <option value="claude">Claude</option>
+      </select>
+    </div>
+    <div class="row">
+      <label for="window">表示する枠</label>
+      <select id="window">
+        <option value="weekly">週間</option>
+        <option value="5h">5時間</option>
+        <option value="weekly_opus">週間 (Opus) ※Claude のみ</option>
+      </select>
+    </div>
+    <div class="row">
+      <label for="label">見出し</label>
+      <input id="label" type="text" placeholder="CODEX / CLAUDE" />
+    </div>
+    <div class="row">
+      <label for="accent">アクセント色</label>
+      <input id="accent" type="text" placeholder="#2ee6d6（空欄で自動）" />
+    </div>
+    <div class="row">
+      <label for="lang">表記</label>
+      <select id="lang">
+        <option value="ja">日本語</option>
+        <option value="en">English</option>
+      </select>
+    </div>
+    <div class="row">
+      <label for="refreshSeconds">更新間隔(秒)</label>
+      <input id="refreshSeconds" type="number" min="15" step="5" value="60" />
+    </div>
+    <div class="row">
+      <label></label>
+      <button id="refresh">今すぐ更新</button>
+    </div>
+    <div class="status" id="status">接続中…</div>
+
+    <script>
+      let websocket = null;
+      let uuid = null;
+      let actionInfo = null;
+      const ids = ["provider", "window", "label", "accent", "lang", "refreshSeconds"];
+      const $ = (id) => document.getElementById(id);
+
+      function currentSettings() {
+        return {
+          provider: $("provider").value,
+          window: $("window").value,
+          label: $("label").value,
+          accent: $("accent").value,
+          lang: $("lang").value,
+          refreshSeconds: Number($("refreshSeconds").value) || 60,
+        };
+      }
+
+      function saveSettings() {
+        if (!websocket) return;
+        websocket.send(JSON.stringify({ event: "setSettings", context: uuid, payload: currentSettings() }));
+      }
+
+      function applySettings(settings) {
+        const s = settings || {};
+        $("provider").value = s.provider === "claude" ? "claude" : "codex";
+        $("window").value = s.window || "weekly";
+        $("label").value = s.label || "";
+        $("accent").value = s.accent || "";
+        $("lang").value = s.lang === "en" ? "en" : "ja";
+        $("refreshSeconds").value = s.refreshSeconds || 60;
+      }
+
+      function showStatus(payload) {
+        const el = $("status");
+        el.classList.remove("ok", "ng");
+        if (payload.ok) {
+          el.classList.add("ok");
+          const reset = payload.resetAt ? new Date(payload.resetAt).toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" }) : "不明";
+          el.textContent = `取得成功: 残り ${Math.round(payload.remainingPercent)}%\nリセット: ${reset}（日本時間）` +
+            (payload.remainingText ? ` / あと ${payload.remainingText}` : "") +
+            (payload.source ? `\n情報源: ${payload.source}` : "");
+        } else {
+          el.classList.add("ng");
+          el.textContent = `取得できません: ${payload.error || "原因不明"}` +
+            (payload.availableWindows && payload.availableWindows.length
+              ? `\n取得できている枠: ${payload.availableWindows.join(", ")}`
+              : "");
+        }
+      }
+
+      ids.forEach((id) => $(id).addEventListener("change", saveSettings));
+      $("refresh").addEventListener("click", () => {
+        if (!websocket) return;
+        websocket.send(
+          JSON.stringify({ event: "sendToPlugin", context: uuid, action: actionInfo && actionInfo.action, payload: { command: "refresh" } })
+        );
+      });
+
+      function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
+        uuid = inUUID;
+        actionInfo = JSON.parse(inActionInfo);
+        applySettings(actionInfo.payload && actionInfo.payload.settings);
+        websocket = new WebSocket("ws://127.0.0.1:" + inPort);
+        websocket.onopen = () => {
+          websocket.send(JSON.stringify({ event: inRegisterEvent, uuid: inUUID }));
+          $("status").textContent = "状態を取得中…";
+        };
+        websocket.onmessage = (event) => {
+          const message = JSON.parse(event.data);
+          if (message.event === "didReceiveSettings") applySettings(message.payload && message.payload.settings);
+          if (message.event === "sendToPropertyInspector") showStatus(message.payload || {});
+        };
+      }
+      window.connectElgatoStreamDeckSocket = connectElgatoStreamDeckSocket;
+    </script>
+  </body>
+</html>

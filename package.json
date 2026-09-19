@@ -15,6 +15,11 @@
     "affiliate": "npx tsx src/affiliate/server.ts",
     "affiliate:run": "npx tsx src/affiliate/run.ts",
     "diagnose": "npx tsx src/utils/cookie-diagnose.ts",
+    "streamdeck:install": "node tools/streamdeck/install.mjs",
+    "streamdeck:probe": "node tools/streamdeck/usage-cli.mjs probe",
+    "streamdeck:preview": "node tools/streamdeck/usage-cli.mjs preview",
+    "streamdeck:profile": "node tools/streamdeck/scripts/make-profile.mjs",
+    "streamdeck:icons": "node tools/streamdeck/scripts/make-icons.mjs",
     "test": "node --test --import tsx tests/*.test.ts",
     "build": "npx tsc"
   },

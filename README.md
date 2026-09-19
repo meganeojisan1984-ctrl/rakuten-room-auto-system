@@ -4,6 +4,8 @@
 
 > 🎯 **X高単価アフィリエイト送客システム**（指揮官＋10エージェントで投稿文・DM・ロードマップ・画像プロンプトを自動生成し、Googleスプレッドシートの案件ごとのタブに書き込む）も同梱しています。詳細は **[AFFILIATE.md](./AFFILIATE.md)** を参照してください。
 
+> 🎛️ **Stream Deck AI 使用量メーター**（Codex / Claude の利用枠の残り％とリセット時刻を Stream Deck のキーに表示）も同梱しています。`npm run streamdeck:install` で導入できます。詳細は **[tools/streamdeck/README.md](./tools/streamdeck/README.md)** を参照してください。
+
 ---
 
 ## 🚀 セットアップ手順

@@ -1,0 +1,43 @@
+{
+  "SDKVersion": 2,
+  "UUID": "jp.rakutenroom.aiusage",
+  "Name": "AI Usage Meter",
+  "Version": "1.0.0.0",
+  "Author": "rakuten-room-auto-system",
+  "Description": "Codex / Claude の利用枠の残り％とリセット時刻（日本時間）を Stream Deck のキーに表示します。",
+  "Category": "AI Usage",
+  "CategoryIcon": "imgs/category",
+  "Icon": "imgs/plugin",
+  "URL": "https://github.com/meganeojisan1984-ctrl/rakuten-room-auto-system",
+  "CodePath": "plugin.js",
+  "Nodejs": {
+    "Version": "20",
+    "Debug": "disabled"
+  },
+  "Software": {
+    "MinimumVersion": "6.5"
+  },
+  "OS": [
+    { "Platform": "mac", "MinimumVersion": "12" },
+    { "Platform": "windows", "MinimumVersion": "10" }
+  ],
+  "Actions": [
+    {
+      "UUID": "jp.rakutenroom.aiusage.meter",
+      "Name": "AI 使用量",
+      "Icon": "imgs/action",
+      "Tooltip": "Codex / Claude の残り％とリセット時刻を表示（押すと即時更新）",
+      "PropertyInspectorPath": "pi/index.html",
+      "Controllers": ["Keypad"],
+      "UserTitleEnabled": false,
+      "SupportedInMultiActions": false,
+      "States": [
+        {
+          "Image": "imgs/key",
+          "TitleAlignment": "middle",
+          "ShowTitle": false
+        }
+      ]
+    }
+  ]
+}
