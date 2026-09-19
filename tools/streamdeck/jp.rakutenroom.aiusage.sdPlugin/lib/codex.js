@@ -116,9 +116,13 @@ function normalizeWindow(raw, baseAt) {
   const windowMinutes = num(raw.window_minutes, raw.windowMinutes, raw.window_size_minutes) ?? null;
   const resetsInSeconds = num(raw.resets_in_seconds, raw.resetsInSeconds, raw.reset_in_seconds);
   let resetAt = null;
-  if (typeof raw.resets_at === "string" || typeof raw.resetsAt === "string") {
-    const parsed = Date.parse(raw.resets_at || raw.resetsAt);
+  const resetsAt = raw.resets_at ?? raw.resetsAt ?? raw.reset_at;
+  if (typeof resetsAt === "string") {
+    const parsed = Date.parse(resetsAt);
     if (Number.isFinite(parsed)) resetAt = new Date(parsed);
+  } else if (typeof resetsAt === "number" && Number.isFinite(resetsAt)) {
+    // Codex はエポック秒で入れてくる（ミリ秒の場合も一応許容する）
+    resetAt = new Date(resetsAt > 1e12 ? resetsAt : resetsAt * 1000);
   }
   if (!resetAt && resetsInSeconds != null) {
     // ログ記録時刻を基準にする（ログが古くてもリセット時刻自体は正しく出る）

@@ -284,3 +284,36 @@ test("plugin.js: 登録後 willAppear でキー画像を送る", async () => {
     fs.rmSync(home, { recursive: true, force: true });
   }
 });
+
+/* ---------------- 実機ログで判明した形式（回帰テスト） ---------------- */
+
+test("normalizeRateLimits: resets_at がエポック秒でもリセット時刻を出せる", () => {
+  // 実機の Codex (plan_type: prolite) は primary に週間枠のみ、resets_at は数値
+  const windows = codex.normalizeRateLimits(
+    { limit_id: "codex", primary: { used_percent: 45, window_minutes: 10080, resets_at: 1789996819 }, secondary: null },
+    new Date("2026-09-19T13:32:25Z")
+  );
+  assert.equal(windows.weekly.remainingPercent, 55);
+  assert.equal(formatJstShort(windows.weekly.resetAt), "09/21 22:20");
+  assert.equal(windows["5h"], undefined, "5時間枠を持たないプランでは作らない");
+});
+
+test("normalizeRateLimits: resets_at がミリ秒でも解釈できる", () => {
+  const windows = codex.normalizeRateLimits({ primary: { used_percent: 0, window_minutes: 300, resets_at: 1789996819000 } }, null);
+  assert.equal(windows["5h"].resetAt.getTime(), 1789996819000);
+});
+
+test("pickAccessToken: 入れ子や別名のキーでもトークンを見つける", () => {
+  const token = "t".repeat(40);
+  assert.equal(claude.pickAccessToken({ profiles: { default: { oauthAccount: { access_token: token } } } }), token);
+  assert.equal(claude.pickAccessToken({ claudeAiOauth: { accessToken: token } }), token);
+  assert.equal(claude.pickAccessToken({ note: "short" }), null, "短い文字列は拾わない");
+});
+
+test("describeCredentials: 値を出さず構造だけを返す", () => {
+  const described = claude.describeCredentials({ claudeAiOauth: { accessToken: "secret-value", expiresAt: 1, scopes: ["a"] } });
+  const serialized = JSON.stringify(described);
+  assert.ok(!serialized.includes("secret-value"), "値は含めない");
+  assert.equal(described.claudeAiOauth.accessToken, "string(12文字)");
+  assert.equal(described.claudeAiOauth.scopes, "配列(1)");
+});

@@ -6,6 +6,7 @@
  *   node tools/streamdeck/usage-cli.mjs json      # 機械可読な JSON で出力
  *   node tools/streamdeck/usage-cli.mjs preview   # キー画像のプレビュー SVG を書き出す
  *   node tools/streamdeck/usage-cli.mjs raw       # Codex ログの rate_limits を生のまま表示（調査用）
+ *   node tools/streamdeck/usage-cli.mjs auth      # Claude 認証情報の「構造だけ」表示（値は出さない）
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -18,6 +19,7 @@ const lib = (name) => require(path.join(here, "jp.rakutenroom.aiusage.sdPlugin",
 
 const { getUsage } = lib("usage.js");
 const codex = lib("codex.js");
+const claude = lib("claude.js");
 const { renderKeySvg } = lib("render.js");
 const { formatJstShort, formatRemaining } = lib("jst.js");
 
@@ -99,8 +101,39 @@ function showRaw() {
   if (shown === 0) console.log("rate_limits を含む記録が見つかりませんでした。");
 }
 
+/** Claude 認証情報の構造だけを表示する（トークンの値は絶対に出さない） */
+function showAuth() {
+  for (const file of claude.credentialPaths()) {
+    const exists = fs.existsSync(file);
+    console.log(`${exists ? "あり" : "なし"}: ${file}`);
+    if (!exists) continue;
+    let json;
+    try {
+      json = JSON.parse(fs.readFileSync(file, "utf8"));
+    } catch (err) {
+      console.log(`  JSON として読めません: ${String(err)}`);
+      continue;
+    }
+    console.log(`  構造: ${JSON.stringify(claude.describeCredentials(json), null, 2).split("\n").join("\n  ")}`);
+    const token = claude.pickAccessToken(json);
+    console.log(`  アクセストークン: ${token ? `検出できました（${token.length}文字）` : "見つかりません"}`);
+    const expiresAt = json.claudeAiOauth && json.claudeAiOauth.expiresAt;
+    if (typeof expiresAt === "number") {
+      const at = new Date(expiresAt > 1e12 ? expiresAt : expiresAt * 1000);
+      console.log(`  有効期限: ${at.toISOString()} (${at.getTime() < Date.now() ? "期限切れ" : "有効"})`);
+    }
+  }
+  const env = process.env.CLAUDE_CODE_OAUTH_TOKEN || process.env.CLAUDE_OAUTH_TOKEN;
+  console.log(`環境変数のトークン: ${env ? "あり" : "なし"}`);
+}
+
 if (command === "raw") {
   showRaw();
+  process.exit(0);
+}
+
+if (command === "auth") {
+  showAuth();
   process.exit(0);
 }
 
