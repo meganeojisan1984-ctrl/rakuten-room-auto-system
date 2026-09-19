@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "lanmanya:10006265",
     "shopworld:10139097",
     "okotico:10041770",
     "vox:10021324",
@@ -499,7 +498,8 @@
     "red-jpn:10000027",
     "medicalbreathshop:10000000",
     "e-zakkokumai:10002941",
-    "ultora:10000043"
+    "ultora:10000043",
+    "netbaby:10018748"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
