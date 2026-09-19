@@ -16,6 +16,8 @@
  *   --col <n>      配置を始める列（0 始まり・既定 0）
  *   --profile <名> 書き込む既存プロファイルを名前で指定（--apply-current 用）
  *   --restore      直近のバックアップ（manifest.json.bak-*）から書き戻す
+ *   --device <文字列> デバイスの Model / UUID（シリアル）で対象プロファイルを絞り込む
+ *   --list-profiles 検出したプロファイルとデバイスを一覧表示して終了
  */
 import { execFileSync, spawn } from "node:child_process";
 import fs from "node:fs";
@@ -51,6 +53,8 @@ function parseArgs(argv) {
     else if (a === "--col") args.startCol = Number(argv[++i]);
     else if (a === "--profile") args.profileName = argv[++i];
     else if (a === "--restore") args.restore = true;
+    else if (a === "--device") args.device = argv[++i];
+    else if (a === "--list-profiles") args.listProfiles = true;
     else if (a === "--device-model") args.deviceModel = argv[++i];
     else if (a === "--help" || a === "-h") args.help = true;
   }
@@ -180,12 +184,37 @@ function openFile(file) {
   }
 }
 
+/** デバイス指定（Model / UUID の部分一致）でプロファイルを絞り込む */
+export function filterByDevice(profiles, device) {
+  if (!device) return profiles;
+  const needle = String(device).toLowerCase();
+  return profiles.filter((profile) => {
+    const info = profile.manifest.Device || {};
+    return [info.Model, info.UUID].filter(Boolean).some((value) => String(value).toLowerCase().includes(needle));
+  });
+}
+
+/** 検出したプロファイルとデバイスを一覧表示する */
+export function listProfiles() {
+  const profiles = detectProfiles();
+  if (profiles.length === 0) {
+    log("プロファイルが見つかりません。");
+    return profiles;
+  }
+  for (const profile of profiles) {
+    const device = profile.manifest.Device || {};
+    log(`- "${profile.name}"  デバイス: ${device.Model || "不明"}  UUID: ${device.UUID || "不明"}  キー数: ${profile.actionCount}`);
+    log(`  ${profile.manifestPath}`);
+  }
+  return profiles;
+}
+
 /**
  * 既存プロファイルの manifest.json にキーを直接書き込む（バックアップ付き）。
  * 位置指定が無ければ空いている行を自動で探すので、使用中のキーは踏まない。
  */
 export function applyToCurrentProfile(keys, dryRun, options = {}) {
-  const profiles = detectProfiles();
+  const profiles = filterByDevice(detectProfiles(), options.device);
   const target = options.profileName
     ? profiles.find((p) => p.name === options.profileName)
     : pickPrimaryProfile(profiles);
@@ -258,6 +287,11 @@ export function main() {
     return;
   }
 
+  if (args.listProfiles) {
+    listProfiles();
+    return;
+  }
+
   const keys = parseKeysSpec(args.keys);
   const dataDir = streamDeckDataDir();
   const dest = args.dest ? path.resolve(args.dest) : pluginsDir(dataDir);
@@ -301,7 +335,12 @@ export function main() {
     restoreFromBackup(args.dryRun, { profileName: args.profileName });
   } else if (args.profile) {
     if (args.applyCurrent) {
-      applyToCurrentProfile(keys, args.dryRun, { row: args.row, startCol: args.startCol, profileName: args.profileName });
+      applyToCurrentProfile(keys, args.dryRun, {
+        row: args.row,
+        startCol: args.startCol,
+        profileName: args.profileName,
+        device: args.device,
+      });
     } else {
       const deviceFields = resolveDeviceFields(args.deviceModel);
       if (!deviceFields) {

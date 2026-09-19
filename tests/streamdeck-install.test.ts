@@ -350,3 +350,30 @@ test("restoreFromBackup: バックアップが無ければ false", async () => {
     fs.rmSync(dataDir, { recursive: true, force: true });
   }
 });
+
+test("filterByDevice: Model / シリアルの部分一致でプロファイルを選べる", async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "sd-dev-"));
+  const { filterByDevice } = await importTool("install.mjs");
+  const { detectProfiles } = await importTool("scripts/streamdeck-paths.mjs");
+  try {
+    // 実機とバーチャルデバイスが同名（Default Profile）で共存する実環境を再現
+    writeProfile(dataDir, path.join("ProfilesV3", "A.sdProfile"), {
+      Name: "Default Profile",
+      Device: { Model: "VSD2/WiFi", UUID: "@(32)[ce400186]" },
+      Actions: {},
+    });
+    writeProfile(dataDir, path.join("ProfilesV3", "B.sdProfile"), {
+      Name: "Default Profile",
+      Device: { Model: "20GBA9901", UUID: "@(1)[4057/128/A00SA5332MNFK5]" },
+      Actions: {},
+    });
+    const profiles = detectProfiles(dataDir);
+    assert.equal(profiles.length, 2);
+    assert.equal(filterByDevice(profiles, "A00SA5332MNFK5")[0].manifest.Device.Model, "20GBA9901", "シリアルで実機を選べる");
+    assert.equal(filterByDevice(profiles, "vsd2")[0].manifest.Device.Model, "VSD2/WiFi", "大文字小文字を無視する");
+    assert.equal(filterByDevice(profiles, "存在しない").length, 0);
+    assert.equal(filterByDevice(profiles, undefined).length, 2, "未指定なら絞り込まない");
+  } finally {
+    fs.rmSync(dataDir, { recursive: true, force: true });
+  }
+});
