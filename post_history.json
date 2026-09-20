@@ -2298,5 +2298,18 @@
     "captionHead": "え、待って。通話もできてこの値段ってマジで？🤯\ud83c",
     "slot": "slot2",
     "itemCodeHash": "e0dd02cc0d80"
+  },
+  {
+    "ts": "2026-09-20T15:39:48.579Z",
+    "itemCode": "darkangel:10036035",
+    "itemName": "72%OFF!【期間限定：3,980円→1,099円！】【年間ランキング4位】 ルームウェア さらてろリブ セットアップ 上下セット 長袖 ウエストゴム ハイウエスト 腹巻 ワンマイルウェア 部屋着 【秋さらルームウェア上下セット】 ハート柄ブルー/ホワイトがページ内最安",
+    "genreName": "グルメ・スイーツ",
+    "price": 1099,
+    "postType": 3,
+    "hour": 0,
+    "hook": "fallback",
+    "captionHead": "72%OFF!【期間限定：3,980円→1,099",
+    "slot": "slot2",
+    "itemCodeHash": "9ccfb0d800d6"
   }
 ]
