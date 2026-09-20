@@ -2285,5 +2285,18 @@
     "itemCodeHash": "96c3fe2c9517",
     "likes": 4,
     "likesUpdatedAt": "2026-09-19T17:27:23.287Z"
+  },
+  {
+    "ts": "2026-09-20T09:07:23.841Z",
+    "itemCode": "enterb:10000100",
+    "itemName": "クーポンで最安2,384円~！★2025年楽天年間1位受賞★【新色登場】スマートウォッチ 通話機能付 1.96インチ大画面 Bluetooth5.4最新型 24時間健康管理 皮膚温変動検知 血中酸素度 心拍数測定 IP68防水 長時間待機 着信通知 GPS運動記録 多機能 腕時計",
+    "genreName": "美容・コスメ",
+    "price": 2980,
+    "postType": 2,
+    "hour": 18,
+    "hook": "surprise",
+    "captionHead": "え、待って。通話もできてこの値段ってマジで？🤯\ud83c",
+    "slot": "slot2",
+    "itemCodeHash": "e0dd02cc0d80"
   }
 ]

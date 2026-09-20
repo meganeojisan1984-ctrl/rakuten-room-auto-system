@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-09-05T16:57:43.955Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "19件抽出、履歴19件のいいね数を更新"
-  },
-  {
-    "ts": "2026-09-05T16:57:43.966Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴139件(計測済89) 実売0件(¥0) mode=likes"
-  },
-  {
-    "ts": "2026-09-05T16:57:47.902Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第59世代へ更新 (ルールベース)、警告0件"
-  },
-  {
-    "ts": "2026-09-06T00:36:25.467Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (家電・ガジェット)"
-  },
-  {
     "ts": "2026-09-06T00:36:30.781Z",
     "agent": "copywriter",
     "ok": true,
@@ -1198,5 +1174,29 @@
     "agent": "poster",
     "ok": false,
     "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/bo)"
+  },
+  {
+    "ts": "2026-09-20T09:03:30.768Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (美容・コスメ)"
+  },
+  {
+    "ts": "2026-09-20T09:03:36.443Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ2)"
+  },
+  {
+    "ts": "2026-09-20T09:05:14.206Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-09-20T09:07:23.840Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
   }
 ]
