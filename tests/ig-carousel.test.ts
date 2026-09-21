@@ -262,3 +262,37 @@ test("publishCarouselAssetsToGitHub uploads files and rewrites raw public urls",
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("AI office backgrounds appear behind the exact Office product photo and source text", async () => {
+  const officeItem: RakutenItem = {
+    ...item,
+    itemName: "マイクロソフト Office Home 2024",
+    itemCaption: "2台の Windows PC または Mac で使用可能。",
+    imageUrl: "https://example.com/office-home-2024.jpg",
+  };
+  const dir = fs.mkdtempSync(path.join(process.cwd(), "tmp-office-backgrounds-"));
+  try {
+    const backgroundPaths = [1, 2, 3, 4, 5].map((index) => {
+      const backgroundPath = path.join(dir, `background-${index}.jpg`);
+      fs.writeFileSync(backgroundPath, `generated-office-background-${index}`);
+      return backgroundPath;
+    });
+    const rendered: string[] = [];
+    await writeCarouselImages(officeItem, buildCarouselSlides(officeItem), {
+      outputDir: dir,
+      publicBaseUrl: "https://cdn.example.com/ig",
+      backgroundImagePaths: backgroundPaths,
+      renderer: async (svg) => { rendered.push(svg); },
+    });
+
+    assert.equal(rendered.length, 5);
+    assert.match(rendered[0]!, /Z2VuZXJhdGVkLW9mZmljZS1iYWNrZ3JvdW5kLTE=/);
+    assert.match(rendered[0]!, /https:\/\/example\.com\/office-home-2024\.jpg/);
+    const visibleCoverText = rendered[0]!.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ");
+    assert.match(visibleCoverText, /2台の Windows PC または Mac で使用可能/);
+    assert.match(rendered[1]!, /Z2VuZXJhdGVkLW9mZmljZS1iYWNrZ3JvdW5kLTI=/);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+

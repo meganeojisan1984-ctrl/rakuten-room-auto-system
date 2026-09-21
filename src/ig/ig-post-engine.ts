@@ -3,7 +3,7 @@ import { buildInstagramFinalCaption, upscaleImageUrl } from "../sns";
 import { notifyError } from "../notifiers";
 import type { PersonaSlot } from "../persona/persona";
 import type { RakutenItem } from "../fetcher";
-import { generateAiLifestyleImages } from "./ai-image";
+import { generateAiLifestyleImages, isAiLifestyleImagesEnabled } from "./ai-image";
 import {
   buildCarouselSlides,
   getCarouselWriteOptions,
@@ -123,6 +123,22 @@ export async function createInstagramCarouselAssets(
   const renderCarouselImages = options.renderCarouselImages ?? writeCarouselImages;
   console.log(`[ig-post-engine] slot=${persona.id} building source-grounded carousel assets...`);
   const slides = buildCarouselSlides(item);
+  if (isAiLifestyleImagesEnabled(envVars)) {
+    const generateAiImages = options.generateAiImages ?? generateAiLifestyleImages;
+    console.log(`[ig-post-engine] slot=${persona.id} generating product-matched background images...`);
+    const backgrounds = await generateAiImages(item, persona, {
+      apiKey: envVars.OPENAI_API_KEY,
+      outputDir: writeOptions.outputDir,
+      publicBaseUrl: writeOptions.publicBaseUrl,
+      model: envVars.AI_IMAGE_MODEL || undefined,
+      quality: envVars.AI_IMAGE_QUALITY as "low" | "medium" | "high" | "auto" | undefined,
+      size: envVars.AI_IMAGE_SIZE || undefined,
+    });
+    if (backgrounds.length !== slides.length) {
+      throw new Error(`AI background generation returned ${backgrounds.length} images; expected ${slides.length}`);
+    }
+    writeOptions.backgroundImagePaths = backgrounds.map((asset) => asset.filePath);
+  }
   return renderCarouselImages(item, slides, writeOptions);
 }
 

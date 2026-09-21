@@ -4,7 +4,8 @@ import * as path from "path";
 import type { RakutenItem } from "../fetcher";
 import type { PersonaSlot } from "../persona/persona";
 import { mapAssetToPublicUrl, type CarouselAsset } from "./carousel";
-import { buildProductStoryProfile } from "./product-story";
+import { classifyProductCategory } from "../fetcher";
+import { cleanProductDisplayName, extractProductFacts, isSoftwareProduct } from "./product-copy";
 
 interface OpenAiImageResponse {
   data?: Array<{ b64_json?: string; url?: string }>;
@@ -17,8 +18,9 @@ export interface GenerateAiLifestyleImagesOptions {
   model?: string;
   quality?: "low" | "medium" | "high" | "auto";
   size?: string;
+  loadProductImage?: (url: string) => Promise<{ bytes: Uint8Array; mimeType: string }>;
   now?: Date;
-  client?: (body: Record<string, unknown>, apiKey: string) => Promise<OpenAiImageResponse>;
+  client?: (body: FormData, apiKey: string) => Promise<OpenAiImageResponse>;
 }
 
 export interface AiLifestyleImagePromptOptions {
@@ -27,35 +29,14 @@ export interface AiLifestyleImagePromptOptions {
 
 const DEFAULT_OUTPUT_DIR = path.join(process.cwd(), "public", "generated", "instagram");
 const DEFAULT_MODEL = "gpt-image-2";
+const DEFAULT_QUALITY: NonNullable<GenerateAiLifestyleImagesOptions["quality"]> = "high";
 
 function cleanText(value: string, max = 140): string {
   return value.replace(/\s+/g, " ").trim().slice(0, max);
 }
 
 function productTitle(item: RakutenItem): string {
-  return cleanText(item.itemName.replace(/[【】≪≫＜＞()[\]{}]/g, " "), 42);
-}
-
-function finiteNumber(value: unknown): number | undefined {
-  if (typeof value === "number") return Number.isFinite(value) ? value : undefined;
-  if (typeof value === "string") {
-    const parsed = Number(value.replace(/,/g, "").trim());
-    return Number.isFinite(parsed) ? parsed : undefined;
-  }
-  return undefined;
-}
-
-function productFeatures(item: RakutenItem): string[] {
-  const features: string[] = [];
-  const reviewAverage = finiteNumber(item.reviewAverage);
-  const reviewCount = finiteNumber(item.reviewCount);
-  const itemPrice = finiteNumber(item.itemPrice) ?? 0;
-  if (item.hasCoupon) features.push("クーポンあり");
-  if (item.hasPointBonus) features.push("ポイントUP");
-  if ((reviewAverage ?? 0) >= 4.3) features.push(`高評価 ${reviewAverage!.toFixed(1)}`);
-  if ((reviewCount ?? 0) >= 50) features.push(`レビュー${Math.round(reviewCount!).toLocaleString("ja-JP")}件`);
-  features.push(`${Math.round(itemPrice).toLocaleString("ja-JP")}円`);
-  return features.slice(0, 4);
+  return cleanText(cleanProductDisplayName(item.itemName), 42);
 }
 
 function timestamp(now: Date): string {
@@ -64,48 +45,66 @@ function timestamp(now: Date): string {
 
 function sceneHints(item: RakutenItem): string[] {
   const text = `${item.itemName} ${item.itemCaption}`.toLowerCase();
-  if (/美容|コスメ|スキンケア|ヘアケア|メイク|化粧|リップ|美容液|香水/.test(text)) {
+  if (isSoftwareProduct(text) || /ソフト|アプリ|ライセンス|パソコン|pc|mac|office|microsoft/.test(text)) {
     return [
-      "a soft morning vanity scene with the product neatly placed near a mirror",
-      "a close-up hand applying the product with clean, soft-focus skin texture",
-      "a bathroom or washstand shelf scene with cosmetic bottles and natural light",
-      "a hand-held smartphone snapshot of the product on a bedside table",
-      "a calm self-care moment scene that feels fresh and inviting",
+      "a tidy home office desk with a closed laptop, keyboard, notebook, and warm daylight; all screens are off",
+      "a quiet work-from-home corner with a desk, chair, stationery, and no visible screen content",
+      "a clean desktop workspace with a blank monitor turned away from camera and neutral office supplies",
+      "a natural desk scene with a laptop closed beside a notebook and pen, with no logos or readable marks",
+      "a calm evening home-office setting with a desk lamp, closed computer, and uncluttered work surface",
     ];
   }
-  if (/食品|お米|お水|ミネラルウォーター|コーヒー|お茶|菓子|チョコ|うなぎ|お肉|鮮魚|干物|プロテイン|牛めし|牛丼|どんぶりの具|ごはんの具|レトルト|惣菜|おかず|時短ごはん|時短ご飯|冷凍食品|冷凍ごはん|冷凍ご飯|常備食|非常食/.test(text)) {
+  if (/美容|コスメ|スキンケア|ヘアケア|メイク|化粧|リップ|美容液|セラム|香水|保湿|乾燥/.test(text)) {
     return [
-      "a cozy kitchen counter with the product naturally prepared for breakfast",
-      "a dining table moment with appetizing food styling and real household dishes",
-      "a close hand-held smartphone snapshot of someone casually serving it at home",
-      "a warm shelf or pantry scene after grocery unpacking",
-      "a relaxed evening table scene that looks candid and delicious",
+      "a soft morning vanity scene with a mirror, folded towel, and restrained neutral cosmetic tools",
+      "a realistic washstand scene with a mirror and clean neutral surfaces, with no bottles or labels",
+      "a bright vanity tabletop with a comb, hand mirror, and soft daylight, without cosmetics or packaging",
+      "a calm vanity corner with a mirror, folded towels, and a small plant, with no branded containers",
+      "a simple makeup-prep corner with a clean mirror and neutral accessories, without a person or product",
     ];
   }
   if (/収納|片付け|ハンガー|ラック|チェスト|ケース|ボックス|衣類/.test(text)) {
     return [
-      "a kitchen counter or washstand corner after tidying, with the product in everyday use",
-      "a bright bedroom storage scene with folded clothes and lived-in details",
-      "a hand-held snapshot of someone organizing small household items",
-      "a clean shelf scene with natural shadows and realistic clutter nearby",
-      "a before-going-out moment with the item quietly useful in the background",
+      "a realistic tidy home storage corner with an open shelf and neatly folded neutral fabrics, no organizers",
+      "a clean shelf or washstand with a few small everyday objects arranged neatly, no storage containers",
+      "a bright uncluttered closet corner with hanging neutral clothes and empty shelf space",
+      "a calm home storage area with natural light and clear surfaces, without boxes or organizers",
+      "a simple bedroom corner with a chair and folded fabric, free of branded or distinctive objects",
     ];
   }
-  if (/洗濯|柔軟剤|洗剤|タオル|掃除|トイレ|風呂|バス|加湿器|シャワー/.test(text)) {
+  if (/洗濯|柔軟剤|洗剤|タオル|掃除|トイレ|風呂|バス|シャワー/.test(text)) {
     return [
-      "a bright laundry or washstand scene with the product being used naturally",
-      "a bathroom shelf or sink-side scene with soft morning light",
-      "a hand-held close-up of a simple daily cleaning routine",
-      "a realistic utility area with towels, bottles, and household texture",
-      "a calm after-cleaning room detail that feels fresh and useful",
+      "a realistic laundry-room counter with folded towels and an empty sink, without detergent bottles",
+      "a bright bathroom sink-side scene with clean tile and a folded neutral towel, no product containers",
+      "a simple utility area with a laundry basket and uncluttered counter, no branded objects",
+      "a calm bath-area scene with folded towels and natural light, without bottles or labels",
+      "a clean home utility corner with plain surfaces and soft daylight, no cleaning products visible",
+    ];
+  }
+  if (classifyProductCategory(item) === "便利家電") {
+    return [
+      "a clean everyday home counter with open space where a small appliance would be used, no appliance shown",
+      "a quiet room corner with an outlet, clear tabletop, and realistic natural daylight",
+      "a bright living area with an empty side table and no visible electronics or logos",
+      "a simple kitchen or home workspace with clear counter space and only neutral household props",
+      "a calm home interior with a practical empty surface and soft natural light",
+    ];
+  }
+  if (/食品|スイーツ|菓子|ケーキ|グルメ|飲料|コーヒー|お茶|うなぎ|肉|魚|チーズ/.test(text)) {
+    return [
+      "a warm home dessert-time table with plain dishes and a clean empty serving plate, no food shown",
+      "a bright dessert tea-time table with simple cups, linen, and an empty plate, with no readable packaging",
+      "a quiet dessert-table setting with neutral tableware and soft daylight, no food or labels",
+      "a cozy dessert-serving counter with an empty serving board and neutral utensils, no ingredients shown",
+      "a calm evening dessert tea table with plain cups and uncluttered surfaces, no food or branded objects",
     ];
   }
   return [
-    "a natural kitchen counter scene where the product looks useful in daily life",
-    "a bright living room shelf scene with the product casually placed",
-    "a hand-held smartphone photo of someone using the item at home",
-    "a clean table-top product moment on white fabric with daylight",
-    "a relaxed daily-life scene that feels convenient and pleasant",
+    "a natural home setting that matches the listed item's stated purpose, with no product or packaging shown",
+    "a bright uncluttered shelf or counter with neutral props related to the item's stated use",
+    "a realistic close view of a clean surface in a room suited to the product category, no product visible",
+    "a simple tabletop scene with natural daylight and only neutral, category-relevant props",
+    "a calm everyday room that fits the product description without adding distinctive objects",
   ];
 }
 
@@ -115,47 +114,87 @@ export function buildAiLifestyleImagePrompts(
   options: AiLifestyleImagePromptOptions = {},
 ): string[] {
   const name = productTitle(item);
-  const description = cleanText(item.itemCaption, 220);
-  const genre = persona.genres[0] ?? persona.name;
-  const story = buildProductStoryProfile(item, { now: options.now });
-  const benefits = story.benefits;
-  const features = productFeatures(item);
+  const description = cleanText(extractProductFacts(item.itemCaption, 1)[0] ?? "", 160);
+  const genre = isSoftwareProduct(item.itemName)
+    ? "パソコン用ソフトウェア"
+    : classifyProductCategory(item) ?? "商品説明から判断する商品カテゴリ";
+  const hourInJapan = Number(
+    new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Tokyo", hour: "numeric", hourCycle: "h23" })
+      .format(options.now ?? new Date()),
+  );
+  const timeContext = hourInJapan < 16 ? "soft morning daylight" : "soft evening indoor light";
   const base =
-    `photorealistic Japanese Instagram carousel design, authentic product-review post, real buyer trust, ` +
-    `Japanese text inside the image, crisp readable Japanese typography, bold friendly SNS fonts, large high-contrast headings, ` +
-    `short text only, clean magazine-like layout, natural daylight product photography, realistic home interior, ` +
-    `subtle imperfect smartphone-photo texture, no watermark, no random logo, no garbled characters, no tiny text, ` +
-    `no artificial CGI look, no over-polished advertisement, avoid plastic-looking skin or objects. ` +
-    `The post may recommend the product category, but must not falsely claim the creator personally bought or used it. ` +
-    `Product reference: ${name}. Product image URL for visual reference if accessible: ${item.imageUrl}. Category: ${genre}. Description: ${description}. ` +
-    `Creative rule for this post: ${story.visualTemplate}. Hook angle: ${story.hookAngle}. Layout mood: ${story.layoutMood}. Time context: ${story.timeMood}. ` +
-    `Keep all slides visually coherent as one carousel, but change composition, scale, cropping, badges, and text placement from slide to slide. ` +
-    `Do not draw any "swipe", "swipe for more", next-arrow, page-dot, or other navigation/continuation graphic or text on any slide — each slide must look complete and self-contained on its own, since it may be shown alone or as the last image in a set.`;
+    `Create a polished, photorealistic square background image only for a Japanese Instagram product carousel. ` +
+    `This is a photographic backdrop, not a finished advertisement or product card. Use natural light, realistic materials, ` +
+    `clear focus, restrained props, and a calm everyday editorial style. ` +
+    `The input image is the exact Rakuten product photo and is provided only to identify the product category and general color context. ` +
+    `Do not recreate the product, its packaging, or any substitute item; the exact source product photo will be overlaid later. ` +
+    `Do not render any readable text, Japanese or English letters, numbers, logos, icons, badges, prices, ratings, labels, charts, or UI. ` +
+    `Do not include a screen with visible content. Do not invent features, discounts, rankings, or personal-use claims. ` +
+    `Product name for context only: ${name}. Category: ${genre}. Listing description for context only: ${description}. ` +
+    `Use these details only to choose a relevant room and neutral props; never write or depict them. ` +
+    `Leave the central area visually quiet because accurate product imagery and all Japanese copy are composited afterward. ` +
+    `Do not draw text panels, a collage, a mockup, a package, or a product.`;
 
   const scenes = sceneHints(item);
   return [
-    `${base} Slide 1: cover. Compose a scroll-stopping Japanese Instagram cover with the selected visual template, a large title, and a clear product photo. Make it feel different from a plain review card. Put this exact Japanese headline in the image: 「${story.coverHeadline}」. Add a smaller readable kicker: 「${story.coverKicker}」. Add a smaller readable product title: 「${name}」. Scene: ${scenes[0]}, ${story.coverSceneTone}. Use ${story.paletteHint} like a popular Japanese product carousel.`,
-    `${base} Slide 2: swipe hook. Use a different composition than slide 1: comparison card, speech bubble, circled details, or bold warning badge depending on the hook angle. Show a realistic person or room before the benefit, not exaggerated. Put this Japanese headline in the image: 「${story.problemHeadline}」. Add 2 short pain points as readable Japanese labels: 「${story.painPoints[0]}」「${story.painPoints[1]}」. Scene: ${scenes[1]}.`,
-    `${base} Slide 3: benefit reveal. Do not repeat the slide 2 structure. Use checklist, before-after, three-scene mini catalog, or annotation layout. Put this Japanese headline in the image: 「${story.solutionHeadline}」. Add these readable checklist items in Japanese: 「${benefits[0]}」「${benefits[1]}」「${benefits[2]}」. Scene: ${scenes[2]}.`,
-    `${base} Slide 4: product features. Show the product photo large with friendly handwritten-style annotations and feature badges. Put this Japanese headline in the image: 「推せるポイント」. Add these readable Japanese feature labels: 「${features.join("」「")}」. Scene: ${scenes[3]}.`,
-    `${base} Slide 5: thank-you and profile CTA. Create a clean profile-guidance final slide with a soft screenshot-like profile area on the right, no real account name or real profile photo. Put this Japanese message in the image: 「最後までありがとう」 and 「気になる人はプロフィールへ」. Also include a big simple arrow shape pointing to the profile area. Scene: ${scenes[4]}.`,
+    ...scenes.map((scene, index) => `${base} Slide ${index + 1} background: ${scene}. Overall lighting: ${timeContext}. Keep the backdrop uncluttered and free of products, people, text, and logos.`),
   ];
 }
 
-async function defaultOpenAiClient(body: Record<string, unknown>, apiKey: string): Promise<OpenAiImageResponse> {
-  const response = await fetch("https://api.openai.com/v1/images/generations", {
+async function defaultOpenAiClient(body: FormData, apiKey: string): Promise<OpenAiImageResponse> {
+  const response = await fetch("https://api.openai.com/v1/images/edits", {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body,
   });
   if (!response.ok) {
     const detail = await response.text();
     throw new Error(`OpenAI image generation failed: ${response.status} ${detail.slice(0, 300)}`);
   }
   return response.json() as Promise<OpenAiImageResponse>;
+}
+
+async function downloadProductImage(url: string): Promise<{ bytes: Uint8Array; mimeType: string }> {
+  const parsed = new URL(url);
+  if (parsed.protocol !== "https:") throw new Error("商品参照画像はHTTPS URLが必要です");
+  const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
+  if (!response.ok) throw new Error(`商品参照画像を取得できません (${response.status})`);
+  const mimeType = (response.headers.get("content-type") ?? "").split(";")[0]!.toLowerCase();
+  if (!new Set(["image/jpeg", "image/png", "image/webp"]).has(mimeType)) {
+    throw new Error(`商品参照画像の形式に対応していません: ${mimeType || "unknown"}`);
+  }
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  if (bytes.byteLength === 0 || bytes.byteLength > 20 * 1024 * 1024) {
+    throw new Error("商品参照画像のサイズが不正です");
+  }
+  return { bytes, mimeType };
+}
+
+function bytesToBlob(bytes: Uint8Array, mimeType: string): Blob {
+  const buffer = new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(buffer).set(bytes);
+  return new Blob([buffer], { type: mimeType });
+}
+
+function buildEditForm(
+  prompt: string,
+  model: string,
+  size: string,
+  quality: string,
+  productImage: { bytes: Uint8Array; mimeType: string },
+): FormData {
+  const form = new FormData();
+  form.append("model", model);
+  form.append("prompt", prompt);
+  form.append("n", "1");
+  form.append("size", size);
+  form.append("quality", quality);
+  form.append("output_format", "jpeg");
+  form.append("output_compression", "90");
+  const ext = productImage.mimeType === "image/png" ? "png" : productImage.mimeType === "image/webp" ? "webp" : "jpg";
+  form.append("image[]", bytesToBlob(productImage.bytes, productImage.mimeType), `rakuten-product.${ext}`);
+  return form;
 }
 
 export function isAiLifestyleImagesEnabled(env: NodeJS.ProcessEnv): boolean {
@@ -173,10 +212,13 @@ export async function generateAiLifestyleImages(
   const outputDir = options.outputDir ?? process.env.IG_CAROUSEL_OUTPUT_DIR ?? DEFAULT_OUTPUT_DIR;
   const publicBaseUrl = options.publicBaseUrl ?? process.env.IG_CAROUSEL_PUBLIC_BASE_URL ?? "";
   const model = options.model ?? process.env.AI_IMAGE_MODEL ?? DEFAULT_MODEL;
-  const quality = options.quality ?? (process.env.AI_IMAGE_QUALITY as GenerateAiLifestyleImagesOptions["quality"]) ?? "low";
+  const quality: NonNullable<GenerateAiLifestyleImagesOptions["quality"]> =
+    options.quality ?? (process.env.AI_IMAGE_QUALITY as GenerateAiLifestyleImagesOptions["quality"]) ?? DEFAULT_QUALITY;
   const size = options.size ?? process.env.AI_IMAGE_SIZE ?? "1024x1024";
   const now = options.now ?? new Date();
   const client = options.client ?? defaultOpenAiClient;
+  const loadProductImage = options.loadProductImage ?? downloadProductImage;
+  const productImage = await loadProductImage(item.imageUrl);
   const day = now.toISOString().slice(0, 10);
   const stamp = timestamp(now);
   const hash = crypto.createHash("sha1").update(`${item.itemCode}|${item.itemName}`).digest("hex").slice(0, 10);
@@ -186,15 +228,7 @@ export async function generateAiLifestyleImages(
   const prompts = buildAiLifestyleImagePrompts(item, persona, { now });
   const assets: CarouselAsset[] = [];
   for (let i = 0; i < prompts.length; i++) {
-    const body: Record<string, unknown> = {
-      model,
-      prompt: prompts[i],
-      n: 1,
-      size,
-      quality,
-      output_format: "jpeg",
-      output_compression: 90,
-    };
+    const body = buildEditForm(prompts[i]!, model, size, quality, productImage);
     const response = await client(body, apiKey);
     const encoded = response.data?.[0]?.b64_json;
     if (!encoded) throw new Error("OpenAI image response did not include b64_json");
@@ -209,3 +243,4 @@ export async function generateAiLifestyleImages(
   }
   return assets;
 }
+
