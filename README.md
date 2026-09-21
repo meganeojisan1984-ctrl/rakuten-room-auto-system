@@ -50,7 +50,7 @@ GitHubのリポジトリページ → **Settings → Secrets and variables → A
 | `IG_ACCESS_TOKEN` | Instagram Graph API 長期トークン | IGクロス投稿用（任意） |
 | `THREADS_USER_ID` | ThreadsユーザーID | Threadsクロス投稿用（任意） |
 | `THREADS_ACCESS_TOKEN` | Threads API 長期トークン | Threadsクロス投稿用（任意） |
-| `ROOM_PROFILE_URL` | 楽天ROOMプロフィールURL | SNSからの誘導先（任意） |
+| `ROOM_PROFILE_URL` | 楽天ROOMプロフィールURL（`/items` まで） | Instagram投稿文の誘導先。未設定時はアカウントの商品一覧URLを使用 |
 
 > 📣 **Instagram/Threadsクロス投稿**: ROOM投稿成功後、同じ商品を自動でIG・Threadsに展開して認知度を拡大します。
 > - クイックスタート: **[SETUP-SNS.md](SETUP-SNS.md)**
@@ -178,7 +178,7 @@ Phase 2 では 3 価格帯ペルソナ（低単価高回転 / 中単価QOL / 高
 
 Net: 3 IG 投稿/日, 2 ROOM 投稿/日
 
-Instagramカルーセルは既定で5枚です。`AI_IMAGE_ENABLED=1` かつ `OPENAI_API_KEY` が設定されている場合、5枚すべてを `gpt-image-2` の `AI_IMAGE_QUALITY=low` で日常利用の実写風画像として生成します。生成に失敗した場合は既存のJPEGカルーセル生成へフォールバックします。
+Instagramカルーセルは「悩み→商品説明の確認→選び方→価格・レビュー→楽天ROOMと保存・いいね・フォロー」の5枚構成です。`AI_IMAGE_ENABLED=1` かつ `OPENAI_API_KEY` が設定されている場合、5枚分の背景画像を生成します。5枚の生成・公開・投稿に失敗した場合は1枚投稿へ切り替えず、Instagram投稿を失敗として通知します。
 
 Instagram投稿が成功し、`SMTP_USER` / `SMTP_PASS` / `X_DRAFT_EMAIL_TO` が設定されている場合、Xへ手動投稿するための本文と生成画像5枚をメールで送ります。`X_DRAFT_EMAIL_TO` の既定値は `meganeojisan1984@gmail.com` です。
 
@@ -187,7 +187,7 @@ Instagram投稿が成功し、`SMTP_USER` / `SMTP_PASS` / `X_DRAFT_EMAIL_TO` が
 `src/persona/persona.json` を編集するとその内容が翌回の投稿に反映されます。
 
 - `activeSlot` を `"multi"` から `"slot0"` 等に変更で単一スロット集中（Phase 4 の勝者確定時）
-- 各 slot の `hashtags` / `ctaLine` / `ngWords` / `genres` を編集
+- 各 slot の `hashtags` / `ngWords` / `genres` を編集。ROOMへの誘導先は `ROOM_PROFILE_URL` で指定します。
 
 ### slot 別実売の集計
 

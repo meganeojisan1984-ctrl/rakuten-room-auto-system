@@ -32,61 +32,90 @@ const persona: PersonaSlot = {
   ctaLine: "詳細はプロフのリンク",
 };
 
-test("postToInstagramWithPersona falls back to single product image when carousel media fetch fails", async () => {
+test("postToInstagramWithPersona never falls back to one image when carousel publishing fails", async () => {
   const previousEnv = { ...process.env };
   process.env.IG_USER_ID = "1789";
   process.env.IG_ACCESS_TOKEN = "token";
   process.env.IG_CAROUSEL_ENABLED = "1";
   process.env.IG_CAROUSEL_PUBLIC_BASE_URL = "https://raw.githubusercontent.com/owner/repo/main/public/generated/instagram";
-  process.env.OPENAI_API_KEY = "test-openai-key";
 
   const calls: string[] = [];
   try {
     const ok = await (postToInstagramWithPersona as unknown as Function)(item, "ROOM caption", persona, {
       buildCaption: async () => "IG caption",
-      createAssets: async () => [
-        {
-          filePath: "slide-01.jpg",
-          publicUrl: "https://raw.githubusercontent.com/owner/repo/main/public/generated/instagram/slide-01.jpg",
-          page: 1,
-        },
-        {
-          filePath: "slide-02.jpg",
-          publicUrl: "https://raw.githubusercontent.com/owner/repo/main/public/generated/instagram/slide-02.jpg",
-          page: 2,
-        },
-      ],
+      createAssets: async () => [1, 2, 3, 4, 5].map((page) => ({
+        filePath: `slide-0${page}.jpg`,
+        publicUrl: `https://raw.githubusercontent.com/owner/repo/main/public/generated/instagram/slide-0${page}.jpg`,
+        page,
+      })),
       publishCarousel: async () => {
+        calls.push("publish-carousel");
         throw new Error("Only photo or video can be accepted as media type.");
       },
-      sendXDraft: async () => {
-        calls.push("x-draft");
-      },
-      singleImageClient: {
-        post: async (url: string, _body: unknown, options: { params: Record<string, unknown> }) => {
-          calls.push(url.endsWith("/media_publish") ? "publish-single" : "create-single");
-          assert.equal(options.params.access_token, "token");
-          if (url.endsWith("/media_publish")) return { data: { id: "published" } };
-          assert.equal(options.params.image_url, "https://example.com/product.jpg?_ex=640x640");
-          assert.equal(options.params.caption, "IG caption\n\n詳細はプロフのリンク\n\n#一人暮らしQOL");
-          return { data: { id: "single-container" } };
-        },
-        get: async () => {
-          calls.push("status-single");
-          return { data: { status_code: "FINISHED" } };
-        },
-      },
+      sendXDraft: async () => { calls.push("x-draft"); },
       notify: async () => {},
-      waitMs: async () => {},
     });
 
-    assert.equal(ok, true);
-    assert.deepEqual(calls, ["create-single", "status-single", "publish-single", "x-draft"]);
+    assert.equal(ok, false);
+    assert.deepEqual(calls, ["publish-carousel"]);
   } finally {
     process.env = previousEnv;
   }
 });
 
+test("postToInstagramWithPersona blocks single-image posting when carousel is disabled", async () => {
+  const previousEnv = { ...process.env };
+  process.env.IG_USER_ID = "1789";
+  process.env.IG_ACCESS_TOKEN = "token";
+  process.env.IG_CAROUSEL_ENABLED = "0";
+  process.env.IG_CAROUSEL_PUBLIC_BASE_URL = "https://cdn.example.com/instagram";
+
+  let assetsCreated = false;
+  try {
+    const ok = await (postToInstagramWithPersona as unknown as Function)(item, "ROOM caption", persona, {
+      buildCaption: async () => "IG caption",
+      createAssets: async () => { assetsCreated = true; return []; },
+      notify: async () => {},
+    });
+
+    assert.equal(ok, false);
+    assert.equal(assetsCreated, false);
+  } finally {
+    process.env = previousEnv;
+  }
+});
+
+test("postToInstagramWithPersona adds the configured Rakuten ROOM items link to the caption", async () => {
+  const previousEnv = { ...process.env };
+  process.env.IG_USER_ID = "1789";
+  process.env.IG_ACCESS_TOKEN = "token";
+  process.env.IG_CAROUSEL_ENABLED = "1";
+  process.env.IG_CAROUSEL_PUBLIC_BASE_URL = "https://cdn.example.com/instagram";
+  process.env.ROOM_PROFILE_URL = "https://room.rakuten.co.jp/room_sho_qoltime";
+
+  try {
+    const ok = await (postToInstagramWithPersona as unknown as Function)(item, "ROOM caption", persona, {
+      buildCaption: async () => "IG caption",
+      createAssets: async () => [1, 2, 3, 4, 5].map((page) => ({
+        filePath: `slide-0${page}.jpg`,
+        publicUrl: `https://cdn.example.com/instagram/slide-0${page}.jpg`,
+        page,
+      })),
+      publishCarousel: async (args: { caption: string; assets: Array<{ page: number }> }) => {
+        assert.equal(args.assets.length, 5);
+        assert.deepEqual(args.assets.map((asset) => asset.page), [1, 2, 3, 4, 5]);
+        assert.match(args.caption, /https:\/\/room\.rakuten\.co\.jp\/room_sho_qoltime\/items/);
+        assert.doesNotMatch(args.caption, /@meganeojisan1984/);
+      },
+      sendXDraft: async () => {},
+      notify: async () => {},
+    });
+
+    assert.equal(ok, true);
+  } finally {
+    process.env = previousEnv;
+  }
+});
 test("buildXDraftText wraps AI-generated Threads copy with attachment and spare-image guidance", async () => {
   const assets = [1, 2, 3, 4, 5].map((page) => ({
     filePath: `slide-${page}.jpg`,
