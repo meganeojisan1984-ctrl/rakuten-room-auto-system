@@ -8,22 +8,8 @@ export interface GenerateInstagramSlideHeadlinesOptions {
   client?: OpenAiTextClient;
 }
 
-function sourceAnchors(item: RakutenItem): string[] {
-  const sources = [cleanProductDisplayName(item.itemName), ...extractProductFacts(item.itemCaption, 8)];
-  const anchors = new Set<string>();
-  for (const source of sources) {
-    const words = source.match(/[A-Za-z][A-Za-z0-9.+-]*|[\p{Script=Han}\p{Script=Katakana}]{2,}/gu) ?? [];
-    for (const word of words) {
-      if (word.length >= 2) anchors.add(word.toLocaleLowerCase("ja-JP"));
-    }
-  }
-  return [...anchors];
-}
-
-function sourceNumbers(item: RakutenItem): Set<string> {
-  const source = `${item.itemName} ${item.itemCaption}`;
-  return new Set((source.match(/\d+(?:[,.]\d+)*(?:\s*(?:台|個|枚|本|人|年|円|GB|TB|％|%))?/giu) ?? [])
-    .map((value) => value.replace(/\s+/g, "").replace(/,/g, "")));
+function normalizedSourceText(value: string): string {
+  return value.normalize("NFKC").replace(/[\s　]+/g, "");
 }
 
 function parseHeadlines(raw: string, item: RakutenItem): string[] {
@@ -33,24 +19,19 @@ function parseHeadlines(raw: string, item: RakutenItem): string[] {
     throw new Error("AI slide copy must contain exactly three headlines");
   }
 
-  const anchors = sourceAnchors(item);
-  const numbers = sourceNumbers(item);
+  const exactSources = [cleanProductDisplayName(item.itemName), ...extractProductFacts(item.itemCaption, 8)]
+    .map(normalizedSourceText)
+    .filter(Boolean);
   const headlines = parsed.headlines.map((value) => {
     if (typeof value !== "string") throw new Error("AI slide headline must be text");
     const headline = value.replace(/[\r\n\s]+/g, " ").trim();
     const length = [...headline].length;
     if (length < 4 || length > 18) throw new Error("AI slide headline length is out of range");
-    if (/[!！?？]{2,}|https?:\/\/|[#＃]/u.test(headline)) throw new Error("AI slide headline contains unsupported formatting");
-    if (/(絶対|必ず|誰でも|劇的|最安|No\.?\s?1|人気|売れ筋|話題|ランキング|効果|改善|解決|抜群|使い放題|永久)/iu.test(headline)) {
-      throw new Error("AI slide headline contains a claim that requires separate evidence");
+    if (/[!！?？。、,:：;；「」『』【】［］()（）]|https?:\/\/|[#＃]/u.test(headline)) {
+      throw new Error("AI slide headline contains unsupported formatting");
     }
-
-    const headlineNumbers = headline.match(/\d+(?:[,.]\d+)*(?:\s*(?:台|個|枚|本|人|年|円|GB|TB|％|%))?/giu) ?? [];
-    if (headlineNumbers.some((number) => !numbers.has(number.replace(/\s+/g, "").replace(/,/g, "")))) {
-      throw new Error("AI slide headline contains a number absent from the listing");
-    }
-    if (!anchors.some((anchor) => headline.toLocaleLowerCase("ja-JP").includes(anchor))) {
-      throw new Error("AI slide headline is not anchored to the product listing");
+    if (!exactSources.some((source) => source.includes(normalizedSourceText(headline)))) {
+      throw new Error("AI slide headline is not an exact excerpt from the product listing");
     }
     return headline;
   });
@@ -71,12 +52,12 @@ ${facts.map((fact, index) => `${index + 1}. ${fact}`).join("\n") || "商品名�
 </product_data>
 
 ルール:
-- 見出しは3つ。順に「商品に合った導入」「確認できる特徴1」「確認できる特徴2」を表す
-- 各見出しは日本語で4〜18文字。商品名や説明にある語句を最低1つそのまま含める
-- 説明にない用途、便利さ、効果、性能、感想、ランキング、値引き、価格を作らない
-- 数字を使う場合は商品名または説明に明記された数字だけを使う
-- 誇張、購入を急かす表現、絵文字、ハッシュタグ、句読点、前置きは入れない
-- 3つ目の特徴が説明にない場合は、商品名に明記された仕様を使う。根拠がなければ商品名に沿った中立的な見出しにする
+- 見出しは3つ。順に「商品名から商品を示す句」「説明にある特徴1」「説明にある特徴2」を選ぶ
+- 各見出しは日本語で4〜18文字
+- 見出しは商品名または特徴文から、連続した文字列をそのまま抜き出す。言い換え、単語の追加、語順変更はしない
+- 説明にない用途、便利さ、効果、性能、感想、ランキング、値引き、価格は書かない
+- 絵文字、ハッシュタグ、句読点、前置き、引用符は入れない
+- 3つ目の特徴が説明にない場合は、商品名にある別の句を選ぶ
 - JSONだけを出力する: {"headlines":["...","...","..."]}`;
 }
 
