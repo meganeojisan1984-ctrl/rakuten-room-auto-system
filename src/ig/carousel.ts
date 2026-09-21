@@ -3,7 +3,7 @@ import * as crypto from "crypto";
 import * as fs from "fs";
 import * as path from "path";
 import type { RakutenItem } from "../fetcher";
-import { buildProductStoryProfile } from "./product-story";
+import { cleanProductDisplayName, extractProductFacts, isSoftwareProduct } from "./product-copy";
 
 export type CarouselSlideKind =
   | "hook"
@@ -89,8 +89,6 @@ function timestamp(now: Date): string {
 function proofLine(item: RakutenItem): string {
   const bits = [formatPrice(item.itemPrice)];
   if (item.reviewAverage && item.reviewCount) bits.push(`★${item.reviewAverage} / ${item.reviewCount}件`);
-  if (item.hasPointBonus && item.pointRate > 1) bits.push(`ポイント${item.pointRate}倍`);
-  if (item.hasCoupon) bits.push("クーポンあり");
   return bits.join(" ・ ");
 }
 
@@ -133,43 +131,44 @@ function actionLabel(kind: CarouselSlideKind): string {
 }
 
 export function buildCarouselSlides(item: RakutenItem, options: CarouselBuildOptions = {}): CarouselSlide[] {
-  const name = truncate(item.itemName, 18);
-  const story = buildProductStoryProfile(item, { now: options.now });
+  void options;
+  const name = cleanProductDisplayName(item.itemName) || "商品名は商品ページで確認";
+  const facts = extractProductFacts(item.itemCaption, 2);
   return [
     {
       index: 1,
       kind: "hook",
       badge: "01",
-      headline: truncate(story.coverHeadline, 34),
-      body: truncate(`✨ ${name}。${story.coverKicker}、ちょっと見てほしい注目アイテムです。`, 82),
+      headline: truncate("商品情報を確認", 34),
+      body: truncate(facts[0] ?? name, 82),
     },
     {
       index: 2,
       kind: "problem",
       badge: "02",
-      headline: truncate(story.problemHeadline, 34),
-      body: truncate(`😳 ${story.painPoints[0]}。${story.painPoints[1]}。今ラクにしておくと、選ぶ時間まで軽くなります。`, 82),
+      headline: truncate("商品説明の記載", 34),
+      body: truncate(facts[1] ?? "詳しい内容は商品ページでご確認ください。", 82),
     },
     {
       index: 3,
       kind: "use_case",
       badge: "03",
-      headline: truncate(story.solutionHeadline, 34),
-      body: truncate(story.useCaseBody, 82),
+      headline: truncate("購入前に見たい仕様", 34),
+      body: truncate(name, 82),
     },
     {
       index: 4,
       kind: "proof",
       badge: "04",
-      headline: truncate("買う前に見たい数字", 34),
-      body: truncate(`👀 迷ったら価格・レビュー・ポイントを確認。${proofLine(item)}なら候補に入れる価値ありです。`, 82),
+      headline: truncate("価格とレビュー", 34),
+      body: truncate(proofLine(item), 82),
     },
     {
       index: 5,
       kind: "cta",
       badge: "05",
-      headline: truncate("あとで見返せるように保存", 34),
-      body: truncate("📌 似た悩みがある人は保存して、買いまわり前にチェック。必要な時に見返せると買い逃しを防げます。", 82),
+      headline: truncate("詳しい情報は商品ページへ", 34),
+      body: truncate("仕様と最新の販売条件は商品ページでご確認ください。", 82),
     },
   ];
 }
@@ -234,13 +233,15 @@ export function renderSlideSvg(slide: CarouselSlide, item: RakutenItem, options:
   const accent = accentColor(slide.kind);
   const headlineLines = lines(slide.headline, 15);
   const bodyLines = lines(slide.body, 22);
-  const productNameLines = twoLineText(item.itemName, 16);
+  const productName = cleanProductDisplayName(item.itemName) || "商品名は商品ページで確認";
+  const productNameLines = twoLineText(productName, 16);
   const productTitleSvg = tspanText(88, 884, "productTitle", productNameLines, 34);
-  const guideImage = characterHref(options);
-  const roomImage = backgroundHref(options);
+  const softwareProduct = isSoftwareProduct(item.itemName);
+  const guideImage = softwareProduct ? "" : characterHref(options);
+  const roomImage = softwareProduct ? "" : backgroundHref(options);
   const backgroundSvg = roomImage
     ? `<image href="${escapeXml(roomImage)}" x="0" y="0" width="1080" height="1080" preserveAspectRatio="xMidYMid slice"/>`
-    : `<rect width="1080" height="1080" fill="#d8dccf"/>`;
+    : `<rect width="1080" height="1080" fill="${softwareProduct ? "#e8eef4" : "#d8dccf"}"/>`;
   const panelHeadlineSvg = headlineLines
     .map((line, i) => `<text x="96" y="${366 + i * 58}" class="panelHeadline">${escapeXml(line)}</text>`)
     .join("\n");
@@ -253,30 +254,46 @@ export function renderSlideSvg(slide: CarouselSlide, item: RakutenItem, options:
     : "";
 
   if (slide.index === 1) {
+    const coverTitleLines = lines(slide.headline, 10);
+    const coverBodyLines = lines(slide.body, 11);
+    const coverProductLines = twoLineText(productName, 15);
+    const coverTitleSvg = coverTitleLines
+      .map((line, i) => `<text x="104" y="${382 + i * 70}" class="coverTitle">${escapeXml(line)}</text>`)
+      .join("\n");
+    const coverProductSvg = coverProductLines
+      .map((line, i) => `<text x="770" y="${727 + i * 38}" text-anchor="middle" class="coverProduct">${escapeXml(line)}</text>`)
+      .join("\n");
+    const coverBodySvg = coverBodyLines
+      .map((line, i) => `<text x="104" y="${520 + i * 46}" class="coverBody">${escapeXml(line)}</text>`)
+      .join("\n");
     return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
   <style>
-    .coverKicker { font: 700 46px Arial, sans-serif; fill: #ffffff; letter-spacing: 0; }
-    .coverTitle { font: 800 84px Arial, sans-serif; fill: #ffffff; letter-spacing: 0; }
-    .swipe { font: 500 28px Arial, sans-serif; fill: #ffffff; letter-spacing: 4px; }
+    .coverTitle { font: 800 58px 'Noto Sans CJK JP', sans-serif; fill: #17233f; letter-spacing: 0; }
+    .coverBody { font: 600 31px 'Noto Sans CJK JP', sans-serif; fill: #334155; letter-spacing: 0; }
+    .coverProduct { font: 700 28px 'Noto Sans CJK JP', sans-serif; fill: #263445; letter-spacing: 0; }
+    .swipe { font: 600 25px 'Noto Sans CJK JP', sans-serif; fill: #334155; letter-spacing: 2px; }
   </style>
   ${backgroundSvg}
-  <rect width="1080" height="1080" fill="#111827" opacity="0.18"/>
-  <text x="540" y="393" text-anchor="middle" class="coverKicker">＼ 暮らしがグッと充実する ／</text>
-  <text x="540" y="538" text-anchor="middle" class="coverTitle">おすすめの</text>
-  <text x="540" y="658" text-anchor="middle" class="coverTitle">アイテム</text>
-  <text x="960" y="1000" text-anchor="end" class="swipe">SWIPE</text>
+  <rect x="54" y="160" width="972" height="760" rx="42" fill="#ffffff"/>
+  <rect x="552" y="244" width="436" height="446" rx="26" fill="#f1f5f9"/>
+  <image href="${escapeXml(item.imageUrl)}" x="584" y="276" width="372" height="350" preserveAspectRatio="xMidYMid meet"/>
+  ${coverTitleSvg}
+  ${coverBodySvg}
+  ${coverProductSvg}
+  <text x="104" y="838" class="swipe">商品ページで詳細を確認</text>
+  <text x="970" y="872" text-anchor="end" class="swipe">SWIPE →</text>
 </svg>`;
   }
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
   <style>
-    .pageNum { font: 500 46px Arial, sans-serif; fill: #17233f; }
-    .panelHeadline { font: 800 52px Arial, sans-serif; fill: #ffffff; letter-spacing: 0; }
-    .panelBody { font: 800 36px Arial, sans-serif; fill: #ffffff; letter-spacing: 0; }
-    .productTitle { font: 800 28px Arial, sans-serif; fill: #263445; letter-spacing: 0; }
-    .productMeta { font: 800 30px Arial, sans-serif; fill: #334155; letter-spacing: 0; }
-    .footer { font: 700 29px Arial, sans-serif; fill: #334155; letter-spacing: 0; }
-    .label { font: 800 24px Arial, sans-serif; fill: #ffffff; letter-spacing: 0; }
+    .pageNum { font: 500 46px 'Noto Sans CJK JP', sans-serif; fill: #17233f; }
+    .panelHeadline { font: 800 52px 'Noto Sans CJK JP', sans-serif; fill: #ffffff; letter-spacing: 0; }
+    .panelBody { font: 800 36px 'Noto Sans CJK JP', sans-serif; fill: #ffffff; letter-spacing: 0; }
+    .productTitle { font: 800 28px 'Noto Sans CJK JP', sans-serif; fill: #263445; letter-spacing: 0; }
+    .productMeta { font: 800 30px 'Noto Sans CJK JP', sans-serif; fill: #334155; letter-spacing: 0; }
+    .footer { font: 700 29px 'Noto Sans CJK JP', sans-serif; fill: #334155; letter-spacing: 0; }
+    .label { font: 800 24px 'Noto Sans CJK JP', sans-serif; fill: #ffffff; letter-spacing: 0; }
     .messagePanel { fill: #263445; opacity: 0.90; }
     .productCard { fill: #ffffff; filter: url(#cardShadow); }
   </style>
@@ -352,6 +369,22 @@ async function renderJpegFromSvg(svg: string, filePath: string): Promise<void> {
   }
 }
 
+async function loadProductImageDataUri(url: string): Promise<string> {
+  const parsed = new URL(url);
+  if (parsed.protocol !== "https:") throw new Error("商品画像URLはHTTPSが必要です");
+  const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
+  if (!response.ok) throw new Error(`商品画像を取得できません (${response.status})`);
+  const mimeType = (response.headers.get("content-type") ?? "").split(";")[0]!.toLowerCase();
+  if (!new Set(["image/jpeg", "image/png", "image/webp"]).has(mimeType)) {
+    throw new Error(`商品画像の形式に対応していません: ${mimeType || "unknown"}`);
+  }
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  if (bytes.byteLength === 0 || bytes.byteLength > 20 * 1024 * 1024) {
+    throw new Error("商品画像のサイズが不正です");
+  }
+  return `data:${mimeType};base64,${Buffer.from(bytes).toString("base64")}`;
+}
+
 export async function writeCarouselImages(
   item: RakutenItem,
   slides: CarouselSlide[],
@@ -364,13 +397,14 @@ export async function writeCarouselImages(
   const stamp = timestamp(now);
   const hash = crypto.createHash("sha1").update(`${item.itemCode}|${item.itemName}`).digest("hex").slice(0, 10);
   const renderer = options.renderer ?? renderJpegFromSvg;
+  const renderItem = options.renderer ? item : { ...item, imageUrl: await loadProductImageDataUri(item.imageUrl) };
   fs.mkdirSync(outputDir, { recursive: true });
 
   const assets: CarouselAsset[] = [];
   for (const slide of slides) {
     const fileName = `${day}-${stamp}-${hash}-${String(slide.index).padStart(2, "0")}.jpg`;
     const filePath = path.join(outputDir, fileName);
-    await renderer(renderSlideSvg(slide, item, options), filePath);
+    await renderer(renderSlideSvg(slide, renderItem, options), filePath);
     assets.push({
       filePath,
       publicUrl: mapAssetToPublicUrl(fileName, publicBaseUrl),

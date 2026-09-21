@@ -113,10 +113,6 @@ interface CreateInstagramCarouselAssetsOptions {
   renderCarouselImages?: typeof writeCarouselImages;
 }
 
-function wantsAiLifestyleImages(envVars: NodeJS.ProcessEnv): boolean {
-  return envVars.AI_IMAGE_ENABLED !== "0" && !!envVars.OPENAI_API_KEY;
-}
-
 export async function createInstagramCarouselAssets(
   item: RakutenItem,
   persona: PersonaSlot,
@@ -124,14 +120,8 @@ export async function createInstagramCarouselAssets(
 ): Promise<CarouselAsset[]> {
   const envVars = options.env ?? process.env;
   const writeOptions = getCarouselWriteOptions(envVars);
-  const generateAiImages = options.generateAiImages ?? generateAiLifestyleImages;
   const renderCarouselImages = options.renderCarouselImages ?? writeCarouselImages;
-
-  if (wantsAiLifestyleImages(envVars)) {
-    console.log(`[ig-post-engine] slot=${persona.id} ChatGPT text-in-image carousel generating...`);
-    return generateAiImages(item, persona, writeOptions);
-  }
-
+  console.log(`[ig-post-engine] slot=${persona.id} building source-grounded carousel assets...`);
   const slides = buildCarouselSlides(item);
   return renderCarouselImages(item, slides, writeOptions);
 }
