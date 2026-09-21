@@ -40,9 +40,7 @@ export interface CarouselWriteOptions {
 
 export interface CarouselBuildOptions {
   now?: Date;
-  headlines?: string[];
 }
-
 interface HttpClient {
   post<T>(url: string, body: unknown, options: { params: Record<string, unknown>; timeout?: number }): Promise<{ data: T }>;
   get<T>(url: string, options: { params: Record<string, unknown>; timeout?: number }): Promise<{ data: T }>;
@@ -116,65 +114,61 @@ function accentColor(kind: CarouselSlideKind): string {
 function actionLabel(kind: CarouselSlideKind): string {
   switch (kind) {
     case "hook":
-      return "最後にリンクあり";
+      return "悩みを整理";
     case "problem":
-      return "あるあるなら次へ";
+      return "商品説明を確認";
     case "discovery":
-      return "買う理由を見る";
     case "use_case":
-      return "使い方を見る";
+      return "選ぶヒント";
     case "proof":
       return "価格とレビュー";
     case "room_bridge":
-      return "ROOMで探す";
     case "cta":
-      return "保存して見返す";
+      return "ROOM・いいね・フォロー";
   }
 }
-
 export function buildCarouselSlides(item: RakutenItem, options: CarouselBuildOptions = {}): CarouselSlide[] {
   const name = cleanProductDisplayName(item.itemName) || "商品名は商品ページで確認";
   const facts = extractProductFacts(item.itemCaption, 2);
-  const headlines = options.headlines ?? [];
+  void options;
   return [
     {
       index: 1,
       kind: "hook",
       badge: "01",
-      headline: truncate(headlines[0] ?? "商品情報を確認", 34),
-      body: truncate(facts[0] ?? name, 82),
+      headline: "商品選びで迷っていませんか？",
+      body: "商品名だけでは違いがわかりにくいことも。説明と条件を見て、自分に合うか確かめましょう。",
     },
     {
       index: 2,
       kind: "problem",
       badge: "02",
-      headline: truncate(headlines[1] ?? "商品説明の記載", 34),
-      body: truncate(facts[1] ?? "詳しい内容は商品ページでご確認ください。", 82),
+      headline: "購入前に確認したい特徴",
+      body: truncate(facts[0] ?? "気になる仕様を商品ページで確認しましょう。", 82),
     },
     {
       index: 3,
       kind: "use_case",
       badge: "03",
-      headline: truncate(headlines[2] ?? "購入前に見たい仕様", 34),
-      body: truncate(name, 82),
+      headline: "説明を見て選ぶヒント",
+      body: truncate(facts[1] ?? `${name}の仕様を希望条件と比べて確認しましょう。`, 82),
     },
     {
       index: 4,
       kind: "proof",
       badge: "04",
-      headline: truncate("価格とレビュー", 34),
+      headline: truncate("価格とレビューを確認", 34),
       body: truncate(proofLine(item), 82),
     },
     {
       index: 5,
       kind: "cta",
       badge: "05",
-      headline: truncate("詳しい情報は商品ページへ", 34),
-      body: truncate("仕様と最新の販売条件は商品ページでご確認ください。", 82),
+      headline: truncate("プロフィールから楽天ROOMへ", 34),
+      body: truncate("商品一覧はプロフィールの楽天ROOMへ。気になったら保存・いいね・フォローもお願いします。", 82),
     },
   ];
 }
-
 function escapeXml(value: string): string {
   return value
     .replace(/&/g, "&amp;")
@@ -187,8 +181,18 @@ function escapeXml(value: string): string {
 function lines(text: string, maxChars: number): string[] {
   const chars = [...text];
   const out: string[] = [];
-  for (let i = 0; i < chars.length; i += maxChars) {
-    out.push(chars.slice(i, i + maxChars).join(""));
+  let offset = 0;
+  while (offset < chars.length) {
+    let end = Math.min(offset + maxChars, chars.length);
+    if (end < chars.length) {
+      const chunk = chars.slice(offset, end).join("");
+      const lastSpace = chunk.lastIndexOf(" ");
+      const breaksWord = /[A-Za-z0-9]$/u.test(chars[end - 1]!) && /^[A-Za-z0-9]/u.test(chars[end]!);
+      if (breaksWord && lastSpace >= Math.ceil(maxChars * 0.4)) end = offset + lastSpace;
+    }
+    out.push(chars.slice(offset, end).join(""));
+    offset = end;
+    while (chars[offset] === " ") offset++;
   }
   if (out.length > 3) {
     const third = out[2]!;
@@ -196,7 +200,6 @@ function lines(text: string, maxChars: number): string[] {
   }
   return out.slice(0, 3);
 }
-
 function twoLineText(text: string, maxChars: number): string[] {
   const split = lines(text, maxChars).slice(0, 2);
   if (split.length < 2) return split;

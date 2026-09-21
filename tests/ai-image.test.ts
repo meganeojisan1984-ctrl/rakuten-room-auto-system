@@ -245,12 +245,13 @@ test("createInstagramCarouselAssets passes generated backgrounds into the accura
       renderedAssetsCalled = true;
       assert.equal(slides.length, 5);
       assert.deepEqual(renderOptions?.backgroundImagePaths, backgroundImagePaths);
-      return [{ filePath: "verified-01.jpg", publicUrl: "https://cdn.example.com/ig/verified-01.jpg", page: 1 }];
+      return [1, 2, 3, 4, 5].map((page) => ({ filePath: `verified-0${page}.jpg`, publicUrl: `https://cdn.example.com/ig/verified-0${page}.jpg`, page }));
     },
   });
 
   assert.equal(aiImageCalled, true);
   assert.equal(renderedAssetsCalled, true);
+  assert.equal(assets.length, 5);
   assert.equal(assets[0]!.filePath, "verified-01.jpg");
 });
 

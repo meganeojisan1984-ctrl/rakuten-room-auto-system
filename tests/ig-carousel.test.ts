@@ -56,7 +56,7 @@ test("renderSlideSvg escapes text and includes product image", () => {
   assert.match(svg, /https:\/\/example\.com\/product\.jpg/);
 });
 
-test("carousel slides use friendly emoji copy and character speech bubble", () => {
+test("carousel slides follow a product-grounded problem-to-ROOM story", () => {
   const dir = fs.mkdtempSync(path.join(process.cwd(), "tmp-carousel-character-"));
   try {
     const iconPath = path.join(dir, "icon.png");
@@ -64,12 +64,18 @@ test("carousel slides use friendly emoji copy and character speech bubble", () =
     fs.writeFileSync(iconPath, Buffer.from("fake-png"));
     fs.writeFileSync(backgroundPath, Buffer.from("fake-room"));
     const slides = buildCarouselSlides(item);
-    assert.equal(slides.some((slide) => /[✨😳💡🙌👀🛒📌]/u.test(slide.body)), true);
+    assert.match(slides[0]!.headline, /迷っていませんか/);
+    assert.match(slides[1]!.body, /洗面台やキッチン周りの小物をすっきり収納できます/);
+    assert.match(slides[2]!.headline, /選ぶヒント/);
+    assert.match(slides[3]!.body, /¥2,980.*★4\.6 \/ 128件/);
+    assert.match(slides[4]!.headline, /プロフィールから楽天ROOMへ/);
+    assert.match(slides[4]!.body, /保存・いいね・フォロー/);
     const coverSvg = renderSlideSvg(slides[0]!, item, { characterImagePath: iconPath, backgroundImagePath: backgroundPath });
     assert.match(coverSvg, /data:image\/png;base64/);
-    assert.match(coverSvg, /<text x="540" y="393" text-anchor="middle" class="coverKicker">/);
-    assert.match(coverSvg, /<text x="540" y="538" text-anchor="middle" class="coverTitle">おすすめの/);
-    assert.match(coverSvg, /<text x="960" y="1000" text-anchor="end" class="swipe">SWIPE/);
+    assert.match(coverSvg, /<text x="104" y="382" class="coverTitle">商品選びで迷って/);
+    assert.match(coverSvg, /<text x="770" y="727" text-anchor="middle" class="coverProduct">片手で使える収納ボックス/);
+    assert.match(coverSvg, /商品ページで詳細を確認/);
+    assert.match(coverSvg, /<text x="970" y="872" text-anchor="end" class="swipe">SWIPE/);
 
     const svg = renderSlideSvg(slides[1]!, item, { characterImagePath: iconPath, backgroundImagePath: backgroundPath });
     assert.match(svg, /data:image\/png;base64/);
@@ -84,26 +90,25 @@ test("carousel slides use friendly emoji copy and character speech bubble", () =
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
-
-test("carousel copy is stronger and product text stays inside the card area", () => {
+test("carousel copy stays source-grounded and product text stays inside the card area", () => {
   const longNameItem = {
     ...item,
     itemName: "20％ポイントバック 〜08/14(金)9:59まで【DEAL】毎日使える高見えアクセサリー収納ケース",
   };
   const slides = buildCarouselSlides(longNameItem);
-  assert.match(slides[1]!.body, /今ラクにしておくと/);
-  assert.match(slides[2]!.body, /キッチン、洗面台、玄関/);
-  assert.match(slides[3]!.body, /迷ったら/);
-  assert.match(slides[4]!.body, /保存/);
+  assert.match(slides[0]!.headline, /迷っていませんか/);
+  assert.match(slides[1]!.body, /洗面台やキッチン周りの小物をすっきり収納できます/);
+  assert.match(slides[2]!.body, /毎日使える高見えアクセサリー収納ケース/);
+  assert.match(slides[3]!.body, /¥2,980.*★4\.6 \/ 128件/);
+  assert.match(slides[4]!.body, /保存・いいね・フォロー/);
+  assert.doesNotMatch(slides.map((slide) => `${slide.headline} ${slide.body}`).join("\n"), /20％ポイントバック|08\/14|DEAL/);
 
   const svg = renderSlideSvg(slides[1]!, longNameItem);
   assert.doesNotMatch(svg, /20％ポイントバック 〜08\/14\(金\)9:59まで【DEAL】毎日使える高見えアクセサリー収納ケース/);
   assert.match(svg, /<text x="88" y="884" class="productTitle">/);
-  assert.match(svg, /…<\/tspan><\/text>/);
   assert.match(svg, /<text x="88" y="966" class="productMeta">/);
 });
-
-test("buildCarouselSlides adapts hook and benefit copy for food products", () => {
+test("buildCarouselSlides uses food listing facts and the same story stages", () => {
   const foodItem: RakutenItem = {
     ...item,
     itemName: "訳あり濃厚チーズケーキ お取り寄せスイーツ",
@@ -113,13 +118,12 @@ test("buildCarouselSlides adapts hook and benefit copy for food products", () =>
 
   const slides = buildCarouselSlides(foodItem);
 
-  assert.match(slides[0]!.headline, /ご褒美|おうちカフェ|週末/);
-  assert.match(slides[1]!.body, /甘いもの|おやつ|来客/);
-  assert.match(slides[2]!.body, /家で|ストック|手軽/);
+  assert.match(slides[0]!.headline, /迷っていませんか/);
+  assert.match(slides[1]!.body, /冷凍庫にあると週末のおやつや来客時にも便利な人気スイーツです/);
+  assert.match(slides[2]!.body, /希望条件/);
   assert.doesNotMatch(slides[2]!.body, /キッチン、洗面台、玄関/);
 });
-
-test("buildCarouselSlides rotates hooks by time while staying aligned to the product", () => {
+test("buildCarouselSlides keeps the story consistent across posting times", () => {
   const morningSlides = buildCarouselSlides(item, {
     now: new Date("2026-09-07T07:30:00+09:00"),
   });
@@ -127,11 +131,11 @@ test("buildCarouselSlides rotates hooks by time while staying aligned to the pro
     now: new Date("2026-09-07T21:30:00+09:00"),
   });
 
-  assert.notEqual(morningSlides[0]!.headline, nightSlides[0]!.headline);
-  assert.match(morningSlides[0]!.body, /収納|片付け|整/);
-  assert.match(nightSlides[0]!.body, /収納|片付け|整/);
+  assert.equal(morningSlides[0]!.headline, nightSlides[0]!.headline);
+  assert.equal(morningSlides[0]!.body, nightSlides[0]!.body);
+  assert.match(morningSlides[0]!.headline, /迷っていませんか/);
+  assert.match(nightSlides[0]!.body, /商品名だけでは違いがわかりにくい/);
 });
-
 test("writeCarouselSlides writes five svg files with stable public urls", () => {
   const dir = fs.mkdtempSync(path.join(process.cwd(), "tmp-carousel-"));
   try {
@@ -267,7 +271,7 @@ test("AI office backgrounds appear behind the exact Office product photo and sou
   const officeItem: RakutenItem = {
     ...item,
     itemName: "マイクロソフト Office Home 2024",
-    itemCaption: "2台の Windows PC または Mac で使用可能。",
+    itemCaption: "2台の Windows PC または Mac で使用可能。2024 デスクトップ版 Word、Excel、PowerPoint、OneNote を永続利用。",
     imageUrl: "https://example.com/office-home-2024.jpg",
   };
   const dir = fs.mkdtempSync(path.join(process.cwd(), "tmp-office-backgrounds-"));
@@ -288,10 +292,15 @@ test("AI office backgrounds appear behind the exact Office product photo and sou
     assert.equal(rendered.length, 5);
     assert.match(rendered[0]!, /Z2VuZXJhdGVkLW9mZmljZS1iYWNrZ3JvdW5kLTE=/);
     assert.match(rendered[0]!, /https:\/\/example\.com\/office-home-2024\.jpg/);
-    const visibleCoverText = rendered[0]!.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ");
-    assert.match(visibleCoverText, /2台の Windows PC または Mac で使用可能/);
-    assert.match(rendered[1]!, /Z2VuZXJhdGVkLW9mZmljZS1iYWNrZ3JvdW5kLTI=/);
-  } finally {
+    const visibleSecondSlideText = rendered[1]!.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ");
+    const visibleThirdSlideText = rendered[2]!.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ");
+    assert.match(visibleSecondSlideText, /2台の Windows PC または Mac で使用可能/);
+    assert.match(visibleThirdSlideText, /2024 デスクトップ版 Word/);
+    assert.match(visibleThirdSlideText, /Excel/);
+    assert.match(visibleThirdSlideText, /PowerPoint/);
+    assert.match(visibleThirdSlideText, /OneNote/);
+    assert.match(visibleThirdSlideText, /永続利用/);
+    assert.match(rendered[1]!, /Z2VuZXJhdGVkLW9mZmljZS1iYWNrZ3JvdW5kLTI=/);  } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });

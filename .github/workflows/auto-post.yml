@@ -95,7 +95,7 @@ jobs:
           SMTP_FROM: ${{ secrets.SMTP_FROM || secrets.SMTP_USER }}
           THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
           THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
-          ROOM_PROFILE_URL: ${{ secrets.ROOM_PROFILE_URL || vars.ROOM_PROFILE_URL || '' }}
+          ROOM_PROFILE_URL: ${{ secrets.ROOM_PROFILE_URL || vars.ROOM_PROFILE_URL || 'https://room.rakuten.co.jp/room_sho_qoltime/items' }}
           TARGET_GENRE: ${{ github.event.inputs.target_genre || vars.TARGET_GENRE || 'general' }}
           POST_COUNT: ${{ github.event.inputs.post_count || vars.POST_COUNT || '1' }}
           TREND_MODE: ${{ github.event.inputs.trend_mode || vars.TREND_MODE || 'false' }}

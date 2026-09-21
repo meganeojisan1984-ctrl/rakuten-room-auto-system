@@ -1,5 +1,5 @@
 import axios from "axios";
-import { buildInstagramFinalCaption, upscaleImageUrl } from "../sns";
+import { buildInstagramFinalCaption } from "../sns";
 import { notifyError } from "../notifiers";
 import type { PersonaSlot } from "../persona/persona";
 import type { RakutenItem } from "../fetcher";
@@ -15,27 +15,17 @@ import {
 } from "./carousel";
 import { isXDraftMailEnabled, sendXDraftMail } from "./x-draft-mailer";
 import { generateThreadsCopy, isThreadsCopyEnabled } from "./threads-copy";
-import { generateInstagramSlideHeadlines } from "./slide-copy";
+import { DEFAULT_ROOM_PROFILE_URL, toRoomItemsUrl } from "../room-profile-url";
 
 // sns.ts と揃える (Instagram Graph API 独自エンドポイント)
 const GRAPH_API = "https://graph.instagram.com/v21.0";
-const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
-
-interface InstagramHttpClient {
-  post<T>(url: string, body: unknown, options: { params: Record<string, unknown>; timeout?: number }): Promise<{ data: T }>;
-  get<T>(url: string, options: { params: Record<string, unknown>; timeout?: number }): Promise<{ data: T }>;
-}
-
 interface PostToInstagramWithPersonaOptions {
   buildCaption?: typeof buildInstagramFinalCaption;
   createAssets?: typeof createInstagramCarouselAssets;
   publishCarousel?: typeof publishInstagramCarousel;
   sendXDraft?: typeof sendXDraftIfEnabled;
-  singleImageClient?: InstagramHttpClient;
   notify?: typeof notifyError;
-  waitMs?: (ms: number) => Promise<void>;
 }
-
 function env(key: string): string {
   return process.env[key] ?? "";
 }
@@ -50,12 +40,18 @@ function scrubNgWords(text: string, ngWords: string[]): string {
   return out;
 }
 
-/** persona.ctaLine と #タグをキャプション末尾に付与 */
+/** Add the verified Rakuten ROOM items URL and social CTA to the caption. */
 function withPersonaFooter(caption: string, persona: PersonaSlot): string {
   const hashtags = persona.hashtags.join(" ");
-  return `${caption.trimEnd()}\n\n${persona.ctaLine}\n\n${hashtags}`;
+  const roomItemsUrl = toRoomItemsUrl(env("ROOM_PROFILE_URL") || DEFAULT_ROOM_PROFILE_URL);
+  const footer = [
+    `楽天ROOMの商品一覧はこちら：\n${roomItemsUrl}`,
+    "気になったら投稿を保存・いいね・フォローで応援してください。",
+    hashtags,
+  ].filter(Boolean).join("\n\n");
+  const availableCaptionLength = Math.max(0, 2200 - footer.length - 2);
+  return `${caption.trimEnd().slice(0, availableCaptionLength).trimEnd()}\n\n${footer}`;
 }
-
 export interface BuildXDraftTextOptions {
   generateThreadsCopy?: typeof generateThreadsCopy;
 }
@@ -111,7 +107,6 @@ export function buildXDraftAttachments(assets: CarouselAsset[]): Array<{ filePat
 interface CreateInstagramCarouselAssetsOptions {
   env?: NodeJS.ProcessEnv;
   generateAiImages?: typeof generateAiLifestyleImages;
-  generateSlideHeadlines?: typeof generateInstagramSlideHeadlines;
   renderCarouselImages?: typeof writeCarouselImages;
 }
 
@@ -124,20 +119,7 @@ export async function createInstagramCarouselAssets(
   const writeOptions = getCarouselWriteOptions(envVars);
   const renderCarouselImages = options.renderCarouselImages ?? writeCarouselImages;
   console.log(`[ig-post-engine] slot=${persona.id} building source-grounded carousel assets...`);
-  let headlines: string[] | undefined;
-  if (envVars.OPENAI_API_KEY && envVars.AI_SLIDE_COPY_ENABLED !== "0") {
-    try {
-      const generateSlideHeadlines = options.generateSlideHeadlines ?? generateInstagramSlideHeadlines;
-      headlines = await generateSlideHeadlines(item, {
-        apiKey: envVars.OPENAI_API_KEY,
-        env: envVars,
-      });
-      console.log(`[ig-post-engine] slot=${persona.id} generated product-specific slide headlines`);
-    } catch (error) {
-      console.warn(`[ig-post-engine] slot=${persona.id} slide-copy generation failed; using grounded fallback headlines: ${String(error).slice(0, 240)}`);
-    }
-  }
-  const slides = buildCarouselSlides(item, { headlines });
+  const slides = buildCarouselSlides(item);
   if (isAiLifestyleImagesEnabled(envVars)) {
     const generateAiImages = options.generateAiImages ?? generateAiLifestyleImages;
     console.log(`[ig-post-engine] slot=${persona.id} generating product-matched background images...`);
@@ -149,14 +131,15 @@ export async function createInstagramCarouselAssets(
       quality: envVars.AI_IMAGE_QUALITY as "low" | "medium" | "high" | "auto" | undefined,
       size: envVars.AI_IMAGE_SIZE || undefined,
     });
-    if (backgrounds.length !== slides.length) {
-      throw new Error(`AI background generation returned ${backgrounds.length} images; expected ${slides.length}`);
+    if (backgrounds.length !== 5) {
+      throw new Error(`AI background generation returned ${backgrounds.length} images; expected 5`);
     }
     writeOptions.backgroundImagePaths = backgrounds.map((asset) => asset.filePath);
   }
-  return renderCarouselImages(item, slides, writeOptions);
+  const assets = await renderCarouselImages(item, slides, writeOptions);
+  if (assets.length !== 5) throw new Error(`Carousel renderer returned ${assets.length} images; expected 5`);
+  return assets;
 }
-
 async function sendXDraftIfEnabled(
   item: RakutenItem,
   finalCaption: string,
@@ -180,39 +163,11 @@ async function sendXDraftIfEnabled(
   }
 }
 
-async function publishSingleInstagramImage(
-  item: RakutenItem,
-  finalCaption: string,
-  client: InstagramHttpClient,
-  waitMs: (ms: number) => Promise<void>,
-): Promise<void> {
-  const IG_USER_ID = env("IG_USER_ID");
-  const IG_ACCESS_TOKEN = env("IG_ACCESS_TOKEN");
-  const imageUrl = upscaleImageUrl(item.imageUrl);
-  console.log(`[ig-post-engine] slot fallback single image creating...`);
-  const createRes = await client.post<{ id: string }>(
-    `${GRAPH_API}/${IG_USER_ID}/media`,
-    null,
-    { params: { image_url: imageUrl, caption: finalCaption, access_token: IG_ACCESS_TOKEN }, timeout: 30000 },
-  );
-  const creationId = createRes.data.id;
-  for (let i = 0; i < 12; i++) {
-    const s = await client.get<{ status_code: string }>(
-      `${GRAPH_API}/${creationId}`,
-      { params: { fields: "status_code", access_token: IG_ACCESS_TOKEN }, timeout: 15000 },
-    );
-    if (s.data.status_code === "FINISHED") break;
-    if (s.data.status_code === "ERROR") throw new Error("Instagramメディア処理エラー");
-    await waitMs(5000);
+function assertFiveCarouselAssets(assets: CarouselAsset[]): void {
+  if (assets.length !== 5 || assets.some((asset, index) => asset.page !== index + 1 || !asset.publicUrl)) {
+    throw new Error("Instagram投稿にはpage 1〜5の5枚すべてが必要です");
   }
-  console.log(`[ig-post-engine] slot fallback single image publishing...`);
-  await client.post(
-    `${GRAPH_API}/${IG_USER_ID}/media_publish`,
-    null,
-    { params: { creation_id: creationId, access_token: IG_ACCESS_TOKEN }, timeout: 30000 },
-  );
 }
-
 export async function postToInstagramWithPersona(
   item: RakutenItem,
   roomCaption: string,
@@ -229,59 +184,49 @@ export async function postToInstagramWithPersona(
     console.warn("[ig-post-engine] Instagram: 画像URL空のためスキップ");
     return false;
   }
+
+  const notify = options.notify ?? notifyError;
   try {
+    if (!isCarouselEnabled(process.env)) {
+      throw new Error("Instagramは5枚カルーセル必須です。IG_CAROUSEL_ENABLED=1 と IG_CAROUSEL_PUBLIC_BASE_URL を設定してください。");
+    }
+
     const buildCaption = options.buildCaption ?? buildInstagramFinalCaption;
     const createAssets = options.createAssets ?? createInstagramCarouselAssets;
     const publishCarousel = options.publishCarousel ?? publishInstagramCarousel;
     const sendXDraft = options.sendXDraft ?? sendXDraftIfEnabled;
-    const singleImageClient = options.singleImageClient ?? axios;
-    const notify = options.notify ?? notifyError;
-    const waitMs = options.waitMs ?? sleep;
     const baseCaption = await buildCaption(item, roomCaption);
     const scrubbed = scrubNgWords(baseCaption, persona.ngWords);
     const finalCaption = withPersonaFooter(scrubbed, persona);
-    let xDraftAssets: CarouselAsset[] = [];
-    if (isCarouselEnabled(process.env)) {
-      try {
-        console.log(`[ig-post-engine] slot=${persona.id} carousel media creating...`);
-        let assets = await createAssets(item, persona);
-        xDraftAssets = assets;
-        if (process.env.IG_CAROUSEL_GITHUB_UPLOAD === "1") {
-          assets = await publishCarouselAssetsToGitHub(assets, {
-            repository: process.env.GITHUB_REPOSITORY ?? "",
-            branch: process.env.GITHUB_REF_NAME ?? "main",
-            token: process.env.GITHUB_TOKEN ?? "",
-          });
-          xDraftAssets = assets;
-        }
-        await publishCarousel({
-          graphApiBase: GRAPH_API,
-          igUserId: IG_USER_ID,
-          accessToken: IG_ACCESS_TOKEN,
-          caption: finalCaption,
-          assets,
-        });
-        console.log(`[ig-post-engine] ✓ carousel post success: ${item.itemName.slice(0, 30)}`);
-        await sendXDraft(item, finalCaption, assets, persona);
-        return true;
-      } catch (err) {
-        const msg = String(err).slice(0, 500);
-        console.warn(`[ig-post-engine] carousel failed, falling back to single product image: ${msg}`);
-        await notify("Instagramカルーセル投稿失敗", `${msg}\n商品画像1枚投稿へフォールバックします。`);
-      }
+
+    let assets = await createAssets(item, persona);
+    assertFiveCarouselAssets(assets);
+    if (process.env.IG_CAROUSEL_GITHUB_UPLOAD === "1") {
+      assets = await publishCarouselAssetsToGitHub(assets, {
+        repository: process.env.GITHUB_REPOSITORY ?? "",
+        branch: process.env.GITHUB_REF_NAME ?? "main",
+        token: process.env.GITHUB_TOKEN ?? "",
+      });
+      assertFiveCarouselAssets(assets);
     }
-    await publishSingleInstagramImage(item, finalCaption, singleImageClient, waitMs);
-    console.log(`[ig-post-engine] ✅ slot=${persona.id} 1枚画像投稿成功: ${item.itemName.slice(0, 30)}`);
-    if (xDraftAssets.length > 0) {
-      await sendXDraft(item, finalCaption, xDraftAssets, persona);
-    }
+
+    console.log(`[ig-post-engine] slot=${persona.id} publishing five-slide carousel...`);
+    await publishCarousel({
+      graphApiBase: GRAPH_API,
+      igUserId: IG_USER_ID,
+      accessToken: IG_ACCESS_TOKEN,
+      caption: finalCaption,
+      assets,
+    });
+    console.log(`[ig-post-engine] ✓ five-slide carousel post success: ${item.itemName.slice(0, 30)}`);
+    await sendXDraft(item, finalCaption, assets, persona);
     return true;
   } catch (err) {
     const msg = axios.isAxiosError(err)
       ? JSON.stringify(err.response?.data ?? err.message).slice(0, 500)
-      : String(err);
+      : String(err).slice(0, 500);
     console.error(`[ig-post-engine] slot=${persona.id} 失敗:`, msg);
-    await (options.notify ?? notifyError)(`Instagram投稿失敗(slot=${persona.id})`, msg);
+    await notify(`Instagram投稿失敗(slot=${persona.id})`, msg);
     return false;
   }
 }
