@@ -83,9 +83,9 @@ jobs:
           IG_CAROUSEL_OUTPUT_DIR: ${{ vars.IG_CAROUSEL_OUTPUT_DIR || 'public/generated/instagram' }}
           IG_CAROUSEL_CHARACTER_IMAGE_PATH: ${{ vars.IG_CAROUSEL_CHARACTER_IMAGE_PATH || 'public/brand/meganeojisan-icon.png' }}
           IG_CAROUSEL_BACKGROUND_IMAGE_PATH: ${{ vars.IG_CAROUSEL_BACKGROUND_IMAGE_PATH || 'public/brand/lifestyle-room-bg.png' }}
-          AI_IMAGE_ENABLED: "0"
+          AI_IMAGE_ENABLED: ${{ vars.AI_IMAGE_ENABLED || '1' }}
           AI_IMAGE_MODEL: ${{ vars.AI_IMAGE_MODEL || 'gpt-image-2' }}
-          AI_IMAGE_QUALITY: ${{ vars.AI_IMAGE_QUALITY || 'low' }}
+          AI_IMAGE_QUALITY: ${{ vars.AI_IMAGE_QUALITY || 'high' }}
           AI_IMAGE_SIZE: ${{ vars.AI_IMAGE_SIZE || '1024x1024' }}
           X_DRAFT_EMAIL_TO: ${{ vars.X_DRAFT_EMAIL_TO || 'meganeojisan1984@gmail.com' }}
           SMTP_HOST: ${{ vars.SMTP_HOST || 'smtp.gmail.com' }}

@@ -35,6 +35,7 @@ export interface CarouselWriteOptions {
   renderer?: (svg: string, filePath: string) => Promise<void>;
   characterImagePath?: string;
   backgroundImagePath?: string;
+  backgroundImagePaths?: string[];
 }
 
 export interface CarouselBuildOptions {
@@ -224,8 +225,9 @@ function characterHref(options: CarouselWriteOptions): string {
 }
 
 function backgroundHref(options: CarouselWriteOptions): string {
-  const configured = options.backgroundImagePath ?? process.env.IG_CAROUSEL_BACKGROUND_IMAGE_PATH;
-  const filePath = configured || DEFAULT_BACKGROUND_IMAGE;
+  const filePath = options.backgroundImagePath !== undefined
+    ? options.backgroundImagePath
+    : process.env.IG_CAROUSEL_BACKGROUND_IMAGE_PATH || DEFAULT_BACKGROUND_IMAGE;
   return fs.existsSync(filePath) ? imageDataUri(filePath) : "";
 }
 
@@ -238,7 +240,7 @@ export function renderSlideSvg(slide: CarouselSlide, item: RakutenItem, options:
   const productTitleSvg = tspanText(88, 884, "productTitle", productNameLines, 34);
   const softwareProduct = isSoftwareProduct(item.itemName);
   const guideImage = softwareProduct ? "" : characterHref(options);
-  const roomImage = softwareProduct ? "" : backgroundHref(options);
+  const roomImage = softwareProduct && !options.backgroundImagePath ? "" : backgroundHref(options);
   const backgroundSvg = roomImage
     ? `<image href="${escapeXml(roomImage)}" x="0" y="0" width="1080" height="1080" preserveAspectRatio="xMidYMid slice"/>`
     : `<rect width="1080" height="1080" fill="${softwareProduct ? "#e8eef4" : "#d8dccf"}"/>`;
@@ -404,7 +406,9 @@ export async function writeCarouselImages(
   for (const slide of slides) {
     const fileName = `${day}-${stamp}-${hash}-${String(slide.index).padStart(2, "0")}.jpg`;
     const filePath = path.join(outputDir, fileName);
-    await renderer(renderSlideSvg(slide, renderItem, options), filePath);
+    const slideBackground = options.backgroundImagePaths?.[slide.index - 1];
+    const slideOptions = slideBackground ? { ...options, backgroundImagePath: slideBackground } : options;
+    await renderer(renderSlideSvg(slide, renderItem, slideOptions), filePath);
     assets.push({
       filePath,
       publicUrl: mapAssetToPublicUrl(fileName, publicBaseUrl),
