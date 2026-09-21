@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "lotus01:10006723",
     "webyselection:10091551",
     "webyselection:10089471",
     "e-kitchen:10112109",
@@ -499,7 +498,8 @@
     "enterb:10000100",
     "darkangel:10036035",
     "superdeal:10004731",
-    "netbaby:10037814"
+    "netbaby:10037814",
+    "anuajapan:10000435"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
