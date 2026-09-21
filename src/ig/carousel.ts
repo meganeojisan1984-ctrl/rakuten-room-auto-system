@@ -40,6 +40,7 @@ export interface CarouselWriteOptions {
 
 export interface CarouselBuildOptions {
   now?: Date;
+  headlines?: string[];
 }
 
 interface HttpClient {
@@ -132,29 +133,29 @@ function actionLabel(kind: CarouselSlideKind): string {
 }
 
 export function buildCarouselSlides(item: RakutenItem, options: CarouselBuildOptions = {}): CarouselSlide[] {
-  void options;
   const name = cleanProductDisplayName(item.itemName) || "商品名は商品ページで確認";
   const facts = extractProductFacts(item.itemCaption, 2);
+  const headlines = options.headlines ?? [];
   return [
     {
       index: 1,
       kind: "hook",
       badge: "01",
-      headline: truncate("商品情報を確認", 34),
+      headline: truncate(headlines[0] ?? "商品情報を確認", 34),
       body: truncate(facts[0] ?? name, 82),
     },
     {
       index: 2,
       kind: "problem",
       badge: "02",
-      headline: truncate("商品説明の記載", 34),
+      headline: truncate(headlines[1] ?? "商品説明の記載", 34),
       body: truncate(facts[1] ?? "詳しい内容は商品ページでご確認ください。", 82),
     },
     {
       index: 3,
       kind: "use_case",
       badge: "03",
-      headline: truncate("購入前に見たい仕様", 34),
+      headline: truncate(headlines[2] ?? "購入前に見たい仕様", 34),
       body: truncate(name, 82),
     },
     {
