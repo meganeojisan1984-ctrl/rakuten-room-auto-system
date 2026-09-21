@@ -2313,5 +2313,18 @@
     "captionHead": "72%OFF!【期間限定：3,980円→1,099",
     "slot": "slot2",
     "itemCodeHash": "9ccfb0d800d6"
+  },
+  {
+    "ts": "2026-09-21T00:56:28.436Z",
+    "itemCode": "superdeal:10004731",
+    "itemName": "【要エントリー！9/19 20時開始 4時間限定ポイントアップ対象】マイクロソフト Office Home 2024【おひとり様5枚限り】",
+    "genreName": "家電・ガジェット",
+    "price": 41360,
+    "postType": 3,
+    "hour": 9,
+    "hook": "fallback",
+    "captionHead": "【要エントリー！9/19 20時開始 4時間限定ポ",
+    "slot": "slot0",
+    "itemCodeHash": "cef445be9e7a"
   }
 ]

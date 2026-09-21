@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "neshexst:10000158",
     "noone:10002908",
     "lotus01:10006723",
     "webyselection:10091551",
@@ -499,7 +498,8 @@
     "netbaby:10018748",
     "netbaby:10053894",
     "enterb:10000100",
-    "darkangel:10036035"
+    "darkangel:10036035",
+    "superdeal:10004731"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
