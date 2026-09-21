@@ -12,7 +12,7 @@
 import axios from "axios";
 import * as dotenv from "dotenv";
 import type { RakutenItem } from "./fetcher";
-import { generateInstagramCaption } from "./generator";
+import { buildVerifiedProductCaption } from "./ig/product-copy";
 import { notifyError } from "./notifiers";
 dotenv.config();
 
@@ -80,17 +80,10 @@ export async function buildInstagramFinalCaption(
   item: RakutenItem,
   roomCaption: string
 ): Promise<string> {
-  try {
-    const { body, tags } = await generateInstagramCaption(item, roomCaption);
-    const cta = pick(IG_CTAS);
-    const genericTags = pick(IG_TAG_SETS);
-    const finalCaption = `${body}\n\n${cta}\n\n${tags ? tags + " " : ""}${genericTags}`.slice(0, 2200);
-    console.log(`[sns] IG専用キャプション生成完了 (${finalCaption.length}文字):\n${finalCaption}`);
-    return finalCaption;
-  } catch (err) {
-    console.warn("[sns] IG専用キャプション生成失敗、ROOM文変換にフォールバック:", String(err).slice(0, 120));
-    return toInstagramCaption(roomCaption);
-  }
+  void roomCaption;
+  const finalCaption = buildVerifiedProductCaption(item);
+  console.log(`[sns] 出典ベースのIGキャプション生成完了 (${finalCaption.length}文字):\n${finalCaption}`);
+  return finalCaption;
 }
 
 /** ROOM用キャプションをThreads用に変換（500字制限・リンク可） */

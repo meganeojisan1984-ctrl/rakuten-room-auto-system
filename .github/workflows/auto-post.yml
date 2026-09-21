@@ -50,6 +50,9 @@ jobs:
       - name: 依存関係をインストール
         run: npm ci
 
+      - name: 日本語フォントをインストール
+        run: sudo apt-get update && sudo apt-get install -y fonts-noto-cjk
+
       - name: Playwright Chromium をインストール
         run: npx playwright install chromium --with-deps
 
@@ -80,7 +83,7 @@ jobs:
           IG_CAROUSEL_OUTPUT_DIR: ${{ vars.IG_CAROUSEL_OUTPUT_DIR || 'public/generated/instagram' }}
           IG_CAROUSEL_CHARACTER_IMAGE_PATH: ${{ vars.IG_CAROUSEL_CHARACTER_IMAGE_PATH || 'public/brand/meganeojisan-icon.png' }}
           IG_CAROUSEL_BACKGROUND_IMAGE_PATH: ${{ vars.IG_CAROUSEL_BACKGROUND_IMAGE_PATH || 'public/brand/lifestyle-room-bg.png' }}
-          AI_IMAGE_ENABLED: ${{ vars.AI_IMAGE_ENABLED || '1' }}
+          AI_IMAGE_ENABLED: "0"
           AI_IMAGE_MODEL: ${{ vars.AI_IMAGE_MODEL || 'gpt-image-2' }}
           AI_IMAGE_QUALITY: ${{ vars.AI_IMAGE_QUALITY || 'low' }}
           AI_IMAGE_SIZE: ${{ vars.AI_IMAGE_SIZE || '1024x1024' }}
