@@ -2326,5 +2326,18 @@
     "captionHead": "【要エントリー！9/19 20時開始 4時間限定ポ",
     "slot": "slot0",
     "itemCodeHash": "cef445be9e7a"
+  },
+  {
+    "ts": "2026-09-21T09:36:19.123Z",
+    "itemCode": "netbaby:10037814",
+    "itemName": "【1種類を選べる】ムーニーマン パンツ 男女 L・BIGサイズ 大容量(4袋セット)【ムーニーマン】",
+    "genreName": "家電・ガジェット",
+    "price": 9196,
+    "postType": 2,
+    "hour": 18,
+    "hook": "fallback",
+    "captionHead": "【1種類を選べる】ムーニーマン パンツ 男女 L・",
+    "slot": "slot2",
+    "itemCodeHash": "3af207a2d790"
   }
 ]
