@@ -15,6 +15,7 @@ import {
 } from "./carousel";
 import { isXDraftMailEnabled, sendXDraftMail } from "./x-draft-mailer";
 import { generateThreadsCopy, isThreadsCopyEnabled } from "./threads-copy";
+import { generateInstagramSlideHeadlines } from "./slide-copy";
 
 // sns.ts と揃える (Instagram Graph API 独自エンドポイント)
 const GRAPH_API = "https://graph.instagram.com/v21.0";
@@ -110,6 +111,7 @@ export function buildXDraftAttachments(assets: CarouselAsset[]): Array<{ filePat
 interface CreateInstagramCarouselAssetsOptions {
   env?: NodeJS.ProcessEnv;
   generateAiImages?: typeof generateAiLifestyleImages;
+  generateSlideHeadlines?: typeof generateInstagramSlideHeadlines;
   renderCarouselImages?: typeof writeCarouselImages;
 }
 
@@ -122,7 +124,20 @@ export async function createInstagramCarouselAssets(
   const writeOptions = getCarouselWriteOptions(envVars);
   const renderCarouselImages = options.renderCarouselImages ?? writeCarouselImages;
   console.log(`[ig-post-engine] slot=${persona.id} building source-grounded carousel assets...`);
-  const slides = buildCarouselSlides(item);
+  let headlines: string[] | undefined;
+  if (envVars.OPENAI_API_KEY && envVars.AI_SLIDE_COPY_ENABLED !== "0") {
+    try {
+      const generateSlideHeadlines = options.generateSlideHeadlines ?? generateInstagramSlideHeadlines;
+      headlines = await generateSlideHeadlines(item, {
+        apiKey: envVars.OPENAI_API_KEY,
+        env: envVars,
+      });
+      console.log(`[ig-post-engine] slot=${persona.id} generated product-specific slide headlines`);
+    } catch (error) {
+      console.warn(`[ig-post-engine] slot=${persona.id} slide-copy generation failed; using grounded fallback headlines: ${String(error).slice(0, 240)}`);
+    }
+  }
+  const slides = buildCarouselSlides(item, { headlines });
   if (isAiLifestyleImagesEnabled(envVars)) {
     const generateAiImages = options.generateAiImages ?? generateAiLifestyleImages;
     console.log(`[ig-post-engine] slot=${persona.id} generating product-matched background images...`);
