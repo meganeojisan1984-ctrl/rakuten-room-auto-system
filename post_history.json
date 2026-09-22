@@ -202,8 +202,8 @@
     "hour": 0,
     "hook": "beforeafter",
     "captionHead": "先月までの私: コンタクトレンズの度数が合わなくて",
-    "likes": 14,
-    "likesUpdatedAt": "2026-09-19T17:27:23.287Z"
+    "likes": 15,
+    "likesUpdatedAt": "2026-09-22T18:17:35.529Z"
   },
   {
     "ts": "2026-07-12T22:59:56.567Z",
@@ -337,8 +337,8 @@
     "hour": 8,
     "hook": "question",
     "captionHead": "まだ暑い夏が続いてるよね😓 その夏の毎日を快適に",
-    "likes": 14,
-    "likesUpdatedAt": "2026-09-19T17:27:23.287Z"
+    "likes": 15,
+    "likesUpdatedAt": "2026-09-22T18:17:35.529Z"
   },
   {
     "ts": "2026-07-15T05:26:00.323Z",
@@ -1452,7 +1452,9 @@
     "hook": "surprise",
     "captionHead": "え、待って。コシヒカリを5kgで3,299円ってど",
     "slot": "slot0",
-    "itemCodeHash": "354607fbbb0c"
+    "itemCodeHash": "354607fbbb0c",
+    "likes": 7,
+    "likesUpdatedAt": "2026-09-22T18:17:35.529Z"
   },
   {
     "ts": "2026-08-16T04:32:41.523Z",
@@ -2152,8 +2154,8 @@
     "captionHead": "まだ使い捨てコンタクトで目がゴロゴロしてない？これ",
     "slot": "slot2",
     "itemCodeHash": "d6930e448589",
-    "likes": 14,
-    "likesUpdatedAt": "2026-09-19T17:27:23.287Z"
+    "likes": 15,
+    "likesUpdatedAt": "2026-09-22T18:17:35.529Z"
   },
   {
     "ts": "2026-09-14T17:55:20.761Z",
@@ -2180,8 +2182,8 @@
     "captionHead": "え、待って。こんなにスッキリする水切りラック、楽天",
     "slot": "slot0",
     "itemCodeHash": "c24c7d78a508",
-    "likes": 21,
-    "likesUpdatedAt": "2026-09-21T19:45:12.589Z"
+    "likes": 22,
+    "likesUpdatedAt": "2026-09-22T18:17:35.529Z"
   },
   {
     "ts": "2026-09-15T09:16:58.637Z",
@@ -2253,8 +2255,8 @@
     "captionHead": "外食多めでタンパク足りてない人、正直手を挙げて🙋",
     "slot": "slot2",
     "itemCodeHash": "c5fd5f359fbd",
-    "likes": 29,
-    "likesUpdatedAt": "2026-09-21T19:45:12.589Z"
+    "likes": 32,
+    "likesUpdatedAt": "2026-09-22T18:17:35.529Z"
   },
   {
     "ts": "2026-09-19T08:35:05.272Z",
@@ -2298,8 +2300,8 @@
     "captionHead": "え、待って。通話もできてこの値段ってマジで？🤯\ud83c",
     "slot": "slot2",
     "itemCodeHash": "e0dd02cc0d80",
-    "likes": 18,
-    "likesUpdatedAt": "2026-09-21T19:45:12.589Z"
+    "likes": 20,
+    "likesUpdatedAt": "2026-09-22T18:17:35.529Z"
   },
   {
     "ts": "2026-09-20T15:39:48.579Z",
@@ -2326,8 +2328,8 @@
     "captionHead": "【要エントリー！9/19 20時開始 4時間限定ポ",
     "slot": "slot0",
     "itemCodeHash": "cef445be9e7a",
-    "likes": 13,
-    "likesUpdatedAt": "2026-09-21T19:45:12.589Z"
+    "likes": 14,
+    "likesUpdatedAt": "2026-09-22T18:17:35.529Z"
   },
   {
     "ts": "2026-09-21T09:36:19.123Z",
@@ -2341,8 +2343,8 @@
     "captionHead": "【1種類を選べる】ムーニーマン パンツ 男女 L・",
     "slot": "slot2",
     "itemCodeHash": "3af207a2d790",
-    "likes": 8,
-    "likesUpdatedAt": "2026-09-21T19:45:12.589Z"
+    "likes": 9,
+    "likesUpdatedAt": "2026-09-22T18:17:35.529Z"
   },
   {
     "ts": "2026-09-21T17:59:45.610Z",
@@ -2356,8 +2358,8 @@
     "captionHead": "【56%OFF】期待に応えて再販！ドキ子XAnua",
     "slot": "slot0",
     "itemCodeHash": "37049c8a1758",
-    "likes": 8,
-    "likesUpdatedAt": "2026-09-21T19:45:12.589Z"
+    "likes": 18,
+    "likesUpdatedAt": "2026-09-22T18:17:35.529Z"
   },
   {
     "ts": "2026-09-22T01:29:58.539Z",
@@ -2370,7 +2372,9 @@
     "hook": "fallback",
     "captionHead": "＼マラソン限定！35%OFFクーポンあり！新米／ ",
     "slot": "slot0",
-    "itemCodeHash": "63c732c9d2e2"
+    "itemCodeHash": "63c732c9d2e2",
+    "likes": 7,
+    "likesUpdatedAt": "2026-09-22T18:17:35.529Z"
   },
   {
     "ts": "2026-09-22T09:02:15.051Z",
