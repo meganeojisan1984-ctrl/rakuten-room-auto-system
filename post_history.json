@@ -2358,5 +2358,18 @@
     "itemCodeHash": "37049c8a1758",
     "likes": 8,
     "likesUpdatedAt": "2026-09-21T19:45:12.589Z"
+  },
+  {
+    "ts": "2026-09-22T01:29:58.539Z",
+    "itemCode": "visionshop:10000812",
+    "itemName": "＼マラソン限定！35%OFFクーポンあり！新米／ 一等米 徳島県産 お米 米 コシヒカリ 令和8年産 白米 5kg 10kg 単一原料米 こしひかり 国産 家庭用 大容量 粘り おにぎり お弁当 冷めてもおいしい 米 一等米新米 5キロ 10キロ",
+    "genreName": "美容・コスメ",
+    "price": 3590,
+    "postType": 1,
+    "hour": 10,
+    "hook": "fallback",
+    "captionHead": "＼マラソン限定！35%OFFクーポンあり！新米／ ",
+    "slot": "slot0",
+    "itemCodeHash": "63c732c9d2e2"
   }
 ]
