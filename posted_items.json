@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "webyselection:10089471",
     "e-kitchen:10112109",
     "cocobeau:10003522",
     "sangostyle:10112693",
@@ -499,7 +498,8 @@
     "superdeal:10004731",
     "netbaby:10037814",
     "anuajapan:10000435",
-    "visionshop:10000812"
+    "visionshop:10000812",
+    "suimingiken:10000001"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
