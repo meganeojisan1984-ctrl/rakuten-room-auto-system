@@ -4,6 +4,7 @@ import * as fs from "fs";
 import * as path from "path";
 import type { RakutenItem } from "../fetcher";
 import { cleanProductDisplayName, extractProductFacts, isSoftwareProduct } from "./product-copy";
+import type { ProductContentBrief } from "../content-brief";
 
 export type CarouselSlideKind =
   | "hook"
@@ -40,6 +41,7 @@ export interface CarouselWriteOptions {
 
 export interface CarouselBuildOptions {
   now?: Date;
+  brief?: ProductContentBrief;
 }
 interface HttpClient {
   post<T>(url: string, body: unknown, options: { params: Record<string, unknown>; timeout?: number }): Promise<{ data: T }>;
@@ -129,28 +131,29 @@ function actionLabel(kind: CarouselSlideKind): string {
 }
 export function buildCarouselSlides(item: RakutenItem, options: CarouselBuildOptions = {}): CarouselSlide[] {
   const name = cleanProductDisplayName(item.itemName) || "商品名は商品ページで確認";
-  const facts = extractProductFacts(item.itemCaption, 2);
-  void options;
+  const facts = options.brief?.facts ?? extractProductFacts(item.itemCaption, 2);
+  const angle = options.brief?.angle ?? "商品説明と条件を確認して自分に合うか選ぶ";
+  const imageComment = options.brief?.imageComment ?? "商品説明と価格・レビューを確認";
   return [
     {
       index: 1,
       kind: "hook",
       badge: "01",
-      headline: "商品選びで迷っていませんか？",
-      body: "商品名だけでは違いがわかりにくいことも。説明と条件を見て、自分に合うか確かめましょう。",
+      headline: options.brief ? `${options.brief.category}選びのヒント` : "商品選びで迷っていませんか？",
+      body: options.brief ? truncate(angle, 82) : "商品名だけでは違いがわかりにくいことも。説明と条件を見て、自分に合うか確かめましょう。",
     },
     {
       index: 2,
       kind: "problem",
       badge: "02",
-      headline: "購入前に確認したい特徴",
+      headline: options.brief ? "商品から確認できる特徴" : "購入前に確認したい特徴",
       body: truncate(facts[0] ?? "気になる仕様を商品ページで確認しましょう。", 82),
     },
     {
       index: 3,
       kind: "use_case",
       badge: "03",
-      headline: "説明を見て選ぶヒント",
+      headline: options.brief ? "この商品の見どころ" : "説明を見て選ぶヒント",
       body: truncate(facts[1] ?? `${name}の仕様を希望条件と比べて確認しましょう。`, 82),
     },
     {
@@ -158,14 +161,16 @@ export function buildCarouselSlides(item: RakutenItem, options: CarouselBuildOpt
       kind: "proof",
       badge: "04",
       headline: truncate("価格とレビューを確認", 34),
-      body: truncate(proofLine(item), 82),
+      body: truncate(options.brief?.proofLine ?? proofLine(item), 82),
     },
     {
       index: 5,
       kind: "cta",
       badge: "05",
       headline: truncate("プロフィールから楽天ROOMへ", 34),
-      body: truncate("商品一覧はプロフィールの楽天ROOMへ。気になったら保存・いいね・フォローもお願いします。", 82),
+      body: options.brief
+        ? truncate(`${imageComment}。商品一覧はプロフィールの楽天ROOMへ。保存・いいね・フォローもお願いします。`, 82)
+        : truncate("商品一覧はプロフィールの楽天ROOMへ。気になったら保存・いいね・フォローもお願いします。", 82),
     },
   ];
 }

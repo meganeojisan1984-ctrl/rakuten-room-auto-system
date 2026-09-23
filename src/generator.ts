@@ -1,5 +1,6 @@
 import * as dotenv from "dotenv";
 import type { RakutenItem } from "./fetcher";
+import type { ProductContentBrief } from "./content-brief";
 import { loadStrategy, loadHistory, weightedPick } from "./agents/store";
 import {
   buildOpenAiTextRequest,
@@ -155,11 +156,12 @@ export function sanitizeCaption(caption: string): string {
   return text.trim();
 }
 
-function buildPrompt(
+export function buildPrompt(
   item: RakutenItem,
   postType: PostType,
   hookInstruction?: string,
-  recentHeads: string[] = []
+  recentHeads: string[] = [],
+  brief?: ProductContentBrief,
 ): string {
   const bonusInfo: string[] = [];
   if (item.hasPointBonus) {
@@ -170,6 +172,18 @@ function buildPrompt(
   }
   const bonusText = bonusInfo.length > 0
     ? `\n【お得情報（文頭で必ずアピールすること）】\n${bonusInfo.join("\n")}`
+    : "";
+  const briefBlock = brief
+    ? `\n【共通コンテンツブリーフ（ROOM本文・画像・画像内コメントで共有）】
+- 視点: ${brief.audience === "wife" ? "女性目線" : "男性目線"}
+- カテゴリ: ${brief.category}
+- 訴求軸: ${brief.angle}
+- 利用シーン: ${brief.useCase}
+- 商品から確認できる特徴: ${brief.facts.join(" / ")}
+- 季節フック: ${brief.seasonalHook || "なし"}
+- 画像内コメント: ${brief.imageComment}
+- 根拠情報: ${brief.proofLine}
+本文の主張は商品情報とこのブリーフに含まれる根拠の範囲に限定し、効果や体験を創作しないこと。`
     : "";
 
   let postTypeInstruction = "";
@@ -212,6 +226,7 @@ ${postTypeInstruction}
 ${item.reviewAverage && item.reviewCount ? `- レビュー: ★${item.reviewAverage} (${item.reviewCount}件) ← 「レビュー${item.reviewCount}件で★${item.reviewAverage}」のような社会的証明として必ず本文に織り込むこと` : ""}
 
 【季節の文脈】いまは「${getSeasonContext()}」の時期。自然に絡められる場合のみ絡めること（無理やりはNG）。
+${briefBlock}
 ${getStyleHintsBlock()}
 ${HUMAN_BUYER_COPY_RULES}
 【今回のフック指定（冒頭は必ずこのパターンで書くこと）】
@@ -377,7 +392,8 @@ export async function generateInstagramCaption(
 
 export async function generateCaption(
   item: RakutenItem,
-  postType: PostType = 2
+  postType: PostType = 2,
+  brief?: ProductContentBrief,
 ): Promise<{ caption: string; hook: string }> {
   if (!OPENAI_API_KEY) {
     throw new Error("OPENAI_API_KEY が未設定です");
@@ -386,7 +402,7 @@ export async function generateCaption(
   const client = defaultOpenAiTextClient;
   // OODA: 司令官の学習済みフック重みで書き出しパターンを選択し、直近と同じ書き出しを禁止
   const { hookKey, hookInstruction, recentHeads } = pickHook();
-  const prompt = buildPrompt(item, postType, hookInstruction, recentHeads);
+  const prompt = buildPrompt(item, postType, hookInstruction, recentHeads, brief);
 
   console.log(
     `[generator] 「${item.itemName.slice(0, 30)}...」の紹介文を生成中 (${getPostTypeLabel(postType)} / フック: ${hookKey})`
@@ -398,7 +414,8 @@ export async function generateCaption(
 
 export async function generateCaptions(
   items: RakutenItem[],
-  postType: PostType = 2
+  postType: PostType = 2,
+  briefs?: Map<string, ProductContentBrief>,
 ): Promise<Array<{ item: RakutenItem; caption: string; hook: string }>> {
   const results: Array<{ item: RakutenItem; caption: string; hook: string }> = [];
 
@@ -407,7 +424,7 @@ export async function generateCaptions(
     if (!item) continue;
 
     try {
-      const { caption, hook } = await generateCaption(item, postType);
+      const { caption, hook } = await generateCaption(item, postType, briefs?.get(item.itemCode));
       results.push({ item, caption, hook });
     } catch (err) {
       console.error(`[generator] 商品「${item.itemName.slice(0, 30)}」の生成失敗:`, err);

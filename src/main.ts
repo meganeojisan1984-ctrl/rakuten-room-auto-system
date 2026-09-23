@@ -3,7 +3,8 @@ dotenv.config();
 
 import * as fs from "fs";
 import * as path from "path";
-import { fetchItems, fetchItemsByKeyword, getLastSelectedGenre } from "./fetcher";
+import { fetchItems, fetchItemsByKeyword, getLastSelectedGenre, PRODUCT_CATEGORIES } from "./fetcher";
+import { buildProductContentBrief } from "./content-brief";
 import { generateCaptions, generateTrendCaptions, type PostType } from "./generator";
 import { fetchTrendKeyword } from "./trend-fetcher";
 import { postItems } from "./poster";
@@ -124,12 +125,17 @@ async function main(): Promise<void> {
   let captionedItems;
   try {
     console.log("--- [2/3] 紹介文生成中 ---");
+    const selectedCategory = PRODUCT_CATEGORIES.find((category) => category.name === getLastSelectedGenre())
+      ?? PRODUCT_CATEGORIES.find((category) => slot.genres.includes(category.name));
+    const briefs = selectedCategory
+      ? new Map(items.map((item) => [item.itemCode, buildProductContentBrief(item, slot, selectedCategory)]))
+      : undefined;
     if (trendKeyword) {
       // トレンドモード: Gemini Flash で YouTube必勝構成
       captionedItems = await generateTrendCaptions(trendKeyword, items);
     } else {
       // 通常モード: Groq で投稿タイプ別生成
-      captionedItems = await generateCaptions(items, postType);
+      captionedItems = await generateCaptions(items, postType, briefs);
     }
     if (captionedItems.length === 0) {
       throw new Error("紹介文の生成に全て失敗しました");

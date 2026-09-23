@@ -2,7 +2,8 @@ import axios from "axios";
 import { buildInstagramFinalCaption } from "../sns";
 import { notifyError } from "../notifiers";
 import type { PersonaSlot } from "../persona/persona";
-import type { RakutenItem } from "../fetcher";
+import { PRODUCT_CATEGORIES, type RakutenItem } from "../fetcher";
+import { buildProductContentBrief } from "../content-brief";
 import { generateAiLifestyleImages, isAiLifestyleImagesEnabled } from "./ai-image";
 import {
   buildCarouselSlides,
@@ -119,7 +120,10 @@ export async function createInstagramCarouselAssets(
   const writeOptions = getCarouselWriteOptions(envVars);
   const renderCarouselImages = options.renderCarouselImages ?? writeCarouselImages;
   console.log(`[ig-post-engine] slot=${persona.id} building source-grounded carousel assets...`);
-  const slides = buildCarouselSlides(item);
+  const personaGenres = Array.isArray(persona.genres) ? persona.genres : [];
+  const category = PRODUCT_CATEGORIES.find((value) => personaGenres.includes(value.name)) ?? PRODUCT_CATEGORIES[0]!;
+  const brief = buildProductContentBrief(item, persona, category);
+  const slides = buildCarouselSlides(item, { brief });
   if (isAiLifestyleImagesEnabled(envVars)) {
     const generateAiImages = options.generateAiImages ?? generateAiLifestyleImages;
     console.log(`[ig-post-engine] slot=${persona.id} generating product-matched background images...`);
@@ -130,6 +134,7 @@ export async function createInstagramCarouselAssets(
       model: envVars.AI_IMAGE_MODEL || undefined,
       quality: envVars.AI_IMAGE_QUALITY as "low" | "medium" | "high" | "auto" | undefined,
       size: envVars.AI_IMAGE_SIZE || undefined,
+      brief,
     });
     if (backgrounds.length !== 5) {
       throw new Error(`AI background generation returned ${backgrounds.length} images; expected 5`);

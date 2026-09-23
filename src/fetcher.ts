@@ -142,6 +142,14 @@ export function isRoomPostableProductUrl(rawUrl: string): boolean {
   }
 }
 
+/** Instagram背景のシーン選択用に、商品情報から8カテゴリの代表カテゴリを返す。 */
+export function classifyProductCategory(item: Pick<RakutenItem, "itemName" | "itemCaption">): string {
+  const text = `${item.itemName} ${item.itemCaption}`.toLowerCase();
+  const match = PRODUCT_CATEGORIES.find((category) => category.keywords.some((keyword) =>
+    keyword.split(/\s+/).some((token) => token.length >= 2 && text.includes(token.toLowerCase()))));
+  return match?.name ?? "";
+}
+
 export function scoreProductCandidate(
   item: Pick<RakutenItem, "itemName" | "itemCaption" | "itemPrice" | "reviewAverage" | "reviewCount" | "hasCoupon" | "hasPointBonus">,
   category: ProductCategory,
@@ -704,6 +712,7 @@ async function fetchSearchWithRotation(
         `検索 "${keyword}" p${page}`
       );
       if (filtered.length > 0) {
+        const category = PRODUCT_CATEGORIES.find((value) => value.keywords.includes(keyword)) ?? PRODUCT_CATEGORIES[0]!;
         filtered.sort((a, b) => scoreProductCandidate(b, category) - scoreProductCandidate(a, category));
         return filtered;
       }

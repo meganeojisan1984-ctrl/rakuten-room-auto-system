@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildFallbackCaption, HUMAN_BUYER_COPY_RULES } from "../src/generator";
+import { buildFallbackCaption, buildPrompt, HUMAN_BUYER_COPY_RULES } from "../src/generator";
+import type { ProductContentBrief } from "../src/content-brief";
 import type { RakutenItem } from "../src/fetcher";
 
 test("HUMAN_BUYER_COPY_RULES discourages AI-like copy while keeping purchase intent", () => {
@@ -22,4 +23,37 @@ test("fallback caption keeps posting alive when the text model is unavailable", 
   assert.match(caption, /収納ボックス/);
   assert.match(caption, /123件/);
   assert.doesNotMatch(caption, /実際に使った|買ってから生活が変わった/);
+});
+
+test("ROOM prompt includes the same content brief used for downstream creative", () => {
+  const item = {
+    itemName: "USB-C対応アルミハブ",
+    itemPrice: 12800,
+    itemCaption: "デスク周りの接続をまとめやすいUSBハブです。",
+    shopName: "テストショップ",
+    hasPointBonus: false,
+    hasCoupon: false,
+    pointRate: 0,
+    reviewAverage: 4.5,
+    reviewCount: 120,
+  } as RakutenItem;
+  const brief: ProductContentBrief = {
+    itemName: item.itemName,
+    displayName: item.itemName,
+    audience: "husband",
+    category: "PCガジェット",
+    facts: ["USBハブ", "デスク周りの接続"],
+    useCase: "在宅ワークの机で使う",
+    angle: "男性目線で機能と使い勝手を見る",
+    seasonalHook: "",
+    proofLine: "12,800円・レビュー120件・★4.5",
+    imageComment: "PCガジェット｜デスク周りの接続を整理",
+    hashtags: ["#PCガジェット"],
+  };
+
+  const prompt = buildPrompt(item, 2, "数字型", [], brief);
+  assert.match(prompt, /共通コンテンツブリーフ/);
+  assert.match(prompt, /PCガジェット/);
+  assert.match(prompt, /機能と使い勝手/);
+  assert.match(prompt, /デスク周りの接続を整理/);
 });
