@@ -4,7 +4,7 @@ dotenv.config();
 import * as fs from "fs";
 import * as path from "path";
 import { fetchItems, fetchItemsByKeyword, getLastSelectedGenre, PRODUCT_CATEGORIES } from "./fetcher";
-import { buildProductContentBrief } from "./content-brief";
+import { generateStrategyBriefMap } from "./sales-strategy";
 import { generateCaptions, generateTrendCaptions, type PostType } from "./generator";
 import { fetchTrendKeyword } from "./trend-fetcher";
 import { postItems } from "./poster";
@@ -128,7 +128,7 @@ async function main(): Promise<void> {
     const selectedCategory = PRODUCT_CATEGORIES.find((category) => category.name === getLastSelectedGenre())
       ?? PRODUCT_CATEGORIES.find((category) => slot.genres.includes(category.name));
     const briefs = selectedCategory
-      ? new Map(items.map((item) => [item.itemCode, buildProductContentBrief(item, slot, selectedCategory)]))
+      ? await generateStrategyBriefMap(items, slot, selectedCategory)
       : undefined;
     if (trendKeyword) {
       // トレンドモード: Gemini Flash で YouTube必勝構成

@@ -1,6 +1,7 @@
 import * as dotenv from "dotenv";
 import type { RakutenItem } from "./fetcher";
 import type { ProductContentBrief } from "./content-brief";
+import type { SalesStrategyBrief } from "./sales-strategy";
 import { loadStrategy, loadHistory, weightedPick } from "./agents/store";
 import {
   buildOpenAiTextRequest,
@@ -161,7 +162,7 @@ export function buildPrompt(
   postType: PostType,
   hookInstruction?: string,
   recentHeads: string[] = [],
-  brief?: ProductContentBrief,
+  brief?: ProductContentBrief | SalesStrategyBrief,
 ): string {
   const bonusInfo: string[] = [];
   if (item.hasPointBonus) {
@@ -396,7 +397,7 @@ export async function generateInstagramCaption(
 export async function generateCaption(
   item: RakutenItem,
   postType: PostType = 2,
-  brief?: ProductContentBrief,
+  brief?: ProductContentBrief | SalesStrategyBrief,
 ): Promise<{ caption: string; hook: string }> {
   if (!OPENAI_API_KEY) {
     throw new Error("OPENAI_API_KEY が未設定です");
@@ -418,9 +419,9 @@ export async function generateCaption(
 export async function generateCaptions(
   items: RakutenItem[],
   postType: PostType = 2,
-  briefs?: Map<string, ProductContentBrief>,
-): Promise<Array<{ item: RakutenItem; caption: string; hook: string }>> {
-  const results: Array<{ item: RakutenItem; caption: string; hook: string }> = [];
+  briefs?: Map<string, ProductContentBrief | SalesStrategyBrief>,
+): Promise<Array<{ item: RakutenItem; caption: string; hook: string; brief?: ProductContentBrief | SalesStrategyBrief }>> {
+  const results: Array<{ item: RakutenItem; caption: string; hook: string; brief?: ProductContentBrief | SalesStrategyBrief }> = [];
 
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
@@ -428,10 +429,10 @@ export async function generateCaptions(
 
     try {
       const { caption, hook } = await generateCaption(item, postType, briefs?.get(item.itemCode));
-      results.push({ item, caption, hook });
+      results.push({ item, caption, hook, brief: briefs?.get(item.itemCode) });
     } catch (err) {
       console.error(`[generator] 商品「${item.itemName.slice(0, 30)}」の生成失敗:`, err);
-      results.push({ item, caption: buildFallbackCaption(item), hook: "fallback" });
+      results.push({ item, caption: buildFallbackCaption(item), hook: "fallback", brief: briefs?.get(item.itemCode) });
       console.warn(`[generator] 商品「${item.itemName.slice(0, 30)}」は保険の紹介文で続行します`);
     }
 

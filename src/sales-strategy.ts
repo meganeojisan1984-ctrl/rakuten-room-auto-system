@@ -23,6 +23,23 @@ export interface SalesStrategyOptions {
   now?: Date;
 }
 
+export type SalesStrategyGenerator = (
+  item: RakutenItem,
+  persona: PersonaSlot,
+  category: ProductCategory,
+) => Promise<SalesStrategyBrief>;
+
+export async function generateStrategyBriefMap(
+  items: RakutenItem[],
+  persona: PersonaSlot,
+  category: ProductCategory,
+  generator: SalesStrategyGenerator = (item, currentPersona, currentCategory) =>
+    generateSalesStrategyBrief(item, currentPersona, currentCategory),
+): Promise<Map<string, SalesStrategyBrief>> {
+  const entries = await Promise.all(items.map(async (item) => [item.itemCode, await generator(item, persona, category)] as const));
+  return new Map(entries);
+}
+
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
 }

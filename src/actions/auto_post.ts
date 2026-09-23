@@ -1,10 +1,13 @@
 /**
  * auto_post.ts - 自動コレ（投稿）機能
  */
-import { fetchItems } from "../fetcher";
+import { fetchItems, getLastSelectedGenre, PRODUCT_CATEGORIES } from "../fetcher";
 import { generateCaptions, type PostType } from "../generator";
 import { postItems } from "../poster";
 import { addLog } from "../api/server";
+import { loadPersona, getSlot } from "../persona/persona";
+import { resolveSlot } from "../persona/slot-rotator";
+import { generateStrategyBriefMap } from "../sales-strategy";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -57,7 +60,12 @@ export async function runAutoPost(postCount: number = 1, headless: boolean = tru
     }
 
     // 紹介文生成
-    const captionedItems = await generateCaptions(items, postType);
+    const persona = loadPersona();
+    const slot = getSlot(persona, resolveSlot(persona, new Date()));
+    const category = PRODUCT_CATEGORIES.find((value) => value.name === getLastSelectedGenre())
+      ?? PRODUCT_CATEGORIES.find((value) => slot.genres.includes(value.name));
+    const briefs = category ? await generateStrategyBriefMap(items, slot, category) : undefined;
+    const captionedItems = await generateCaptions(items, postType, briefs);
     if (captionedItems.length === 0) {
       addLog("auto_post", "error", "紹介文の生成に失敗しました");
       return;
