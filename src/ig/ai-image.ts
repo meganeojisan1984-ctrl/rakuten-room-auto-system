@@ -7,6 +7,7 @@ import { mapAssetToPublicUrl, type CarouselAsset } from "./carousel";
 import { classifyProductCategory } from "../fetcher";
 import { cleanProductDisplayName, extractProductFacts, isSoftwareProduct } from "./product-copy";
 import type { ProductContentBrief } from "../content-brief";
+import { normalizeImageForUpload } from "./image-normalize";
 
 interface OpenAiImageResponse {
   data?: Array<{ b64_json?: string; url?: string }>;
@@ -223,7 +224,7 @@ export async function generateAiLifestyleImages(
   const now = options.now ?? new Date();
   const client = options.client ?? defaultOpenAiClient;
   const loadProductImage = options.loadProductImage ?? downloadProductImage;
-  const productImage = await loadProductImage(item.imageUrl);
+  const productImage = await loadProductImage(item.imageUrl).then((image) => normalizeImageForUpload(image.bytes, image.mimeType));
   const day = now.toISOString().slice(0, 10);
   const stamp = timestamp(now);
   const hash = crypto.createHash("sha1").update(`${item.itemCode}|${item.itemName}`).digest("hex").slice(0, 10);

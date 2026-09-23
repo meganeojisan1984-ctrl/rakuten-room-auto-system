@@ -5,6 +5,7 @@ import * as path from "path";
 import type { RakutenItem } from "../fetcher";
 import { cleanProductDisplayName, extractProductFacts, isSoftwareProduct } from "./product-copy";
 import type { ProductContentBrief } from "../content-brief";
+import { normalizeImageForUpload } from "./image-normalize";
 
 export type CarouselSlideKind =
   | "hook"
@@ -385,14 +386,12 @@ async function loadProductImageDataUri(url: string): Promise<string> {
   const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
   if (!response.ok) throw new Error(`商品画像を取得できません (${response.status})`);
   const mimeType = (response.headers.get("content-type") ?? "").split(";")[0]!.toLowerCase();
-  if (!new Set(["image/jpeg", "image/png", "image/webp"]).has(mimeType)) {
-    throw new Error(`商品画像の形式に対応していません: ${mimeType || "unknown"}`);
-  }
   const bytes = new Uint8Array(await response.arrayBuffer());
   if (bytes.byteLength === 0 || bytes.byteLength > 20 * 1024 * 1024) {
     throw new Error("商品画像のサイズが不正です");
   }
-  return `data:${mimeType};base64,${Buffer.from(bytes).toString("base64")}`;
+  const normalized = await normalizeImageForUpload(bytes, mimeType);
+  return `data:${normalized.mimeType};base64,${Buffer.from(normalized.bytes).toString("base64")}`;
 }
 
 export async function writeCarouselImages(
