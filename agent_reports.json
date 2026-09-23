@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-09-09T16:03:16.386Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (美容・コスメ)"
-  },
-  {
-    "ts": "2026-09-09T16:03:22.225Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ1)"
-  },
-  {
-    "ts": "2026-09-09T16:05:00.250Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-09-09T16:08:02.985Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
     "ts": "2026-09-10T00:52:40.264Z",
     "agent": "scout",
     "ok": true,
@@ -1198,5 +1174,29 @@
     "agent": "poster",
     "ok": false,
     "summary": "成功0件/失敗1件 (Error: 「ROOMに追加」ボタンが見つかりません)"
+  },
+  {
+    "ts": "2026-09-23T12:32:46.660Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (暮らし・インテリア)"
+  },
+  {
+    "ts": "2026-09-23T12:32:51.318Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ3)"
+  },
+  {
+    "ts": "2026-09-23T12:34:31.327Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-09-23T12:34:32.823Z",
+    "agent": "promoter",
+    "ok": false,
+    "summary": "IG=失敗/未設定, Threads=失敗/未設定"
   }
 ]

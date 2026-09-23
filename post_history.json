@@ -2388,5 +2388,18 @@
     "captionHead": "寒がり＆デスクワークで肩こりある人、正直手を挙げて",
     "slot": "slot1",
     "itemCodeHash": "9beeb1cff694"
+  },
+  {
+    "ts": "2026-09-23T12:34:32.824Z",
+    "itemCode": "auc-assy-underwear:10004360",
+    "itemName": "【4172】CIARA mesh super low-rise front-hook sports briefs",
+    "genreName": "暮らし・インテリア",
+    "price": 3300,
+    "postType": 3,
+    "hour": 21,
+    "hook": "beforeafter",
+    "captionHead": "先月までの私: 普通の下着でちょっと物足りない日々",
+    "slot": "slot2",
+    "itemCodeHash": "52e141731e3a"
   }
 ]

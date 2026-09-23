@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "e-kitchen:10112109",
     "cocobeau:10003522",
     "sangostyle:10112693",
     "keynice:10000014",
@@ -499,7 +498,8 @@
     "netbaby:10037814",
     "anuajapan:10000435",
     "visionshop:10000812",
-    "suimingiken:10000001"
+    "suimingiken:10000001",
+    "auc-assy-underwear:10004360"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
