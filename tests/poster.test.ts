@@ -1,0 +1,17 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { getProductPageUrl } from "../src/poster";
+
+test("商品ページ遷移用URLから楽天の追跡クエリを除去する", () => {
+  assert.equal(
+    getProductPageUrl("https://item.rakuten.co.jp/book/18814391/?rafcid=wsc_i_ra_123"),
+    "https://item.rakuten.co.jp/book/18814391/"
+  );
+});
+
+test("商品ページ遷移用URLはハッシュも除去する", () => {
+  assert.equal(
+    getProductPageUrl("https://item.rakuten.co.jp/shop/item/?scid=af_pc_etc&foo=bar#review"),
+    "https://item.rakuten.co.jp/shop/item/"
+  );
+});

@@ -8,6 +8,22 @@ dotenv.config();
 const ROOM_URL = "https://room.rakuten.co.jp";
 const SCREENSHOT_PATH = path.join(process.cwd(), "error.png");
 
+/**
+ * 商品ページをブラウザで開くためのURL。
+ * 楽天APIのアフィリエイト追跡クエリは紹介文用リンクには必要だが、
+ * 商品ページ遷移時にHTTP/2エラーを起こすことがあるため除去する。
+ */
+export function getProductPageUrl(rawUrl: string): string {
+  try {
+    const url = new URL(rawUrl);
+    url.search = "";
+    url.hash = "";
+    return url.toString();
+  } catch {
+    return rawUrl;
+  }
+}
+
 // セレクタ定数 (楽天ROOMのDOM変更時はここを更新)
 const SELECTORS = {
   // 商品ページの「ROOMに追加」ボタン
@@ -52,8 +68,9 @@ async function postSingleItem(
     const page = await context.newPage();
 
     // 商品URLへアクセス
-    console.log(`[poster] 商品URLへアクセス: ${item.itemUrl}`);
-    await page.goto(item.itemUrl, {
+    const productPageUrl = getProductPageUrl(item.itemUrl);
+    console.log(`[poster] 商品URLへアクセス: ${productPageUrl}`);
+    await page.goto(productPageUrl, {
       waitUntil: "domcontentloaded",
       timeout: 60000,
     });
