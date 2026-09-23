@@ -419,9 +419,9 @@ export async function generateCaption(
 export async function generateCaptions(
   items: RakutenItem[],
   postType: PostType = 2,
-  briefs?: Map<string, ProductContentBrief | SalesStrategyBrief>,
-): Promise<Array<{ item: RakutenItem; caption: string; hook: string; brief?: ProductContentBrief | SalesStrategyBrief }>> {
-  const results: Array<{ item: RakutenItem; caption: string; hook: string; brief?: ProductContentBrief | SalesStrategyBrief }> = [];
+  briefs?: Map<string, SalesStrategyBrief>,
+): Promise<Array<{ item: RakutenItem; caption: string; hook: string; brief?: SalesStrategyBrief }>> {
+  const results: Array<{ item: RakutenItem; caption: string; hook: string; brief?: SalesStrategyBrief }> = [];
 
   for (let i = 0; i < items.length; i++) {
     const item = items[i];

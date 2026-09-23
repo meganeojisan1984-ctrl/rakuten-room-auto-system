@@ -12,6 +12,7 @@
 import axios from "axios";
 import * as dotenv from "dotenv";
 import type { RakutenItem } from "./fetcher";
+import type { SalesStrategyBrief } from "./sales-strategy";
 import { buildVerifiedProductCaption } from "./ig/product-copy";
 import { notifyError } from "./notifiers";
 dotenv.config();
@@ -78,10 +79,22 @@ export function toInstagramCaption(caption: string): string {
  */
 export async function buildInstagramFinalCaption(
   item: RakutenItem,
-  roomCaption: string
+  roomCaption: string,
+  brief?: SalesStrategyBrief,
 ): Promise<string> {
-  void roomCaption;
-  const finalCaption = buildVerifiedProductCaption(item);
+  const finalCaption = brief
+    ? [
+        `${brief.target}へ｜${brief.audience === "wife" ? "女性目線" : "男性目線"}`,
+        brief.problem,
+        `わかる、その悩み。${brief.need}`,
+        brief.solution,
+        brief.proofLine,
+        brief.purchaseReason,
+        brief.purchaseCta,
+        brief.imageComment,
+        brief.hashtags.join(" "),
+      ].join("\n")
+    : buildVerifiedProductCaption(item);
   console.log(`[sns] 出典ベースのIGキャプション生成完了 (${finalCaption.length}文字):\n${finalCaption}`);
   return finalCaption;
 }
@@ -224,7 +237,7 @@ export async function postToThreads(item: RakutenItem, caption: string): Promise
  * スパム防止のため1実行につき1商品のみ。失敗しても本体処理には影響させない。
  */
 export async function crossPostToSns(
-  items: Array<{ item: RakutenItem; caption: string }>,
+  items: Array<{ item: RakutenItem; caption: string; brief?: SalesStrategyBrief }>,
   opts?: { persona?: import("./persona/persona").PersonaSlot },
 ): Promise<{ attempted: boolean; instagram: boolean; threads: boolean }> {
   const none = { attempted: false, instagram: false, threads: false };
@@ -241,7 +254,7 @@ export async function crossPostToSns(
   let instagram: boolean;
   if (opts?.persona) {
     const { postToInstagramWithPersona } = await import("./ig/ig-post-engine");
-    instagram = await postToInstagramWithPersona(first.item, first.caption, opts.persona);
+    instagram = await postToInstagramWithPersona(first.item, first.caption, opts.persona, { brief: first.brief });
   } else {
     instagram = await postToInstagram(first.item, first.caption);
   }

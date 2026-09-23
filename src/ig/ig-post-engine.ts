@@ -4,6 +4,7 @@ import { notifyError } from "../notifiers";
 import type { PersonaSlot } from "../persona/persona";
 import { PRODUCT_CATEGORIES, type RakutenItem } from "../fetcher";
 import { buildProductContentBrief } from "../content-brief";
+import type { SalesStrategyBrief } from "../sales-strategy";
 import { generateAiLifestyleImages, isAiLifestyleImagesEnabled } from "./ai-image";
 import {
   buildCarouselSlides,
@@ -21,6 +22,7 @@ import { DEFAULT_ROOM_PROFILE_URL, toRoomItemsUrl } from "../room-profile-url";
 // sns.ts と揃える (Instagram Graph API 独自エンドポイント)
 const GRAPH_API = "https://graph.instagram.com/v21.0";
 interface PostToInstagramWithPersonaOptions {
+  brief?: SalesStrategyBrief;
   buildCaption?: typeof buildInstagramFinalCaption;
   createAssets?: typeof createInstagramCarouselAssets;
   publishCarousel?: typeof publishInstagramCarousel;
@@ -106,6 +108,7 @@ export function buildXDraftAttachments(assets: CarouselAsset[]): Array<{ filePat
 }
 
 interface CreateInstagramCarouselAssetsOptions {
+  brief?: SalesStrategyBrief;
   env?: NodeJS.ProcessEnv;
   generateAiImages?: typeof generateAiLifestyleImages;
   renderCarouselImages?: typeof writeCarouselImages;
@@ -122,7 +125,7 @@ export async function createInstagramCarouselAssets(
   console.log(`[ig-post-engine] slot=${persona.id} building source-grounded carousel assets...`);
   const personaGenres = Array.isArray(persona.genres) ? persona.genres : [];
   const category = PRODUCT_CATEGORIES.find((value) => personaGenres.includes(value.name)) ?? PRODUCT_CATEGORIES[0]!;
-  const brief = buildProductContentBrief(item, persona, category);
+  const brief = options.brief ?? buildProductContentBrief(item, persona, category);
   const slides = buildCarouselSlides(item, { brief });
   if (isAiLifestyleImagesEnabled(envVars)) {
     const generateAiImages = options.generateAiImages ?? generateAiLifestyleImages;
@@ -200,11 +203,11 @@ export async function postToInstagramWithPersona(
     const createAssets = options.createAssets ?? createInstagramCarouselAssets;
     const publishCarousel = options.publishCarousel ?? publishInstagramCarousel;
     const sendXDraft = options.sendXDraft ?? sendXDraftIfEnabled;
-    const baseCaption = await buildCaption(item, roomCaption);
+    const baseCaption = await buildCaption(item, roomCaption, options.brief);
     const scrubbed = scrubNgWords(baseCaption, persona.ngWords);
     const finalCaption = withPersonaFooter(scrubbed, persona);
 
-    let assets = await createAssets(item, persona);
+    let assets = await createAssets(item, persona, { brief: options.brief });
     assertFiveCarouselAssets(assets);
     if (process.env.IG_CAROUSEL_GITHUB_UPLOAD === "1") {
       assets = await publishCarouselAssetsToGitHub(assets, {
