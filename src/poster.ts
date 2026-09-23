@@ -24,6 +24,17 @@ export function getProductPageUrl(rawUrl: string): string {
   }
 }
 
+/**
+ * 商品ページは一部リソースの読み込み完了を待つとタイムアウトすることがあるため、
+ * HTTPレスポンスが確立した時点で処理を続け、必要なDOMは後続のselector待機で確認する。
+ */
+export function getProductNavigationOptions() {
+  return {
+    waitUntil: "commit" as const,
+    timeout: 30000,
+  };
+}
+
 // セレクタ定数 (楽天ROOMのDOM変更時はここを更新)
 const SELECTORS = {
   // 商品ページの「ROOMに追加」ボタン
@@ -70,10 +81,7 @@ async function postSingleItem(
     // 商品URLへアクセス
     const productPageUrl = getProductPageUrl(item.itemUrl);
     console.log(`[poster] 商品URLへアクセス: ${productPageUrl}`);
-    await page.goto(productPageUrl, {
-      waitUntil: "domcontentloaded",
-      timeout: 60000,
-    });
+    await page.goto(productPageUrl, getProductNavigationOptions());
     await page.waitForTimeout(2000);
 
     // CAPTCHA検知
@@ -146,7 +154,7 @@ async function postSingleItem(
       }
       if (addBtnHref) {
         console.log(`[poster] href から直接遷移します: ${addBtnHref}`);
-        await page.goto(addBtnHref, { waitUntil: "domcontentloaded", timeout: 30000 });
+        await page.goto(addBtnHref, getProductNavigationOptions());
       } else {
         throw new Error("ROOMに追加ボタンのクリックに全て失敗しました");
       }
@@ -160,12 +168,12 @@ async function postSingleItem(
     let postPage = newPageOrNull ?? page;
     if (newPageOrNull) {
       console.log("[poster] 新しいタブで投稿フォームが開きました");
-      await postPage.waitForLoadState("load", { timeout: 15000 });
+      await postPage.waitForTimeout(1000);
     } else if (!page.url().includes("room.rakuten.co.jp") && addBtnHref) {
       // クリックは発火したが新タブも遷移も起きなかった場合の最終フォールバック
       console.log(`[poster] ポップアップ・遷移なし、新タブで href を開きます: ${addBtnHref}`);
       postPage = await context.newPage();
-      await postPage.goto(addBtnHref, { waitUntil: "domcontentloaded", timeout: 30000 });
+      await postPage.goto(addBtnHref, getProductNavigationOptions());
     }
     console.log("[poster] ROOMに追加ボタンをクリックしました");
 

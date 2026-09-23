@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { getProductPageUrl } from "../src/poster";
+import { getProductNavigationOptions, getProductPageUrl } from "../src/poster";
 import { getChromiumLaunchOptions } from "../src/session";
 
 test("商品ページ遷移用URLから楽天の追跡クエリを除去する", () => {
@@ -22,4 +22,11 @@ test("楽天商品ページのHTTP/2プロトコルエラーを避けるChromium
 
   assert.equal(options.headless, true);
   assert.ok(options.args?.includes("--disable-http2"));
+});
+
+test("楽天商品ページはDOMContentLoadedを待たずレスポンス確立後に処理する", () => {
+  const options = getProductNavigationOptions();
+
+  assert.equal(options.waitUntil, "commit");
+  assert.equal(options.timeout, 30000);
 });
