@@ -1,0 +1,39 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { PRODUCT_CATEGORIES, isRoomPostableProductUrl, scoreProductCandidate } from "../src/fetcher";
+
+const baseItem = {
+  itemName: "高評価の美容機器",
+  itemCode: "shop:item",
+  itemPrice: 18000,
+  itemUrl: "https://item.rakuten.co.jp/shop/item/",
+  itemCaption: "秋の乾燥対策に使いやすい美容機器。自宅ケア向け。",
+  imageUrl: "https://example.com/item.jpg",
+  shopName: "ショップ",
+  pointRate: 1,
+  hasCoupon: false,
+  hasPointBonus: false,
+  availability: 1,
+  reviewAverage: 4.8,
+  reviewCount: 1200,
+};
+
+test("候補スコアは高単価だけでなくレビュー・季節一致・特典を加点する", () => {
+  const category = PRODUCT_CATEGORIES.find((item) => item.name === "美容機器")!;
+  const scored = scoreProductCandidate(
+    { ...baseItem, hasCoupon: true, hasPointBonus: true },
+    category,
+    new Date("2026-10-01T00:00:00Z"),
+  );
+  const weak = scoreProductCandidate(
+    { ...baseItem, itemPrice: 1000, reviewAverage: 3.8, reviewCount: 5 },
+    category,
+    new Date("2026-10-01T00:00:00Z"),
+  );
+  assert.ok(scored > weak);
+});
+
+test("ROOM投稿非対応URLを候補から除外する", () => {
+  assert.equal(isRoomPostableProductUrl("https://item.rakuten.co.jp/book/123/"), false);
+  assert.equal(isRoomPostableProductUrl("https://item.rakuten.co.jp/shop/item/"), true);
+});

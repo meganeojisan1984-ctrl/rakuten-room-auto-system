@@ -18,40 +18,76 @@ const TARGET_GENRE = process.env.TARGET_GENRE ?? "general";
 export interface ProductCategory {
   name: string;
   keywords: string[];
+  seasonalKeywords: string[];
   minPrice: number;
   maxPrice: number;
+  audience: "wife" | "husband";
 }
 
 export const PRODUCT_CATEGORIES: ProductCategory[] = [
   {
-    name: "暮らし・インテリア",
-    keywords: ["インテリア 収納 人気", "暮らし 便利グッズ", "北欧 インテリア 雑貨", "キッチン 収納 便利", "生活雑貨 人気"],
-    minPrice: 1000,
-    maxPrice: 30000,
-  },
-  {
-    name: "ファッション・子供服",
-    keywords: ["レディース ファッション 人気", "子供服 人気", "キッズ 服 おしゃれ", "バッグ レディース 人気", "親子コーデ"],
-    minPrice: 1000,
-    maxPrice: 20000,
-  },
-  {
-    name: "グルメ・スイーツ",
-    keywords: ["スイーツ 人気 お取り寄せ", "グルメ お取り寄せ 人気", "食品 送料無料 人気", "ご褒美 スイーツ", "訳あり グルメ"],
-    minPrice: 1000,
-    maxPrice: 30000,
-  },
-  {
-    name: "美容・コスメ",
-    keywords: ["コスメ 人気", "美容 グッズ 人気", "スキンケア 人気", "ヘアケア 人気", "メイクアップ 人気"],
-    minPrice: 1000,
-    maxPrice: 20000,
-  },
-  {
-    name: "家電・ガジェット",
-    keywords: ["家電 便利 人気", "ガジェット 人気", "時短 家電", "スマホ 周辺機器 人気", "一人暮らし 家電"],
-    minPrice: 1000,
+    name: "美容機器",
+    keywords: ["美顔器 人気", "EMS 美容機器", "毛穴ケア 美容機器", "リフトケア 美容機器", "美容機器 口コミ"],
+    seasonalKeywords: ["乾燥", "紫外線", "毛穴", "秋", "冬"],
+    minPrice: 5000,
     maxPrice: 50000,
+    audience: "wife",
+  },
+  {
+    name: "化粧品",
+    keywords: ["美容液 人気", "スキンケア 人気", "ファンデーション 人気", "化粧水 口コミ", "コスメ ギフト"],
+    seasonalKeywords: ["乾燥", "保湿", "秋冬", "紫外線", "春"],
+    minPrice: 2000,
+    maxPrice: 30000,
+    audience: "wife",
+  },
+  {
+    name: "美容家電",
+    keywords: ["ドライヤー 人気", "ヘアアイロン 人気", "頭皮ケア 家電", "美容家電 口コミ", "脱毛器 人気"],
+    seasonalKeywords: ["梅雨", "夏", "乾燥", "秋", "冬"],
+    minPrice: 5000,
+    maxPrice: 60000,
+    audience: "wife",
+  },
+  {
+    name: "ダイエット器具",
+    keywords: ["フィットネス器具 人気", "腹筋ローラー 人気", "ダイエット器具 口コミ", "ヨガマット 人気", "トレーニング器具"],
+    seasonalKeywords: ["薄着", "夏", "運動不足", "新年", "春"],
+    minPrice: 3000,
+    maxPrice: 40000,
+    audience: "wife",
+  },
+  {
+    name: "ダイエット商品",
+    keywords: ["プロテイン 人気", "ダイエット食品 人気", "置き換え ダイエット", "低糖質 食品", "ダイエット サポート"],
+    seasonalKeywords: ["新年", "春", "薄着", "夏", "食欲の秋"],
+    minPrice: 2000,
+    maxPrice: 30000,
+    audience: "wife",
+  },
+  {
+    name: "PCガジェット",
+    keywords: ["キーボード 人気", "PC周辺機器 人気", "モニター おすすめ", "USBハブ 人気", "デスク環境"],
+    seasonalKeywords: ["新生活", "在宅勤務", "入学", "年末", "セール"],
+    minPrice: 5000,
+    maxPrice: 80000,
+    audience: "husband",
+  },
+  {
+    name: "アウトドア",
+    keywords: ["キャンプ用品 人気", "アウトドア ギア", "登山用品 人気", "車中泊 グッズ", "釣り用品 おすすめ"],
+    seasonalKeywords: ["春キャンプ", "夏キャンプ", "秋キャンプ", "冬キャンプ", "防災"],
+    minPrice: 5000,
+    maxPrice: 80000,
+    audience: "husband",
+  },
+  {
+    name: "家電製品",
+    keywords: ["掃除機 人気", "空気清浄機 人気", "調理家電 人気", "生活家電 おすすめ", "家電 買い替え"],
+    seasonalKeywords: ["花粉", "梅雨", "暑さ対策", "寒さ対策", "大掃除"],
+    minPrice: 8000,
+    maxPrice: 100000,
+    audience: "husband",
   },
 ];
 
@@ -104,6 +140,20 @@ export function isRoomPostableProductUrl(rawUrl: string): boolean {
   } catch {
     return false;
   }
+}
+
+export function scoreProductCandidate(
+  item: Pick<RakutenItem, "itemName" | "itemCaption" | "itemPrice" | "reviewAverage" | "reviewCount" | "hasCoupon" | "hasPointBonus">,
+  category: ProductCategory,
+  _now: Date = new Date(),
+): number {
+  const priceRatio = Math.min(1, Math.max(0, (item.itemPrice - category.minPrice) / Math.max(1, category.maxPrice - category.minPrice)));
+  const reviewQuality = Math.min(1, Math.max(0, (item.reviewAverage ?? 0) / 5));
+  const reviewVolume = Math.min(1, Math.log10((item.reviewCount ?? 0) + 1) / 4);
+  const text = `${item.itemName} ${item.itemCaption}`.toLowerCase();
+  const seasonal = category.seasonalKeywords.some((keyword) => text.includes(keyword.toLowerCase())) ? 1 : 0;
+  const bonus = (item.hasCoupon ? 0.5 : 0) + (item.hasPointBonus ? 0.5 : 0);
+  return priceRatio * 0.25 + reviewQuality * 0.35 + reviewVolume * 0.2 + seasonal * 0.1 + bonus * 0.05;
 }
 
 export interface RakutenItem {
@@ -653,7 +703,10 @@ async function fetchSearchWithRotation(
         excludeCodes,
         `検索 "${keyword}" p${page}`
       );
-      if (filtered.length > 0) return filtered;
+      if (filtered.length > 0) {
+        filtered.sort((a, b) => scoreProductCandidate(b, category) - scoreProductCandidate(a, category));
+        return filtered;
+      }
     }
   }
 
