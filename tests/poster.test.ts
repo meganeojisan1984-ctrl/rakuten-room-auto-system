@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { getProductPageUrl } from "../src/poster";
+import { getChromiumLaunchOptions } from "../src/session";
 
 test("商品ページ遷移用URLから楽天の追跡クエリを除去する", () => {
   assert.equal(
@@ -14,4 +15,11 @@ test("商品ページ遷移用URLはハッシュも除去する", () => {
     getProductPageUrl("https://item.rakuten.co.jp/shop/item/?scid=af_pc_etc&foo=bar#review"),
     "https://item.rakuten.co.jp/shop/item/"
   );
+});
+
+test("楽天商品ページのHTTP/2プロトコルエラーを避けるChromium設定を使う", () => {
+  const options = getChromiumLaunchOptions(true);
+
+  assert.equal(options.headless, true);
+  assert.ok(options.args?.includes("--disable-http2"));
 });

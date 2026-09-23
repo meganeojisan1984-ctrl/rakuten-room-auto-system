@@ -81,7 +81,7 @@ export async function createAuthenticatedContext(headless = true): Promise<{
   context: BrowserContext;
 }> {
   const cookies = parseCookiesFromEnv();
-  const browser = await chromium.launch({ headless });
+  const browser = await chromium.launch(getChromiumLaunchOptions(headless));
   const context = await browser.newContext({
     userAgent:
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -90,4 +90,15 @@ export async function createAuthenticatedContext(headless = true): Promise<{
   });
   await injectCookies(context, cookies);
   return { browser, context };
+}
+
+/**
+ * 楽天の商品ページがHTTP/2接続を異常終了させる環境があるため、
+ * 投稿に使うChromiumではHTTP/2を無効化する。
+ */
+export function getChromiumLaunchOptions(headless: boolean) {
+  return {
+    headless,
+    args: ["--disable-http2"],
+  };
 }
