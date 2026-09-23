@@ -7,6 +7,7 @@ import { mapAssetToPublicUrl, type CarouselAsset } from "./carousel";
 import { classifyProductCategory } from "../fetcher";
 import { cleanProductDisplayName, extractProductFacts, isSoftwareProduct } from "./product-copy";
 import type { ProductContentBrief } from "../content-brief";
+import type { SalesStrategyBrief } from "../sales-strategy";
 import { normalizeImageForUpload } from "./image-normalize";
 
 interface OpenAiImageResponse {
@@ -22,13 +23,13 @@ export interface GenerateAiLifestyleImagesOptions {
   size?: string;
   loadProductImage?: (url: string) => Promise<{ bytes: Uint8Array; mimeType: string }>;
   now?: Date;
-  brief?: ProductContentBrief;
+  brief?: ProductContentBrief | SalesStrategyBrief;
   client?: (body: FormData, apiKey: string) => Promise<OpenAiImageResponse>;
 }
 
 export interface AiLifestyleImagePromptOptions {
   now?: Date;
-  brief?: ProductContentBrief;
+  brief?: ProductContentBrief | SalesStrategyBrief;
 }
 
 const DEFAULT_OUTPUT_DIR = path.join(process.cwd(), "public", "generated", "instagram");
@@ -137,7 +138,7 @@ export function buildAiLifestyleImagePrompts(
     `Do not render any readable text, Japanese or English letters, numbers, logos, icons, badges, prices, ratings, labels, charts, or UI. ` +
     `Do not include a screen with visible content. Do not invent features, discounts, rankings, or personal-use claims. ` +
     `Product name for context only: ${name}. Category: ${brief?.category ?? genre}. Listing description for context only: ${description}. ` +
-    `${brief ? `Editorial angle for this series: ${brief.angle}. Problem context: ${brief.problem}. Solution context: ${brief.solution}. Purchase-story context: ${brief.purchaseCta}. Image comment to keep semantically aligned: ${brief.imageComment}. ` : ""}` +
+    `${brief ? `Editorial angle for this series: ${brief.angle}. Preferred lifestyle scene: ${(brief as Partial<SalesStrategyBrief>).imageScene ?? brief.useCase}. Problem context: ${brief.problem}. Solution context: ${brief.solution}. Purchase-story context: ${brief.purchaseCta}. Image comment to keep semantically aligned: ${brief.imageComment}. ` : ""}` +
     `Use these details only to choose a relevant room and neutral props; never write or depict them. ` +
     `Leave the central area visually quiet because accurate product imagery and all Japanese copy are composited afterward. ` +
     `Do not draw text panels, a collage, a mockup, a package, or a product.`;

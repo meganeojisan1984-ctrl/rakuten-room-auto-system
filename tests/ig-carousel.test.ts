@@ -158,6 +158,7 @@ test("brief carousel follows problem, solution, proof, and purchase CTA order", 
   assert.ok(story.indexOf("乾燥") < story.indexOf("化粧品"));
   assert.ok(story.indexOf("化粧品") < story.indexOf("12,800円"));
   assert.ok(story.indexOf("12,800円") < story.indexOf("楽天ROOM"));
+  assert.match(story, /化粧品｜乾燥対策に使いやすい美容液/);
   assert.match(slides[4]!.body, /ROOM/);
 });
 test("writeCarouselSlides writes five svg files with stable public urls", () => {

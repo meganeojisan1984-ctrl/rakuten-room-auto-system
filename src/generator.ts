@@ -300,11 +300,12 @@ export function buildFallbackCaption(item: RakutenItem): string {
  */
 export async function generateTrendCaptions(
   keyword: string,
-  items: RakutenItem[]
-): Promise<Array<{ item: RakutenItem; caption: string; hook: string }>> {
+  items: RakutenItem[],
+  briefs?: Map<string, SalesStrategyBrief>,
+): Promise<Array<{ item: RakutenItem; caption: string; hook: string; brief?: SalesStrategyBrief }>> {
   if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY が未設定です");
   const client = defaultOpenAiTextClient;
-  const results: Array<{ item: RakutenItem; caption: string; hook: string }> = [];
+  const results: Array<{ item: RakutenItem; caption: string; hook: string; brief?: SalesStrategyBrief }> = [];
 
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
@@ -314,7 +315,7 @@ export async function generateTrendCaptions(
       console.log(`[generator] 「${item.itemName.slice(0, 30)}...」ROOM文生成中 (トレンド: ${keyword})`);
       const caption = await generateWithRetry(client, buildGeminiRoomPrompt(keyword, item), 0.95);
 
-      results.push({ item, caption: sanitizeCaption(caption), hook: "trend" });
+      results.push({ item, caption: sanitizeCaption(caption), hook: "trend", brief: briefs?.get(item.itemCode) });
     } catch (err) {
       console.error(`[generator] トレンド生成失敗 「${item.itemName.slice(0, 30)}」:`, err);
     }

@@ -154,7 +154,9 @@ export function buildCarouselSlides(item: RakutenItem, options: CarouselBuildOpt
       kind: "use_case",
       badge: "03",
       headline: options.brief ? "商品情報で確かめること" : "説明を見て選ぶヒント",
-      body: truncate(facts[1] ?? `${name}の仕様を希望条件と比べて確認しましょう。`, 82),
+      body: truncate(options.brief
+        ? `${options.brief.imageComment}｜${facts[1] ?? "商品説明の特徴を確認"}`
+        : facts[1] ?? `${name}の仕様を希望条件と比べて確認しましょう。`, 82),
     },
     {
       index: 4,

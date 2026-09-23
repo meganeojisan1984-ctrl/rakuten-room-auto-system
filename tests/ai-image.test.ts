@@ -67,6 +67,7 @@ test("AI backgrounds carry the audience angle and purchase-story context without
       angle: "女性目線で続けやすさを見る",
       problem: "乾燥の悩み",
       solution: "毎日に取り入れやすい選択肢",
+      imageScene: "朝の洗面台、清潔で落ち着いた雰囲気",
       seasonalHook: "乾燥",
       proofLine: "レビュー248件",
       imageComment: "化粧品｜乾燥対策",
@@ -77,6 +78,7 @@ test("AI backgrounds carry the audience angle and purchase-story context without
   assert.match(prompts[0]!, /女性目線/);
   assert.match(prompts[0]!, /乾燥の悩み/);
   assert.match(prompts[0]!, /毎日に取り入れやすい選択肢/);
+  assert.match(prompts[0]!, /朝の洗面台/);
   assert.doesNotMatch(prompts[0]!, /画像内コメントをそのまま文字として描画|日本語テキストを描画/);
   assert.match(prompts[0]!, /Do not render any readable text/);
 });
