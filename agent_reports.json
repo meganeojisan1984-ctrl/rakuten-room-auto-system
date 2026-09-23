@@ -1,11 +1,5 @@
 [
   {
-    "ts": "2026-09-09T01:05:29.391Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ2)"
-  },
-  {
     "ts": "2026-09-09T01:07:21.256Z",
     "agent": "poster",
     "ok": true,
@@ -1198,5 +1192,11 @@
     "agent": "poster",
     "ok": false,
     "summary": "成功0件/失敗1件 (TimeoutError: page.goto: Timeout 60000ms exceeded.\nCall log:\n  - navigating to \")"
+  },
+  {
+    "ts": "2026-09-23T12:18:24.673Z",
+    "agent": "scout",
+    "ok": false,
+    "summary": "Error: 楽天キーワード検索エラー: AxiosError: Request failed with status code 400"
   }
 ]
