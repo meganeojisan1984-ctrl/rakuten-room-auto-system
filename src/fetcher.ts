@@ -11,9 +11,42 @@ export function getLastSelectedGenre(): string {
 
 const RAKUTEN_APP_ID = process.env.RAKUTEN_APP_ID ?? "";
 const RAKUTEN_ACCESS_KEY = process.env.RAKUTEN_ACCESS_KEY ?? "";
+const RAKUTEN_AFFILIATE_ID = process.env.RAKUTEN_AFFILIATE_ID ?? "";
 const MAX_PRICE = parseInt(process.env.MAX_PRICE ?? "5000", 10);
 const MIN_PRICE = parseInt(process.env.MIN_PRICE ?? "1000", 10);
 const TARGET_GENRE = process.env.TARGET_GENRE ?? "general";
+
+export const ITEM_SEARCH_API_URL =
+  "https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20260401";
+
+export interface ItemSearchParamsOptions {
+  applicationId?: string;
+  accessKey?: string;
+  affiliateId?: string;
+  keyword: string;
+  minPrice?: number;
+  maxPrice?: number;
+  genreId?: string;
+  page?: number;
+}
+
+export function buildItemSearchParams(options: ItemSearchParamsOptions): Record<string, string | number> {
+  const params: Record<string, string | number> = {
+    applicationId: options.applicationId ?? RAKUTEN_APP_ID,
+    accessKey: options.accessKey ?? RAKUTEN_ACCESS_KEY,
+    formatVersion: 2,
+    hits: 30,
+    page: options.page ?? 1,
+    sort: "-reviewCount",
+    keyword: options.keyword,
+    availability: 1,
+  };
+  if (options.affiliateId) params.affiliateId = options.affiliateId;
+  if (options.minPrice !== undefined) params.minPrice = options.minPrice;
+  if (options.maxPrice !== undefined) params.maxPrice = options.maxPrice;
+  if (options.genreId) params.genreId = options.genreId;
+  return params;
+}
 
 export interface ProductCategory {
   name: string;
@@ -142,6 +175,25 @@ export function isRoomPostableProductUrl(rawUrl: string): boolean {
   }
 }
 
+/** 楽天APIがaffiliateId付きで返す追跡URLから、ROOM遷移用の商品URLを取り出す。 */
+export function canonicalizeRakutenItemUrl(rawUrl: string): string {
+  try {
+    const url = new URL(rawUrl);
+    if (url.hostname === "hb.afl.rakuten.co.jp") {
+      const productUrl = url.searchParams.get("pc");
+      if (productUrl) {
+        const parsedProductUrl = new URL(productUrl);
+        if (parsedProductUrl.protocol === "https:" && parsedProductUrl.hostname === "item.rakuten.co.jp") {
+          return parsedProductUrl.toString();
+        }
+      }
+    }
+  } catch {
+    // 元URLをそのまま返し、後段の投稿可能URL検証に任せる。
+  }
+  return rawUrl;
+}
+
 /** Instagram背景のシーン選択用に、商品情報から8カテゴリの代表カテゴリを返す。 */
 export function classifyProductCategory(item: Pick<RakutenItem, "itemName" | "itemCaption">): string {
   const text = `${item.itemName} ${item.itemCaption}`.toLowerCase();
@@ -207,6 +259,7 @@ interface RakutenApiItem {
   itemCode: string;
   itemPrice: number;
   itemUrl: string;
+  affiliateUrl?: string;
   itemCaption: string;
   mediumImageUrls: Array<{ imageUrl: string }>;
   shopName: string;
@@ -299,6 +352,7 @@ async function fetchRanking(genreId?: string, page: number = 1): Promise<Rakuten
     hits: 30,
     page,
   };
+  if (RAKUTEN_AFFILIATE_ID) params.affiliateId = RAKUTEN_AFFILIATE_ID;
   if (genreId) params.genreId = genreId;
 
   console.log(`[fetcher] ランキングAPI取得中 (ジャンルID: ${genreId || "全体"}, page: ${page})`);
@@ -348,26 +402,21 @@ async function fetchItemSearch(
   genreId?: string,
   page: number = 1
 ): Promise<RakutenItem[]> {
-  const params: Record<string, string | number> = {
-    applicationId: RAKUTEN_APP_ID,
-    accessKey: RAKUTEN_ACCESS_KEY,
-    formatVersion: 2,
-    hits: 30,
-    page,
-    sort: "-reviewCount",
+  const params = buildItemSearchParams({
     keyword,
-    availability: 1,
-  };
-  if (minPrice !== undefined) params.minPrice = minPrice;
-  if (maxPrice !== undefined) params.maxPrice = maxPrice;
-  if (genreId) params.genreId = genreId;
+    minPrice,
+    maxPrice,
+    genreId,
+    page,
+    affiliateId: RAKUTEN_AFFILIATE_ID,
+  });
 
   console.log(`[fetcher] アイテム検索API取得中 (キーワード: ${keyword}, page: ${page})`);
 
   try {
     const response = await axios.get<{
       Items: Array<RakutenApiItem | { Item: RakutenApiItem }>;
-    }>("https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20220601", {
+    }>(ITEM_SEARCH_API_URL, {
       params,
       timeout: 15000,
       headers: { Referer: "https://github.com", Origin: "https://github.com" },
@@ -385,7 +434,7 @@ async function fetchItemSearch(
       console.warn("[fetcher] 楽天API レート制限 (429)、30秒待機して再試行...");
       await new Promise((r) => setTimeout(r, 30000));
       const retry = await axios.get<{ Items: Array<RakutenApiItem | { Item: RakutenApiItem }> }>(
-        "https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20220601",
+        ITEM_SEARCH_API_URL,
         { params, timeout: 15000, headers: { Referer: "https://github.com", Origin: "https://github.com" } }
       );
       return convertSearchItems(unwrapSearchItems(retry.data.Items ?? []));
@@ -426,7 +475,7 @@ function convertRankingItems(items: RakutenRankingApiItem[]): RakutenItem[] {
       itemName: item.itemName,
       itemCode: item.itemCode,
       itemPrice: typeof item.itemPrice === "string" ? parseInt(item.itemPrice, 10) : item.itemPrice,
-      itemUrl: item.itemUrl,
+      itemUrl: canonicalizeRakutenItemUrl(item.itemUrl),
       affiliateUrl: item.affiliateUrl,
       itemCaption: item.itemCaption ?? "",
       imageUrl: firstImageUrl(item.mediumImageUrls),
@@ -468,8 +517,8 @@ function convertSearchItems(items: RakutenApiItem[]): RakutenItem[] {
       itemName: item.itemName,
       itemCode: item.itemCode,
       itemPrice: item.itemPrice,
-      itemUrl: item.itemUrl,
-      affiliateUrl: undefined,
+      itemUrl: canonicalizeRakutenItemUrl(item.itemUrl),
+      affiliateUrl: item.affiliateUrl ?? item.itemUrl,
       itemCaption: item.itemCaption,
       imageUrl: firstImageUrl(item.mediumImageUrls),
       shopName: item.shopName,
@@ -502,6 +551,7 @@ export async function fetchItemsByKeyword(
   const params: Record<string, string | number> = {
     applicationId: RAKUTEN_APP_ID,
     accessKey: RAKUTEN_ACCESS_KEY,
+    affiliateId: RAKUTEN_AFFILIATE_ID,
     formatVersion: 2,
     hits: 30,
     sort: "-reviewCount",
@@ -510,13 +560,14 @@ export async function fetchItemsByKeyword(
     maxPrice: 10000,
     minPrice: MIN_PRICE,
   };
+  if (!RAKUTEN_AFFILIATE_ID) delete params.affiliateId;
 
   console.log(`[fetcher] キーワード検索中: 「${keyword}」`);
 
   let rawItems: RakutenApiItem[];
   try {
     const response = await axios.get<{ Items: Array<RakutenApiItem | { Item: RakutenApiItem }> }>(
-      "https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20220601",
+      ITEM_SEARCH_API_URL,
       {
         params,
         timeout: 15000,
