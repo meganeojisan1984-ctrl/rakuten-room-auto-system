@@ -132,28 +132,27 @@ function actionLabel(kind: CarouselSlideKind): string {
 export function buildCarouselSlides(item: RakutenItem, options: CarouselBuildOptions = {}): CarouselSlide[] {
   const name = cleanProductDisplayName(item.itemName) || "商品名は商品ページで確認";
   const facts = options.brief?.facts ?? extractProductFacts(item.itemCaption, 2);
-  const angle = options.brief?.angle ?? "商品説明と条件を確認して自分に合うか選ぶ";
   const imageComment = options.brief?.imageComment ?? "商品説明と価格・レビューを確認";
   return [
     {
       index: 1,
       kind: "hook",
       badge: "01",
-      headline: options.brief ? `${options.brief.category}選びのヒント` : "商品選びで迷っていませんか？",
-      body: options.brief ? truncate(angle, 82) : "商品名だけでは違いがわかりにくいことも。説明と条件を見て、自分に合うか確かめましょう。",
+      headline: options.brief ? "こんな悩みありませんか？" : "商品選びで迷っていませんか？",
+      body: options.brief ? truncate(options.brief.problem, 82) : "商品名だけでは違いがわかりにくいことも。説明と条件を見て、自分に合うか確かめましょう。",
     },
     {
       index: 2,
       kind: "problem",
       badge: "02",
-      headline: options.brief ? "商品から確認できる特徴" : "購入前に確認したい特徴",
-      body: truncate(facts[0] ?? "気になる仕様を商品ページで確認しましょう。", 82),
+      headline: options.brief ? `${options.brief.category}で解決のヒント` : "購入前に確認したい特徴",
+      body: options.brief ? truncate(options.brief.solution, 82) : truncate(facts[0] ?? "気になる仕様を商品ページで確認しましょう。", 82),
     },
     {
       index: 3,
       kind: "use_case",
       badge: "03",
-      headline: options.brief ? "この商品の見どころ" : "説明を見て選ぶヒント",
+      headline: options.brief ? "商品情報で確かめること" : "説明を見て選ぶヒント",
       body: truncate(facts[1] ?? `${name}の仕様を希望条件と比べて確認しましょう。`, 82),
     },
     {
@@ -169,7 +168,7 @@ export function buildCarouselSlides(item: RakutenItem, options: CarouselBuildOpt
       badge: "05",
       headline: truncate("プロフィールから楽天ROOMへ", 34),
       body: options.brief
-        ? truncate(`${imageComment}。商品一覧はプロフィールの楽天ROOMへ。保存・いいね・フォローもお願いします。`, 82)
+        ? truncate(`${options.brief.purchaseCta}。保存・いいね・フォローもお願いします。`, 82)
         : truncate("商品一覧はプロフィールの楽天ROOMへ。気になったら保存・いいね・フォローもお願いします。", 82),
     },
   ];

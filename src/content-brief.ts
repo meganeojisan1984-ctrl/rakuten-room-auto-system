@@ -11,9 +11,12 @@ export interface ProductContentBrief {
   facts: string[];
   useCase: string;
   angle: string;
+  problem: string;
+  solution: string;
   seasonalHook: string;
   proofLine: string;
   imageComment: string;
+  purchaseCta: string;
   hashtags: string[];
 }
 
@@ -56,9 +59,16 @@ export function buildProductContentBrief(
     ? `女性目線で、${category.name}の続けやすさと生活への取り入れやすさを見る`
     : `男性目線で、${category.name}の機能・耐久性・使い勝手を見る`;
   const imageComment = `${category.name}｜${facts[0]}`.slice(0, 55);
+  const problem = audience === "wife"
+    ? `${seasonalHook || category.name}の悩みを抱えたまま、続けやすい選び方に迷う人へ`
+    : `${facts[0]}という悩みを、用途に合う機能で整理したい人へ`;
+  const solution = audience === "wife"
+    ? `${category.name}の${facts[0]}を確認し、毎日の生活に取り入れやすい選択肢として検討`
+    : `${category.name}の機能・仕様を確認し、${facts[0]}の解決につながるか用途で判断`;
+  const purchaseCta = "価格・レビュー・販売条件を確認して、詳細は楽天ROOMへ";
   return {
     itemName: item.itemName, displayName, audience, category: category.name, facts,
-    useCase, angle, seasonalHook, proofLine, imageComment,
+    useCase, angle, problem, solution, seasonalHook, proofLine, imageComment, purchaseCta,
     hashtags: [...new Set([...(Array.isArray(persona.hashtags) ? persona.hashtags : []), `#${category.name}`])].slice(0, 7),
   };
 }

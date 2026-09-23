@@ -178,12 +178,15 @@ export function buildPrompt(
 - 視点: ${brief.audience === "wife" ? "女性目線" : "男性目線"}
 - カテゴリ: ${brief.category}
 - 訴求軸: ${brief.angle}
+- 悩み: ${brief.problem}
+- 解決ポイント: ${brief.solution}
 - 利用シーン: ${brief.useCase}
 - 商品から確認できる特徴: ${brief.facts.join(" / ")}
 - 季節フック: ${brief.seasonalHook || "なし"}
 - 画像内コメント: ${brief.imageComment}
 - 根拠情報: ${brief.proofLine}
-本文の主張は商品情報とこのブリーフに含まれる根拠の範囲に限定し、効果や体験を創作しないこと。`
+ - 購入導線: ${brief.purchaseCta}
+本文は必ず「悩みの提示 → 商品情報に基づく解決ポイント → 根拠情報 → 購入導線」の順で構成すること。主張は商品情報とこのブリーフの範囲に限定し、効果や体験を創作しないこと。`
     : "";
 
   let postTypeInstruction = "";

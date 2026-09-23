@@ -26,6 +26,9 @@ test("共通ブリーフは女性向けカテゴリの季節フックと根拠�
   assert.match(brief.proofLine, /248件/);
   assert.match(brief.imageComment, /化粧品/);
   assert.match(brief.imageComment, /乾燥/);
+  assert.match(brief.problem, /乾燥/);
+  assert.match(brief.solution, /化粧品/);
+  assert.match(brief.purchaseCta, /ROOM/);
 });
 
 test("共通ブリーフは男性向けカテゴリで機能軸を明示し、根拠のない効果を作らない", () => {
@@ -39,5 +42,7 @@ test("共通ブリーフは男性向けカテゴリで機能軸を明示し、�
   assert.equal(brief.audience, "husband");
   assert.match(brief.angle, /機能|耐久性/);
   assert.match(brief.facts.join(" "), /USBハブ/);
+  assert.match(brief.problem, /接続|デスク/);
+  assert.match(brief.solution, /機能/);
   assert.doesNotMatch(`${brief.angle} ${brief.useCase} ${brief.imageComment}`, /絶対に痩せる|必ず若返る|治る/);
 });

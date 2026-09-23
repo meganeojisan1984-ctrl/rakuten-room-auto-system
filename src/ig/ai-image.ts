@@ -136,7 +136,7 @@ export function buildAiLifestyleImagePrompts(
     `Do not render any readable text, Japanese or English letters, numbers, logos, icons, badges, prices, ratings, labels, charts, or UI. ` +
     `Do not include a screen with visible content. Do not invent features, discounts, rankings, or personal-use claims. ` +
     `Product name for context only: ${name}. Category: ${brief?.category ?? genre}. Listing description for context only: ${description}. ` +
-    `${brief ? `Editorial angle for this series: ${brief.angle}. Image comment to keep semantically aligned: ${brief.imageComment}. ` : ""}` +
+    `${brief ? `Editorial angle for this series: ${brief.angle}. Problem context: ${brief.problem}. Solution context: ${brief.solution}. Purchase-story context: ${brief.purchaseCta}. Image comment to keep semantically aligned: ${brief.imageComment}. ` : ""}` +
     `Use these details only to choose a relevant room and neutral props; never write or depict them. ` +
     `Leave the central area visually quiet because accurate product imagery and all Japanese copy are composited afterward. ` +
     `Do not draw text panels, a collage, a mockup, a package, or a product.`;

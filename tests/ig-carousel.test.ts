@@ -136,6 +136,30 @@ test("buildCarouselSlides keeps the story consistent across posting times", () =
   assert.match(morningSlides[0]!.headline, /迷っていませんか/);
   assert.match(nightSlides[0]!.body, /商品名だけでは違いがわかりにくい/);
 });
+test("brief carousel follows problem, solution, proof, and purchase CTA order", () => {
+  const brief = {
+    itemName: item.itemName,
+    displayName: "収納ボックス",
+    audience: "wife" as const,
+    category: "化粧品",
+    facts: ["乾燥対策に使いやすい美容液", "毎日のケアに取り入れやすい"],
+    useCase: "朝晩のスキンケア",
+    angle: "女性目線で続けやすさを見る",
+    problem: "乾燥しやすい季節のケアに迷う",
+    solution: "化粧品として毎日の保湿ケアに取り入れる",
+    seasonalHook: "乾燥",
+    proofLine: "12,800円・レビュー248件・★4.6",
+    imageComment: "化粧品｜乾燥対策に使いやすい美容液",
+    purchaseCta: "詳細は楽天ROOMで確認",
+    hashtags: ["#化粧品"],
+  };
+  const slides = buildCarouselSlides(item, { brief });
+  const story = slides.map((slide) => `${slide.headline} ${slide.body}`).join("\n");
+  assert.ok(story.indexOf("乾燥") < story.indexOf("化粧品"));
+  assert.ok(story.indexOf("化粧品") < story.indexOf("12,800円"));
+  assert.ok(story.indexOf("12,800円") < story.indexOf("楽天ROOM"));
+  assert.match(slides[4]!.body, /ROOM/);
+});
 test("writeCarouselSlides writes five svg files with stable public urls", () => {
   const dir = fs.mkdtempSync(path.join(process.cwd(), "tmp-carousel-"));
   try {

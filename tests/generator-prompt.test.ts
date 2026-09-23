@@ -45,9 +45,12 @@ test("ROOM prompt includes the same content brief used for downstream creative",
     facts: ["USBハブ", "デスク周りの接続"],
     useCase: "在宅ワークの机で使う",
     angle: "男性目線で機能と使い勝手を見る",
+    problem: "デスク周りの接続に迷う",
+    solution: "機能と使い勝手を確認して選ぶ",
     seasonalHook: "",
     proofLine: "12,800円・レビュー120件・★4.5",
     imageComment: "PCガジェット｜デスク周りの接続を整理",
+    purchaseCta: "価格とレビューを確認して詳細は楽天ROOMへ",
     hashtags: ["#PCガジェット"],
   };
 
@@ -56,4 +59,7 @@ test("ROOM prompt includes the same content brief used for downstream creative",
   assert.match(prompt, /PCガジェット/);
   assert.match(prompt, /機能と使い勝手/);
   assert.match(prompt, /デスク周りの接続を整理/);
+  assert.ok(prompt.indexOf("悩み") < prompt.indexOf("解決"));
+  assert.ok(prompt.indexOf("解決") < prompt.indexOf("購入導線"));
+  assert.match(prompt, /男性目線/);
 });

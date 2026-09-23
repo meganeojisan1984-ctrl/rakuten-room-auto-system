@@ -55,6 +55,32 @@ test("buildAiLifestyleImagePrompts creates five product-grounded background-only
   assert.equal(prompts.some((prompt) => prompt.includes("bathroom") || prompt.includes("washstand")), true);
 });
 
+test("AI backgrounds carry the audience angle and purchase-story context without rendering copy", () => {
+  const prompts = buildAiLifestyleImagePrompts(item, persona, {
+    brief: {
+      itemName: item.itemName,
+      displayName: "収納ボックス",
+      audience: "wife",
+      category: "化粧品",
+      facts: ["乾燥対策に使いやすい美容液"],
+      useCase: "朝晩のケア",
+      angle: "女性目線で続けやすさを見る",
+      problem: "乾燥の悩み",
+      solution: "毎日に取り入れやすい選択肢",
+      seasonalHook: "乾燥",
+      proofLine: "レビュー248件",
+      imageComment: "化粧品｜乾燥対策",
+      purchaseCta: "詳細は楽天ROOMへ",
+      hashtags: ["#化粧品"],
+    },
+  });
+  assert.match(prompts[0]!, /女性目線/);
+  assert.match(prompts[0]!, /乾燥の悩み/);
+  assert.match(prompts[0]!, /毎日に取り入れやすい選択肢/);
+  assert.doesNotMatch(prompts[0]!, /画像内コメントをそのまま文字として描画|日本語テキストを描画/);
+  assert.match(prompts[0]!, /Do not render any readable text/);
+});
+
 test("buildAiLifestyleImagePrompts keeps changing product numbers out of generated backgrounds", () => {
   const itemWithStringReview = {
     ...item,
