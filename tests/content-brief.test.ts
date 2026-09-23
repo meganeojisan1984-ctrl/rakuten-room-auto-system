@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { PRODUCT_CATEGORIES, type RakutenItem } from "../src/fetcher";
+import { PRODUCT_CATEGORIES, matchesProductCategory, type RakutenItem } from "../src/fetcher";
 import { buildProductContentBrief } from "../src/content-brief";
 import type { PersonaSlot } from "../src/persona/persona";
 
@@ -45,4 +45,10 @@ test("共通ブリーフは男性向けカテゴリで機能軸を明示し、�
   assert.match(brief.problem, /接続|デスク/);
   assert.match(brief.solution, /機能/);
   assert.doesNotMatch(`${brief.angle} ${brief.useCase} ${brief.imageComment}`, /絶対に痩せる|必ず若返る|治る/);
+});
+
+test("選択したPCガジェット枠は美容機器の商品を受け入れない", () => {
+  const beautyItem = { ...item, itemName: "ELEKI LIFT 美顔器", itemCaption: "EMSとRFを搭載" };
+  const pcCategory = PRODUCT_CATEGORIES.find((category) => category.name === "PCガジェット")!;
+  assert.equal(matchesProductCategory(beautyItem, pcCategory), false);
 });

@@ -150,6 +150,23 @@ export function classifyProductCategory(item: Pick<RakutenItem, "itemName" | "it
   return match?.name ?? "";
 }
 
+const GENERIC_CATEGORY_TOKENS = new Set(["人気", "おすすめ", "口コミ", "ギフト", "用品", "グッズ"]);
+
+/** 選択カテゴリに明確に紐づく商品だけをフォールバック候補として許可する。 */
+export function matchesProductCategory(
+  item: Pick<RakutenItem, "itemName" | "itemCaption">,
+  category: ProductCategory,
+): boolean {
+  const text = `${item.itemName} ${item.itemCaption}`.toLowerCase();
+  if (text.includes(category.name.toLowerCase())) return true;
+  return category.keywords.some((keyword) =>
+    keyword
+      .split(/\s+/)
+      .filter((token) => token.length >= 2 && !GENERIC_CATEGORY_TOKENS.has(token))
+      .some((token) => text.includes(token.toLowerCase())),
+  );
+}
+
 export function scoreProductCandidate(
   item: Pick<RakutenItem, "itemName" | "itemCaption" | "itemPrice" | "reviewAverage" | "reviewCount" | "hasCoupon" | "hasPointBonus">,
   category: ProductCategory,
@@ -169,6 +186,7 @@ export interface RakutenItem {
   itemCode: string;
   itemPrice: number;
   itemUrl: string;
+  affiliateUrl?: string;
   itemCaption: string;
   imageUrl: string;
   shopName: string;
@@ -409,6 +427,7 @@ function convertRankingItems(items: RakutenRankingApiItem[]): RakutenItem[] {
       itemCode: item.itemCode,
       itemPrice: typeof item.itemPrice === "string" ? parseInt(item.itemPrice, 10) : item.itemPrice,
       itemUrl: item.itemUrl,
+      affiliateUrl: item.affiliateUrl,
       itemCaption: item.itemCaption ?? "",
       imageUrl: firstImageUrl(item.mediumImageUrls),
       shopName: item.shopName ?? "",
@@ -450,6 +469,7 @@ function convertSearchItems(items: RakutenApiItem[]): RakutenItem[] {
       itemCode: item.itemCode,
       itemPrice: item.itemPrice,
       itemUrl: item.itemUrl,
+      affiliateUrl: undefined,
       itemCaption: item.itemCaption,
       imageUrl: firstImageUrl(item.mediumImageUrls),
       shopName: item.shopName,
@@ -608,7 +628,8 @@ async function fetchRankingWithFallback(
   primaryGenreName: string,
   minPrice: number | undefined,
   maxPrice: number,
-  excludeCodes: Set<string>
+  excludeCodes: Set<string>,
+  targetCategory?: ProductCategory,
 ): Promise<RakutenItem[]> {
   // フォールバック用のジャンル候補: メイン+サブをマージし重複ジャンルIDを除去
   const alternativeGenres = [...MAIN_GENRES, ...SUB_GENRES].filter(
@@ -645,13 +666,16 @@ async function fetchRankingWithFallback(
       continue;
     }
     lastRawItems = rawItems;
-    const filtered = applyItemFilter(rawItems, minPrice, maxPrice, excludeCodes, attempt.label);
+    const categoryItems = targetCategory
+      ? rawItems.filter((item) => matchesProductCategory(item, targetCategory))
+      : rawItems;
+    const filtered = applyItemFilter(categoryItems, minPrice, maxPrice, excludeCodes, attempt.label);
     if (filtered.length > 0) return filtered;
   }
 
   // ランキング全滅時: 検索APIキーワード×ページ ローテーションで無限供給
   console.warn("[fetcher] ランキング系フォールバック全て0件。検索APIへ切替");
-  const searchResult = await fetchSearchWithRotation(minPrice, maxPrice, excludeCodes);
+  const searchResult = await fetchSearchWithRotation(minPrice, maxPrice, excludeCodes, targetCategory);
   if (searchResult.length > 0) return searchResult;
 
   // 検索も0件なら価格帯を緩和して検索 (min/2, max*2, 上限10000円)
@@ -660,7 +684,7 @@ async function fetchRankingWithFallback(
   console.warn(
     `[fetcher] 検索も0件。価格帯を緩和して再検索 (${relaxedMin ?? "-"}〜${relaxedMax}円)`
   );
-  const relaxedSearch = await fetchSearchWithRotation(relaxedMin, relaxedMax, excludeCodes);
+  const relaxedSearch = await fetchSearchWithRotation(relaxedMin, relaxedMax, excludeCodes, targetCategory);
   if (relaxedSearch.length > 0) return relaxedSearch;
 
   // 最終フォールバック: 最後に取得したランキングデータに緩和価格で再フィルタ
@@ -685,7 +709,8 @@ async function fetchRankingWithFallback(
 async function fetchSearchWithRotation(
   minPrice: number | undefined,
   maxPrice: number,
-  excludeCodes: Set<string>
+  excludeCodes: Set<string>,
+  targetCategory?: ProductCategory,
 ): Promise<RakutenItem[]> {
   const MAX_PAGES_PER_KEYWORD = 3;
   // キーワードはランダム順、ページは 1 → 2 → 3 の順で試行
@@ -704,8 +729,11 @@ async function fetchSearchWithRotation(
       // 該当0件のページに達したら、このキーワードはもう打ち切り
       if (rawItems.length === 0) break;
 
+      const categoryItems = targetCategory
+        ? rawItems.filter((item) => matchesProductCategory(item, targetCategory))
+        : rawItems;
       const filtered = applyItemFilter(
-        rawItems,
+        categoryItems,
         minPrice,
         maxPrice,
         excludeCodes,
@@ -744,7 +772,8 @@ async function fetchProductCategoryWithRotation(
         excludeCodes,
         `${category.name}: ${keyword} p${page}`,
       );
-      if (filtered.length > 0) return filtered;
+      const categoryMatched = filtered.filter((item) => matchesProductCategory(item, category));
+      if (categoryMatched.length > 0) return categoryMatched;
     }
   }
   return [];
@@ -812,6 +841,7 @@ export async function fetchItems(
           minPrice,
           maxPrice,
           excludeCodes,
+          selectedCategory,
         );
       }
     } else if (TARGET_GENRE === "1000yen") {

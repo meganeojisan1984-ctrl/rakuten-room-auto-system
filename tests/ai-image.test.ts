@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import * as fs from "node:fs";
 import * as path from "node:path";
+import * as os from "node:os";
 import { buildAiLifestyleImagePrompts, generateAiLifestyleImages } from "../src/ig/ai-image";
 import { createInstagramCarouselAssets } from "../src/ig/ig-post-engine";
 import type { RakutenItem } from "../src/fetcher";
@@ -246,6 +247,20 @@ test("generateAiLifestyleImages writes five jpeg assets using high quality", asy
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test("AI画像生成が応答しない場合は指定時間でタイムアウトする", async () => {
+  await assert.rejects(
+    generateAiLifestyleImages(item, persona, {
+      apiKey: "test-key",
+      outputDir: fs.mkdtempSync(path.join(os.tmpdir(), "ai-timeout-")),
+      publicBaseUrl: "https://example.test/assets",
+      requestTimeoutMs: 20,
+      loadProductImage: async () => ({ bytes: new Uint8Array([1, 2, 3]), mimeType: "image/png" }),
+      client: async () => await new Promise<never>(() => {}),
+    }),
+    /タイムアウト|timed out/i,
+  );
 });
 
 test("createInstagramCarouselAssets passes generated backgrounds into the accurate carousel renderer", async () => {

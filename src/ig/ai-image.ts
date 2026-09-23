@@ -24,6 +24,7 @@ export interface GenerateAiLifestyleImagesOptions {
   loadProductImage?: (url: string) => Promise<{ bytes: Uint8Array; mimeType: string }>;
   now?: Date;
   brief?: ProductContentBrief | SalesStrategyBrief;
+  requestTimeoutMs?: number;
   client?: (body: FormData, apiKey: string) => Promise<OpenAiImageResponse>;
 }
 
@@ -154,12 +155,32 @@ async function defaultOpenAiClient(body: FormData, apiKey: string): Promise<Open
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}` },
     body,
+    signal: AbortSignal.timeout(120_000),
   });
   if (!response.ok) {
     const detail = await response.text();
     throw new Error(`OpenAI image generation failed: ${response.status} ${detail.slice(0, 300)}`);
   }
   return response.json() as Promise<OpenAiImageResponse>;
+}
+
+async function callImageClient(
+  client: (body: FormData, apiKey: string) => Promise<OpenAiImageResponse>,
+  body: FormData,
+  apiKey: string,
+  timeoutMs: number,
+): Promise<OpenAiImageResponse> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      client(body, apiKey),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new Error(`OpenAI画像生成がタイムアウトしました (${timeoutMs}ms)`)), timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
 }
 
 async function downloadProductImage(url: string): Promise<{ bytes: Uint8Array; mimeType: string }> {
@@ -224,6 +245,7 @@ export async function generateAiLifestyleImages(
   const size = options.size ?? process.env.AI_IMAGE_SIZE ?? "1024x1024";
   const now = options.now ?? new Date();
   const client = options.client ?? defaultOpenAiClient;
+  const requestTimeoutMs = options.requestTimeoutMs ?? 120_000;
   const loadProductImage = options.loadProductImage ?? downloadProductImage;
   const productImage = await loadProductImage(item.imageUrl).then((image) => normalizeImageForUpload(image.bytes, image.mimeType));
   const day = now.toISOString().slice(0, 10);
@@ -236,7 +258,7 @@ export async function generateAiLifestyleImages(
   const assets: CarouselAsset[] = [];
   for (let i = 0; i < prompts.length; i++) {
     const body = buildEditForm(prompts[i]!, model, size, quality, productImage);
-    const response = await client(body, apiKey);
+    const response = await callImageClient(client, body, apiKey, requestTimeoutMs);
     const encoded = response.data?.[0]?.b64_json;
     if (!encoded) throw new Error("OpenAI image response did not include b64_json");
     const fileName = `${day}-${stamp}-${hash}-ai-${String(i + 1).padStart(2, "0")}.jpg`;
