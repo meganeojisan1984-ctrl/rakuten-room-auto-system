@@ -132,7 +132,7 @@ async function main(): Promise<void> {
       : undefined;
     if (trendKeyword) {
       // トレンドモード: Gemini Flash で YouTube必勝構成
-      captionedItems = await generateTrendCaptions(trendKeyword, items);
+      captionedItems = await generateTrendCaptions(trendKeyword, items, briefs);
     } else {
       // 通常モード: Groq で投稿タイプ別生成
       captionedItems = await generateCaptions(items, postType, briefs);
