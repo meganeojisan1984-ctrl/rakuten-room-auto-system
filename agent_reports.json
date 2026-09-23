@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-09-08T18:06:07.694Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴148件(計測済95) 実売0件(¥0) mode=likes"
-  },
-  {
-    "ts": "2026-09-08T18:06:10.720Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第62世代へ更新 (ルールベース)、警告0件"
-  },
-  {
-    "ts": "2026-09-09T01:05:24.426Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (ファッション・子供服)"
-  },
-  {
     "ts": "2026-09-09T01:05:29.391Z",
     "agent": "copywriter",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "poster",
     "ok": false,
     "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/bo)"
+  },
+  {
+    "ts": "2026-09-23T11:52:04.844Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (グルメ・スイーツ)"
+  },
+  {
+    "ts": "2026-09-23T11:52:09.926Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ3)"
+  },
+  {
+    "ts": "2026-09-23T11:53:38.973Z",
+    "agent": "poster",
+    "ok": false,
+    "summary": "成功0件/失敗1件 (TimeoutError: page.goto: Timeout 60000ms exceeded.\nCall log:\n  - navigating to \")"
   }
 ]
