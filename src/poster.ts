@@ -18,12 +18,6 @@ export function getProductPageUrl(rawUrl: string): string {
     const url = new URL(rawUrl);
     url.search = "";
     url.hash = "";
-    const bookMatch = url.hostname === "item.rakuten.co.jp"
-      ? url.pathname.match(/^\/book\/([^/]+)\/?$/i)
-      : null;
-    if (bookMatch) {
-      return `https://books.rakuten.co.jp/rb/${bookMatch[1]}/`;
-    }
     return url.toString();
   } catch {
     return rawUrl;

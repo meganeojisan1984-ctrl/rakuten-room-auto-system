@@ -90,6 +90,22 @@ const GENRE_PRICE_OVERRIDES: Record<string, { min: number; max: number }> = {
   furusato: { min: 2000, max: 30000 },
 };
 
+/**
+ * 楽天ROOMの「ROOMに追加」対象かを判定する。
+ * 楽天公式案内では楽天ブックス商品はROOMへコレできないため、
+ * 投稿処理へ渡す前に除外して別商品へフォールバックする。
+ */
+export function isRoomPostableProductUrl(rawUrl: string): boolean {
+  try {
+    const url = new URL(rawUrl);
+    if (url.hostname === "books.rakuten.co.jp") return false;
+    if (url.hostname === "item.rakuten.co.jp" && /^\/book(?:\/|$)/i.test(url.pathname)) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export interface RakutenItem {
   itemName: string;
   itemCode: string;
@@ -445,6 +461,7 @@ export async function fetchItemsByKeyword(
     if ((item.reviewAverage ?? 0) < 4.0) return false;
     if ((item.reviewCount ?? 0) < 10) return false;
     if (excludeCodes.has(item.itemCode)) return false;
+    if (!isRoomPostableProductUrl(item.itemUrl)) return false;
     return true;
   });
 
@@ -475,6 +492,7 @@ function applyItemFilter(
     overMax: 0,
     underMin: 0,
     alreadyPosted: 0,
+    unsupported: 0,
     passed: 0,
   };
   const now = new Date();
@@ -500,6 +518,10 @@ function applyItemFilter(
       stats.alreadyPosted++;
       return false;
     }
+    if (!isRoomPostableProductUrl(item.itemUrl)) {
+      stats.unsupported++;
+      return false;
+    }
     stats.passed++;
     return true;
   });
@@ -508,6 +530,7 @@ function applyItemFilter(
     `[fetcher] フィルタ内訳 [${label}] raw=${rawItems.length}, 通過=${stats.passed}, ` +
       `販売停止=${stats.unavailable}, 期限切=${stats.expired}, 価格>${maxPrice}=${stats.overMax}, ` +
       `価格<${minPrice ?? "-"}=${stats.underMin}, 投稿済=${stats.alreadyPosted}`
+      + `, ROOM対象外=${stats.unsupported}`
   );
 
   return filtered;

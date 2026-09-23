@@ -2,11 +2,12 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { getProductNavigationOptions, getProductPageUrl } from "../src/poster";
 import { getChromiumLaunchOptions } from "../src/session";
+import { isRoomPostableProductUrl } from "../src/fetcher";
 
-test("楽天ブックス商品ページから追跡クエリを除去して正規URLへ変換する", () => {
+test("商品ページ遷移用URLから楽天の追跡クエリを除去する", () => {
   assert.equal(
     getProductPageUrl("https://item.rakuten.co.jp/book/18814391/?rafcid=wsc_i_ra_123"),
-    "https://books.rakuten.co.jp/rb/18814391/"
+    "https://item.rakuten.co.jp/book/18814391/"
   );
 });
 
@@ -17,11 +18,10 @@ test("商品ページ遷移用URLはハッシュも除去する", () => {
   );
 });
 
-test("楽天ブックス商品はリダイレクト元ではなく正規URLへ変換する", () => {
-  assert.equal(
-    getProductPageUrl("https://item.rakuten.co.jp/book/18763170/"),
-    "https://books.rakuten.co.jp/rb/18763170/"
-  );
+test("楽天ブックス商品はROOM投稿候補から除外する", () => {
+  assert.equal(isRoomPostableProductUrl("https://item.rakuten.co.jp/book/18763170/"), false);
+  assert.equal(isRoomPostableProductUrl("https://books.rakuten.co.jp/rb/18763170/"), false);
+  assert.equal(isRoomPostableProductUrl("https://item.rakuten.co.jp/shop/item/"), true);
 });
 
 test("楽天商品ページのHTTP/2プロトコルエラーを避けるChromium設定を使う", () => {
