@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-09-08T16:11:21.702Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-09-08T16:12:41.893Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-09-08T18:06:07.677Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "19件抽出、履歴13件のいいね数を更新"
-  },
-  {
     "ts": "2026-09-08T18:06:07.694Z",
     "agent": "analyst",
     "ok": true,
@@ -1195,6 +1177,24 @@
   },
   {
     "ts": "2026-09-23T01:17:49.128Z",
+    "agent": "poster",
+    "ok": false,
+    "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/bo)"
+  },
+  {
+    "ts": "2026-09-23T09:03:13.343Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (ファッション・子供服)"
+  },
+  {
+    "ts": "2026-09-23T09:03:20.438Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ1)"
+  },
+  {
+    "ts": "2026-09-23T09:03:46.055Z",
     "agent": "poster",
     "ok": false,
     "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/bo)"
