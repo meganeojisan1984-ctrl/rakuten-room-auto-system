@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "tjix:10010453",
     "tv-ya:10002730",
     "sieweves:10002410",
     "a-sap:10008564",
@@ -499,7 +498,8 @@
     "auc-assy-underwear:10004360",
     "link5520889:10000001",
     "apr-japan:10000866",
-    "sensefit:10000059"
+    "sensefit:10000059",
+    "k222:10000018"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }

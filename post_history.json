@@ -2440,5 +2440,18 @@
     "captionHead": "【決算前！ポイントアップSALE｜9月1日～9月3",
     "slot": "slot1",
     "itemCodeHash": "2ec30b52e9f7"
+  },
+  {
+    "ts": "2026-09-24T16:40:07.494Z",
+    "itemCode": "k222:10000018",
+    "itemName": "【5と0のつく日限定クーポン5%OFF】【おまけ付】こんにゃくラーメン 24食 ダイエット食品 健康食品 こんにゃく そうめん ギフト ダイエット スープ 置き換え 満腹感 こんにゃく麺 ロカボ 焼きそば 低糖質麺 糖質制限 糖質オフ 低カロリー 低GI食 低カロリー食品",
+    "genreName": "ダイエット商品",
+    "price": 3180,
+    "postType": 3,
+    "hour": 1,
+    "hook": "fallback",
+    "captionHead": "【5と0のつく日限定クーポン5%OFF】【おまけ付",
+    "slot": "slot0",
+    "itemCodeHash": "0f1e78aab3a8"
   }
 ]
