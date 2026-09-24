@@ -2414,5 +2414,18 @@
     "captionHead": "まだ自己処理でゴワゴワしてない？剃り残しと肌荒れ、",
     "slot": "slot0",
     "itemCodeHash": "fc848bd7493e"
+  },
+  {
+    "ts": "2026-09-24T01:07:56.165Z",
+    "itemCode": "apr-japan:10000866",
+    "itemName": "【公式】AGE-R ウルトラチューン40.68（美顔器 メディキューブ美顔器 美容家電 美容機器 RF 微細電流 小顔 リフトケア リフトアップ 高周波 コラーゲン LEDケア ハリ medicube メディキューブ ）",
+    "genreName": "美容機器",
+    "price": 33750,
+    "postType": 1,
+    "hour": 10,
+    "hook": "fallback",
+    "captionHead": "【公式】AGE-R ウルトラチューン40.68（美",
+    "slot": "slot0",
+    "itemCodeHash": "14e92c767eca"
   }
 ]
