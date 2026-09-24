@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-09-11T08:32:12.522Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (美容・コスメ)"
-  },
-  {
-    "ts": "2026-09-11T08:32:22.145Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ3)"
-  },
-  {
-    "ts": "2026-09-11T08:33:56.166Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
     "ts": "2026-09-11T08:36:30.759Z",
     "agent": "promoter",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "promoter",
     "ok": false,
     "summary": "IG=失敗/未設定, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-09-24T18:41:20.761Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "20件抽出、履歴5件のいいね数を更新"
+  },
+  {
+    "ts": "2026-09-24T18:41:20.792Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴183件(計測済120) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-09-24T18:41:23.780Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第77世代へ更新 (ルールベース)、警告0件"
   }
 ]
