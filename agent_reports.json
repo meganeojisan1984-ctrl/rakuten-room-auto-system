@@ -1,185 +1,5 @@
 [
   {
-    "ts": "2026-09-10T00:52:40.264Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (家電・ガジェット)"
-  },
-  {
-    "ts": "2026-09-10T00:52:45.416Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ3)"
-  },
-  {
-    "ts": "2026-09-10T00:54:25.992Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-09-10T00:57:02.004Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-09-10T08:39:33.500Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (ファッション・子供服)"
-  },
-  {
-    "ts": "2026-09-10T08:39:38.779Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ2)"
-  },
-  {
-    "ts": "2026-09-10T08:41:17.263Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-09-10T08:43:46.511Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-09-10T15:57:16.598Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (ファッション・子供服)"
-  },
-  {
-    "ts": "2026-09-10T15:57:22.984Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ3)"
-  },
-  {
-    "ts": "2026-09-10T15:59:02.921Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-09-10T16:01:43.232Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-09-10T17:53:13.493Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "20件抽出、履歴19件のいいね数を更新"
-  },
-  {
-    "ts": "2026-09-10T17:53:13.505Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴154件(計測済101) 実売0件(¥0) mode=likes"
-  },
-  {
-    "ts": "2026-09-10T17:53:16.499Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第63世代へ更新 (ルールベース)、警告0件"
-  },
-  {
-    "ts": "2026-09-11T00:51:41.343Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (グルメ・スイーツ)"
-  },
-  {
-    "ts": "2026-09-11T00:51:48.990Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ3)"
-  },
-  {
-    "ts": "2026-09-11T00:53:24.966Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-09-11T00:56:22.345Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-09-11T08:32:12.522Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (美容・コスメ)"
-  },
-  {
-    "ts": "2026-09-11T08:32:22.145Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ3)"
-  },
-  {
-    "ts": "2026-09-11T08:33:56.166Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-09-11T08:36:30.759Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-09-11T16:00:05.715Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (暮らし・インテリア)"
-  },
-  {
-    "ts": "2026-09-11T16:00:12.485Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ3)"
-  },
-  {
-    "ts": "2026-09-11T16:01:53.477Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-09-11T16:04:26.569Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-09-11T17:55:10.410Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "20件抽出、履歴14件のいいね数を更新"
-  },
-  {
-    "ts": "2026-09-11T17:55:10.420Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴157件(計測済103) 実売0件(¥0) mode=likes"
-  },
-  {
-    "ts": "2026-09-11T17:55:13.710Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第64世代へ更新 (ルールベース)、警告0件"
-  },
-  {
     "ts": "2026-09-12T00:55:38.529Z",
     "agent": "scout",
     "ok": true,
@@ -1195,6 +1015,186 @@
   },
   {
     "ts": "2026-09-23T12:34:32.823Z",
+    "agent": "promoter",
+    "ok": false,
+    "summary": "IG=失敗/未設定, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-09-23T16:15:52.382Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (美容家電)"
+  },
+  {
+    "ts": "2026-09-23T16:16:15.388Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ2)"
+  },
+  {
+    "ts": "2026-09-23T16:17:58.618Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-09-23T16:28:39.196Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-09-23T18:38:48.769Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "20件抽出、履歴9件のいいね数を更新"
+  },
+  {
+    "ts": "2026-09-23T18:38:48.781Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴180件(計測済119) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-09-23T18:38:51.817Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第76世代へ更新 (ルールベース)、警告0件"
+  },
+  {
+    "ts": "2026-09-24T01:05:42.079Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (美容機器)"
+  },
+  {
+    "ts": "2026-09-24T01:06:23.116Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ1)"
+  },
+  {
+    "ts": "2026-09-24T01:07:54.106Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-09-24T01:07:56.164Z",
+    "agent": "promoter",
+    "ok": false,
+    "summary": "IG=失敗/未設定, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-09-24T08:58:47.070Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (ダイエット器具)"
+  },
+  {
+    "ts": "2026-09-24T08:59:27.749Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ1)"
+  },
+  {
+    "ts": "2026-09-24T09:01:12.757Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-09-24T09:01:14.848Z",
+    "agent": "promoter",
+    "ok": false,
+    "summary": "IG=失敗/未設定, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-09-24T16:37:46.390Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (ダイエット商品)"
+  },
+  {
+    "ts": "2026-09-24T16:38:27.846Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ3)"
+  },
+  {
+    "ts": "2026-09-24T16:40:04.155Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-09-24T16:40:07.493Z",
+    "agent": "promoter",
+    "ok": false,
+    "summary": "IG=失敗/未設定, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-09-24T18:41:20.761Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "20件抽出、履歴5件のいいね数を更新"
+  },
+  {
+    "ts": "2026-09-24T18:41:20.792Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴183件(計測済120) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-09-24T18:41:23.780Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第77世代へ更新 (ルールベース)、警告0件"
+  },
+  {
+    "ts": "2026-09-25T01:09:14.519Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (美容家電)"
+  },
+  {
+    "ts": "2026-09-25T01:09:55.130Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ1)"
+  },
+  {
+    "ts": "2026-09-25T01:11:28.388Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-09-25T01:11:30.741Z",
+    "agent": "promoter",
+    "ok": false,
+    "summary": "IG=失敗/未設定, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-09-25T09:20:34.645Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (PCガジェット)"
+  },
+  {
+    "ts": "2026-09-25T09:21:15.036Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ3)"
+  },
+  {
+    "ts": "2026-09-25T09:22:50.337Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-09-25T09:22:52.344Z",
     "agent": "promoter",
     "ok": false,
     "summary": "IG=失敗/未設定, Threads=失敗/未設定"
