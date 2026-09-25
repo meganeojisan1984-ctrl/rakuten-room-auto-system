@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "sieweves:10002410",
     "a-sap:10008564",
     "nihoninterior:10033765",
     "tenmafitsworld:10004390",
@@ -499,7 +498,8 @@
     "apr-japan:10000866",
     "sensefit:10000059",
     "k222:10000018",
-    "mikirona:10000085"
+    "mikirona:10000085",
+    "premiumgift:10000010"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }

@@ -2468,5 +2468,18 @@
     "captionHead": "【楽天1位★クーポンで3,580円！】ドライヤー ",
     "slot": "slot0",
     "itemCodeHash": "06272f36c645"
+  },
+  {
+    "ts": "2026-09-25T09:22:52.344Z",
+    "itemCode": "premiumgift:10000010",
+    "itemName": "【新品】【楽天1位！】ノートパソコン 新品第13世代CPU搭載ノートPC Office付きノートパソコン 初心者向け Windows11 初期設定済 Webカメラ zoom 日本語キーボード 14.1型 Intel Celeron メモリ8GB SSD1TB(最大) 大容量バッテリービジネス 大学生 プレゼント 学生向け",
+    "genreName": "PCガジェット",
+    "price": 29800,
+    "postType": 3,
+    "hour": 18,
+    "hook": "fallback",
+    "captionHead": "【新品】【楽天1位！】ノートパソコン 新品第13世",
+    "slot": "slot2",
+    "itemCodeHash": "4cd9f11067de"
   }
 ]
