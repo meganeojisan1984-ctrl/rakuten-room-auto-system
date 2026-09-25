@@ -131,6 +131,7 @@ export async function createInstagramCarouselAssets(
     const generateAiImages = options.generateAiImages ?? generateAiLifestyleImages;
     console.log(`[ig-post-engine] slot=${persona.id} generating product-matched background images...`);
     try {
+      const aiTextMode = envVars.AI_IMAGE_TEXT_MODE !== "0";
       const backgrounds = await generateAiImages(item, persona, {
         apiKey: envVars.OPENAI_API_KEY,
         outputDir: writeOptions.outputDir,
@@ -140,9 +141,15 @@ export async function createInstagramCarouselAssets(
         size: envVars.AI_IMAGE_SIZE || undefined,
         brief,
         creativePlan,
+        referenceImageDir: envVars.AI_IMAGE_REFERENCE_DIR || undefined,
+        useAiText: aiTextMode,
       });
       if (backgrounds.length !== 5) {
         throw new Error(`AI background generation returned ${backgrounds.length} images; expected 5`);
+      }
+      if (aiTextMode) {
+        console.log("[ig-post-engine] AI完成画像モード: 生成画像をそのままカルーセル素材へ使用");
+        return backgrounds;
       }
       writeOptions.backgroundImagePaths = backgrounds.map((asset) => asset.filePath);
     } catch (error) {

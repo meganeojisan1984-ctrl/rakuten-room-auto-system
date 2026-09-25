@@ -57,7 +57,45 @@ test("buildAiLifestyleImagePrompts creates five product-grounded background-only
   assert.equal(prompts.some((prompt) => prompt.includes("bathroom") || prompt.includes("washstand")), true);
 });
 
-test("AI prompts carry product-specific copy and visual direction without letting AI render duplicate text", () => {
+test("AI生成は参考画像を全て参照し、ページ別の確定コピーをプロンプトへ含める", async () => {
+  const referenceDir = fs.mkdtempSync(path.join(os.tmpdir(), "creative-references-"));
+  const outputDir = fs.mkdtempSync(path.join(os.tmpdir(), "creative-output-"));
+  try {
+    fs.writeFileSync(path.join(referenceDir, "style-01.png"), "style-one");
+    fs.writeFileSync(path.join(referenceDir, "style-02.jpg"), "style-two");
+    const creativePlan = buildImageCreativePlan(item);
+    const calls: FormData[] = [];
+    await generateAiLifestyleImages(item, persona, {
+      outputDir,
+      apiKey: "test-key",
+      referenceImageDir: referenceDir,
+      creativePlan,
+      loadProductImage: async () => ({ bytes: Buffer.from("product-reference"), mimeType: "image/jpeg" }),
+      client: async (body: FormData) => {
+        calls.push(body);
+        return { data: [{ b64_json: Buffer.from("jpeg").toString("base64") }] };
+      },
+    });
+
+    assert.equal(calls.length, 5);
+    for (const [index, call] of calls.entries()) {
+      const refs = call.getAll("image[]") as Array<Blob & { name: string }>;
+      assert.equal(refs.length, 3);
+      assert.match(String(call.get("prompt")), new RegExp(`スライド${index + 1}`));
+      assert.match(String(call.get("prompt")), new RegExp(creativePlan.slides[index]!.overlayCopy.headline));
+      assert.match(String(call.get("prompt")), new RegExp(creativePlan.slides[index]!.overlayCopy.body));
+      if (creativePlan.slides[index]!.overlayCopy.label) {
+        assert.match(String(call.get("prompt")), new RegExp(creativePlan.slides[index]!.overlayCopy.label!));
+      }
+      assert.match(String(call.get("prompt")), /参考画像|文字を描画|正確な日本語/);
+    }
+  } finally {
+    fs.rmSync(referenceDir, { recursive: true, force: true });
+    fs.rmSync(outputDir, { recursive: true, force: true });
+  }
+});
+
+test("AI prompts carry product-specific copy and visual direction for AI-rendered text", () => {
   const creativePlan = buildImageCreativePlan({
     ...item,
     itemName: "大風量ヘアドライヤー 美容家電",
@@ -68,7 +106,7 @@ test("AI prompts carry product-specific copy and visual direction without lettin
   assert.equal(prompts.length, 5);
   assert.match(prompts[1]!, /乾かす時間を見直したい日に/);
   assert.match(prompts[1]!, /手書き風|マーカー線|使う場面/);
-  assert.match(prompts[1]!, /文字を描画しない/);
+  assert.match(prompts[1]!, /正確な日本語|正確な日本語文字/);
   assert.match(prompts[4]!, /気になったら楽天ROOMへ/);
   assert.match(prompts[4]!, /リンク風|矢印|プロフィール/);
   assert.doesNotMatch(prompts.join("\n"), /必ず|絶対|治る|痩せる/);
@@ -164,7 +202,7 @@ test("image edit requests use the Rakuten product image only as a category refer
     assert.equal(calls.length, 5);
     for (const call of calls) {
       const refs = call.getAll("image[]") as Array<Blob & { name: string }>;
-      assert.equal(refs.length, 1);
+      assert.ok(refs.length >= 1);
       assert.equal(refs[0]!.name, "rakuten-product.jpg");
       assert.equal(call.get("quality"), "high");
       assert.match(String(call.get("prompt")), /background image only/);
@@ -292,6 +330,7 @@ test("createInstagramCarouselAssets passes generated backgrounds into the accura
       IG_CAROUSEL_PUBLIC_BASE_URL: "https://cdn.example.com/ig",
       AI_IMAGE_ENABLED: "1",
       OPENAI_API_KEY: "test-key",
+      AI_IMAGE_TEXT_MODE: "0",
     } as NodeJS.ProcessEnv,
     generateAiImages: async (_item, _persona, options) => {
       aiImageCalled = true;
@@ -326,6 +365,7 @@ test("OpenAI残高不足でも決定論的カルーセルへフォールバッ�
       IG_CAROUSEL_PUBLIC_BASE_URL: "https://cdn.example.com/ig",
       AI_IMAGE_ENABLED: "1",
       OPENAI_API_KEY: "test-key",
+      AI_IMAGE_TEXT_MODE: "0",
     } as NodeJS.ProcessEnv,
     generateAiImages: async () => {
       throw new Error('OpenAI image generation failed: 429 {"code":"credit_balance_exhausted"}');
@@ -339,5 +379,35 @@ test("OpenAI残高不足でも決定論的カルーセルへフォールバッ�
   assert.equal(isOpenAiQuotaError(new Error("credit_balance_exhausted")), true);
   assert.equal(rendered, true);
   assert.equal(assets.length, 5);
+});
+
+test("AI画像完成モードは生成画像を文字付きカルーセル素材としてそのまま返す", async () => {
+  let rendered = false;
+  const aiAssets = [1, 2, 3, 4, 5].map((page) => ({
+    filePath: `ai-final-${page}.jpg`,
+    publicUrl: `https://cdn.example.com/ig/ai-final-${page}.jpg`,
+    page,
+  }));
+  const assets = await createInstagramCarouselAssets(item, persona, {
+    env: {
+      IG_CAROUSEL_ENABLED: "1",
+      IG_CAROUSEL_PUBLIC_BASE_URL: "https://cdn.example.com/ig",
+      AI_IMAGE_ENABLED: "1",
+      OPENAI_API_KEY: "test-key",
+      AI_IMAGE_TEXT_MODE: "1",
+    } as NodeJS.ProcessEnv,
+    generateAiImages: async (_item, _persona, options) => {
+      assert.equal(options?.useAiText, true);
+      assert.ok(options?.creativePlan);
+      return aiAssets;
+    },
+    renderCarouselImages: async () => {
+      rendered = true;
+      return [];
+    },
+  });
+
+  assert.equal(rendered, false);
+  assert.deepEqual(assets, aiAssets);
 });
 

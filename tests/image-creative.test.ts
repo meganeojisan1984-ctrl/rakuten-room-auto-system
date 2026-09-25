@@ -78,7 +78,7 @@ test("各スライドにニーズ起点の文字設計と禁止事項がある",
     assert.ok(slide.overlayCopy.body.length > 0);
     assert.ok(slide.textPlacement.length > 0);
     assert.ok(slide.decorations.length > 0);
-    assert.match(slide.prompt, /文字は最終合成|文字を描画しない/);
+    assert.match(slide.prompt, /正確な日本語|文字は最終合成|文字を描画しない/);
   }
   assert.doesNotMatch(result.prompt, /必ず|絶対|治る|痩せる/);
 });

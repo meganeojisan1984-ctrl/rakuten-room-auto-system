@@ -132,9 +132,9 @@ function rolePrompt(slide: ImageCreativeSlide, analysis: ProductAnalysis): strin
     "正方形1080×1080の日本語Instagramカルーセル画像を作るためのアートディレクション。",
     `スライド${slide.index}の役割: ${slide.purpose}。商品カテゴリ: ${analysis.category}。`,
     `被写体: ${slide.subject}。構図: ${slide.composition}。配色: ${slide.palette}。`,
-    `最終合成する文字設計: 主見出し「${slide.overlayCopy.headline}」／補足「${slide.overlayCopy.body}」${slide.overlayCopy.label ? `／ラベル「${slide.overlayCopy.label}」` : ""}。`,
+    `画像内に表示する確定テキスト: 見出し「${slide.overlayCopy.headline}」／補足文「${slide.overlayCopy.body}」${slide.overlayCopy.label ? `／ラベル「${slide.overlayCopy.label}」` : ""}。これらの文字列を一字一句そのまま表示する。`,
     `文字配置: ${slide.textPlacement}。装飾: ${slide.decorations.join("、")}。商品画像: ${slide.productPlacement}。`,
-    "文字を描画しない。上記の文字内容と配置を守る余白・視線誘導だけを作り、最終画像では正確な日本語文字を1回だけ合成する。",
+    "上記の確定テキストを画像内に1回だけ、読みやすい正確な日本語として描画する。文字を省略・改変・翻訳・創作せず、商品画像と重ならない指定ゾーンへ配置する。",
     `禁止事項: ${slide.forbidden.concat(analysis.forbiddenClaims).join("、")}。ロゴや別商品の代用、読めない文字、誇大表現を入れない。`,
   ].join(" ");
 }

@@ -26,6 +26,8 @@ export interface GenerateAiLifestyleImagesOptions {
   now?: Date;
   brief?: ProductContentBrief | SalesStrategyBrief;
   creativePlan?: ImageCreativePlan;
+  referenceImageDir?: string;
+  useAiText?: boolean;
   requestTimeoutMs?: number;
   client?: (body: FormData, apiKey: string) => Promise<OpenAiImageResponse>;
 }
@@ -34,11 +36,13 @@ export interface AiLifestyleImagePromptOptions {
   now?: Date;
   brief?: ProductContentBrief | SalesStrategyBrief;
   creativePlan?: ImageCreativePlan;
+  useAiText?: boolean;
 }
 
 const DEFAULT_OUTPUT_DIR = path.join(process.cwd(), "public", "generated", "instagram");
 const DEFAULT_MODEL = "gpt-image-2";
 const DEFAULT_QUALITY: NonNullable<GenerateAiLifestyleImagesOptions["quality"]> = "high";
+const DEFAULT_REFERENCE_IMAGE_DIR = path.join(process.cwd(), "docs", "creative", "references");
 
 export function isOpenAiQuotaError(error: unknown): boolean {
   const text = String(error).toLowerCase();
@@ -138,19 +142,21 @@ export function buildAiLifestyleImagePrompts(
       .format(options.now ?? new Date()),
   );
   const timeContext = hourInJapan < 16 ? "soft morning daylight" : "soft evening indoor light";
+  const useAiText = options.useAiText ?? Boolean(options.creativePlan);
   const base =
     `Create a polished, photorealistic square background image only for a Japanese Instagram product carousel. ` +
-    `This is a photographic backdrop, not a finished advertisement or product card. Use natural light, realistic materials, ` +
+    `${useAiText ? "This is a finished SNS product-introduction slide." : "This is a photographic backdrop, not a finished advertisement or product card."} Use natural light, realistic materials, ` +
     `clear focus, restrained props, and a calm everyday editorial style. ` +
     `The input image is the exact Rakuten product photo and is provided only to identify the product category and general color context. ` +
+    `Additional attached images from docs/creative/references are mandatory style references; match their shared composition, whitespace, hand-drawn decoration, color balance, and information density without copying another product's facts. ` +
     `Do not recreate the product, its packaging, or any substitute item; the exact source product photo will be overlaid later. ` +
-    `Do not render any readable text, Japanese or English letters, numbers, logos, icons, badges, prices, ratings, labels, charts, or UI. ` +
+    `${useAiText ? "Render only the exact Japanese copy specified in the slide direction; do not invent, abbreviate, or alter any other text. Keep Japanese highly legible." : "Do not render any readable text, Japanese or English letters, numbers, logos, icons, badges, prices, ratings, labels, charts, or UI."} ` +
     `Do not include a screen with visible content. Do not invent features, discounts, rankings, or personal-use claims. ` +
     `Product name for context only: ${name}. Category: ${brief?.category ?? genre}. Listing description for context only: ${description}. ` +
     `${brief ? `Editorial angle for this series: ${brief.angle}. Preferred lifestyle scene: ${(brief as Partial<SalesStrategyBrief>).imageScene ?? brief.useCase}. Problem context: ${brief.problem}. Solution context: ${brief.solution}. Purchase-story context: ${brief.purchaseCta}. Image comment to keep semantically aligned: ${brief.imageComment}. ` : ""}` +
     `Use these details only to choose a relevant room and neutral props; never write or depict them. ` +
-    `Leave the central area visually quiet because accurate product imagery and all Japanese copy are composited afterward. ` +
-    `Do not draw text panels, a collage, a mockup, a package, or a product.`;
+    `${useAiText ? "Use the exact product reference image as the main product, preserve its identity, and keep the product and copy in separate zones." : "Leave the central area visually quiet because accurate product imagery and all Japanese copy are composited afterward."} ` +
+    `${useAiText ? "Do not add unrelated labels, logos, prices, or claims." : "Do not draw text panels, a collage, a mockup, a package, or a product."}`;
 
   const scenes = sceneHints(item);
   return scenes.map((scene, index) => {
@@ -158,6 +164,27 @@ export function buildAiLifestyleImagePrompts(
     const creativeDirection = slidePlan ? ` ${slidePlan.prompt}` : "";
     return `${base} Slide ${index + 1} background: ${scene}. Overall lighting: ${timeContext}. Keep the backdrop uncluttered and free of products, people, text, and logos.${creativeDirection}`;
   });
+}
+
+function referenceMimeType(filePath: string): string | undefined {
+  const ext = path.extname(filePath).toLowerCase();
+  if (ext === ".jpg" || ext === ".jpeg") return "image/jpeg";
+  if (ext === ".png") return "image/png";
+  if (ext === ".webp") return "image/webp";
+  return undefined;
+}
+
+function loadReferenceImages(referenceDir: string): Array<{ bytes: Uint8Array; mimeType: string; fileName: string }> {
+  if (!fs.existsSync(referenceDir)) return [];
+  const references: Array<{ bytes: Uint8Array; mimeType: string; fileName: string }> = [];
+  for (const entry of fs.readdirSync(referenceDir, { withFileTypes: true })) {
+    if (!entry.isFile()) continue;
+    const filePath = path.join(referenceDir, entry.name);
+    const mimeType = referenceMimeType(filePath);
+    if (!mimeType) continue;
+    references.push({ bytes: new Uint8Array(fs.readFileSync(filePath)), mimeType, fileName: entry.name });
+  }
+  return references;
 }
 
 async function defaultOpenAiClient(body: FormData, apiKey: string): Promise<OpenAiImageResponse> {
@@ -221,6 +248,7 @@ function buildEditForm(
   size: string,
   quality: string,
   productImage: { bytes: Uint8Array; mimeType: string },
+  referenceImages: Array<{ bytes: Uint8Array; mimeType: string; fileName: string }>,
 ): FormData {
   const form = new FormData();
   form.append("model", model);
@@ -232,6 +260,10 @@ function buildEditForm(
   form.append("output_compression", "90");
   const ext = productImage.mimeType === "image/png" ? "png" : productImage.mimeType === "image/webp" ? "webp" : "jpg";
   form.append("image[]", bytesToBlob(productImage.bytes, productImage.mimeType), `rakuten-product.${ext}`);
+  referenceImages.forEach((reference, index) => {
+    const refExt = reference.mimeType === "image/png" ? "png" : reference.mimeType === "image/webp" ? "webp" : "jpg";
+    form.append("image[]", bytesToBlob(reference.bytes, reference.mimeType), `reference-${String(index + 1).padStart(2, "0")}.${refExt}`);
+  });
   return form;
 }
 
@@ -258,16 +290,19 @@ export async function generateAiLifestyleImages(
   const requestTimeoutMs = options.requestTimeoutMs ?? 120_000;
   const loadProductImage = options.loadProductImage ?? downloadProductImage;
   const productImage = await loadProductImage(item.imageUrl).then((image) => normalizeImageForUpload(image.bytes, image.mimeType));
+  const referenceImageDir = options.referenceImageDir ?? process.env.AI_IMAGE_REFERENCE_DIR ?? DEFAULT_REFERENCE_IMAGE_DIR;
+  const referenceImages = loadReferenceImages(referenceImageDir);
+  const useAiText = options.useAiText ?? Boolean(options.creativePlan);
   const day = now.toISOString().slice(0, 10);
   const stamp = timestamp(now);
   const hash = crypto.createHash("sha1").update(`${item.itemCode}|${item.itemName}`).digest("hex").slice(0, 10);
 
   fs.mkdirSync(outputDir, { recursive: true });
 
-  const prompts = buildAiLifestyleImagePrompts(item, persona, { now, brief: options.brief, creativePlan: options.creativePlan });
+  const prompts = buildAiLifestyleImagePrompts(item, persona, { now, brief: options.brief, creativePlan: options.creativePlan, useAiText });
   const assets: CarouselAsset[] = [];
   for (let i = 0; i < prompts.length; i++) {
-    const body = buildEditForm(prompts[i]!, model, size, quality, productImage);
+    const body = buildEditForm(prompts[i]!, model, size, quality, productImage, referenceImages);
     const response = await callImageClient(client, body, apiKey, requestTimeoutMs);
     const encoded = response.data?.[0]?.b64_json;
     if (!encoded) throw new Error("OpenAI image response did not include b64_json");
