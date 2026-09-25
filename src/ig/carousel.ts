@@ -5,6 +5,7 @@ import * as path from "path";
 import type { RakutenItem } from "../fetcher";
 import { cleanProductDisplayName, extractProductFacts, isSoftwareProduct } from "./product-copy";
 import type { ProductContentBrief } from "../content-brief";
+import type { ImageCreativePlan } from "./image-creative";
 import { normalizeImageForUpload } from "./image-normalize";
 
 export type CarouselSlideKind =
@@ -38,11 +39,13 @@ export interface CarouselWriteOptions {
   characterImagePath?: string;
   backgroundImagePath?: string;
   backgroundImagePaths?: string[];
+  creativePlan?: ImageCreativePlan;
 }
 
 export interface CarouselBuildOptions {
   now?: Date;
   brief?: ProductContentBrief;
+  creativePlan?: ImageCreativePlan;
 }
 interface HttpClient {
   post<T>(url: string, body: unknown, options: { params: Record<string, unknown>; timeout?: number }): Promise<{ data: T }>;
@@ -134,7 +137,7 @@ export function buildCarouselSlides(item: RakutenItem, options: CarouselBuildOpt
   const name = cleanProductDisplayName(item.itemName) || "商品名は商品ページで確認";
   const facts = options.brief?.facts ?? extractProductFacts(item.itemCaption, 2);
   const imageComment = options.brief?.imageComment ?? "商品説明と価格・レビューを確認";
-  return [
+  const slides: CarouselSlide[] = [
     {
       index: 1,
       kind: "hook",
@@ -175,6 +178,15 @@ export function buildCarouselSlides(item: RakutenItem, options: CarouselBuildOpt
         : truncate("商品一覧はプロフィールの楽天ROOMへ。気になったら保存・いいね・フォローもお願いします。", 82),
     },
   ];
+  if (options.creativePlan) {
+    return slides.map((slide, index) => {
+      const copy = options.creativePlan?.slides[index]?.overlayCopy;
+      return copy
+        ? { ...slide, headline: truncate(copy.headline, 34), body: truncate(copy.body, 82), badge: String(index + 1).padStart(2, "0") }
+        : slide;
+    });
+  }
+  return slides;
 }
 function escapeXml(value: string): string {
   return value
@@ -265,6 +277,9 @@ export function renderSlideSvg(slide: CarouselSlide, item: RakutenItem, options:
     ? `<ellipse cx="848" cy="940" rx="118" ry="24" fill="#111827" opacity="0.16"/>
   <image href="${escapeXml(guideImage)}" x="686" y="608" width="322" height="382" preserveAspectRatio="xMidYMax meet"/>`
     : "";
+  const creativeDecorationSvg = options.creativePlan?.slides[slide.index - 1]
+    ? `<g class="creativeDecorations" fill="none" stroke="${accent}" stroke-width="8" stroke-linecap="round" opacity="0.75"><path d="M88 232 C190 258 290 230 390 246"/><circle cx="958" cy="208" r="28"/><path d="M930 208 l28 20 32 -42"/></g>`
+    : "";
 
   if (slide.index === 1) {
     const coverTitleLines = lines(slide.headline, 10);
@@ -287,6 +302,7 @@ export function renderSlideSvg(slide: CarouselSlide, item: RakutenItem, options:
     .swipe { font: 600 25px 'Noto Sans CJK JP', sans-serif; fill: #334155; letter-spacing: 2px; }
   </style>
   ${backgroundSvg}
+  ${creativeDecorationSvg}
   <rect x="54" y="160" width="972" height="760" rx="42" fill="#ffffff"/>
   <rect x="552" y="244" width="436" height="446" rx="26" fill="#f1f5f9"/>
   <image href="${escapeXml(item.imageUrl)}" x="584" y="276" width="372" height="350" preserveAspectRatio="xMidYMid meet"/>
@@ -316,6 +332,7 @@ export function renderSlideSvg(slide: CarouselSlide, item: RakutenItem, options:
     </filter>
   </defs>
   ${backgroundSvg}
+  ${creativeDecorationSvg}
   <rect width="1080" height="1080" fill="#e6eadf" opacity="0.58"/>
   <rect width="1080" height="1080" fill="#111827" opacity="0.10"/>
   <path d="M34 86 A52 52 0 1 1 34 190 L150 138 Z" fill="#17233f"/>

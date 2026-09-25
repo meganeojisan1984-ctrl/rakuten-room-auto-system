@@ -12,6 +12,10 @@
 
 ROOM投稿成功後、同じ商品を **Instagram** と **Threads** に自動クロス投稿して認知度を拡大します。
 
+Instagram画像は商品ごとに分析してから作成します。サイズが必要な商品だけ寸法紹介を使い、化粧品・美容家電・キャンプ用品などは用途に合わせて2枚目の内容を切り替えます。画像プロンプトには見出し・補足文・文字配置・装飾を含めますが、AIが日本語を二重に描かないよう、最終的な文字は正確なSVG合成で1回だけ表示します。OpenAI画像生成に失敗した場合も、商品別のコピーと装飾を残した決定論的カルーセルで投稿を継続します。
+
+OpenAI APIの `credit_balance_exhausted` が発生した場合は、画像生成と紹介文生成がそれぞれ安全なフォールバックへ切り替わります。通常経路の品質を使うには、GitHub Actionsの `OPENAI_API_KEY` をクレジット残高のあるAPIキーに更新してください。
+
 **詳細な手順は [SETUP-SNS-DETAILED.md](SETUP-SNS-DETAILED.md) を参照してください。**
 このドキュメントはそのクイックスタートです。
 
@@ -50,6 +54,14 @@ ROOM投稿成功後、同じ商品を **Instagram** と **Threads** に自動ク
 | `THREADS_USER_ID` | Threads User ID（=IG User ID） |
 | `THREADS_ACCESS_TOKEN` | IG_ACCESS_TOKEN と同じ |
 | `ROOM_PROFILE_URL` | 楽天ROOMプロフィールURL |
+
+### Instagramプロフィールのリンク設定（必須）
+
+Instagramの投稿本文に書いたURLはクリックリンクにならないため、投稿本文には生URLを表示せず「プロフィールの楽天ROOM」へ誘導します。Instagramプロフィールの「リンク」に、次のURLを登録してください。
+
+`https://room.rakuten.co.jp/room_sho_qoltime/items`
+
+`ROOM_PROFILE_URL` は投稿処理側の設定であり、Instagramプロフィールのリンクを自動変更するものではありません。
 
 ---
 

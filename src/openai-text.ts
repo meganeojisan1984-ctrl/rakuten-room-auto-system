@@ -13,6 +13,11 @@ export type OpenAiTextClient = (
 
 const DEFAULT_OPENAI_TEXT_MODEL = "gpt-5-mini";
 
+export function isOpenAiQuotaError(error: unknown): boolean {
+  const text = String(error).toLowerCase();
+  return text.includes("credit_balance_exhausted") || text.includes("insufficient_quota") || text.includes("no credits remaining");
+}
+
 export function resolveOpenAiTextModel(env: Record<string, string | undefined> = process.env): string {
   return env.OPENAI_TEXT_MODEL?.trim() || DEFAULT_OPENAI_TEXT_MODEL;
 }

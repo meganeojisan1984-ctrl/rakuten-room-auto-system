@@ -25,6 +25,36 @@ test("fallback caption keeps posting alive when the text model is unavailable", 
   assert.doesNotMatch(caption, /実際に使った|買ってから生活が変わった/);
 });
 
+test("fallback caption uses the product brief to stay need-specific when the text model is out of credit", () => {
+  const item = {
+    itemName: "大風量ヘアドライヤー",
+    itemPrice: 5980,
+    itemCaption: "大風量で髪を乾かしやすい美容家電。",
+    reviewAverage: 4.49,
+    reviewCount: 8592,
+  } as RakutenItem;
+  const brief: ProductContentBrief = {
+    itemName: item.itemName,
+    displayName: item.itemName,
+    audience: "wife",
+    category: "美容家電",
+    facts: ["大風量で髪を乾かしやすい", "冷風に対応"],
+    useCase: "忙しい朝やお風呂上がりのヘアケア",
+    angle: "乾かす時間と使いやすさを見る",
+    problem: "お風呂上がりの髪を乾かす時間が気になる人へ",
+    solution: "大風量と冷風の仕様を確認して選ぶ",
+    seasonalHook: "",
+    proofLine: "5,980円・レビュー8592件・★4.49",
+    imageComment: "美容家電｜大風量で髪を乾かしやすい",
+    purchaseCta: "価格とレビューを確認して詳細は楽天ROOMへ",
+    hashtags: ["#美容家電"],
+  };
+  const caption = buildFallbackCaption(item, brief);
+  assert.match(caption, /お風呂上がり|乾かす時間/);
+  assert.match(caption, /大風量|冷風/);
+  assert.doesNotMatch(caption, /暮らしの中の「あと少し不便」/);
+});
+
 test("ROOM prompt includes the same content brief used for downstream creative", () => {
   const item = {
     itemName: "USB-C対応アルミハブ",

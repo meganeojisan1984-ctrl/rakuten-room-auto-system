@@ -3,8 +3,9 @@ import assert from "node:assert/strict";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
-import { buildAiLifestyleImagePrompts, generateAiLifestyleImages } from "../src/ig/ai-image";
+import { buildAiLifestyleImagePrompts, generateAiLifestyleImages, isOpenAiQuotaError } from "../src/ig/ai-image";
 import { createInstagramCarouselAssets } from "../src/ig/ig-post-engine";
+import { buildImageCreativePlan } from "../src/ig/image-creative";
 import type { RakutenItem } from "../src/fetcher";
 import type { PersonaSlot } from "../src/persona/persona";
 
@@ -54,6 +55,23 @@ test("buildAiLifestyleImagePrompts creates five product-grounded background-only
   assert.equal(prompts.join("\n").includes("exact quoted copy"), false);
   assert.equal(prompts.some((prompt) => prompt.includes("organizer")), true);
   assert.equal(prompts.some((prompt) => prompt.includes("bathroom") || prompt.includes("washstand")), true);
+});
+
+test("AI prompts carry product-specific copy and visual direction without letting AI render duplicate text", () => {
+  const creativePlan = buildImageCreativePlan({
+    ...item,
+    itemName: "大風量ヘアドライヤー 美容家電",
+    itemCaption: "大風量で髪を乾かしやすい。3段階の風量調節と冷風に対応。",
+  });
+  const prompts = buildAiLifestyleImagePrompts(item, persona, { creativePlan });
+
+  assert.equal(prompts.length, 5);
+  assert.match(prompts[1]!, /乾かす時間を見直したい日に/);
+  assert.match(prompts[1]!, /手書き風|マーカー線|使う場面/);
+  assert.match(prompts[1]!, /文字を描画しない/);
+  assert.match(prompts[4]!, /気になったら楽天ROOMへ/);
+  assert.match(prompts[4]!, /リンク風|矢印|プロフィール/);
+  assert.doesNotMatch(prompts.join("\n"), /必ず|絶対|治る|痩せる/);
 });
 
 test("AI backgrounds carry the audience angle and purchase-story context without rendering copy", () => {
@@ -278,6 +296,7 @@ test("createInstagramCarouselAssets passes generated backgrounds into the accura
     generateAiImages: async (_item, _persona, options) => {
       aiImageCalled = true;
       assert.equal(options?.apiKey, "test-key");
+      assert.ok(options?.creativePlan);
       return backgroundImagePaths.map((filePath, index) => ({
         filePath,
         publicUrl: `https://cdn.example.com/ig/${filePath}`,
@@ -288,6 +307,7 @@ test("createInstagramCarouselAssets passes generated backgrounds into the accura
       renderedAssetsCalled = true;
       assert.equal(slides.length, 5);
       assert.deepEqual(renderOptions?.backgroundImagePaths, backgroundImagePaths);
+      assert.ok(renderOptions?.creativePlan);
       return [1, 2, 3, 4, 5].map((page) => ({ filePath: `verified-0${page}.jpg`, publicUrl: `https://cdn.example.com/ig/verified-0${page}.jpg`, page }));
     },
   });
@@ -296,5 +316,28 @@ test("createInstagramCarouselAssets passes generated backgrounds into the accura
   assert.equal(renderedAssetsCalled, true);
   assert.equal(assets.length, 5);
   assert.equal(assets[0]!.filePath, "verified-01.jpg");
+});
+
+test("OpenAI残高不足でも決定論的カルーセルへフォールバックする", async () => {
+  let rendered = false;
+  const assets = await createInstagramCarouselAssets(item, persona, {
+    env: {
+      IG_CAROUSEL_ENABLED: "1",
+      IG_CAROUSEL_PUBLIC_BASE_URL: "https://cdn.example.com/ig",
+      AI_IMAGE_ENABLED: "1",
+      OPENAI_API_KEY: "test-key",
+    } as NodeJS.ProcessEnv,
+    generateAiImages: async () => {
+      throw new Error('OpenAI image generation failed: 429 {"code":"credit_balance_exhausted"}');
+    },
+    renderCarouselImages: async () => {
+      rendered = true;
+      return [1, 2, 3, 4, 5].map((page) => ({ filePath: `fallback-${page}.jpg`, publicUrl: `https://cdn.example.com/ig/fallback-${page}.jpg`, page }));
+    },
+  });
+
+  assert.equal(isOpenAiQuotaError(new Error("credit_balance_exhausted")), true);
+  assert.equal(rendered, true);
+  assert.equal(assets.length, 5);
 });
 

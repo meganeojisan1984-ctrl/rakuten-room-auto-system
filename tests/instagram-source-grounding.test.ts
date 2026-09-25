@@ -45,23 +45,27 @@ test("Instagram caption keeps current listing values and exact review precision"
   assert.doesNotMatch(caption, /9\/19|4時間限定|ポイントアップ|買ってよかった|時間短縮/);
 });
 
-test("automatic Instagram carousel ignores the AI image setting", async () => {
+test("automatic Instagram carousel keeps source-grounded copy when AI backgrounds fail", async () => {
   let aiCalled = false;
   let rendererCalled = false;
   await createInstagramCarouselAssets(officeItem, { id: "slot1" } as PersonaSlot, {
     env: { AI_IMAGE_ENABLED: "1", OPENAI_API_KEY: "test-key" },
     generateAiImages: async () => {
       aiCalled = true;
-      throw new Error("AI image generation must not be used for auto-posts");
+      throw new Error("AI image generation unavailable in this test");
     },
     renderCarouselImages: async (_item, slides) => {
       rendererCalled = true;
       assert.match(slides[0]!.body, /2台の Windows PC または Mac で使用可能/);
-      return [];
+      return Array.from({ length: 5 }, (_, index) => ({
+        filePath: `slide-${index + 1}.jpg`,
+        publicUrl: `https://example.com/slide-${index + 1}.jpg`,
+        page: index + 1,
+      }));
     },
   });
 
-  assert.equal(aiCalled, false);
+  assert.equal(aiCalled, true);
   assert.equal(rendererCalled, true);
 });
 

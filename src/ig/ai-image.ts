@@ -9,6 +9,7 @@ import { cleanProductDisplayName, extractProductFacts, isSoftwareProduct } from 
 import type { ProductContentBrief } from "../content-brief";
 import type { SalesStrategyBrief } from "../sales-strategy";
 import { normalizeImageForUpload } from "./image-normalize";
+import type { ImageCreativePlan } from "./image-creative";
 
 interface OpenAiImageResponse {
   data?: Array<{ b64_json?: string; url?: string }>;
@@ -24,6 +25,7 @@ export interface GenerateAiLifestyleImagesOptions {
   loadProductImage?: (url: string) => Promise<{ bytes: Uint8Array; mimeType: string }>;
   now?: Date;
   brief?: ProductContentBrief | SalesStrategyBrief;
+  creativePlan?: ImageCreativePlan;
   requestTimeoutMs?: number;
   client?: (body: FormData, apiKey: string) => Promise<OpenAiImageResponse>;
 }
@@ -31,11 +33,17 @@ export interface GenerateAiLifestyleImagesOptions {
 export interface AiLifestyleImagePromptOptions {
   now?: Date;
   brief?: ProductContentBrief | SalesStrategyBrief;
+  creativePlan?: ImageCreativePlan;
 }
 
 const DEFAULT_OUTPUT_DIR = path.join(process.cwd(), "public", "generated", "instagram");
 const DEFAULT_MODEL = "gpt-image-2";
 const DEFAULT_QUALITY: NonNullable<GenerateAiLifestyleImagesOptions["quality"]> = "high";
+
+export function isOpenAiQuotaError(error: unknown): boolean {
+  const text = String(error).toLowerCase();
+  return text.includes("credit_balance_exhausted") || text.includes("insufficient_quota") || text.includes("no credits remaining");
+}
 
 function cleanText(value: string, max = 140): string {
   return value.replace(/\s+/g, " ").trim().slice(0, max);
@@ -145,9 +153,11 @@ export function buildAiLifestyleImagePrompts(
     `Do not draw text panels, a collage, a mockup, a package, or a product.`;
 
   const scenes = sceneHints(item);
-  return [
-    ...scenes.map((scene, index) => `${base} Slide ${index + 1} background: ${scene}. Overall lighting: ${timeContext}. Keep the backdrop uncluttered and free of products, people, text, and logos.`),
-  ];
+  return scenes.map((scene, index) => {
+    const slidePlan = options.creativePlan?.slides[index];
+    const creativeDirection = slidePlan ? ` ${slidePlan.prompt}` : "";
+    return `${base} Slide ${index + 1} background: ${scene}. Overall lighting: ${timeContext}. Keep the backdrop uncluttered and free of products, people, text, and logos.${creativeDirection}`;
+  });
 }
 
 async function defaultOpenAiClient(body: FormData, apiKey: string): Promise<OpenAiImageResponse> {
@@ -254,7 +264,7 @@ export async function generateAiLifestyleImages(
 
   fs.mkdirSync(outputDir, { recursive: true });
 
-  const prompts = buildAiLifestyleImagePrompts(item, persona, { now, brief: options.brief });
+  const prompts = buildAiLifestyleImagePrompts(item, persona, { now, brief: options.brief, creativePlan: options.creativePlan });
   const assets: CarouselAsset[] = [];
   for (let i = 0; i < prompts.length; i++) {
     const body = buildEditForm(prompts[i]!, model, size, quality, productImage);

@@ -8,6 +8,7 @@ import {
   defaultOpenAiTextClient,
   extractOpenAiText,
   resolveOpenAiTextModel,
+  isOpenAiQuotaError,
   type OpenAiTextClient,
 } from "./openai-text";
 dotenv.config();
@@ -96,7 +97,7 @@ async function generateWithRetry(
       errorMsg.includes("Rate limit");
     const isEmptyResponse = errorMsg.includes("OpenAI APIからの応答が空です");
 
-    if ((isRateLimit || isEmptyResponse) && attempt < MAX_RETRIES) {
+    if (!isOpenAiQuotaError(err) && (isRateLimit || isEmptyResponse) && attempt < MAX_RETRIES) {
       const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt);
       console.warn(
         `[generator] ${isEmptyResponse ? "応答が空でした" : "レート制限に達しました"}。${delay / 1000}秒後にリトライ (${attempt + 1}/${MAX_RETRIES})`
@@ -287,7 +288,23 @@ ${HUMAN_BUYER_COPY_RULES}
 }
 
 /** 外部LLMが一時的に空応答を返しても、1件の投稿で全体を止めないための保険。 */
-export function buildFallbackCaption(item: RakutenItem): string {
+export function buildFallbackCaption(item: RakutenItem, brief?: ProductContentBrief | SalesStrategyBrief): string {
+  if (brief) {
+    const facts = brief.facts.filter(Boolean).slice(0, 3).map((fact) => `✅ ${fact}`).join("\n");
+    const tags = brief.hashtags.length > 0 ? brief.hashtags.join(" ") : "#楽天ROOM #買ってよかった #QOL向上";
+    return [
+      brief.problem,
+      "",
+      `${brief.displayName}は、${brief.useCase}を考えている人が確認したい商品です。`,
+      facts,
+      "",
+      brief.solution,
+      brief.proofLine,
+      "",
+      "あとで比較できるように保存して、価格・レビュー・仕様は楽天ROOMの商品ページで確認してください📌",
+      tags,
+    ].filter(Boolean).join("\n");
+  }
   const review = item.reviewAverage && item.reviewCount
     ? `★${item.reviewAverage}・${item.reviewCount.toLocaleString()}件のレビューも参考になります。`
     : "気になる人はサイズや仕様を確認してから選ぶのがおすすめです。";
@@ -433,7 +450,7 @@ export async function generateCaptions(
       results.push({ item, caption, hook, brief: briefs?.get(item.itemCode) });
     } catch (err) {
       console.error(`[generator] 商品「${item.itemName.slice(0, 30)}」の生成失敗:`, err);
-      results.push({ item, caption: buildFallbackCaption(item), hook: "fallback", brief: briefs?.get(item.itemCode) });
+      results.push({ item, caption: buildFallbackCaption(item, briefs?.get(item.itemCode)), hook: "fallback", brief: briefs?.get(item.itemCode) });
       console.warn(`[generator] 商品「${item.itemName.slice(0, 30)}」は保険の紹介文で続行します`);
     }
 

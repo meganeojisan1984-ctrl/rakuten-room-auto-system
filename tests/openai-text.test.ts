@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   buildOpenAiTextRequest,
   extractOpenAiText,
+  isOpenAiQuotaError,
   resolveOpenAiTextModel,
 } from "../src/openai-text";
 
@@ -34,4 +35,9 @@ test("extractOpenAiText reads output_text and rejects empty responses", () => {
     "種類なしの本文です。",
   );
   assert.throws(() => extractOpenAiText({ output_text: "   " }), /空/);
+});
+
+test("OpenAI残高不足はリトライ対象ではないエラーとして判定する", () => {
+  assert.equal(isOpenAiQuotaError(new Error('429 credit_balance_exhausted')), true);
+  assert.equal(isOpenAiQuotaError(new Error('429 rate_limit_exceeded')), false);
 });

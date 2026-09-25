@@ -12,6 +12,7 @@ import {
   type CarouselAsset,
 } from "../src/ig/carousel";
 import type { RakutenItem } from "../src/fetcher";
+import { buildImageCreativePlan } from "../src/ig/image-creative";
 
 const item: RakutenItem = {
   itemName: "片手で使える収納ボックス 3個セット",
@@ -135,6 +136,21 @@ test("buildCarouselSlides keeps the story consistent across posting times", () =
   assert.equal(morningSlides[0]!.body, nightSlides[0]!.body);
   assert.match(morningSlides[0]!.headline, /迷っていませんか/);
   assert.match(nightSlides[0]!.body, /商品名だけでは違いがわかりにくい/);
+});
+
+test("creative plan supplies product-specific overlay copy exactly once", () => {
+  const creativePlan = buildImageCreativePlan({
+    ...item,
+    itemName: "大風量ヘアドライヤー 美容家電",
+    itemCaption: "大風量で髪を乾かしやすい。3段階の風量調節と冷風に対応。",
+  });
+  const slides = buildCarouselSlides(item, { creativePlan });
+  assert.equal(slides[1]!.headline, creativePlan.slides[1]!.overlayCopy.headline);
+  assert.equal(slides[1]!.body, creativePlan.slides[1]!.overlayCopy.body);
+  const svg = renderSlideSvg(slides[1]!, item, { creativePlan });
+  const escaped = creativePlan.slides[1]!.overlayCopy.headline.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  assert.equal((svg.match(new RegExp(escaped, "g")) ?? []).length, 1);
+  assert.match(svg, /handUnderline|creative/);
 });
 test("brief carousel follows problem, solution, proof, and purchase CTA order", () => {
   const brief = {

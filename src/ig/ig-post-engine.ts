@@ -5,7 +5,7 @@ import type { PersonaSlot } from "../persona/persona";
 import { PRODUCT_CATEGORIES, type RakutenItem } from "../fetcher";
 import { buildProductContentBrief } from "../content-brief";
 import type { SalesStrategyBrief } from "../sales-strategy";
-import { generateAiLifestyleImages, isAiLifestyleImagesEnabled } from "./ai-image";
+import { generateAiLifestyleImages, isAiLifestyleImagesEnabled, isOpenAiQuotaError } from "./ai-image";
 import {
   buildCarouselSlides,
   getCarouselWriteOptions,
@@ -17,7 +17,7 @@ import {
 } from "./carousel";
 import { isXDraftMailEnabled, sendXDraftMail } from "./x-draft-mailer";
 import { generateThreadsCopy, isThreadsCopyEnabled } from "./threads-copy";
-import { DEFAULT_ROOM_PROFILE_URL, toRoomItemsUrl } from "../room-profile-url";
+import { buildImageCreativePlan } from "./image-creative";
 
 // sns.ts と揃える (Instagram Graph API 独自エンドポイント)
 const GRAPH_API = "https://graph.instagram.com/v21.0";
@@ -43,12 +43,11 @@ function scrubNgWords(text: string, ngWords: string[]): string {
   return out;
 }
 
-/** Add the verified Rakuten ROOM items URL and social CTA to the caption. */
+/** Instagram captions do not make raw URLs clickable; send readers to the profile link. */
 function withPersonaFooter(caption: string, persona: PersonaSlot): string {
   const hashtags = persona.hashtags.join(" ");
-  const roomItemsUrl = toRoomItemsUrl(env("ROOM_PROFILE_URL") || DEFAULT_ROOM_PROFILE_URL);
   const footer = [
-    `楽天ROOMの商品一覧はこちら：\n${roomItemsUrl}`,
+    "商品リンクはプロフィールの楽天ROOMから確認できます。プロフィールのURLをタップしてチェックしてください🛒",
     "気になったら投稿を保存・いいね・フォローで応援してください。",
     hashtags,
   ].filter(Boolean).join("\n\n");
@@ -126,24 +125,33 @@ export async function createInstagramCarouselAssets(
   const personaGenres = Array.isArray(persona.genres) ? persona.genres : [];
   const category = PRODUCT_CATEGORIES.find((value) => personaGenres.includes(value.name)) ?? PRODUCT_CATEGORIES[0]!;
   const brief = options.brief ?? buildProductContentBrief(item, persona, category);
-  const slides = buildCarouselSlides(item, { brief });
+  const creativePlan = buildImageCreativePlan(item, brief);
+  const slides = buildCarouselSlides(item, { brief, creativePlan });
   if (isAiLifestyleImagesEnabled(envVars)) {
     const generateAiImages = options.generateAiImages ?? generateAiLifestyleImages;
     console.log(`[ig-post-engine] slot=${persona.id} generating product-matched background images...`);
-    const backgrounds = await generateAiImages(item, persona, {
-      apiKey: envVars.OPENAI_API_KEY,
-      outputDir: writeOptions.outputDir,
-      publicBaseUrl: writeOptions.publicBaseUrl,
-      model: envVars.AI_IMAGE_MODEL || undefined,
-      quality: envVars.AI_IMAGE_QUALITY as "low" | "medium" | "high" | "auto" | undefined,
-      size: envVars.AI_IMAGE_SIZE || undefined,
-      brief,
-    });
-    if (backgrounds.length !== 5) {
-      throw new Error(`AI background generation returned ${backgrounds.length} images; expected 5`);
+    try {
+      const backgrounds = await generateAiImages(item, persona, {
+        apiKey: envVars.OPENAI_API_KEY,
+        outputDir: writeOptions.outputDir,
+        publicBaseUrl: writeOptions.publicBaseUrl,
+        model: envVars.AI_IMAGE_MODEL || undefined,
+        quality: envVars.AI_IMAGE_QUALITY as "low" | "medium" | "high" | "auto" | undefined,
+        size: envVars.AI_IMAGE_SIZE || undefined,
+        brief,
+        creativePlan,
+      });
+      if (backgrounds.length !== 5) {
+        throw new Error(`AI background generation returned ${backgrounds.length} images; expected 5`);
+      }
+      writeOptions.backgroundImagePaths = backgrounds.map((asset) => asset.filePath);
+    } catch (error) {
+      const reason = isOpenAiQuotaError(error) ? "OpenAI画像生成の残高不足" : "AI画像生成エラー";
+      console.warn(`[ig-post-engine] ${reason}。文字入り決定論的カルーセルへフォールバック: ${String(error).slice(0, 220)}`);
+      delete writeOptions.backgroundImagePaths;
     }
-    writeOptions.backgroundImagePaths = backgrounds.map((asset) => asset.filePath);
   }
+  writeOptions.creativePlan = creativePlan;
   const assets = await renderCarouselImages(item, slides, writeOptions);
   if (assets.length !== 5) throw new Error(`Carousel renderer returned ${assets.length} images; expected 5`);
   return assets;
