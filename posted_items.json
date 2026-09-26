@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "tenmafitsworld:10004390",
     "wtw-cctv-camera:10000924",
     "kanfudo:10000189",
     "okotico:10040500",
@@ -499,7 +498,8 @@
     "mikirona:10000085",
     "premiumgift:10000010",
     "link5520889:10000002",
-    "kamiya:10036619"
+    "kamiya:10036619",
+    "totoai:10000001"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
