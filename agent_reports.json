@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-09-13T00:38:50.726Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ1)"
-  },
-  {
-    "ts": "2026-09-13T00:40:24.477Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-09-13T00:42:38.705Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-09-13T15:44:09.020Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (暮らし・インテリア)"
-  },
-  {
     "ts": "2026-09-13T15:44:14.202Z",
     "agent": "copywriter",
     "ok": true,
@@ -1195,6 +1171,30 @@
   },
   {
     "ts": "2026-09-26T09:15:16.856Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-09-26T15:55:49.161Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (アウトドア)"
+  },
+  {
+    "ts": "2026-09-26T15:56:01.538Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ3)"
+  },
+  {
+    "ts": "2026-09-26T15:57:40.983Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-09-26T16:04:36.424Z",
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
