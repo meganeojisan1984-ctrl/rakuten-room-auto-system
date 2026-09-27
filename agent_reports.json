@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-09-14T00:45:56.331Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ1)"
-  },
-  {
-    "ts": "2026-09-14T00:46:23.749Z",
-    "agent": "poster",
-    "ok": false,
-    "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/bo)"
-  },
-  {
-    "ts": "2026-09-14T09:32:35.508Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (グルメ・スイーツ)"
-  },
-  {
-    "ts": "2026-09-14T09:32:42.218Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ2)"
-  },
-  {
     "ts": "2026-09-14T09:34:17.235Z",
     "agent": "poster",
     "ok": true,
@@ -1195,6 +1171,30 @@
   },
   {
     "ts": "2026-09-27T01:17:57.976Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-09-27T09:47:12.844Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (家電製品)"
+  },
+  {
+    "ts": "2026-09-27T09:47:24.572Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ2)"
+  },
+  {
+    "ts": "2026-09-27T09:48:57.190Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-09-27T09:51:59.014Z",
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
