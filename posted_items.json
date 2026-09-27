@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "kanfudo:10000189",
     "okotico:10040500",
     "roomy:10015523",
     "charisma-bon:10040167",
@@ -499,7 +498,8 @@
     "link5520889:10000002",
     "kamiya:10036619",
     "totoai:10000001",
-    "basecamponlineshop:10003354"
+    "basecamponlineshop:10003354",
+    "motebeauty:10000472"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
