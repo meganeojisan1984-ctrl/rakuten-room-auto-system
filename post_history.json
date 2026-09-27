@@ -2565,5 +2565,18 @@
     "captionHead": "これ知らないと年間ムダにするかも…髪も顔も疲れが残",
     "slot": "slot2",
     "itemCodeHash": "e9d7d4b393e2"
+  },
+  {
+    "ts": "2026-09-27T16:38:35.220Z",
+    "itemCode": "chorakuka:10000649",
+    "itemName": "振動マシン 最新型モデル バランスウェーブ ステッパー シェイカー式 2年間保証 PSE認証 3D ブルブルマシン 効果 ダイエット器具 人気 静音 ミニ ems",
+    "genreName": "ダイエット器具",
+    "price": 26990,
+    "postType": 1,
+    "hour": 1,
+    "hook": "beforeafter",
+    "captionHead": "先月までの私: 家でゴロゴロしがち / 今の私: ",
+    "slot": "slot0",
+    "itemCodeHash": "c30facfb545f"
   }
 ]

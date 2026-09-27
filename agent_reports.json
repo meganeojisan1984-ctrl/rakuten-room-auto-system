@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-09-14T09:34:17.235Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-09-14T09:36:41.011Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-09-14T17:51:17.434Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (美容・コスメ)"
-  },
-  {
-    "ts": "2026-09-14T17:51:23.162Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ1)"
-  },
-  {
     "ts": "2026-09-14T17:53:01.473Z",
     "agent": "poster",
     "ok": true,
@@ -1195,6 +1171,30 @@
   },
   {
     "ts": "2026-09-27T09:51:59.014Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-09-27T16:31:49.003Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (ダイエット器具)"
+  },
+  {
+    "ts": "2026-09-27T16:32:05.199Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ1)"
+  },
+  {
+    "ts": "2026-09-27T16:33:37.030Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-09-27T16:38:35.219Z",
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"

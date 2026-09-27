@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "roomy:10015523",
     "charisma-bon:10040167",
     "nitori:10291874",
     "cream-dot:10027736",
@@ -499,7 +498,8 @@
     "totoai:10000001",
     "basecamponlineshop:10003354",
     "motebeauty:10000472",
-    "nissoplus:10000207"
+    "nissoplus:10000207",
+    "chorakuka:10000649"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
