@@ -1439,7 +1439,9 @@
     "hook": "question",
     "captionHead": "まだ充電しながら待ってたの？💻🔋 そうだったら",
     "slot": "slot2",
-    "itemCodeHash": "281cf2ad33e5"
+    "itemCodeHash": "281cf2ad33e5",
+    "likes": 8,
+    "likesUpdatedAt": "2026-09-27T18:40:07.299Z"
   },
   {
     "ts": "2026-08-15T23:21:29.342Z",
@@ -1453,8 +1455,8 @@
     "captionHead": "え、待って。コシヒカリを5kgで3,299円ってど",
     "slot": "slot0",
     "itemCodeHash": "354607fbbb0c",
-    "likes": 29,
-    "likesUpdatedAt": "2026-09-26T18:02:22.870Z"
+    "likes": 30,
+    "likesUpdatedAt": "2026-09-27T18:40:07.299Z"
   },
   {
     "ts": "2026-08-16T04:32:41.523Z",
@@ -2197,8 +2199,8 @@
     "captionHead": "レビュー11,205件で★4.75って見た瞬間、正",
     "slot": "slot2",
     "itemCodeHash": "55ddedf597e4",
-    "likes": 19,
-    "likesUpdatedAt": "2026-09-21T19:45:12.589Z"
+    "likes": 20,
+    "likesUpdatedAt": "2026-09-27T18:40:07.299Z"
   },
   {
     "ts": "2026-09-15T16:30:44.337Z",
@@ -2373,8 +2375,8 @@
     "captionHead": "＼マラソン限定！35%OFFクーポンあり！新米／ ",
     "slot": "slot0",
     "itemCodeHash": "63c732c9d2e2",
-    "likes": 29,
-    "likesUpdatedAt": "2026-09-26T18:02:22.870Z"
+    "likes": 8,
+    "likesUpdatedAt": "2026-09-27T18:40:07.299Z"
   },
   {
     "ts": "2026-09-22T09:02:15.051Z",
@@ -2440,8 +2442,8 @@
     "captionHead": "【決算前！ポイントアップSALE｜9月1日～9月3",
     "slot": "slot1",
     "itemCodeHash": "2ec30b52e9f7",
-    "likes": 16,
-    "likesUpdatedAt": "2026-09-26T18:02:22.870Z"
+    "likes": 18,
+    "likesUpdatedAt": "2026-09-27T18:40:07.299Z"
   },
   {
     "ts": "2026-09-24T16:40:07.494Z",
@@ -2468,8 +2470,8 @@
     "captionHead": "【楽天1位★クーポンで3,580円！】ドライヤー ",
     "slot": "slot0",
     "itemCodeHash": "06272f36c645",
-    "likes": 13,
-    "likesUpdatedAt": "2026-09-26T18:02:22.870Z"
+    "likes": 18,
+    "likesUpdatedAt": "2026-09-27T18:40:07.299Z"
   },
   {
     "ts": "2026-09-25T09:22:52.344Z",
@@ -2483,8 +2485,8 @@
     "captionHead": "【新品】【楽天1位！】ノートパソコン 新品第13世",
     "slot": "slot2",
     "itemCodeHash": "4cd9f11067de",
-    "likes": 14,
-    "likesUpdatedAt": "2026-09-26T18:02:22.870Z"
+    "likes": 21,
+    "likesUpdatedAt": "2026-09-27T18:40:07.299Z"
   },
   {
     "ts": "2026-09-25T16:55:45.479Z",
@@ -2524,8 +2526,8 @@
     "captionHead": "深夜2時、子どものオンライン授業の準備で古いノート",
     "slot": "slot2",
     "itemCodeHash": "a226807090fb",
-    "likes": 14,
-    "likesUpdatedAt": "2026-09-26T18:02:22.870Z"
+    "likes": 21,
+    "likesUpdatedAt": "2026-09-27T18:40:07.299Z"
   },
   {
     "ts": "2026-09-26T16:04:36.425Z",
@@ -2564,7 +2566,9 @@
     "hook": "loss",
     "captionHead": "これ知らないと年間ムダにするかも…髪も顔も疲れが残",
     "slot": "slot2",
-    "itemCodeHash": "e9d7d4b393e2"
+    "itemCodeHash": "e9d7d4b393e2",
+    "likes": 8,
+    "likesUpdatedAt": "2026-09-27T18:40:07.299Z"
   },
   {
     "ts": "2026-09-27T16:38:35.220Z",
