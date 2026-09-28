@@ -1440,8 +1440,8 @@
     "captionHead": "まだ充電しながら待ってたの？💻🔋 そうだったら",
     "slot": "slot2",
     "itemCodeHash": "281cf2ad33e5",
-    "likes": 8,
-    "likesUpdatedAt": "2026-09-27T18:40:07.299Z"
+    "likes": 12,
+    "likesUpdatedAt": "2026-09-28T20:48:50.086Z"
   },
   {
     "ts": "2026-08-15T23:21:29.342Z",
@@ -1455,8 +1455,8 @@
     "captionHead": "え、待って。コシヒカリを5kgで3,299円ってど",
     "slot": "slot0",
     "itemCodeHash": "354607fbbb0c",
-    "likes": 30,
-    "likesUpdatedAt": "2026-09-27T18:40:07.299Z"
+    "likes": 31,
+    "likesUpdatedAt": "2026-09-28T20:48:50.086Z"
   },
   {
     "ts": "2026-08-16T04:32:41.523Z",
@@ -2257,8 +2257,8 @@
     "captionHead": "外食多めでタンパク足りてない人、正直手を挙げて🙋",
     "slot": "slot2",
     "itemCodeHash": "c5fd5f359fbd",
-    "likes": 36,
-    "likesUpdatedAt": "2026-09-26T18:02:22.870Z"
+    "likes": 35,
+    "likesUpdatedAt": "2026-09-28T20:48:50.086Z"
   },
   {
     "ts": "2026-09-19T08:35:05.272Z",
@@ -2345,8 +2345,8 @@
     "captionHead": "【1種類を選べる】ムーニーマン パンツ 男女 L・",
     "slot": "slot2",
     "itemCodeHash": "3af207a2d790",
-    "likes": 12,
-    "likesUpdatedAt": "2026-09-26T18:02:22.870Z"
+    "likes": 11,
+    "likesUpdatedAt": "2026-09-28T20:48:50.086Z"
   },
   {
     "ts": "2026-09-21T17:59:45.610Z",
@@ -2375,8 +2375,8 @@
     "captionHead": "＼マラソン限定！35%OFFクーポンあり！新米／ ",
     "slot": "slot0",
     "itemCodeHash": "63c732c9d2e2",
-    "likes": 8,
-    "likesUpdatedAt": "2026-09-27T18:40:07.299Z"
+    "likes": 12,
+    "likesUpdatedAt": "2026-09-28T20:48:50.086Z"
   },
   {
     "ts": "2026-09-22T09:02:15.051Z",
@@ -2442,8 +2442,8 @@
     "captionHead": "【決算前！ポイントアップSALE｜9月1日～9月3",
     "slot": "slot1",
     "itemCodeHash": "2ec30b52e9f7",
-    "likes": 18,
-    "likesUpdatedAt": "2026-09-27T18:40:07.299Z"
+    "likes": 19,
+    "likesUpdatedAt": "2026-09-28T20:48:50.086Z"
   },
   {
     "ts": "2026-09-24T16:40:07.494Z",
@@ -2470,8 +2470,8 @@
     "captionHead": "【楽天1位★クーポンで3,580円！】ドライヤー ",
     "slot": "slot0",
     "itemCodeHash": "06272f36c645",
-    "likes": 18,
-    "likesUpdatedAt": "2026-09-27T18:40:07.299Z"
+    "likes": 19,
+    "likesUpdatedAt": "2026-09-28T20:48:50.086Z"
   },
   {
     "ts": "2026-09-25T09:22:52.344Z",
@@ -2485,8 +2485,8 @@
     "captionHead": "【新品】【楽天1位！】ノートパソコン 新品第13世",
     "slot": "slot2",
     "itemCodeHash": "4cd9f11067de",
-    "likes": 21,
-    "likesUpdatedAt": "2026-09-27T18:40:07.299Z"
+    "likes": 26,
+    "likesUpdatedAt": "2026-09-28T20:48:50.086Z"
   },
   {
     "ts": "2026-09-25T16:55:45.479Z",
@@ -2526,8 +2526,8 @@
     "captionHead": "深夜2時、子どものオンライン授業の準備で古いノート",
     "slot": "slot2",
     "itemCodeHash": "a226807090fb",
-    "likes": 21,
-    "likesUpdatedAt": "2026-09-27T18:40:07.299Z"
+    "likes": 26,
+    "likesUpdatedAt": "2026-09-28T20:48:50.086Z"
   },
   {
     "ts": "2026-09-26T16:04:36.425Z",
@@ -2567,8 +2567,8 @@
     "captionHead": "これ知らないと年間ムダにするかも…髪も顔も疲れが残",
     "slot": "slot2",
     "itemCodeHash": "e9d7d4b393e2",
-    "likes": 8,
-    "likesUpdatedAt": "2026-09-27T18:40:07.299Z"
+    "likes": 12,
+    "likesUpdatedAt": "2026-09-28T20:48:50.086Z"
   },
   {
     "ts": "2026-09-27T16:38:35.220Z",
@@ -2620,6 +2620,8 @@
     "hook": "surprise",
     "captionHead": "え、待って。家でバーベル？って半信半疑だったんだけ",
     "slot": "slot0",
-    "itemCodeHash": "fdc6d6cbc85f"
+    "itemCodeHash": "fdc6d6cbc85f",
+    "likes": 2,
+    "likesUpdatedAt": "2026-09-28T20:48:50.086Z"
   }
 ]
