@@ -2582,5 +2582,18 @@
     "captionHead": "先月までの私: 家でゴロゴロしがち / 今の私: ",
     "slot": "slot0",
     "itemCodeHash": "c30facfb545f"
+  },
+  {
+    "ts": "2026-09-28T01:29:55.703Z",
+    "itemCode": "wide:10003980",
+    "itemName": "ZIP めざましテレビ 紹介 こんにゃく麺 こんにゃくラーメン 24食セット 日本製 ダイエット食品 ダイエットフード 蒟蒻ラーメン 置き換えダイエット 糖質制限 低カロリー 低糖質 糖質カット こんにゃく 蒟蒻 コンニャク ダイエット【送料無料】",
+    "genreName": "ダイエット商品",
+    "price": 3480,
+    "postType": 1,
+    "hour": 10,
+    "hook": "empathy",
+    "captionHead": "夜食つい食べちゃう人、正直手を挙げて🙋「これ知ら",
+    "slot": "slot0",
+    "itemCodeHash": "750ae6a535ad"
   }
 ]
