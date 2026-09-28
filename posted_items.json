@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "cream-dot:10027736",
     "roomy:10018286",
     "rack-kan:10000287",
     "woodpro:10029805",
@@ -499,7 +498,8 @@
     "nissoplus:10000207",
     "chorakuka:10000649",
     "wide:10003980",
-    "hopestar:10000035"
+    "hopestar:10000035",
+    "super-sports:10000015"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
