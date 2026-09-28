@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "nitori:10291874",
     "cream-dot:10027736",
     "roomy:10018286",
     "rack-kan:10000287",
@@ -499,7 +498,8 @@
     "motebeauty:10000472",
     "nissoplus:10000207",
     "chorakuka:10000649",
-    "wide:10003980"
+    "wide:10003980",
+    "hopestar:10000035"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
