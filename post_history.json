@@ -1440,8 +1440,8 @@
     "captionHead": "まだ充電しながら待ってたの？💻🔋 そうだったら",
     "slot": "slot2",
     "itemCodeHash": "281cf2ad33e5",
-    "likes": 12,
-    "likesUpdatedAt": "2026-09-28T20:48:50.086Z"
+    "likes": 14,
+    "likesUpdatedAt": "2026-09-29T19:39:21.251Z"
   },
   {
     "ts": "2026-08-15T23:21:29.342Z",
@@ -1455,8 +1455,8 @@
     "captionHead": "え、待って。コシヒカリを5kgで3,299円ってど",
     "slot": "slot0",
     "itemCodeHash": "354607fbbb0c",
-    "likes": 31,
-    "likesUpdatedAt": "2026-09-28T20:48:50.086Z"
+    "likes": 32,
+    "likesUpdatedAt": "2026-09-29T19:39:21.251Z"
   },
   {
     "ts": "2026-08-16T04:32:41.523Z",
@@ -2184,8 +2184,8 @@
     "captionHead": "え、待って。こんなにスッキリする水切りラック、楽天",
     "slot": "slot0",
     "itemCodeHash": "c24c7d78a508",
-    "likes": 22,
-    "likesUpdatedAt": "2026-09-22T18:17:35.529Z"
+    "likes": 24,
+    "likesUpdatedAt": "2026-09-29T19:39:21.251Z"
   },
   {
     "ts": "2026-09-15T09:16:58.637Z",
@@ -2272,8 +2272,8 @@
     "captionHead": "子育てバタバタ派、正直手を挙げて🙋 秋の衣替えで",
     "slot": "slot1",
     "itemCodeHash": "129ebfe2d8f7",
-    "likes": 6,
-    "likesUpdatedAt": "2026-09-20T17:40:59.807Z"
+    "likes": 7,
+    "likesUpdatedAt": "2026-09-29T19:39:21.251Z"
   },
   {
     "ts": "2026-09-19T15:33:54.772Z",
@@ -2287,8 +2287,8 @@
     "captionHead": "楽天ランキング常連＆リピーター続出！これは見つけた",
     "slot": "slot2",
     "itemCodeHash": "96c3fe2c9517",
-    "likes": 12,
-    "likesUpdatedAt": "2026-09-21T19:45:12.589Z"
+    "likes": 13,
+    "likesUpdatedAt": "2026-09-29T19:39:21.251Z"
   },
   {
     "ts": "2026-09-20T09:07:23.841Z",
@@ -2375,8 +2375,8 @@
     "captionHead": "＼マラソン限定！35%OFFクーポンあり！新米／ ",
     "slot": "slot0",
     "itemCodeHash": "63c732c9d2e2",
-    "likes": 12,
-    "likesUpdatedAt": "2026-09-28T20:48:50.086Z"
+    "likes": 14,
+    "likesUpdatedAt": "2026-09-29T19:39:21.251Z"
   },
   {
     "ts": "2026-09-22T09:02:15.051Z",
@@ -2567,8 +2567,8 @@
     "captionHead": "これ知らないと年間ムダにするかも…髪も顔も疲れが残",
     "slot": "slot2",
     "itemCodeHash": "e9d7d4b393e2",
-    "likes": 12,
-    "likesUpdatedAt": "2026-09-28T20:48:50.086Z"
+    "likes": 14,
+    "likesUpdatedAt": "2026-09-29T19:39:21.251Z"
   },
   {
     "ts": "2026-09-27T16:38:35.220Z",
@@ -2621,8 +2621,8 @@
     "captionHead": "え、待って。家でバーベル？って半信半疑だったんだけ",
     "slot": "slot0",
     "itemCodeHash": "fdc6d6cbc85f",
-    "likes": 2,
-    "likesUpdatedAt": "2026-09-28T20:48:50.086Z"
+    "likes": 8,
+    "likesUpdatedAt": "2026-09-29T19:39:21.251Z"
   },
   {
     "ts": "2026-09-29T02:34:25.110Z",
@@ -2635,7 +2635,9 @@
     "hook": "number",
     "captionHead": "レビュー685件で★4.59って数字に惹かれて思わ",
     "slot": "slot0",
-    "itemCodeHash": "1c71574cc9f2"
+    "itemCodeHash": "1c71574cc9f2",
+    "likes": 12,
+    "likesUpdatedAt": "2026-09-29T19:39:21.251Z"
   },
   {
     "ts": "2026-09-29T10:28:07.628Z",
@@ -2661,6 +2663,8 @@
     "hook": "question",
     "captionHead": "まだ床でヨガマット選びで損してない？意外と厚さや滑",
     "slot": "slot0",
-    "itemCodeHash": "e3475c5be609"
+    "itemCodeHash": "e3475c5be609",
+    "likes": 5,
+    "likesUpdatedAt": "2026-09-29T19:39:21.251Z"
   }
 ]

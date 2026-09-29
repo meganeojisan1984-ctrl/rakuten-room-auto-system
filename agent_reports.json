@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-09-16T18:26:35.054Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴166件(計測済109) 実売0件(¥0) mode=likes"
-  },
-  {
-    "ts": "2026-09-16T18:26:38.060Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第69世代へ更新 (ルールベース)、警告0件"
-  },
-  {
-    "ts": "2026-09-17T01:07:40.738Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (ファッション・子供服)"
-  },
-  {
     "ts": "2026-09-17T01:07:46.661Z",
     "agent": "copywriter",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-09-29T19:39:21.279Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "20件抽出、履歴10件のいいね数を更新"
+  },
+  {
+    "ts": "2026-09-29T19:39:21.290Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴198件(計測済128) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-09-29T19:39:24.769Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第82世代へ更新 (ルールベース)、警告0件"
   }
 ]
