@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "rack-kan:10000287",
     "woodpro:10029805",
     "kobikiya:10000388",
     "yamasoro:10003641",
@@ -499,7 +498,8 @@
     "wide:10003980",
     "hopestar:10000035",
     "super-sports:10000015",
-    "slc-123:10000043"
+    "slc-123:10000043",
+    "c-c-s:10000131"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
