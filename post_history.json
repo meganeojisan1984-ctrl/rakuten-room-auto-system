@@ -2666,5 +2666,18 @@
     "itemCodeHash": "e3475c5be609",
     "likes": 5,
     "likesUpdatedAt": "2026-09-29T19:39:21.251Z"
+  },
+  {
+    "ts": "2026-09-30T01:55:38.837Z",
+    "itemCode": "tripleshop:10000158",
+    "itemName": "【クーポンで6,980円！】次世代HIPL脱毛 脱毛器 脱毛 フラッシュ式 ケア 肌 HIPL 美容 光 VIO ムダ毛 顔 腕 全身 ボディ 効果 家庭 フラッシュ お手入れ IPL 光美容 光脱毛 女性 男性 エステ 自宅 レディース メンズ シェーバー 美顔器",
+    "genreName": "美容家電",
+    "price": 9980,
+    "postType": 3,
+    "hour": 10,
+    "hook": "story",
+    "captionHead": "深夜2時、またムダ毛処理と格闘してたら「これ楽天で",
+    "slot": "slot0",
+    "itemCodeHash": "d757349a7f9c"
   }
 ]
