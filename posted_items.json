@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "calmisence:10000070",
     "silverkyasya:10012627",
     "curtainsakuranbo:10004574",
     "sanrio:10097872",
@@ -499,7 +498,8 @@
     "c-c-s:10000131",
     "style-depot:10000661",
     "tripleshop:10000158",
-    "hobbyman:10000008"
+    "hobbyman:10000008",
+    "arianakosume:10001906"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }

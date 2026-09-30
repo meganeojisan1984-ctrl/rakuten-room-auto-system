@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-09-17T16:25:40.093Z",
-    "agent": "poster",
-    "ok": false,
-    "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/bo)"
-  },
-  {
-    "ts": "2026-09-17T18:33:43.228Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "20件抽出、履歴13件のいいね数を更新"
-  },
-  {
-    "ts": "2026-09-17T18:33:43.284Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴167件(計測済109) 実売0件(¥0) mode=likes"
-  },
-  {
-    "ts": "2026-09-17T18:33:47.095Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第70世代へ更新 (ルールベース)、警告0件"
-  },
-  {
     "ts": "2026-09-18T01:03:31.346Z",
     "agent": "scout",
     "ok": true,
@@ -1195,6 +1171,30 @@
   },
   {
     "ts": "2026-09-30T10:21:16.781Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-09-30T17:42:13.630Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (化粧品)"
+  },
+  {
+    "ts": "2026-09-30T17:42:30.646Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ1)"
+  },
+  {
+    "ts": "2026-09-30T17:44:07.754Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-09-30T17:47:05.238Z",
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
