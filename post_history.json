@@ -1898,8 +1898,8 @@
     "captionHead": "先月までの私: 冷凍庫は謎のスペース祭り / 今の",
     "slot": "slot1",
     "itemCodeHash": "147c7d90698a",
-    "likes": 29,
-    "likesUpdatedAt": "2026-09-25T18:53:37.283Z"
+    "likes": 30,
+    "likesUpdatedAt": "2026-09-30T19:38:40.690Z"
   },
   {
     "ts": "2026-09-07T17:28:41.275Z",
@@ -2014,8 +2014,8 @@
     "captionHead": "レビュー886件で★4.67！見つけた瞬間テンショ",
     "slot": "slot0",
     "itemCodeHash": "9b264f979e17",
-    "likes": 20,
-    "likesUpdatedAt": "2026-09-26T18:02:22.870Z"
+    "likes": 21,
+    "likesUpdatedAt": "2026-09-30T19:38:40.690Z"
   },
   {
     "ts": "2026-09-10T08:43:46.512Z",
@@ -2085,8 +2085,8 @@
     "captionHead": "まだ風邪や乾燥で髪パサついて損してない？楽天でこれ",
     "slot": "slot2",
     "itemCodeHash": "bbf83cf50328",
-    "likes": 24,
-    "likesUpdatedAt": "2026-09-20T17:40:59.807Z"
+    "likes": 25,
+    "likesUpdatedAt": "2026-09-30T19:38:40.690Z"
   },
   {
     "ts": "2026-09-12T08:24:38.854Z",
@@ -2100,8 +2100,8 @@
     "captionHead": "レビュー14,738件で★4.56！楽天でこれ見つ",
     "slot": "slot1",
     "itemCodeHash": "f173aa2ec7ee",
-    "likes": 39,
-    "likesUpdatedAt": "2026-09-26T18:02:22.870Z"
+    "likes": 40,
+    "likesUpdatedAt": "2026-09-30T19:38:40.690Z"
   },
   {
     "ts": "2026-09-12T15:14:34.173Z",
@@ -2302,8 +2302,8 @@
     "captionHead": "え、待って。通話もできてこの値段ってマジで？🤯\ud83c",
     "slot": "slot2",
     "itemCodeHash": "e0dd02cc0d80",
-    "likes": 27,
-    "likesUpdatedAt": "2026-09-26T18:02:22.870Z"
+    "likes": 28,
+    "likesUpdatedAt": "2026-09-30T19:38:40.690Z"
   },
   {
     "ts": "2026-09-20T15:39:48.579Z",
@@ -2485,8 +2485,8 @@
     "captionHead": "【新品】【楽天1位！】ノートパソコン 新品第13世",
     "slot": "slot2",
     "itemCodeHash": "4cd9f11067de",
-    "likes": 26,
-    "likesUpdatedAt": "2026-09-28T20:48:50.086Z"
+    "likes": 27,
+    "likesUpdatedAt": "2026-09-30T19:38:40.690Z"
   },
   {
     "ts": "2026-09-25T16:55:45.479Z",
@@ -2526,8 +2526,8 @@
     "captionHead": "深夜2時、子どものオンライン授業の準備で古いノート",
     "slot": "slot2",
     "itemCodeHash": "a226807090fb",
-    "likes": 26,
-    "likesUpdatedAt": "2026-09-28T20:48:50.086Z"
+    "likes": 27,
+    "likesUpdatedAt": "2026-09-30T19:38:40.690Z"
   },
   {
     "ts": "2026-09-26T16:04:36.425Z",
@@ -2636,8 +2636,8 @@
     "captionHead": "レビュー685件で★4.59って数字に惹かれて思わ",
     "slot": "slot0",
     "itemCodeHash": "1c71574cc9f2",
-    "likes": 12,
-    "likesUpdatedAt": "2026-09-29T19:39:21.251Z"
+    "likes": 13,
+    "likesUpdatedAt": "2026-09-30T19:38:40.690Z"
   },
   {
     "ts": "2026-09-29T10:28:07.628Z",
@@ -2664,8 +2664,8 @@
     "captionHead": "まだ床でヨガマット選びで損してない？意外と厚さや滑",
     "slot": "slot0",
     "itemCodeHash": "e3475c5be609",
-    "likes": 5,
-    "likesUpdatedAt": "2026-09-29T19:39:21.251Z"
+    "likes": 11,
+    "likesUpdatedAt": "2026-09-30T19:38:40.690Z"
   },
   {
     "ts": "2026-09-30T01:55:38.837Z",
@@ -2691,7 +2691,9 @@
     "hook": "surprise",
     "captionHead": "え、嘘でしょ…車の中が一瞬で個室化するアイテム見つ",
     "slot": "slot2",
-    "itemCodeHash": "714231e6d7b3"
+    "itemCodeHash": "714231e6d7b3",
+    "likes": 5,
+    "likesUpdatedAt": "2026-09-30T19:38:40.690Z"
   },
   {
     "ts": "2026-09-30T17:47:05.239Z",
@@ -2704,6 +2706,8 @@
     "hook": "surprise",
     "captionHead": "え、待って。下地塗らなくていいファンデって本当に時",
     "slot": "slot0",
-    "itemCodeHash": "97b54994dab9"
+    "itemCodeHash": "97b54994dab9",
+    "likes": 6,
+    "likesUpdatedAt": "2026-09-30T19:38:40.690Z"
   }
 ]
