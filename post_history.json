@@ -2735,5 +2735,18 @@
     "captionHead": "ブランド Vitamix / バイタミックス サイ",
     "slot": "slot2",
     "itemCodeHash": "cb71b6397b99"
+  },
+  {
+    "ts": "2026-10-01T18:10:30.485Z",
+    "itemCode": "baselab:10000308",
+    "itemName": "【クーポン利用で6,282円】スチーマー 美顔器 フェイススチーマー 濃密ナノミスト 大容量 ノズル調節可能 顔ケア 水道水OK スキンケア 毛穴ケア 簡単操作 美容 顔スチ 保湿 肌ケア 乾燥対策 潤い 人気 コンパクト ANLAN 【美人百花美顔器部門NO1】60冠",
+    "genreName": "美容機器",
+    "price": 6980,
+    "postType": 1,
+    "hour": 3,
+    "hook": "fallback",
+    "captionHead": "乾燥の悩みを抱えたまま、続けやすい選び方に迷う人へ",
+    "slot": "slot0",
+    "itemCodeHash": "25e8ecea35db"
   }
 ]
