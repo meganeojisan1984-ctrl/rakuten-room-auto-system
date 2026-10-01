@@ -1440,8 +1440,8 @@
     "captionHead": "まだ充電しながら待ってたの？💻🔋 そうだったら",
     "slot": "slot2",
     "itemCodeHash": "281cf2ad33e5",
-    "likes": 14,
-    "likesUpdatedAt": "2026-09-29T19:39:21.251Z"
+    "likes": 16,
+    "likesUpdatedAt": "2026-10-01T19:53:43.939Z"
   },
   {
     "ts": "2026-08-15T23:21:29.342Z",
@@ -2115,8 +2115,8 @@
     "captionHead": "え、待って。天板だけでここまで変わるの…？！ 楽天",
     "slot": "slot2",
     "itemCodeHash": "0c04f2a091ad",
-    "likes": 34,
-    "likesUpdatedAt": "2026-09-20T17:40:59.807Z"
+    "likes": 33,
+    "likesUpdatedAt": "2026-10-01T19:53:43.939Z"
   },
   {
     "ts": "2026-09-13T00:42:38.705Z",
@@ -2257,8 +2257,8 @@
     "captionHead": "外食多めでタンパク足りてない人、正直手を挙げて🙋",
     "slot": "slot2",
     "itemCodeHash": "c5fd5f359fbd",
-    "likes": 35,
-    "likesUpdatedAt": "2026-09-28T20:48:50.086Z"
+    "likes": 36,
+    "likesUpdatedAt": "2026-10-01T19:53:43.939Z"
   },
   {
     "ts": "2026-09-19T08:35:05.272Z",
@@ -2375,8 +2375,8 @@
     "captionHead": "＼マラソン限定！35%OFFクーポンあり！新米／ ",
     "slot": "slot0",
     "itemCodeHash": "63c732c9d2e2",
-    "likes": 14,
-    "likesUpdatedAt": "2026-09-29T19:39:21.251Z"
+    "likes": 16,
+    "likesUpdatedAt": "2026-10-01T19:53:43.939Z"
   },
   {
     "ts": "2026-09-22T09:02:15.051Z",
@@ -2567,8 +2567,8 @@
     "captionHead": "これ知らないと年間ムダにするかも…髪も顔も疲れが残",
     "slot": "slot2",
     "itemCodeHash": "e9d7d4b393e2",
-    "likes": 14,
-    "likesUpdatedAt": "2026-09-29T19:39:21.251Z"
+    "likes": 16,
+    "likesUpdatedAt": "2026-10-01T19:53:43.939Z"
   },
   {
     "ts": "2026-09-27T16:38:35.220Z",
@@ -2621,8 +2621,8 @@
     "captionHead": "え、待って。家でバーベル？って半信半疑だったんだけ",
     "slot": "slot0",
     "itemCodeHash": "fdc6d6cbc85f",
-    "likes": 8,
-    "likesUpdatedAt": "2026-09-29T19:39:21.251Z"
+    "likes": 6,
+    "likesUpdatedAt": "2026-10-01T19:53:43.939Z"
   },
   {
     "ts": "2026-09-29T02:34:25.110Z",
@@ -2636,8 +2636,8 @@
     "captionHead": "レビュー685件で★4.59って数字に惹かれて思わ",
     "slot": "slot0",
     "itemCodeHash": "1c71574cc9f2",
-    "likes": 13,
-    "likesUpdatedAt": "2026-09-30T19:38:40.690Z"
+    "likes": 14,
+    "likesUpdatedAt": "2026-10-01T19:53:43.939Z"
   },
   {
     "ts": "2026-09-29T10:28:07.628Z",
@@ -2664,8 +2664,8 @@
     "captionHead": "まだ床でヨガマット選びで損してない？意外と厚さや滑",
     "slot": "slot0",
     "itemCodeHash": "e3475c5be609",
-    "likes": 11,
-    "likesUpdatedAt": "2026-09-30T19:38:40.690Z"
+    "likes": 13,
+    "likesUpdatedAt": "2026-10-01T19:53:43.939Z"
   },
   {
     "ts": "2026-09-30T01:55:38.837Z",
@@ -2707,8 +2707,8 @@
     "captionHead": "え、待って。下地塗らなくていいファンデって本当に時",
     "slot": "slot0",
     "itemCodeHash": "97b54994dab9",
-    "likes": 6,
-    "likesUpdatedAt": "2026-09-30T19:38:40.690Z"
+    "likes": 10,
+    "likesUpdatedAt": "2026-10-01T19:53:43.939Z"
   },
   {
     "ts": "2026-10-01T01:51:25.765Z",
@@ -2721,7 +2721,9 @@
     "hook": "fallback",
     "captionHead": "ダイエット器具の悩みを抱えたまま、続けやすい選び方",
     "slot": "slot0",
-    "itemCodeHash": "b9c2a95bd47b"
+    "itemCodeHash": "b9c2a95bd47b",
+    "likes": 6,
+    "likesUpdatedAt": "2026-10-01T19:53:43.939Z"
   },
   {
     "ts": "2026-10-01T10:44:28.913Z",
@@ -2747,6 +2749,8 @@
     "hook": "fallback",
     "captionHead": "乾燥の悩みを抱えたまま、続けやすい選び方に迷う人へ",
     "slot": "slot0",
-    "itemCodeHash": "25e8ecea35db"
+    "itemCodeHash": "25e8ecea35db",
+    "likes": 6,
+    "likesUpdatedAt": "2026-10-01T19:53:43.939Z"
   }
 ]
