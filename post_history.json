@@ -2709,5 +2709,18 @@
     "itemCodeHash": "97b54994dab9",
     "likes": 6,
     "likesUpdatedAt": "2026-09-30T19:38:40.690Z"
+  },
+  {
+    "ts": "2026-10-01T01:51:25.765Z",
+    "itemCode": "super-sports:10000017",
+    "itemName": "【10/1はワンダフルデーPアップ】IROTEC（アイロテック）ラバーダンベル 60KG セット/ ダンベル ダンベルセット 筋トレ ダンベルプレート ベンチプレス 鉄アレイ ezバー 可変式ダンベル トレーニング器具 器具 30kg×2個 可変式 バーベル アジャスタブル",
+    "genreName": "ダイエット器具",
+    "price": 25850,
+    "postType": 3,
+    "hour": 10,
+    "hook": "fallback",
+    "captionHead": "ダイエット器具の悩みを抱えたまま、続けやすい選び方",
+    "slot": "slot0",
+    "itemCodeHash": "b9c2a95bd47b"
   }
 ]
