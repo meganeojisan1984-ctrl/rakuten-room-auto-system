@@ -2752,5 +2752,18 @@
     "itemCodeHash": "25e8ecea35db",
     "likes": 6,
     "likesUpdatedAt": "2026-10-01T19:53:43.939Z"
+  },
+  {
+    "ts": "2026-10-02T02:03:48.230Z",
+    "itemCode": "pluestshop:10000058",
+    "itemName": "プルエスト 美顔器 マルチフェイシャルスパ リフトアップ ems 目元 目の下のたるみ rf led たるみ 鼻 美顔器 超音波 毛穴 小顔 美容家電 ほうれい線 led美顔器 rf美顔器 ウォーター ピーリング シミ しみ イオン導入 保湿 肌荒れ 美白 ハリ 角質 角栓 母の日 プレゼント",
+    "genreName": "美容機器",
+    "price": 16499,
+    "postType": 2,
+    "hour": 11,
+    "hook": "fallback",
+    "captionHead": "毛穴の悩みを抱えたまま、続けやすい選び方に迷う人へ",
+    "slot": "slot0",
+    "itemCodeHash": "d8abc8017d21"
   }
 ]
