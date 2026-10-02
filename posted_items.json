@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "toumeikan:10015676",
     "k-home:10010640",
     "seikou-kids:10007315",
     "ajiro:10002414",
@@ -499,7 +498,8 @@
     "plywoodfurniture:10019018",
     "baselab:10000308",
     "pluestshop:10000058",
-    "rosy-cats:10005785"
+    "rosy-cats:10005785",
+    "motebeauty:10000497"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
