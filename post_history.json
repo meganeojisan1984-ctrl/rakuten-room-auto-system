@@ -1440,8 +1440,8 @@
     "captionHead": "まだ充電しながら待ってたの？💻🔋 そうだったら",
     "slot": "slot2",
     "itemCodeHash": "281cf2ad33e5",
-    "likes": 16,
-    "likesUpdatedAt": "2026-10-01T19:53:43.939Z"
+    "likes": 17,
+    "likesUpdatedAt": "2026-10-02T19:31:59.410Z"
   },
   {
     "ts": "2026-08-15T23:21:29.342Z",
@@ -2375,8 +2375,8 @@
     "captionHead": "＼マラソン限定！35%OFFクーポンあり！新米／ ",
     "slot": "slot0",
     "itemCodeHash": "63c732c9d2e2",
-    "likes": 16,
-    "likesUpdatedAt": "2026-10-01T19:53:43.939Z"
+    "likes": 17,
+    "likesUpdatedAt": "2026-10-02T19:31:59.410Z"
   },
   {
     "ts": "2026-09-22T09:02:15.051Z",
@@ -2470,8 +2470,8 @@
     "captionHead": "【楽天1位★クーポンで3,580円！】ドライヤー ",
     "slot": "slot0",
     "itemCodeHash": "06272f36c645",
-    "likes": 19,
-    "likesUpdatedAt": "2026-09-28T20:48:50.086Z"
+    "likes": 20,
+    "likesUpdatedAt": "2026-10-02T19:31:59.410Z"
   },
   {
     "ts": "2026-09-25T09:22:52.344Z",
@@ -2567,8 +2567,8 @@
     "captionHead": "これ知らないと年間ムダにするかも…髪も顔も疲れが残",
     "slot": "slot2",
     "itemCodeHash": "e9d7d4b393e2",
-    "likes": 16,
-    "likesUpdatedAt": "2026-10-01T19:53:43.939Z"
+    "likes": 17,
+    "likesUpdatedAt": "2026-10-02T19:31:59.410Z"
   },
   {
     "ts": "2026-09-27T16:38:35.220Z",
@@ -2621,8 +2621,8 @@
     "captionHead": "え、待って。家でバーベル？って半信半疑だったんだけ",
     "slot": "slot0",
     "itemCodeHash": "fdc6d6cbc85f",
-    "likes": 6,
-    "likesUpdatedAt": "2026-10-01T19:53:43.939Z"
+    "likes": 8,
+    "likesUpdatedAt": "2026-10-02T19:31:59.410Z"
   },
   {
     "ts": "2026-09-29T02:34:25.110Z",
@@ -2664,8 +2664,8 @@
     "captionHead": "まだ床でヨガマット選びで損してない？意外と厚さや滑",
     "slot": "slot0",
     "itemCodeHash": "e3475c5be609",
-    "likes": 13,
-    "likesUpdatedAt": "2026-10-01T19:53:43.939Z"
+    "likes": 14,
+    "likesUpdatedAt": "2026-10-02T19:31:59.410Z"
   },
   {
     "ts": "2026-09-30T01:55:38.837Z",
@@ -2707,8 +2707,8 @@
     "captionHead": "え、待って。下地塗らなくていいファンデって本当に時",
     "slot": "slot0",
     "itemCodeHash": "97b54994dab9",
-    "likes": 10,
-    "likesUpdatedAt": "2026-10-01T19:53:43.939Z"
+    "likes": 11,
+    "likesUpdatedAt": "2026-10-02T19:31:59.410Z"
   },
   {
     "ts": "2026-10-01T01:51:25.765Z",
@@ -2722,8 +2722,8 @@
     "captionHead": "ダイエット器具の悩みを抱えたまま、続けやすい選び方",
     "slot": "slot0",
     "itemCodeHash": "b9c2a95bd47b",
-    "likes": 6,
-    "likesUpdatedAt": "2026-10-01T19:53:43.939Z"
+    "likes": 8,
+    "likesUpdatedAt": "2026-10-02T19:31:59.410Z"
   },
   {
     "ts": "2026-10-01T10:44:28.913Z",
@@ -2750,8 +2750,8 @@
     "captionHead": "乾燥の悩みを抱えたまま、続けやすい選び方に迷う人へ",
     "slot": "slot0",
     "itemCodeHash": "25e8ecea35db",
-    "likes": 6,
-    "likesUpdatedAt": "2026-10-01T19:53:43.939Z"
+    "likes": 10,
+    "likesUpdatedAt": "2026-10-02T19:31:59.410Z"
   },
   {
     "ts": "2026-10-02T02:03:48.230Z",
@@ -2790,6 +2790,8 @@
     "hook": "fallback",
     "captionHead": "乾燥の悩みを抱えたまま、続けやすい選び方に迷う人へ",
     "slot": "slot0",
-    "itemCodeHash": "132706f7a69f"
+    "itemCodeHash": "132706f7a69f",
+    "likes": 10,
+    "likesUpdatedAt": "2026-10-02T19:31:59.410Z"
   }
 ]

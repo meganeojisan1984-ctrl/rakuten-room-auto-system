@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-09-20T00:41:26.272Z",
-    "agent": "poster",
-    "ok": false,
-    "summary": "成功0件/失敗1件 (Error: page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://item.rakuten.co.jp/bo)"
-  },
-  {
-    "ts": "2026-09-20T09:03:30.768Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (美容・コスメ)"
-  },
-  {
-    "ts": "2026-09-20T09:03:36.443Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ2)"
-  },
-  {
     "ts": "2026-09-20T09:05:14.206Z",
     "agent": "poster",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-10-02T19:31:59.436Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "19件抽出、履歴10件のいいね数を更新"
+  },
+  {
+    "ts": "2026-10-02T19:31:59.447Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴207件(計測済133) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-10-02T19:32:02.611Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第85世代へ更新 (ルールベース)、警告0件"
   }
 ]
