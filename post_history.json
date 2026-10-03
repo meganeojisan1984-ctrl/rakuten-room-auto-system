@@ -2793,5 +2793,18 @@
     "itemCodeHash": "132706f7a69f",
     "likes": 10,
     "likesUpdatedAt": "2026-10-02T19:31:59.410Z"
+  },
+  {
+    "ts": "2026-10-03T09:41:08.662Z",
+    "itemCode": "kashima-tokeiten:10096080",
+    "itemName": "【クーポン利用で15%OFF！4日20時〜】＜高評価★4.66 レビュー2,000件以上＞ ポータブル電源 500Wh 車中泊 大容量 ポータブルバッテリー 防災 蓄電池 発電機 防災グッズ 停電 家庭用蓄電池 小型 100V 家庭用 非常用電源 非常用 バッテリー ポータブル 電源 急速充電",
+    "genreName": "アウトドア",
+    "price": 55000,
+    "postType": 2,
+    "hour": 18,
+    "hook": "fallback",
+    "captionHead": "ITEM INFORMATION [スマートタップ",
+    "slot": "slot2",
+    "itemCodeHash": "87848b678058"
   }
 ]
