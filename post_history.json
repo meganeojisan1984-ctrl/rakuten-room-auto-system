@@ -2257,8 +2257,8 @@
     "captionHead": "外食多めでタンパク足りてない人、正直手を挙げて🙋",
     "slot": "slot2",
     "itemCodeHash": "c5fd5f359fbd",
-    "likes": 36,
-    "likesUpdatedAt": "2026-10-01T19:53:43.939Z"
+    "likes": 37,
+    "likesUpdatedAt": "2026-10-03T18:17:38.256Z"
   },
   {
     "ts": "2026-09-19T08:35:05.272Z",
@@ -2360,8 +2360,8 @@
     "captionHead": "【56%OFF】期待に応えて再販！ドキ子XAnua",
     "slot": "slot0",
     "itemCodeHash": "37049c8a1758",
-    "likes": 23,
-    "likesUpdatedAt": "2026-09-25T18:53:37.283Z"
+    "likes": 24,
+    "likesUpdatedAt": "2026-10-03T18:17:38.256Z"
   },
   {
     "ts": "2026-09-22T01:29:58.539Z",
@@ -2707,8 +2707,8 @@
     "captionHead": "え、待って。下地塗らなくていいファンデって本当に時",
     "slot": "slot0",
     "itemCodeHash": "97b54994dab9",
-    "likes": 11,
-    "likesUpdatedAt": "2026-10-02T19:31:59.410Z"
+    "likes": 12,
+    "likesUpdatedAt": "2026-10-03T18:17:38.256Z"
   },
   {
     "ts": "2026-10-01T01:51:25.765Z",
@@ -2818,6 +2818,8 @@
     "hook": "fallback",
     "captionHead": "[商品名]ミヨシ USB3.2 Gen2ハブ Aタ",
     "slot": "slot2",
-    "itemCodeHash": "7830de721c37"
+    "itemCodeHash": "7830de721c37",
+    "likes": 2,
+    "likesUpdatedAt": "2026-10-03T18:17:38.256Z"
   }
 ]
