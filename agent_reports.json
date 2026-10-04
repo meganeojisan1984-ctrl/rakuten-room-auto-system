@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-09-21T19:45:12.638Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴176件(計測済117) 実売0件(¥0) mode=likes"
-  },
-  {
-    "ts": "2026-09-21T19:45:15.739Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第74世代へ更新 (ルールベース)、警告0件"
-  },
-  {
-    "ts": "2026-09-22T01:28:24.209Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (美容・コスメ)"
-  },
-  {
-    "ts": "2026-09-22T01:28:25.192Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ1)"
-  },
-  {
     "ts": "2026-09-22T01:29:57.909Z",
     "agent": "poster",
     "ok": true,
@@ -1195,6 +1171,30 @@
   },
   {
     "ts": "2026-10-04T10:25:48.635Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-10-04T16:32:43.218Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (ダイエット商品)"
+  },
+  {
+    "ts": "2026-10-04T16:32:46.268Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ3)"
+  },
+  {
+    "ts": "2026-10-04T16:34:36.706Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-10-04T16:35:21.461Z",
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"

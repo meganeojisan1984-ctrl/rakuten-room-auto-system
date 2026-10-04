@@ -2847,5 +2847,18 @@
     "captionHead": "この商品のお支払い方法 お支払方法：銀行・カード・",
     "slot": "slot2",
     "itemCodeHash": "3a07d43add9c"
+  },
+  {
+    "ts": "2026-10-04T16:35:21.462Z",
+    "itemCode": "mobilebattery:10000262",
+    "itemName": "【4日20時〜★P5倍&最大10%OFF】 ココナッツオイル 1500ml (500ml×3本) オーガニック 有機JAS エキストラバージン 認定品 ココナッツ オイル 単品 オーガニックエクストラバージン 健康維持 GMP ダイエット コールドプレス 無添加 無精製 【SOMA FOODS】",
+    "genreName": "ダイエット商品",
+    "price": 3599,
+    "postType": 3,
+    "hour": 1,
+    "hook": "fallback",
+    "captionHead": "ダイエット商品の悩みを抱えたまま、続けやすい選び方",
+    "slot": "slot0",
+    "itemCodeHash": "0da528ad9e81"
   }
 ]

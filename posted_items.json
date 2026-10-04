@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "jism:14239718",
     "auc-risecreation:10005233",
     "hanadonya-associe:10962364",
     "roomy-garden:10021604",
@@ -499,7 +498,8 @@
     "kashima-tokeiten:10096080",
     "ssk-1:18386657",
     "apr-japan:10000959",
-    "ohw:10009319"
+    "ohw:10009319",
+    "mobilebattery:10000262"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
