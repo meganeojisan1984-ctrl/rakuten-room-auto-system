@@ -2821,5 +2821,18 @@
     "itemCodeHash": "7830de721c37",
     "likes": 2,
     "likesUpdatedAt": "2026-10-03T18:17:38.256Z"
+  },
+  {
+    "ts": "2026-10-04T02:27:45.682Z",
+    "itemCode": "apr-japan:10000959",
+    "itemName": "＼4日10:00〜★20%クーポン+GIFT付き／【公式】ブースタープロミニプラス・振動リフトクレンザーヘッド・リフトEMSローラー（韓国エステ 美顔器 美容家電 美容機器 ホームエステ 肌つや スキンケア 表情筋 中周波 EMS ハリ クレンザー メディキューブ ）",
+    "genreName": "美容機器",
+    "price": 12900,
+    "postType": 3,
+    "hour": 11,
+    "hook": "fallback",
+    "captionHead": "美容機器の悩みを抱えたまま、続けやすい選び方に迷う",
+    "slot": "slot0",
+    "itemCodeHash": "0dcb1e2cab8d"
   }
 ]
