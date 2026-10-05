@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "auc-risecreation:10005233",
     "hanadonya-associe:10962364",
     "roomy-garden:10021604",
     "coming:10000440",
@@ -499,7 +498,8 @@
     "ssk-1:18386657",
     "apr-japan:10000959",
     "ohw:10009319",
-    "mobilebattery:10000262"
+    "mobilebattery:10000262",
+    "pass-baton:10001842"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
