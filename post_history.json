@@ -2819,8 +2819,8 @@
     "captionHead": "[商品名]ミヨシ USB3.2 Gen2ハブ Aタ",
     "slot": "slot2",
     "itemCodeHash": "7830de721c37",
-    "likes": 10,
-    "likesUpdatedAt": "2026-10-04T18:22:41.230Z"
+    "likes": 14,
+    "likesUpdatedAt": "2026-10-05T21:38:58.435Z"
   },
   {
     "ts": "2026-10-04T02:27:45.682Z",
@@ -2885,6 +2885,8 @@
     "hook": "fallback",
     "captionHead": "※製品カラー、グリーンは【グラス】に、ブラウンは【",
     "slot": "slot2",
-    "itemCodeHash": "c753f1d7c918"
+    "itemCodeHash": "c753f1d7c918",
+    "likes": 4,
+    "likesUpdatedAt": "2026-10-05T21:38:58.435Z"
   }
 ]
