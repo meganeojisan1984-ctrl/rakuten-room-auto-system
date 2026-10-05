@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "hanadonya-associe:10962364",
     "roomy-garden:10021604",
     "coming:10000440",
     "rakuten24:11323149",
@@ -499,7 +498,8 @@
     "apr-japan:10000959",
     "ohw:10009319",
     "mobilebattery:10000262",
-    "pass-baton:10001842"
+    "pass-baton:10001842",
+    "of9:10005994"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
