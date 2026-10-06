@@ -2777,7 +2777,9 @@
     "hook": "fallback",
     "captionHead": "商品紹介 軽いハイキングにもタフなツアーにも対応す",
     "slot": "slot2",
-    "itemCodeHash": "4aa01c4277e3"
+    "itemCodeHash": "4aa01c4277e3",
+    "likes": 1,
+    "likesUpdatedAt": "2026-10-06T19:50:20.248Z"
   },
   {
     "ts": "2026-10-02T17:36:32.480Z",
@@ -2886,8 +2888,8 @@
     "captionHead": "※製品カラー、グリーンは【グラス】に、ブラウンは【",
     "slot": "slot2",
     "itemCodeHash": "c753f1d7c918",
-    "likes": 4,
-    "likesUpdatedAt": "2026-10-05T21:38:58.435Z"
+    "likes": 5,
+    "likesUpdatedAt": "2026-10-06T19:50:20.248Z"
   },
   {
     "ts": "2026-10-06T02:44:24.788Z",
@@ -2913,7 +2915,9 @@
     "hook": "fallback",
     "captionHead": "商品紹介 シフトアップしたハイキングを楽しむという",
     "slot": "slot2",
-    "itemCodeHash": "cfa9f44eea7d"
+    "itemCodeHash": "cfa9f44eea7d",
+    "likes": 1,
+    "likesUpdatedAt": "2026-10-06T19:50:20.248Z"
   },
   {
     "ts": "2026-10-06T18:03:21.530Z",
