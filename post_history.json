@@ -2914,5 +2914,18 @@
     "captionHead": "商品紹介 シフトアップしたハイキングを楽しむという",
     "slot": "slot2",
     "itemCodeHash": "cfa9f44eea7d"
+  },
+  {
+    "ts": "2026-10-06T18:03:21.530Z",
+    "itemCode": "tukeru-shopping:10000851",
+    "itemName": "【200週1位 甘酒】お米と米麹でつくったあまざけ 1L×6本 送料無料 米麹 砂糖不使用 無塩 ノンアルコール 粒なし 無添加 米麹甘酒 腸活 菌活 美活 発酵食品 あまざけ 麹 米こうじ あま酒 国産 紙 パック こうじや里村 コーセーフーズ レジスタントプロテイン",
+    "genreName": "ダイエット商品",
+    "price": 3850,
+    "postType": 2,
+    "hour": 3,
+    "hook": "fallback",
+    "captionHead": "新年の悩みを抱えたまま、続けやすい選び方に迷う人へ",
+    "slot": "slot0",
+    "itemCodeHash": "30b87de5408c"
   }
 ]

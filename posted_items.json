@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "rakuten24:11323149",
     "k-relight:10001303",
     "mujirushi-ryohin:10006096",
     "enetroom:10183587",
@@ -499,7 +498,8 @@
     "pass-baton:10001842",
     "of9:10005994",
     "takeuchi-labo:10000074",
-    "rosy-cats:10006072"
+    "rosy-cats:10006072",
+    "tukeru-shopping:10000851"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
