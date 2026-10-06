@@ -2888,5 +2888,18 @@
     "itemCodeHash": "c753f1d7c918",
     "likes": 4,
     "likesUpdatedAt": "2026-10-05T21:38:58.435Z"
+  },
+  {
+    "ts": "2026-10-06T02:44:24.788Z",
+    "itemCode": "takeuchi-labo:10000074",
+    "itemName": "【P2倍】 30種類のフレーバーから楽しめる！プロテイン ホエイ 1kg ザプロ ホエイプロテイン ダイエット 女性 男性 プロテインダイエット メロン バナナ ココア ストロベリー ピーチ レモン ヨーグルト 抹茶 マンゴー ミルクティー WPC 武内製薬 THE PROTEIN 送料無料",
+    "genreName": "ダイエット商品",
+    "price": 5980,
+    "postType": 3,
+    "hour": 11,
+    "hook": "fallback",
+    "captionHead": "ダイエット商品の悩みを抱えたまま、続けやすい選び方",
+    "slot": "slot0",
+    "itemCodeHash": "f1ae862caa41"
   }
 ]
