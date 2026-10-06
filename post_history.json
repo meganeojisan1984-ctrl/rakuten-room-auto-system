@@ -2901,5 +2901,18 @@
     "captionHead": "ダイエット商品の悩みを抱えたまま、続けやすい選び方",
     "slot": "slot0",
     "itemCodeHash": "f1ae862caa41"
+  },
+  {
+    "ts": "2026-10-06T11:02:11.950Z",
+    "itemCode": "rosy-cats:10006072",
+    "itemName": "【ラッピング無料】 マムート リュック 正規販売店 MAMMUT Lithium 15L アウトドア ザック 登山 クライミング 登山用リュック 山用品 登山用品 本格 本格的 メンズ レディース 彼氏 シンプル かっこいい おしゃれ 誕生日 プレゼント ブランド ギフト 人気 贈り物 お祝い",
+    "genreName": "アウトドア",
+    "price": 17600,
+    "postType": 3,
+    "hour": 20,
+    "hook": "fallback",
+    "captionHead": "商品紹介 シフトアップしたハイキングを楽しむという",
+    "slot": "slot2",
+    "itemCodeHash": "cfa9f44eea7d"
   }
 ]
