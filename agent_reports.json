@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-09-23T16:16:15.388Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ2)"
-  },
-  {
-    "ts": "2026-09-23T16:17:58.618Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-09-23T16:28:39.196Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-09-23T18:38:48.769Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "20件抽出、履歴9件のいいね数を更新"
-  },
-  {
     "ts": "2026-09-23T18:38:48.781Z",
     "agent": "analyst",
     "ok": true,
@@ -1195,6 +1171,30 @@
   },
   {
     "ts": "2026-10-07T02:08:42.540Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-10-07T10:49:41.088Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (PCガジェット)"
+  },
+  {
+    "ts": "2026-10-07T10:49:44.118Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ1)"
+  },
+  {
+    "ts": "2026-10-07T10:51:18.423Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-10-07T10:52:10.437Z",
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"

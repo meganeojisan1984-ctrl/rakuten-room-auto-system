@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "mujirushi-ryohin:10006096",
     "enetroom:10183587",
     "swarotonya:10002524",
     "cream-dot:10026699",
@@ -499,7 +498,8 @@
     "takeuchi-labo:10000074",
     "rosy-cats:10006072",
     "tukeru-shopping:10000851",
-    "tangram:10000184"
+    "tangram:10000184",
+    "hopestar:10000020"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
