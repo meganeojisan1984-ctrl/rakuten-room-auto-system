@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-09-23T18:38:48.781Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴180件(計測済119) 実売0件(¥0) mode=likes"
-  },
-  {
-    "ts": "2026-09-23T18:38:51.817Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第76世代へ更新 (ルールベース)、警告0件"
-  },
-  {
-    "ts": "2026-09-24T01:05:42.079Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (美容機器)"
-  },
-  {
     "ts": "2026-09-24T01:06:23.116Z",
     "agent": "copywriter",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-10-07T20:10:09.296Z",
+    "agent": "metrics",
+    "ok": false,
+    "summary": "投稿カードを1件も抽出できず（ROOMのDOM変更の可能性）"
+  },
+  {
+    "ts": "2026-10-07T20:10:09.309Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴219件(計測済137) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-10-07T20:10:13.876Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第90世代へ更新 (ルールベース)、警告0件"
   }
 ]
