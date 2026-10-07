@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "k-relight:10001303",
     "mujirushi-ryohin:10006096",
     "enetroom:10183587",
     "swarotonya:10002524",
@@ -499,7 +498,8 @@
     "of9:10005994",
     "takeuchi-labo:10000074",
     "rosy-cats:10006072",
-    "tukeru-shopping:10000851"
+    "tukeru-shopping:10000851",
+    "tangram:10000184"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
