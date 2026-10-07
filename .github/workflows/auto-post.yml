@@ -1,14 +1,12 @@
 name: 楽天ROOM 自動投稿
 
 on:
-  schedule:
-    # Phase 2: 3 crons/日 (persona multi モードで slot0/1/2 にローテ)
-    # JST 08:00 → UTC 23:00 (前日) — slot0 (ROOM + IG)
-    - cron: "0 23 * * *"
-    # JST 13:00 → UTC 04:00 — slot1 (IG のみ, SKIP_ROOM=1)
-    - cron: "0 4 * * *"
-    # JST 21:00 → UTC 12:00 — slot2 (ROOM + IG)
-    - cron: "0 12 * * *"
+  # PAUSED 2026-10-08: automatic schedule disabled. Restore the commented block to resume.
+  # schedule:
+  #   # Original schedules: JST 08:00, 13:00, 21:00
+  #   - cron: "0 23 * * *"
+  #   - cron: "0 4 * * *"
+  #   - cron: "0 12 * * *"
   # 手動実行も可能
   workflow_dispatch:
     inputs:
@@ -34,6 +32,8 @@ permissions:
 
 jobs:
   auto-post:
+    # PAUSED 2026-10-08: guard prevents all automatic/manual posting until explicitly resumed.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
