@@ -14,7 +14,7 @@ import { loadStrategy, weightedPick, appendHistory, report, type PostRecord } fr
 import { loadPersona, getSlot } from "./persona/persona";
 import { resolveSlot } from "./persona/slot-rotator";
 import { deriveItemCode } from "./affiliate/report-parser";
-import { createRoomPostIntent, clearRoomPostIntent, hasUnresolvedRoomPostIntent, persistRoomPostIntent, readRemoteRoomPostIntent, readRoomPostIntent, type RoomPostIntent } from "./room-post-intent";
+import { createRoomPostIntent, clearRoomPostIntent, persistPostedItemsAndVerify, hasUnresolvedRoomPostIntent, persistRoomPostIntent, readRemoteRoomPostIntent, readRoomPostIntent, type RoomPostIntent } from "./room-post-intent";
 
 const POSTED_ITEMS_FILE = path.join(process.cwd(), "posted_items.json");
 const MAX_HISTORY = 500; // 保持する最大件数
@@ -271,8 +271,11 @@ async function main(): Promise<void> {
   console.log(`[main] 投稿済みリストを更新: ${successCodes.length}件追加、結果不明隔離: ${uncertainItems.length}件`);
   console.log(`[main] 次回の投稿タイプ: ${getPostTypeLabel(getPostType(nextPostTypeIndex))}`);
 
-  // ROOM成功をローカル履歴へ永続化した後だけremote intentを消去する。
-  // この消去に失敗した場合はintentを残し、次回起動を安全側で停止する。
+  // 成功コードをremote posted stateへ保存・読み戻し検証した後だけintentを消去する。
+  // remote保存/検証/消去のいずれかに失敗した場合はintentを残し、次回起動を安全側で停止する。
+  if (roomIntent && successCodes.length > 0) {
+    await persistPostedItemsAndVerify(successCodes);
+  }
   if (roomIntent && results.length === captionedItems.length && results.every((result) => result.success)) {
     await clearRoomPostIntent(roomIntent.requestId);
   }
