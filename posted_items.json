@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "enetroom:10183587",
     "swarotonya:10002524",
     "cream-dot:10026699",
     "rack-kan:10004570",
@@ -499,7 +498,9 @@
     "rosy-cats:10006072",
     "tukeru-shopping:10000851",
     "tangram:10000184",
-    "hopestar:10000020"
+    "hopestar:10000020",
+    "auc-brainsewing:10000142"
   ],
-  "postTypeIndex": 2
+  "uncertainItemCodes": [],
+  "postTypeIndex": 0
 }
