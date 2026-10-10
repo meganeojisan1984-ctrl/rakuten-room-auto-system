@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import { createRoomPostIntent, hasUnresolvedRoomPostIntent, persistRoomPostIntent } from "../src/room-post-intent";
+import { clearRoomPostIntent, createRoomPostIntent, hasUnresolvedRoomPostIntent, persistRoomPostIntent } from "../src/room-post-intent";
 
 test("ROOM投稿intentは500件を超えてもunknownを切り捨てない", () => {
   const items = Array.from({ length: 501 }, (_, index) => ({
@@ -43,5 +43,54 @@ test("CIでintentのremote保存に失敗したら送信前に停止する", asy
     if (oldEnv.GITHUB_TOKEN === undefined) delete process.env.GITHUB_TOKEN; else process.env.GITHUB_TOKEN = oldEnv.GITHUB_TOKEN;
     if (oldEnv.GITHUB_REPOSITORY === undefined) delete process.env.GITHUB_REPOSITORY; else process.env.GITHUB_REPOSITORY = oldEnv.GITHUB_REPOSITORY;
     fs.rmSync(intentPath, { force: true });
+  }
+});
+
+test("remoteに既存未解決intentがあれば別runのintentで上書きしない", async () => {
+  const oldIntent = createRoomPostIntent([{ itemCode: "old", itemName: "既存", itemUrl: "https://example.test/old" }], "old-request");
+  const nextIntent = createRoomPostIntent([{ itemCode: "new", itemName: "新規", itemUrl: "https://example.test/new" }], "new-request");
+  const originalFetch = globalThis.fetch;
+  const oldEnv = { CI: process.env.CI, GITHUB_TOKEN: process.env.GITHUB_TOKEN, GITHUB_REPOSITORY: process.env.GITHUB_REPOSITORY, GITHUB_REF_NAME: process.env.GITHUB_REF_NAME };
+  const calls: string[] = [];
+  process.env.CI = "true"; process.env.GITHUB_TOKEN = "test-token"; process.env.GITHUB_REPOSITORY = "owner/repo"; process.env.GITHUB_REF_NAME = "main";
+  globalThis.fetch = async (_input, init) => {
+    calls.push(init?.method ?? "GET");
+    return new Response(JSON.stringify({
+      sha: "remote-sha",
+      content: Buffer.from(JSON.stringify(oldIntent)).toString("base64"),
+    }), { status: 200 });
+  };
+  try {
+    await assert.rejects(persistRoomPostIntent(nextIntent), /未解決ROOM投稿intent/);
+    assert.deepEqual(calls, ["GET"]);
+  } finally {
+    globalThis.fetch = originalFetch;
+    for (const [key, value] of Object.entries(oldEnv)) {
+      if (value === undefined) delete process.env[key]; else process.env[key] = value;
+    }
+  }
+});
+
+test("別requestIdのremote intentは消去しない", async () => {
+  const oldIntent = createRoomPostIntent([{ itemCode: "old", itemName: "既存", itemUrl: "https://example.test/old" }], "old-request");
+  const originalFetch = globalThis.fetch;
+  const oldEnv = { CI: process.env.CI, GITHUB_TOKEN: process.env.GITHUB_TOKEN, GITHUB_REPOSITORY: process.env.GITHUB_REPOSITORY, GITHUB_REF_NAME: process.env.GITHUB_REF_NAME };
+  const calls: string[] = [];
+  process.env.CI = "true"; process.env.GITHUB_TOKEN = "test-token"; process.env.GITHUB_REPOSITORY = "owner/repo"; process.env.GITHUB_REF_NAME = "feature";
+  globalThis.fetch = async (_input, init) => {
+    calls.push(init?.method ?? "GET");
+    return new Response(JSON.stringify({
+      sha: "remote-sha",
+      content: Buffer.from(JSON.stringify(oldIntent)).toString("base64"),
+    }), { status: 200 });
+  };
+  try {
+    await assert.rejects(clearRoomPostIntent("different-request"), /別requestId/);
+    assert.deepEqual(calls, ["GET"]);
+  } finally {
+    globalThis.fetch = originalFetch;
+    for (const [key, value] of Object.entries(oldEnv)) {
+      if (value === undefined) delete process.env[key]; else process.env[key] = value;
+    }
   }
 });
