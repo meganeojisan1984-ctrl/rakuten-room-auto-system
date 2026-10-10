@@ -25,3 +25,7 @@ jobs:
       - name: Unit tests
         if: always()
         run: npm test
+
+      - name: ROOM safety tests
+        if: always()
+        run: node --test --import tsx tests/poster.test.ts tests/room-post-intent.test.ts
