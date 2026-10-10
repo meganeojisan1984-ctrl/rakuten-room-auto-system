@@ -138,6 +138,38 @@ export async function persistRoomPostIntent(intent: RoomPostIntent): Promise<voi
 
 
 
+
+
+export async function syncPostedItemsFromRemote(): Promise<void> {
+  const context = authContext();
+  if (!context) return;
+  const postedApi = `https://api.github.com/repos/${context.repository}/contents/posted_items.json`;
+  const readApi = `${postedApi}?ref=${encodeURIComponent(process.env.GITHUB_REF_NAME || "main")}`;
+  const response = await fetch(readApi, { headers: context.headers });
+  if (response.status === 404) return;
+  if (!response.ok) throw new Error(`posted_items.jsonのactive branch取得に失敗しました: HTTP ${response.status}`);
+  const body = await response.json() as { content?: string };
+  if (!body.content) throw new Error("posted_items.jsonのactive branch内容がありません");
+  let remoteState: { postedItemCodes?: string[]; uncertainItemCodes?: string[]; postTypeIndex?: number };
+  try {
+    remoteState = JSON.parse(Buffer.from(body.content.replace(/\s/g, ""), "base64").toString("utf-8"));
+  } catch (error) {
+    throw new Error(`posted_items.jsonのactive branch内容を安全に読めません: ${String(error)}`);
+  }
+  const localPath = path.join(process.cwd(), "posted_items.json");
+  const localState = JSON.parse(fs.readFileSync(localPath, "utf-8")) as {
+    postedItemCodes?: string[];
+    uncertainItemCodes?: string[];
+    postTypeIndex?: number;
+  };
+  const merged = {
+    postedItemCodes: [...new Set([...(localState.postedItemCodes ?? []), ...(remoteState.postedItemCodes ?? [])])],
+    uncertainItemCodes: [...new Set([...(localState.uncertainItemCodes ?? []), ...(remoteState.uncertainItemCodes ?? [])])],
+    postTypeIndex: remoteState.postTypeIndex ?? localState.postTypeIndex ?? 0,
+  };
+  fs.writeFileSync(localPath, JSON.stringify(merged, null, 2) + "\n");
+}
+
 export async function persistPostedItemsAndVerify(requiredCodes: string[]): Promise<void> {
   if (requiredCodes.length === 0) return;
   const context = authContext();
