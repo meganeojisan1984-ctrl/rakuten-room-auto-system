@@ -140,12 +140,14 @@ test("posted stateをremote保存して読み戻し確認できるまで成功�
     if (init?.method === "PUT") return new Response("", { status: 200 });
     return new Response(JSON.stringify({
       sha: "posted-sha",
-      content: Buffer.from(JSON.stringify({ postedItemCodes: ["required"], postTypeIndex: 1 })).toString("base64"),
+      content: Buffer.from(JSON.stringify({ postedItemCodes: ["required", "remote-parallel"], postTypeIndex: 1 })).toString("base64"),
     }), { status: 200 });
   };
   try {
     await persistPostedItemsAndVerify(["required"]);
     assert.equal(call, 3);
+    const mergedLocal = JSON.parse(fs.readFileSync(postedPath, "utf-8")) as { postedItemCodes: string[] };
+    assert.equal(mergedLocal.postedItemCodes.includes("remote-parallel"), true);
   } finally {
     fs.writeFileSync(postedPath, originalPosted);
     globalThis.fetch = originalFetch;
