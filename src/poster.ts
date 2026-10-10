@@ -51,11 +51,13 @@ const SELECTORS = {
   successMessage: '.success-message, .post-success, [class*="success"]',
 };
 
-type PostResult = {
+export type PostResult = {
   success: boolean;
   itemName: string;
   itemUrl: string;
   error?: string;
+  /** True when the submit result is unknown; callers must not retry automatically. */
+  unknown?: boolean;
 };
 
 /**
@@ -270,13 +272,14 @@ async function postSingleItem(
     console.log("[poster] 投稿後ページHTML:", afterHtml);
     console.log("[poster] 投稿後URL:", postPage.url());
 
-    // 投稿完了を待機
-    await Promise.race([
-      postPage.waitForSelector(SELECTORS.successMessage, { timeout: 15000 }),
-      postPage.waitForURL((url) => url.href.includes("/room/"), { timeout: 15000 }),
-    ]).catch(async () => {
-      console.warn("[poster] 投稿完了確認タイムアウト（投稿自体は成功している可能性あり）");
-    });
+    // 投稿完了を待機。確認できない場合は成功扱いせず、再送禁止の結果不明で停止する。
+    const confirmed = await waitForPostCompletion(postPage);
+    if (!confirmed) {
+      const error = "投稿完了確認タイムアウト（投稿結果不明。再送禁止）";
+      console.error(`[poster] ⚠️ ${error}: ${item.itemName}`);
+      await notifyError("楽天ROOM投稿結果不明", error);
+      return { success: false, itemName: item.itemName, itemUrl: item.itemUrl, error, unknown: true };
+    }
 
     await notifySuccess(item.itemName, item.itemUrl);
     console.log(`[poster] ✅ 投稿成功: ${item.itemName}`);
@@ -302,6 +305,24 @@ async function postSingleItem(
   } finally {
     await browser.close();
   }
+}
+
+/**
+ * 投稿ボタン押下後の完了確認。タイムアウトは成功ではなく結果不明として扱う。
+ */
+export async function waitForPostCompletion(
+  postPage: {
+    waitForSelector: (selector: string, options: { timeout: number }) => Promise<unknown>;
+    waitForURL: (predicate: (url: URL) => boolean, options: { timeout: number }) => Promise<unknown>;
+  },
+  timeout = 15000
+): Promise<boolean> {
+  return Promise.race([
+    postPage.waitForSelector(SELECTORS.successMessage, { timeout }),
+    postPage.waitForURL((url) => url.href.includes("/room/"), { timeout }),
+  ])
+    .then(() => true)
+    .catch(() => false);
 }
 
 /**
