@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import { clearRoomPostIntent, createRoomPostIntent, hasUnresolvedRoomPostIntent, persistRoomPostIntent } from "../src/room-post-intent";
+import { clearRoomPostIntent, createRoomPostIntent, hasUnresolvedRoomPostIntent, persistPostedItemsAndVerify, persistRoomPostIntent, syncPostedItemsFromRemote } from "../src/room-post-intent";
 
 test("ROOM投稿intentは500件を超えてもunknownを切り捨てない", () => {
   const items = Array.from({ length: 501 }, (_, index) => ({
@@ -102,4 +102,76 @@ test("ROOM intentは履歴保存後にだけ消去しunknown一覧を切り捨�
   const cleared = source.indexOf("clearRoomPostIntent(roomIntent.requestId)");
   assert.ok(saved >= 0 && cleared > saved);
   assert.doesNotMatch(source, /uncertainItemCodes: \[\.\.\.uncertainCodes\]\.slice/);
+});
+
+test("古いcheckoutはactive branchの最新posted履歴を先に取り込む", async () => {
+  const originalFetch = globalThis.fetch;
+  const oldEnv = { CI: process.env.CI, GITHUB_TOKEN: process.env.GITHUB_TOKEN, GITHUB_REPOSITORY: process.env.GITHUB_REPOSITORY, GITHUB_REF_NAME: process.env.GITHUB_REF_NAME };
+  const postedPath = path.join(process.cwd(), "posted_items.json");
+  const originalPosted = fs.readFileSync(postedPath, "utf-8");
+  process.env.CI = "true"; process.env.GITHUB_TOKEN = "test-token"; process.env.GITHUB_REPOSITORY = "owner/repo"; process.env.GITHUB_REF_NAME = "main";
+  fs.writeFileSync(postedPath, JSON.stringify({ postedItemCodes: ["local-old"], postTypeIndex: 0 }));
+  globalThis.fetch = async () => new Response(JSON.stringify({
+    content: Buffer.from(JSON.stringify({ postedItemCodes: ["remote-new"], postTypeIndex: 2 })).toString("base64"),
+  }), { status: 200 });
+  try {
+    await syncPostedItemsFromRemote();
+    const merged = JSON.parse(fs.readFileSync(postedPath, "utf-8")) as { postedItemCodes: string[] };
+    assert.deepEqual(new Set(merged.postedItemCodes), new Set(["local-old", "remote-new"]));
+  } finally {
+    fs.writeFileSync(postedPath, originalPosted);
+    globalThis.fetch = originalFetch;
+    for (const [key, value] of Object.entries(oldEnv)) {
+      if (value === undefined) delete process.env[key]; else process.env[key] = value;
+    }
+  }
+});
+
+test("posted stateをremote保存して読み戻し確認できるまで成功扱いしない", async () => {
+  const originalFetch = globalThis.fetch;
+  const oldEnv = { CI: process.env.CI, GITHUB_TOKEN: process.env.GITHUB_TOKEN, GITHUB_REPOSITORY: process.env.GITHUB_REPOSITORY, GITHUB_REF_NAME: process.env.GITHUB_REF_NAME };
+  const postedPath = path.join(process.cwd(), "posted_items.json");
+  const originalPosted = fs.readFileSync(postedPath, "utf-8");
+  process.env.CI = "true"; process.env.GITHUB_TOKEN = "test-token"; process.env.GITHUB_REPOSITORY = "owner/repo"; process.env.GITHUB_REF_NAME = "main";
+  fs.writeFileSync(postedPath, JSON.stringify({ postedItemCodes: ["required"], postTypeIndex: 1 }));
+  let call = 0;
+  globalThis.fetch = async (_input, init) => {
+    call += 1;
+    if (init?.method === "PUT") return new Response("", { status: 200 });
+    return new Response(JSON.stringify({
+      sha: "posted-sha",
+      content: Buffer.from(JSON.stringify({ postedItemCodes: ["required"], postTypeIndex: 1 })).toString("base64"),
+    }), { status: 200 });
+  };
+  try {
+    await persistPostedItemsAndVerify(["required"]);
+    assert.equal(call, 3);
+  } finally {
+    fs.writeFileSync(postedPath, originalPosted);
+    globalThis.fetch = originalFetch;
+    for (const [key, value] of Object.entries(oldEnv)) {
+      if (value === undefined) delete process.env[key]; else process.env[key] = value;
+    }
+  }
+});
+
+test("posted stateのremote保存失敗時はintent解除へ進めない", async () => {
+  const originalFetch = globalThis.fetch;
+  const oldEnv = { CI: process.env.CI, GITHUB_TOKEN: process.env.GITHUB_TOKEN, GITHUB_REPOSITORY: process.env.GITHUB_REPOSITORY, GITHUB_REF_NAME: process.env.GITHUB_REF_NAME };
+  const postedPath = path.join(process.cwd(), "posted_items.json");
+  const originalPosted = fs.readFileSync(postedPath, "utf-8");
+  process.env.CI = "true"; process.env.GITHUB_TOKEN = "test-token"; process.env.GITHUB_REPOSITORY = "owner/repo"; process.env.GITHUB_REF_NAME = "main";
+  fs.writeFileSync(postedPath, JSON.stringify({ postedItemCodes: ["required"], postTypeIndex: 1 }));
+  globalThis.fetch = async (_input, init) => init?.method === "PUT"
+    ? new Response("", { status: 500 })
+    : new Response(JSON.stringify({ sha: "posted-sha", content: Buffer.from(JSON.stringify({ postedItemCodes: [] })).toString("base64") }), { status: 200 });
+  try {
+    await assert.rejects(persistPostedItemsAndVerify(["required"]), /remote保存に失敗/);
+  } finally {
+    fs.writeFileSync(postedPath, originalPosted);
+    globalThis.fetch = originalFetch;
+    for (const [key, value] of Object.entries(oldEnv)) {
+      if (value === undefined) delete process.env[key]; else process.env[key] = value;
+    }
+  }
 });
