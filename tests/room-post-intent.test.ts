@@ -36,7 +36,7 @@ test("CIでintentのremote保存に失敗したら送信前に停止する", asy
   globalThis.fetch = async () => new Response("", { status: 500 });
   try {
     await assert.rejects(persistRoomPostIntent(intent), /ROOM投稿intent.*失敗/);
-    assert.equal(fs.existsSync(intentPath), true);
+    assert.equal(fs.existsSync(intentPath), false);
   } finally {
     globalThis.fetch = originalFetch;
     if (oldEnv.CI === undefined) delete process.env.CI; else process.env.CI = oldEnv.CI;
