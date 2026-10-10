@@ -90,7 +90,8 @@ function authContext(): { token: string; repository: string; api: string; header
 export async function readRemoteRoomPostIntent(): Promise<RemoteRoomPostIntent> {
   const context = authContext();
   if (!context) return { intent: emptyIntent(), available: false };
-  const response = await fetch(context.api, { headers: context.headers });
+  const readApi = `${context.api}?ref=${encodeURIComponent(process.env.GITHUB_REF_NAME || "main")}`;
+  const response = await fetch(readApi, { headers: context.headers });
   if (response.status === 404) return { intent: emptyIntent(), available: true };
   if (!response.ok) throw new Error(`ROOM投稿intentのremote確認に失敗しました: HTTP ${response.status}`);
   const body = await response.json() as { sha?: string; content?: string };
