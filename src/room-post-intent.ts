@@ -136,6 +136,66 @@ export async function persistRoomPostIntent(intent: RoomPostIntent): Promise<voi
   await writeRemote(intent, remote.sha);
 }
 
+
+
+export async function persistPostedItemsAndVerify(requiredCodes: string[]): Promise<void> {
+  if (requiredCodes.length === 0) return;
+  const context = authContext();
+  if (!context) return;
+
+  const postedApi = `https://api.github.com/repos/${context.repository}/contents/posted_items.json`;
+  const readApi = `${postedApi}?ref=${encodeURIComponent(process.env.GITHUB_REF_NAME || "main")}`;
+  const headers = context.headers;
+  const current = await fetch(readApi, { headers });
+  let remoteSha: string | undefined;
+  let remoteState: { postedItemCodes?: string[]; uncertainItemCodes?: string[]; postTypeIndex?: number } = {};
+  if (current.ok) {
+    const body = await current.json() as { sha?: string; content?: string };
+    remoteSha = body.sha;
+    if (body.content) {
+      try {
+        remoteState = JSON.parse(Buffer.from(body.content.replace(/\s/g, ""), "base64").toString("utf-8"));
+      } catch (error) {
+        throw new Error(`posted_items.jsonのremote内容を安全に読めません: ${String(error)}`);
+      }
+    }
+  } else if (current.status !== 404) {
+    throw new Error(`posted_items.jsonのremote確認に失敗しました: HTTP ${current.status}`);
+  }
+
+  const localPath = path.join(process.cwd(), "posted_items.json");
+  const localState = JSON.parse(fs.readFileSync(localPath, "utf-8")) as {
+    postedItemCodes?: string[];
+    uncertainItemCodes?: string[];
+    postTypeIndex?: number;
+  };
+  const merged = {
+    postedItemCodes: [...new Set([...(remoteState.postedItemCodes ?? []), ...(localState.postedItemCodes ?? [])])],
+    uncertainItemCodes: [...new Set([...(remoteState.uncertainItemCodes ?? []), ...(localState.uncertainItemCodes ?? [])])],
+    postTypeIndex: localState.postTypeIndex ?? remoteState.postTypeIndex ?? 0,
+  };
+  const response = await fetch(postedApi, {
+    method: "PUT",
+    headers,
+    body: JSON.stringify({
+      message: "chore: persist ROOM posted state before clearing intent [skip ci]",
+      content: Buffer.from(JSON.stringify(merged, null, 2) + "\n").toString("base64"),
+      branch: process.env.GITHUB_REF_NAME || "main",
+      ...(remoteSha ? { sha: remoteSha } : {}),
+    }),
+  });
+  if (!response.ok) throw new Error(`posted_items.jsonのremote保存に失敗しました: HTTP ${response.status}`);
+
+  const verify = await fetch(readApi, { headers });
+  if (!verify.ok) throw new Error(`posted_items.jsonのremote読み戻しに失敗しました: HTTP ${verify.status}`);
+  const verifyBody = await verify.json() as { content?: string };
+  if (!verifyBody.content) throw new Error("posted_items.jsonのremote読み戻し内容がありません");
+  const verified = JSON.parse(Buffer.from(verifyBody.content.replace(/\s/g, ""), "base64").toString("utf-8")) as { postedItemCodes?: string[] };
+  if (!requiredCodes.every((code) => (verified.postedItemCodes ?? []).includes(code))) {
+    throw new Error("posted_items.jsonのremote読み戻しに成功コードがありません");
+  }
+}
+
 export async function clearRoomPostIntent(requestId: string): Promise<void> {
   const remote = await readRemoteRoomPostIntent();
   if (!hasUnresolvedRoomPostIntent(remote.intent)) {
