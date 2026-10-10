@@ -20,24 +20,31 @@ const MAX_HISTORY = 500; // 保持する最大件数
 
 interface PostedItemsState {
   postedItemCodes: string[];
+  uncertainItemCodes?: string[]; // 投稿結果不明。手動確認まで自動再送しない
   postTypeIndex: number; // 0=評価取り, 1=売上, 2=送客 → ローテーション
 }
 
-function loadState(): { codes: Set<string>; postTypeIndex: number } {
+function loadState(): { codes: Set<string>; uncertainCodes: Set<string>; postTypeIndex: number } {
   try {
     const data: PostedItemsState = JSON.parse(fs.readFileSync(POSTED_ITEMS_FILE, "utf-8"));
+    const uncertainCodes = new Set<string>(data.uncertainItemCodes ?? []);
     return {
-      codes: new Set<string>(data.postedItemCodes ?? []),
+      codes: new Set<string>([...(data.postedItemCodes ?? []), ...uncertainCodes]),
+      uncertainCodes,
       postTypeIndex: data.postTypeIndex ?? 0,
     };
   } catch {
-    return { codes: new Set<string>(), postTypeIndex: 0 };
+    return { codes: new Set<string>(), uncertainCodes: new Set<string>(), postTypeIndex: 0 };
   }
 }
 
-function saveState(codes: Set<string>, postTypeIndex: number): void {
-  const arr = [...codes].slice(-MAX_HISTORY);
-  const state: PostedItemsState = { postedItemCodes: arr, postTypeIndex };
+function saveState(codes: Set<string>, postTypeIndex: number, uncertainCodes: Set<string>): void {
+  const arr = [...codes].filter((code) => !uncertainCodes.has(code)).slice(-MAX_HISTORY);
+  const state: PostedItemsState = {
+    postedItemCodes: arr,
+    uncertainItemCodes: [...uncertainCodes].slice(-MAX_HISTORY),
+    postTypeIndex,
+  };
   fs.writeFileSync(POSTED_ITEMS_FILE, JSON.stringify(state, null, 2));
 }
 
@@ -82,7 +89,7 @@ async function main(): Promise<void> {
   const SKIP_ROOM = process.env.SKIP_ROOM === "1";
   console.log(`[main] active persona: ${slot.id} (${slot.name}) SKIP_ROOM=${SKIP_ROOM}`);
 
-  const { codes: postedCodes, postTypeIndex } = loadState();
+  const { codes: postedCodes, uncertainCodes, postTypeIndex } = loadState();
   const postType = getPostType(postTypeIndex);
   console.log(`[main] 投稿済み商品数: ${postedCodes.size}件（除外対象）`);
   if (!TREND_MODE) {
@@ -235,15 +242,15 @@ async function main(): Promise<void> {
   }));
   if (historyRecords.length > 0) appendHistory(historyRecords);
 
-  // 成功した商品を投稿済みリストに追加して保存。投稿タイプを次に進める
+  // 成功商品を記録し、結果不明の商品は手動確認まで自動再送対象から隔離する
   const successCodes = succeededItems.map((c) => c.item.itemCode);
+  const uncertainItems = captionedItems.filter((_, i) => results[i]?.unknown);
   for (const code of successCodes) postedCodes.add(code);
+  for (const item of uncertainItems) uncertainCodes.add(item.item.itemCode);
   const nextPostTypeIndex = (postTypeIndex + 1) % 3;
-  if (successCodes.length > 0 || true) {
-    saveState(postedCodes, nextPostTypeIndex);
-    console.log(`[main] 投稿済みリストを更新: ${successCodes.length}件追加`);
-    console.log(`[main] 次回の投稿タイプ: ${getPostTypeLabel(getPostType(nextPostTypeIndex))}`);
-  }
+  saveState(postedCodes, nextPostTypeIndex, uncertainCodes);
+  console.log(`[main] 投稿済みリストを更新: ${successCodes.length}件追加、結果不明隔離: ${uncertainItems.length}件`);
+  console.log(`[main] 次回の投稿タイプ: ${getPostTypeLabel(getPostType(nextPostTypeIndex))}`);
 
   // 全件失敗の場合は異常終了
   if (succeeded === 0) {
