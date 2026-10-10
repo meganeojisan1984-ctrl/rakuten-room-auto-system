@@ -501,6 +501,8 @@
     "hopestar:10000020",
     "auc-brainsewing:10000142"
   ],
-  "uncertainItemCodes": [],
-  "postTypeIndex": 0
+  "uncertainItemCodes": [
+    "mikirona:10000048"
+  ],
+  "postTypeIndex": 1
 }

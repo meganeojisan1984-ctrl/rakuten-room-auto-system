@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-09-24T16:40:07.493Z",
-    "agent": "promoter",
-    "ok": false,
-    "summary": "IG=失敗/未設定, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-09-24T18:41:20.761Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "20件抽出、履歴5件のいいね数を更新"
-  },
-  {
-    "ts": "2026-09-24T18:41:20.792Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴183件(計測済120) 実売0件(¥0) mode=likes"
-  },
-  {
     "ts": "2026-09-24T18:41:23.780Z",
     "agent": "commander",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-10-10T16:51:30.084Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (美容機器)"
+  },
+  {
+    "ts": "2026-10-10T16:51:32.641Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ2)"
+  },
+  {
+    "ts": "2026-10-10T16:53:05.634Z",
+    "agent": "poster",
+    "ok": false,
+    "summary": "成功0件/失敗1件 (投稿完了確認タイムアウト（投稿結果不明。再送禁止）)"
   }
 ]
