@@ -14,28 +14,37 @@ export interface RoomPostIntent {
   items: RoomPostIntentItem[];
 }
 
+export interface RemoteRoomPostIntent {
+  intent: RoomPostIntent;
+  sha?: string;
+  available: boolean;
+}
+
 const INTENT_FILE = path.join(process.cwd(), "room_post_intent.json");
 
 function emptyIntent(): RoomPostIntent {
   return { version: 1, requestId: "", createdAt: "", items: [] };
 }
 
+function parseIntent(raw: unknown): RoomPostIntent {
+  if (!raw || typeof raw !== "object") throw new Error("intentがオブジェクトではありません");
+  const value = raw as Partial<RoomPostIntent>;
+  if (!Array.isArray(value.items)) throw new Error("itemsが配列ではありません");
+  return {
+    version: 1,
+    requestId: String(value.requestId ?? ""),
+    createdAt: String(value.createdAt ?? ""),
+    items: value.items.map((item) => ({
+      itemCode: String(item.itemCode),
+      itemName: String(item.itemName),
+      itemUrl: String(item.itemUrl),
+    })),
+  };
+}
+
 export function readRoomPostIntent(): RoomPostIntent {
   try {
-    const value = JSON.parse(fs.readFileSync(INTENT_FILE, "utf-8")) as Partial<RoomPostIntent>;
-    if (!Array.isArray(value.items)) {
-      throw new Error("itemsが配列ではありません");
-    }
-    return {
-      version: 1,
-      requestId: String(value.requestId ?? ""),
-      createdAt: String(value.createdAt ?? ""),
-      items: value.items.map((item) => ({
-        itemCode: String(item.itemCode),
-        itemName: String(item.itemName),
-        itemUrl: String(item.itemUrl),
-      })),
-    };
+    return parseIntent(JSON.parse(fs.readFileSync(INTENT_FILE, "utf-8")));
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return emptyIntent();
     throw new Error(`ROOM投稿intentを安全に読み込めません: ${String(error)}`);
@@ -56,35 +65,51 @@ function writeLocal(intent: RoomPostIntent): void {
   fs.renameSync(temp, INTENT_FILE);
 }
 
-async function writeRemote(intent: RoomPostIntent): Promise<void> {
+function authContext(): { token: string; repository: string; api: string; headers: Record<string, string> } | null {
   const token = process.env.GITHUB_TOKEN;
   const repository = process.env.GITHUB_REPOSITORY;
   if (!token || !repository) {
     if (process.env.CI === "true") {
       throw new Error("CIでのROOM投稿intent永続化に必要な既存GitHub環境がありません");
     }
-    return;
+    return null;
   }
-
-  const api = `https://api.github.com/repos/${repository}/contents/room_post_intent.json`;
-  const headers = {
-    Accept: "application/vnd.github+json",
-    Authorization: `Bearer ${token}`,
-    "X-GitHub-Api-Version": "2022-11-28",
-    "Content-Type": "application/json",
+  return {
+    token,
+    repository,
+    api: `https://api.github.com/repos/${repository}/contents/room_post_intent.json`,
+    headers: {
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${token}`,
+      "X-GitHub-Api-Version": "2022-11-28",
+      "Content-Type": "application/json",
+    },
   };
-  const current = await fetch(api, { headers });
-  let sha: string | undefined;
-  if (current.ok) {
-    const body = await current.json() as { sha?: string };
-    sha = body.sha;
-  } else if (current.status !== 404) {
-    throw new Error(`ROOM投稿intentの既存状態確認に失敗しました: HTTP ${current.status}`);
-  }
+}
 
-  const response = await fetch(api, {
+export async function readRemoteRoomPostIntent(): Promise<RemoteRoomPostIntent> {
+  const context = authContext();
+  if (!context) return { intent: emptyIntent(), available: false };
+  const response = await fetch(context.api, { headers: context.headers });
+  if (response.status === 404) return { intent: emptyIntent(), available: true };
+  if (!response.ok) throw new Error(`ROOM投稿intentのremote確認に失敗しました: HTTP ${response.status}`);
+  const body = await response.json() as { sha?: string; content?: string };
+  if (!body.content) throw new Error("ROOM投稿intentのremote内容がありません");
+  let intent: RoomPostIntent;
+  try {
+    intent = parseIntent(JSON.parse(Buffer.from(body.content.replace(/\s/g, ""), "base64").toString("utf-8")));
+  } catch (error) {
+    throw new Error(`ROOM投稿intentのremote内容を安全に読めません: ${String(error)}`);
+  }
+  return { intent, sha: body.sha, available: true };
+}
+
+async function writeRemote(intent: RoomPostIntent, sha?: string): Promise<void> {
+  const context = authContext();
+  if (!context) return;
+  const response = await fetch(context.api, {
     method: "PUT",
-    headers,
+    headers: context.headers,
     body: JSON.stringify({
       message: intent.items.length > 0
         ? `chore: persist ROOM post intent ${intent.requestId} [skip ci]`
@@ -94,18 +119,32 @@ async function writeRemote(intent: RoomPostIntent): Promise<void> {
       ...(sha ? { sha } : {}),
     }),
   });
-  if (!response.ok) {
-    throw new Error(`ROOM投稿intentの永続化に失敗しました: HTTP ${response.status}`);
-  }
+  if (!response.ok) throw new Error(`ROOM投稿intentの永続化に失敗しました: HTTP ${response.status}`);
 }
 
 export async function persistRoomPostIntent(intent: RoomPostIntent): Promise<void> {
+  const remote = await readRemoteRoomPostIntent();
+  if (hasUnresolvedRoomPostIntent(remote.intent)) {
+    if (remote.intent.requestId !== intent.requestId) {
+      throw new Error(`既存の未解決ROOM投稿intentがあります（requestId=${remote.intent.requestId}）。再送しません`);
+    }
+    writeLocal(intent);
+    return;
+  }
   writeLocal(intent);
-  await writeRemote(intent);
+  await writeRemote(intent, remote.sha);
 }
 
 export async function clearRoomPostIntent(requestId: string): Promise<void> {
+  const remote = await readRemoteRoomPostIntent();
+  if (!hasUnresolvedRoomPostIntent(remote.intent)) {
+    writeLocal(emptyIntent());
+    return;
+  }
+  if (remote.intent.requestId !== requestId) {
+    throw new Error(`別requestIdのROOM投稿intentを消去しません（requestId=${remote.intent.requestId}）`);
+  }
   const cleared = { version: 1 as const, requestId, createdAt: new Date().toISOString(), items: [] };
-  await writeRemote(cleared);
+  await writeRemote(cleared, remote.sha);
   writeLocal(cleared);
 }
