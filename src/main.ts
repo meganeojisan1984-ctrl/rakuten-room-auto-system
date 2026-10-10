@@ -14,7 +14,7 @@ import { loadStrategy, weightedPick, appendHistory, report, type PostRecord } fr
 import { loadPersona, getSlot } from "./persona/persona";
 import { resolveSlot } from "./persona/slot-rotator";
 import { deriveItemCode } from "./affiliate/report-parser";
-import { createRoomPostIntent, clearRoomPostIntent, hasUnresolvedRoomPostIntent, persistRoomPostIntent, readRoomPostIntent } from "./room-post-intent";
+import { createRoomPostIntent, clearRoomPostIntent, hasUnresolvedRoomPostIntent, persistRoomPostIntent, readRemoteRoomPostIntent, readRoomPostIntent, type RoomPostIntent } from "./room-post-intent";
 
 const POSTED_ITEMS_FILE = path.join(process.cwd(), "posted_items.json");
 const MAX_HISTORY = 500; // 保持する最大件数
@@ -43,7 +43,7 @@ function saveState(codes: Set<string>, postTypeIndex: number, uncertainCodes: Se
   const arr = [...codes].filter((code) => !uncertainCodes.has(code)).slice(-MAX_HISTORY);
   const state: PostedItemsState = {
     postedItemCodes: arr,
-    uncertainItemCodes: [...uncertainCodes].slice(-MAX_HISTORY),
+    uncertainItemCodes: [...uncertainCodes],
     postTypeIndex,
   };
   fs.writeFileSync(POSTED_ITEMS_FILE, JSON.stringify(state, null, 2));
@@ -84,8 +84,10 @@ async function main(): Promise<void> {
   console.log(`投稿数: ${POST_COUNT}件\n`);
 
   const pendingIntent = readRoomPostIntent();
-  if (hasUnresolvedRoomPostIntent(pendingIntent)) {
-    throw new Error(`未解決のROOM投稿intentがあります（requestId=${pendingIntent.requestId}）。手動確認まで再送しません`);
+  const remoteIntent = await readRemoteRoomPostIntent();
+  if (hasUnresolvedRoomPostIntent(pendingIntent) || hasUnresolvedRoomPostIntent(remoteIntent.intent)) {
+    const blockedIntent = hasUnresolvedRoomPostIntent(remoteIntent.intent) ? remoteIntent.intent : pendingIntent;
+    throw new Error(`未解決のROOM投稿intentがあります（requestId=${blockedIntent.requestId}）。remoteを権威状態として手動確認まで再送しません`);
   }
 
   // Phase 2: 本回の担当 persona を決定
@@ -165,6 +167,7 @@ async function main(): Promise<void> {
 
   // Step 3: 楽天ROOMへ投稿（SKIP_ROOM=1 の cron 枠は IG のみ）
   let results: Awaited<ReturnType<typeof postItems>>;
+  let roomIntent: RoomPostIntent | undefined;
   if (SKIP_ROOM) {
     console.log("--- [3/3] SKIP_ROOM=1 のため ROOM 投稿をスキップ ---");
     results = captionedItems.map((c) => ({
@@ -176,17 +179,15 @@ async function main(): Promise<void> {
     try {
       console.log("--- [3/3] 楽天ROOMへ投稿中 ---");
       // クリック前に意図を永続化。保存できなければ1件も送信しない。
-      const intent = createRoomPostIntent(captionedItems.map((c) => ({
+      roomIntent = createRoomPostIntent(captionedItems.map((c) => ({
         itemCode: c.item.itemCode,
         itemName: c.item.itemName,
         itemUrl: c.item.itemUrl,
       })));
-      await persistRoomPostIntent(intent);
+      await persistRoomPostIntent(roomIntent);
       const headless = process.env.CI === "true" || process.env.HEADLESS !== "false";
       results = await postItems(captionedItems, headless);
-      if (results.length === captionedItems.length && results.every((result) => result.success)) {
-        await clearRoomPostIntent(intent.requestId);
-      } else {
+      if (!(results.length === captionedItems.length && results.every((result) => result.success))) {
         console.warn("[main] ROOM投稿が全件確認できないためintentを保持します。再送禁止。");
       }
     } catch (err) {
@@ -269,6 +270,12 @@ async function main(): Promise<void> {
   saveState(postedCodes, nextPostTypeIndex, uncertainCodes);
   console.log(`[main] 投稿済みリストを更新: ${successCodes.length}件追加、結果不明隔離: ${uncertainItems.length}件`);
   console.log(`[main] 次回の投稿タイプ: ${getPostTypeLabel(getPostType(nextPostTypeIndex))}`);
+
+  // ROOM成功をローカル履歴へ永続化した後だけremote intentを消去する。
+  // この消去に失敗した場合はintentを残し、次回起動を安全側で停止する。
+  if (roomIntent && results.length === captionedItems.length && results.every((result) => result.success)) {
+    await clearRoomPostIntent(roomIntent.requestId);
+  }
 
   // 全件失敗の場合は異常終了
   if (succeeded === 0) {
