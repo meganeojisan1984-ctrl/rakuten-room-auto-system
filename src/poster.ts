@@ -346,6 +346,12 @@ export async function postItems(
       await new Promise((resolve) => setTimeout(resolve, waitMs));
     }
 
+    // 投稿結果不明は二重投稿防止のため即時中断
+    if (result.unknown) {
+      console.error("[poster] 投稿結果不明のため、後続商品の投稿を中断します");
+      break;
+    }
+
     // 致命的なエラー（Cookie切れ・CAPTCHA）は即時中断
     if (!result.success && result.error) {
       const isFatal =
