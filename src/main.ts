@@ -14,7 +14,7 @@ import { loadStrategy, weightedPick, appendHistory, report, type PostRecord } fr
 import { loadPersona, getSlot } from "./persona/persona";
 import { resolveSlot } from "./persona/slot-rotator";
 import { deriveItemCode } from "./affiliate/report-parser";
-import { createRoomPostIntent, clearRoomPostIntent, persistPostedItemsAndVerify, hasUnresolvedRoomPostIntent, persistRoomPostIntent, readRemoteRoomPostIntent, readRoomPostIntent, type RoomPostIntent } from "./room-post-intent";
+import { createRoomPostIntent, clearRoomPostIntent, persistPostedItemsAndVerify, syncPostedItemsFromRemote, hasUnresolvedRoomPostIntent, persistRoomPostIntent, readRemoteRoomPostIntent, readRoomPostIntent, type RoomPostIntent } from "./room-post-intent";
 
 const POSTED_ITEMS_FILE = path.join(process.cwd(), "posted_items.json");
 const MAX_HISTORY = 500; // 保持する最大件数
@@ -89,6 +89,8 @@ async function main(): Promise<void> {
     const blockedIntent = hasUnresolvedRoomPostIntent(remoteIntent.intent) ? remoteIntent.intent : pendingIntent;
     throw new Error(`未解決のROOM投稿intentがあります（requestId=${blockedIntent.requestId}）。remoteを権威状態として手動確認まで再送しません`);
   }
+  // 古いcheckoutの履歴で商品を再選定しないようactive branchの履歴を先に同期する。
+  await syncPostedItemsFromRemote();
 
   // Phase 2: 本回の担当 persona を決定
   const persona = loadPersona();
