@@ -30,6 +30,7 @@ test("CIでintentのremote保存に失敗したら送信前に停止する", asy
     GITHUB_REPOSITORY: process.env.GITHUB_REPOSITORY,
   };
   const intentPath = path.join(process.cwd(), "room_post_intent.json");
+  fs.rmSync(intentPath, { force: true });
   process.env.CI = "true";
   process.env.GITHUB_TOKEN = "test-token";
   process.env.GITHUB_REPOSITORY = "owner/repo";
