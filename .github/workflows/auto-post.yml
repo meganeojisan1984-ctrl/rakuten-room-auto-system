@@ -118,7 +118,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add posted_items.json post_history.json agent_reports.json
+          git add posted_items.json post_history.json agent_reports.json room_post_intent.json
           if git diff --staged --quiet; then
             echo "no staged changes, skip commit"
             exit 0
