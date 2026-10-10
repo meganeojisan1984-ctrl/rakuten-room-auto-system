@@ -23,7 +23,9 @@ function emptyIntent(): RoomPostIntent {
 export function readRoomPostIntent(): RoomPostIntent {
   try {
     const value = JSON.parse(fs.readFileSync(INTENT_FILE, "utf-8")) as Partial<RoomPostIntent>;
-    if (!Array.isArray(value.items)) return emptyIntent();
+    if (!Array.isArray(value.items)) {
+      throw new Error("itemsが配列ではありません");
+    }
     return {
       version: 1,
       requestId: String(value.requestId ?? ""),
@@ -34,8 +36,9 @@ export function readRoomPostIntent(): RoomPostIntent {
         itemUrl: String(item.itemUrl),
       })),
     };
-  } catch {
-    return emptyIntent();
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return emptyIntent();
+    throw new Error(`ROOM投稿intentを安全に読み込めません: ${String(error)}`);
   }
 }
 
