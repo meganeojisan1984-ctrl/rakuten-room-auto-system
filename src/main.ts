@@ -14,6 +14,7 @@ import { loadStrategy, weightedPick, appendHistory, report, type PostRecord } fr
 import { loadPersona, getSlot } from "./persona/persona";
 import { resolveSlot } from "./persona/slot-rotator";
 import { deriveItemCode } from "./affiliate/report-parser";
+import { createRoomPostIntent, clearRoomPostIntent, hasUnresolvedRoomPostIntent, persistRoomPostIntent, readRoomPostIntent } from "./room-post-intent";
 
 const POSTED_ITEMS_FILE = path.join(process.cwd(), "posted_items.json");
 const MAX_HISTORY = 500; // 保持する最大件数
@@ -81,6 +82,11 @@ async function main(): Promise<void> {
   console.log(`実行時刻: ${new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })}`);
   console.log(`モード: ${TREND_MODE ? "トレンド投稿" : `ランキング投稿 (${process.env.TARGET_GENRE ?? "general"})`}`);
   console.log(`投稿数: ${POST_COUNT}件\n`);
+
+  const pendingIntent = readRoomPostIntent();
+  if (hasUnresolvedRoomPostIntent(pendingIntent)) {
+    throw new Error(`未解決のROOM投稿intentがあります（requestId=${pendingIntent.requestId}）。手動確認まで再送しません`);
+  }
 
   // Phase 2: 本回の担当 persona を決定
   const persona = loadPersona();
@@ -169,8 +175,20 @@ async function main(): Promise<void> {
   } else {
     try {
       console.log("--- [3/3] 楽天ROOMへ投稿中 ---");
+      // クリック前に意図を永続化。保存できなければ1件も送信しない。
+      const intent = createRoomPostIntent(captionedItems.map((c) => ({
+        itemCode: c.item.itemCode,
+        itemName: c.item.itemName,
+        itemUrl: c.item.itemUrl,
+      })));
+      await persistRoomPostIntent(intent);
       const headless = process.env.CI === "true" || process.env.HEADLESS !== "false";
       results = await postItems(captionedItems, headless);
+      if (results.length === captionedItems.length && results.every((result) => result.success)) {
+        await clearRoomPostIntent(intent.requestId);
+      } else {
+        console.warn("[main] ROOM投稿が全件確認できないためintentを保持します。再送禁止。");
+      }
     } catch (err) {
       const msg = String(err);
       console.error("投稿処理中に予期しないエラー:", msg);
