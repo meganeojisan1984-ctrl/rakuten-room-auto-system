@@ -23,4 +23,5 @@ jobs:
       - name: TypeScript build
         run: npm run build
       - name: Unit tests
+        if: always()
         run: npm test
