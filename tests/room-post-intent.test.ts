@@ -35,7 +35,7 @@ test("CIでintentのremote保存に失敗したら送信前に停止する", asy
   process.env.GITHUB_REPOSITORY = "owner/repo";
   globalThis.fetch = async () => new Response("", { status: 500 });
   try {
-    await assert.rejects(persistRoomPostIntent(intent), /永続化に失敗/);
+    await assert.rejects(persistRoomPostIntent(intent), /ROOM投稿intent.*失敗/);
     assert.equal(fs.existsSync(intentPath), true);
   } finally {
     globalThis.fetch = originalFetch;
