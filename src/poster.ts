@@ -69,6 +69,7 @@ async function postSingleItem(
   headless: boolean
 ): Promise<PostResult> {
   const { browser, context } = await createAuthenticatedContext(headless);
+  let submitAttempted = false;
 
   try {
     // Cookieの有効性チェック
@@ -252,17 +253,10 @@ async function postSingleItem(
       throw new Error("投稿ボタンが見つかりません");
     }
 
-    // JS直接クリック → Locator force:true の順で試行
-    await postPage.evaluate(() => {
-      const btn = Array.from(document.querySelectorAll<HTMLElement>("button, a")).find(
-        (el) => el.textContent?.trim() === "完了"
-      );
-      if (btn) btn.click();
-    }).catch(() => {});
-    await postPage.waitForTimeout(1000);
-    // Locator force:true（ElementHandleではなくLocatorなので確実にオーバーレイを無視できる）
-    await postBtnLocator.click({ force: true, timeout: 5000 }).catch(() => {});
-    console.log("[poster] 投稿ボタンをクリックしました (Locator force:true)");
+    // 送信操作は1回だけ。以後は観測のみ（未送信と証明できない再クリックは禁止）。
+    submitAttempted = true;
+    await postBtnLocator.click({ force: true, timeout: 5000 });
+    console.log("[poster] 投稿ボタンをクリックしました (Locator force:true, single-submit)");
 
     // 投稿直後のスクリーンショット（デバッグ用）
     await postPage.waitForTimeout(3000);
@@ -296,11 +290,16 @@ async function postSingleItem(
     } else {
       await notifyError("楽天ROOM投稿失敗", errorMsg);
     }
+    const unknown = submitAttempted;
+    const safeError = unknown
+      ? `投稿送信後に結果不明: ${errorMsg}（再送禁止）`
+      : errorMsg;
     return {
       success: false,
       itemName: item.itemName,
       itemUrl: item.itemUrl,
-      error: errorMsg,
+      error: safeError,
+      unknown,
     };
   } finally {
     await browser.close();
