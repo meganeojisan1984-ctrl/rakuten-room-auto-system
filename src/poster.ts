@@ -51,11 +51,13 @@ const SELECTORS = {
   successMessage: '.success-message, .post-success, [class*="success"]',
 };
 
-type PostResult = {
+export type PostResult = {
   success: boolean;
   itemName: string;
   itemUrl: string;
   error?: string;
+  /** True when the submit result is unknown; callers must not retry automatically. */
+  unknown?: boolean;
 };
 
 /**
@@ -67,6 +69,7 @@ async function postSingleItem(
   headless: boolean
 ): Promise<PostResult> {
   const { browser, context } = await createAuthenticatedContext(headless);
+  let submitAttempted = false;
 
   try {
     // Cookieの有効性チェック
@@ -250,17 +253,10 @@ async function postSingleItem(
       throw new Error("投稿ボタンが見つかりません");
     }
 
-    // JS直接クリック → Locator force:true の順で試行
-    await postPage.evaluate(() => {
-      const btn = Array.from(document.querySelectorAll<HTMLElement>("button, a")).find(
-        (el) => el.textContent?.trim() === "完了"
-      );
-      if (btn) btn.click();
-    }).catch(() => {});
-    await postPage.waitForTimeout(1000);
-    // Locator force:true（ElementHandleではなくLocatorなので確実にオーバーレイを無視できる）
-    await postBtnLocator.click({ force: true, timeout: 5000 }).catch(() => {});
-    console.log("[poster] 投稿ボタンをクリックしました (Locator force:true)");
+    // 送信操作は1回だけ。以後は観測のみ（未送信と証明できない再クリックは禁止）。
+    submitAttempted = true;
+    await postBtnLocator.click({ force: true, timeout: 5000 });
+    console.log("[poster] 投稿ボタンをクリックしました (Locator force:true, single-submit)");
 
     // 投稿直後のスクリーンショット（デバッグ用）
     await postPage.waitForTimeout(3000);
@@ -270,13 +266,14 @@ async function postSingleItem(
     console.log("[poster] 投稿後ページHTML:", afterHtml);
     console.log("[poster] 投稿後URL:", postPage.url());
 
-    // 投稿完了を待機
-    await Promise.race([
-      postPage.waitForSelector(SELECTORS.successMessage, { timeout: 15000 }),
-      postPage.waitForURL((url) => url.href.includes("/room/"), { timeout: 15000 }),
-    ]).catch(async () => {
-      console.warn("[poster] 投稿完了確認タイムアウト（投稿自体は成功している可能性あり）");
-    });
+    // 投稿完了を待機。確認できない場合は成功扱いせず、再送禁止の結果不明で停止する。
+    const confirmed = await waitForPostCompletion(postPage);
+    if (!confirmed) {
+      const error = "投稿完了確認タイムアウト（投稿結果不明。再送禁止）";
+      console.error(`[poster] ⚠️ ${error}: ${item.itemName}`);
+      await notifyError("楽天ROOM投稿結果不明", error);
+      return { success: false, itemName: item.itemName, itemUrl: item.itemUrl, error, unknown: true };
+    }
 
     await notifySuccess(item.itemName, item.itemUrl);
     console.log(`[poster] ✅ 投稿成功: ${item.itemName}`);
@@ -293,15 +290,38 @@ async function postSingleItem(
     } else {
       await notifyError("楽天ROOM投稿失敗", errorMsg);
     }
+    const unknown = submitAttempted;
+    const safeError = unknown
+      ? `投稿送信後に結果不明: ${errorMsg}（再送禁止）`
+      : errorMsg;
     return {
       success: false,
       itemName: item.itemName,
       itemUrl: item.itemUrl,
-      error: errorMsg,
+      error: safeError,
+      unknown,
     };
   } finally {
     await browser.close();
   }
+}
+
+/**
+ * 投稿ボタン押下後の完了確認。タイムアウトは成功ではなく結果不明として扱う。
+ */
+export async function waitForPostCompletion(
+  postPage: {
+    waitForSelector: (selector: string, options: { timeout: number }) => Promise<unknown>;
+    waitForURL: (predicate: (url: URL) => boolean, options: { timeout: number }) => Promise<unknown>;
+  },
+  timeout = 15000
+): Promise<boolean> {
+  return Promise.race([
+    postPage.waitForSelector(SELECTORS.successMessage, { timeout }),
+    postPage.waitForURL((url) => url.href.includes("/room/"), { timeout }),
+  ])
+    .then(() => true)
+    .catch(() => false);
 }
 
 /**
@@ -323,6 +343,12 @@ export async function postItems(
       const waitMs = 5000 + Math.random() * 5000; // 5〜10秒のランダム待機
       console.log(`[poster] 次の投稿まで ${Math.round(waitMs / 1000)}秒待機...`);
       await new Promise((resolve) => setTimeout(resolve, waitMs));
+    }
+
+    // 投稿結果不明は二重投稿防止のため即時中断
+    if (result.unknown) {
+      console.error("[poster] 投稿結果不明のため、後続商品の投稿を中断します");
+      break;
     }
 
     // 致命的なエラー（Cookie切れ・CAPTCHA）は即時中断

@@ -67,6 +67,7 @@ test("AI生成は参考画像を全て参照し、ページ別の確定コピー
     const calls: FormData[] = [];
     await generateAiLifestyleImages(item, persona, {
       outputDir,
+      publicBaseUrl: "https://cdn.example.com/ig",
       apiKey: "test-key",
       referenceImageDir: referenceDir,
       creativePlan,

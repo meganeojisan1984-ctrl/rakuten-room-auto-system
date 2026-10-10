@@ -18,6 +18,7 @@ import {
 import { isXDraftMailEnabled, sendXDraftMail } from "./x-draft-mailer";
 import { generateThreadsCopy, isThreadsCopyEnabled } from "./threads-copy";
 import { buildImageCreativePlan } from "./image-creative";
+import { DEFAULT_ROOM_PROFILE_URL, toRoomItemsUrl } from "../room-profile-url";
 
 // sns.ts と揃える (Instagram Graph API 独自エンドポイント)
 const GRAPH_API = "https://graph.instagram.com/v21.0";
@@ -46,8 +47,9 @@ function scrubNgWords(text: string, ngWords: string[]): string {
 /** Instagram captions do not make raw URLs clickable; send readers to the profile link. */
 function withPersonaFooter(caption: string, persona: PersonaSlot): string {
   const hashtags = persona.hashtags.join(" ");
+  const roomItemsUrl = toRoomItemsUrl(env("ROOM_PROFILE_URL") || DEFAULT_ROOM_PROFILE_URL);
   const footer = [
-    "商品リンクはプロフィールの楽天ROOMから確認できます。プロフィールのURLをタップしてチェックしてください🛒",
+    `商品リンクはプロフィールの楽天ROOMから確認できます。商品一覧: ${roomItemsUrl} 🛒`,
     "気になったら投稿を保存・いいね・フォローで応援してください。",
     hashtags,
   ].filter(Boolean).join("\n\n");

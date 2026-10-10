@@ -49,7 +49,7 @@ for i in 1 2 3; do
     cp -r "${SAVE_DIR}/." .
   fi
 
-  git add posted_items.json post_history.json agent_reports.json strategy.json dialogue.json 2>/dev/null || true
+  git add posted_items.json post_history.json agent_reports.json strategy.json dialogue.json room_post_intent.json 2>/dev/null || true
   if git diff --staged --quiet; then
     echo "[safe-push] no diff after reapply — nothing to push"
     rm -rf "${SAVE_DIR}"

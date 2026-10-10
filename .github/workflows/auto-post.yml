@@ -107,7 +107,7 @@ jobs:
           GENRE_ID_ELECTRONICS: ${{ vars.GENRE_ID_ELECTRONICS || '215783' }}
         run: |
           # UTC 04時 (JST 13時) の cron 発火時のみ IG のみ (SKIP_ROOM=1)
-          if [ "$(date -u +%H)" = "04" ] && [ "${{ github.event_name }}" = "schedule" ]; then
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "${{ github.event.schedule }}" = "0 4 * * *" ]; then
             export SKIP_ROOM=1
             echo "[auto-post] SKIP_ROOM=1 (JST13 は IG のみ)"
           fi
@@ -118,7 +118,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add posted_items.json post_history.json agent_reports.json
+          git add posted_items.json post_history.json agent_reports.json room_post_intent.json
           if git diff --staged --quiet; then
             echo "no staged changes, skip commit"
             exit 0

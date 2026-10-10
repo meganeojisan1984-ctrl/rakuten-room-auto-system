@@ -14,30 +14,38 @@ import { loadStrategy, weightedPick, appendHistory, report, type PostRecord } fr
 import { loadPersona, getSlot } from "./persona/persona";
 import { resolveSlot } from "./persona/slot-rotator";
 import { deriveItemCode } from "./affiliate/report-parser";
+import { createRoomPostIntent, clearRoomPostIntent, persistPostedItemsAndVerify, syncPostedItemsFromRemote, hasUnresolvedRoomPostIntent, persistRoomPostIntent, readRemoteRoomPostIntent, readRoomPostIntent, type RoomPostIntent } from "./room-post-intent";
 
 const POSTED_ITEMS_FILE = path.join(process.cwd(), "posted_items.json");
 const MAX_HISTORY = 500; // 保持する最大件数
 
 interface PostedItemsState {
   postedItemCodes: string[];
+  uncertainItemCodes?: string[]; // 投稿結果不明。手動確認まで自動再送しない
   postTypeIndex: number; // 0=評価取り, 1=売上, 2=送客 → ローテーション
 }
 
-function loadState(): { codes: Set<string>; postTypeIndex: number } {
+function loadState(): { codes: Set<string>; uncertainCodes: Set<string>; postTypeIndex: number } {
   try {
     const data: PostedItemsState = JSON.parse(fs.readFileSync(POSTED_ITEMS_FILE, "utf-8"));
+    const uncertainCodes = new Set<string>(data.uncertainItemCodes ?? []);
     return {
-      codes: new Set<string>(data.postedItemCodes ?? []),
+      codes: new Set<string>([...(data.postedItemCodes ?? []), ...uncertainCodes]),
+      uncertainCodes,
       postTypeIndex: data.postTypeIndex ?? 0,
     };
   } catch {
-    return { codes: new Set<string>(), postTypeIndex: 0 };
+    return { codes: new Set<string>(), uncertainCodes: new Set<string>(), postTypeIndex: 0 };
   }
 }
 
-function saveState(codes: Set<string>, postTypeIndex: number): void {
-  const arr = [...codes].slice(-MAX_HISTORY);
-  const state: PostedItemsState = { postedItemCodes: arr, postTypeIndex };
+function saveState(codes: Set<string>, postTypeIndex: number, uncertainCodes: Set<string>): void {
+  const arr = [...codes].filter((code) => !uncertainCodes.has(code)).slice(-MAX_HISTORY);
+  const state: PostedItemsState = {
+    postedItemCodes: arr,
+    uncertainItemCodes: [...uncertainCodes],
+    postTypeIndex,
+  };
   fs.writeFileSync(POSTED_ITEMS_FILE, JSON.stringify(state, null, 2));
 }
 
@@ -75,6 +83,15 @@ async function main(): Promise<void> {
   console.log(`モード: ${TREND_MODE ? "トレンド投稿" : `ランキング投稿 (${process.env.TARGET_GENRE ?? "general"})`}`);
   console.log(`投稿数: ${POST_COUNT}件\n`);
 
+  const pendingIntent = readRoomPostIntent();
+  const remoteIntent = await readRemoteRoomPostIntent();
+  if (hasUnresolvedRoomPostIntent(pendingIntent) || hasUnresolvedRoomPostIntent(remoteIntent.intent)) {
+    const blockedIntent = hasUnresolvedRoomPostIntent(remoteIntent.intent) ? remoteIntent.intent : pendingIntent;
+    throw new Error(`未解決のROOM投稿intentがあります（requestId=${blockedIntent.requestId}）。remoteを権威状態として手動確認まで再送しません`);
+  }
+  // 古いcheckoutの履歴で商品を再選定しないようactive branchの履歴を先に同期する。
+  await syncPostedItemsFromRemote();
+
   // Phase 2: 本回の担当 persona を決定
   const persona = loadPersona();
   const slotId = resolveSlot(persona, new Date());
@@ -82,7 +99,7 @@ async function main(): Promise<void> {
   const SKIP_ROOM = process.env.SKIP_ROOM === "1";
   console.log(`[main] active persona: ${slot.id} (${slot.name}) SKIP_ROOM=${SKIP_ROOM}`);
 
-  const { codes: postedCodes, postTypeIndex } = loadState();
+  const { codes: postedCodes, uncertainCodes, postTypeIndex } = loadState();
   const postType = getPostType(postTypeIndex);
   console.log(`[main] 投稿済み商品数: ${postedCodes.size}件（除外対象）`);
   if (!TREND_MODE) {
@@ -152,6 +169,7 @@ async function main(): Promise<void> {
 
   // Step 3: 楽天ROOMへ投稿（SKIP_ROOM=1 の cron 枠は IG のみ）
   let results: Awaited<ReturnType<typeof postItems>>;
+  let roomIntent: RoomPostIntent | undefined;
   if (SKIP_ROOM) {
     console.log("--- [3/3] SKIP_ROOM=1 のため ROOM 投稿をスキップ ---");
     results = captionedItems.map((c) => ({
@@ -162,8 +180,18 @@ async function main(): Promise<void> {
   } else {
     try {
       console.log("--- [3/3] 楽天ROOMへ投稿中 ---");
+      // クリック前に意図を永続化。保存できなければ1件も送信しない。
+      roomIntent = createRoomPostIntent(captionedItems.map((c) => ({
+        itemCode: c.item.itemCode,
+        itemName: c.item.itemName,
+        itemUrl: c.item.itemUrl,
+      })));
+      await persistRoomPostIntent(roomIntent);
       const headless = process.env.CI === "true" || process.env.HEADLESS !== "false";
       results = await postItems(captionedItems, headless);
+      if (!(results.length === captionedItems.length && results.every((result) => result.success))) {
+        console.warn("[main] ROOM投稿が全件確認できないためintentを保持します。再送禁止。");
+      }
     } catch (err) {
       const msg = String(err);
       console.error("投稿処理中に予期しないエラー:", msg);
@@ -235,14 +263,23 @@ async function main(): Promise<void> {
   }));
   if (historyRecords.length > 0) appendHistory(historyRecords);
 
-  // 成功した商品を投稿済みリストに追加して保存。投稿タイプを次に進める
+  // 成功商品を記録し、結果不明の商品は手動確認まで自動再送対象から隔離する
   const successCodes = succeededItems.map((c) => c.item.itemCode);
+  const uncertainItems = captionedItems.filter((_, i) => results[i]?.unknown);
   for (const code of successCodes) postedCodes.add(code);
+  for (const item of uncertainItems) uncertainCodes.add(item.item.itemCode);
   const nextPostTypeIndex = (postTypeIndex + 1) % 3;
-  if (successCodes.length > 0 || true) {
-    saveState(postedCodes, nextPostTypeIndex);
-    console.log(`[main] 投稿済みリストを更新: ${successCodes.length}件追加`);
-    console.log(`[main] 次回の投稿タイプ: ${getPostTypeLabel(getPostType(nextPostTypeIndex))}`);
+  saveState(postedCodes, nextPostTypeIndex, uncertainCodes);
+  console.log(`[main] 投稿済みリストを更新: ${successCodes.length}件追加、結果不明隔離: ${uncertainItems.length}件`);
+  console.log(`[main] 次回の投稿タイプ: ${getPostTypeLabel(getPostType(nextPostTypeIndex))}`);
+
+  // 成功コードをremote posted stateへ保存・読み戻し検証した後だけintentを消去する。
+  // remote保存/検証/消去のいずれかに失敗した場合はintentを残し、次回起動を安全側で停止する。
+  if (roomIntent && successCodes.length > 0) {
+    await persistPostedItemsAndVerify(successCodes);
+  }
+  if (roomIntent && results.length === captionedItems.length && results.every((result) => result.success)) {
+    await clearRoomPostIntent(roomIntent.requestId);
   }
 
   // 全件失敗の場合は異常終了

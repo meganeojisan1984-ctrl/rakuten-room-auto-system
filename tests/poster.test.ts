@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { getProductNavigationOptions, getProductPageUrl } from "../src/poster";
+import { getProductNavigationOptions, getProductPageUrl, waitForPostCompletion } from "../src/poster";
 import { getChromiumLaunchOptions } from "../src/session";
 import { isRoomPostableProductUrl } from "../src/fetcher";
 
@@ -36,4 +36,21 @@ test("楽天商品ページはDOMContentLoadedを待たずレスポンス確立�
 
   assert.equal(options.waitUntil, "commit");
   assert.equal(options.timeout, 30000);
+});
+
+
+test("投稿完了確認のタイムアウトは成功扱いしない", async () => {
+  const page = {
+    waitForSelector: async () => { throw new Error("timeout"); },
+    waitForURL: async () => { throw new Error("timeout"); },
+  };
+  assert.equal(await waitForPostCompletion(page), false);
+});
+
+test("投稿完了確認の成功は確認済みとして扱う", async () => {
+  const page = {
+    waitForSelector: async () => undefined,
+    waitForURL: async () => new Promise(() => {}),
+  };
+  assert.equal(await waitForPostCompletion(page), true);
 });

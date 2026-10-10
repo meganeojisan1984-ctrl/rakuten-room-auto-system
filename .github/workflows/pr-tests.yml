@@ -1,0 +1,34 @@
+name: PR tests
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+      - name: Node.js のセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - name: 依存関係をインストール
+        run: npm ci
+      - name: TypeScript build
+        run: npm run build
+      - name: Playwright Chromium
+        if: always()
+        run: npx playwright install chromium --with-deps
+      - name: Unit tests
+        if: always()
+        run: npm test
+
+      - name: ROOM safety tests
+        if: always()
+        run: node --test --import tsx tests/poster.test.ts tests/room-post-intent.test.ts
