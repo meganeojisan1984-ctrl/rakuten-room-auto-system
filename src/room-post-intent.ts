@@ -226,6 +226,8 @@ export async function persistPostedItemsAndVerify(requiredCodes: string[]): Prom
   if (!requiredCodes.every((code) => (verified.postedItemCodes ?? []).includes(code))) {
     throw new Error("posted_items.jsonのremote読み戻しに成功コードがありません");
   }
+  // safe-pushの再適用でもremote側の並行writer履歴を失わないよう、検証済みマージ結果をcheckoutへ戻す。
+  fs.writeFileSync(localPath, JSON.stringify(merged, null, 2) + "\n");
 }
 
 export async function clearRoomPostIntent(requestId: string): Promise<void> {
