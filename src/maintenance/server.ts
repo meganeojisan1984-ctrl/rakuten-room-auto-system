@@ -153,7 +153,7 @@ async function executeSreAction(action: SreAction): Promise<SreExecutionResult> 
       return { action: `${file} rerun`, ok: true };
     }
     if (action.type === "scrape-sales") {
-      const result = await scrapeAffiliateReport({ headless: false, slowMoMs: 120 });
+      const result = await scrapeAffiliateReport();
       return {
         action: `sales scrape ${result.date}`,
         ok: result.ok,
@@ -342,7 +342,7 @@ app.post("/api/autofix", async (req, res) => {
 
 app.post("/api/sales/auto", async (_req, res) => {
   try {
-    const result = await scrapeAffiliateReport({ headless: false, slowMoMs: 120 });
+    const result = await scrapeAffiliateReport();
     const note = result.ok
       ? `自動取得: ${result.date} orders=${result.totalOrders} reward=${result.totalReward} rows=${result.rowsInserted}`
       : `自動取得失敗: ${result.date} ${result.error ?? "unknown error"}`;
