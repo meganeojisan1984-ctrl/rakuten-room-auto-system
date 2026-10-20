@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-09-26T18:02:25.927Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第79世代へ更新 (ルールベース)、警告1件"
-  },
-  {
-    "ts": "2026-09-27T01:05:50.627Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (美容機器)"
-  },
-  {
-    "ts": "2026-09-27T01:06:07.617Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ3)"
-  },
-  {
     "ts": "2026-09-27T01:07:43.582Z",
     "agent": "poster",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "commander",
     "ok": true,
     "summary": "第102世代へ更新 (ルールベース)、警告0件"
+  },
+  {
+    "ts": "2026-10-20T18:44:44.870Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "18件抽出、履歴3件のいいね数を更新"
+  },
+  {
+    "ts": "2026-10-20T18:44:44.882Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴220件(計測済137) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-10-20T18:44:47.831Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第103世代へ更新 (ルールベース)、警告0件"
   }
 ]
