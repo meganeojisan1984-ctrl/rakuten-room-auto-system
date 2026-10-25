@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-09-27T18:40:10.504Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第80世代へ更新 (ルールベース)、警告1件"
-  },
-  {
-    "ts": "2026-09-28T01:25:04.339Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (ダイエット商品)"
-  },
-  {
-    "ts": "2026-09-28T01:25:22.352Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ1)"
-  },
-  {
     "ts": "2026-09-28T01:26:55.510Z",
     "agent": "poster",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "commander",
     "ok": true,
     "summary": "第107世代へ更新 (ルールベース)、警告0件"
+  },
+  {
+    "ts": "2026-10-25T17:52:14.005Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "36件抽出、履歴4件のいいね数を更新"
+  },
+  {
+    "ts": "2026-10-25T17:52:14.018Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴220件(計測済137) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-10-25T17:52:17.448Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第108世代へ更新 (ルールベース)、警告0件"
   }
 ]
