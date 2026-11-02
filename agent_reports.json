@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-09-29T17:46:24.348Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (ダイエット器具)"
-  },
-  {
-    "ts": "2026-09-29T17:46:40.887Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ1)"
-  },
-  {
-    "ts": "2026-09-29T17:48:17.676Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
     "ts": "2026-09-29T17:51:31.426Z",
     "agent": "promoter",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "commander",
     "ok": true,
     "summary": "第115世代へ更新 (ルールベース)、警告0件"
+  },
+  {
+    "ts": "2026-11-02T22:55:01.513Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "18件抽出、履歴0件のいいね数を更新"
+  },
+  {
+    "ts": "2026-11-02T22:55:01.527Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴220件(計測済137) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-11-02T22:55:05.200Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第116世代へ更新 (ルールベース)、警告0件"
   }
 ]
