@@ -209,7 +209,7 @@ export async function runAutoLike(maxLikes: number = 20, headless: boolean = tru
   try {
     if (!(await validateSession(context))) {
       addLog("auto_like", "error", "セッション無効: Cookie更新が必要です");
-      return;
+      throw new Error("ROOM セッション無効: Cookie更新が必要です");
     }
 
     const page = await context.newPage();
@@ -234,3 +234,4 @@ export async function runAutoLike(maxLikes: number = 20, headless: boolean = tru
     await browser.close();
   }
 }
+
