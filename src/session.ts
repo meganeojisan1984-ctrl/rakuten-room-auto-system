@@ -3,10 +3,9 @@ import * as fs from "fs";
 import * as path from "path";
 import * as dotenv from "dotenv";
 import { notifyCookieExpired } from "./notifiers";
+import { assertRoomAccount, configuredRoomProfileUrl } from "./room-account";
 dotenv.config();
 
-const ROOM_URL = "https://room.rakuten.co.jp";
-const LOGIN_URL = "https://grp01.id.rakuten.co.jp";
 
 /**
  * Cookie配列を取得する。
@@ -45,31 +44,18 @@ export async function injectCookies(context: BrowserContext, cookies: Cookie[]):
 
 /**
  * Cookieが有効（ログイン状態）かどうかを検証する
- * 楽天ROOMにアクセスし、ログインページにリダイレクトされないか確認する
+ * ログイン済みヘッダの my ROOM が指定アカウントを指すことを確認する
  */
 export async function validateSession(context: BrowserContext): Promise<boolean> {
-  const page = await context.newPage();
   try {
     console.log("[session] Cookieの有効性を検証中...");
-    await page.goto(`${ROOM_URL}/my`, {
-      waitUntil: "domcontentloaded",
-      timeout: 30000,
-    });
-    const currentUrl = page.url();
-    // ログインページへリダイレクトされた場合はセッション無効
-    if (currentUrl.includes(LOGIN_URL) || currentUrl.includes("/login") || currentUrl.includes("signin")) {
-      console.warn("[session] セッション無効: ログインページへリダイレクトされました");
-      // Phase 0: Cookie 失効を必ず通知する（Cookie診断・投稿・学習の全経路で発火）
-      await notifyCookieExpired();
-      return false;
-    }
-    console.log("[session] セッション有効確認済み");
+    await assertRoomAccount(context, configuredRoomProfileUrl());
+    console.log("[session] 指定アカウントの my ROOM を確認しました");
     return true;
-  } catch (err) {
-    console.error("[session] セッション検証中にエラー:", err);
+  } catch {
+    console.warn("[session] 指定アカウントを確認できません。操作を停止します");
+    await notifyCookieExpired();
     return false;
-  } finally {
-    await page.close();
   }
 }
 

@@ -6,11 +6,10 @@ import { chromium, type BrowserContext, type Browser } from "playwright";
 import * as fs from "fs";
 import * as path from "path";
 import * as dotenv from "dotenv";
+import { assertRoomAccount, configuredRoomProfileUrl } from "../room-account";
 dotenv.config();
 
 const SESSION_FILE = path.join(process.cwd(), "data", "session.json");
-const LOGIN_URL = "https://grp01.id.rakuten.co.jp";
-const ROOM_URL = "https://room.rakuten.co.jp";
 
 // BAN対策: ヒューマンらしい User-Agent 一覧
 const USER_AGENTS = [
@@ -106,16 +105,12 @@ export async function createBrowserContext(headless = true): Promise<{
  * セッションが有効か確認する
  */
 export async function validateSession(context: BrowserContext): Promise<boolean> {
-  const page = await context.newPage();
   try {
-    await page.goto(`${ROOM_URL}/my`, { waitUntil: "domcontentloaded", timeout: 30000 });
-    const url = page.url();
-    const isValid = !url.includes(LOGIN_URL) && !url.includes("/login") && !url.includes("signin");
-    console.log(`[browser] セッション検証: ${isValid ? "有効" : "無効"} (${url})`);
-    return isValid;
+    await assertRoomAccount(context, configuredRoomProfileUrl());
+    console.log("[browser] セッション検証: 指定アカウントの my ROOM を確認しました");
+    return true;
   } catch {
+    console.warn("[browser] セッション検証: 指定アカウントを確認できません");
     return false;
-  } finally {
-    await page.close();
   }
 }
