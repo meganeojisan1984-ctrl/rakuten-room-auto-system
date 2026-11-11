@@ -1,0 +1,31 @@
+{
+  "version": 2,
+  "mode": "room-standard",
+  "active": {
+    "requestId": "room-standard-00618fee-2954-4521-8efb-68b500c986e4",
+    "itemCode": "roomy:10015496",
+    "itemUrl": "https://item.rakuten.co.jp/roomy/ymz_twrecohold/",
+    "collectUrl": "https://room.rakuten.co.jp/mix/collect?itemcode=1100066290757402&scid=we_room_upc60",
+    "expectedProfileUrl": "https://room.rakuten.co.jp/room_sho_qoltime/items",
+    "captionSha256": "d7bc1d47d1fa64bbccc1ea476173cb449f49a3ed91d379dc101dd4339c6f4f96",
+    "captionUtf16Units": 168,
+    "createdAt": "2026-11-11T11:03:00.887493+00:00",
+    "status": "reserved",
+    "mode": "room-standard",
+    "sourceImageMode": "ROOM automatic unchanged",
+    "uploadPerformed": false,
+    "standardImageUrls": [
+      "https://tshop.r10s.jp/roomy/cabinet/500cart_all/500cart_11g/p5-4/ymz5505-00008-0_gt01.jpg?thum=166&resize=600:*",
+      "https://tshop.r10s.jp/roomy/cabinet/500cart_all/500cart_ca2_3/ymz5505-00008-0_sz01.jpg?thum=166&resize=600:*",
+      "https://tshop.r10s.jp/roomy/cabinet/500cart_all/500cart_ca2_3/ymz5505-00008-0_cv01.jpg?thum=166&resize=600:*",
+      "https://tshop.r10s.jp/roomy/cabinet/500cart_all/500cart_info4/cart-kome-info.jpg?thum=166&resize=600:*",
+      "https://tshop.r10s.jp/roomy/cabinet/zakka/ymz/ymz5505-00008-0_1.jpg?thum=166&resize=600:*",
+      "https://tshop.r10s.jp/roomy/cabinet/zakka/ymz/ymz5505-00008-0_3.jpg?thum=166&resize=600:*",
+      "https://tshop.r10s.jp/roomy/cabinet/zakka/ymz/ymz5505-00008-0_4.jpg?thum=166&resize=600:*",
+      "https://tshop.r10s.jp/roomy/cabinet/zakka/ymz/ymz5505-00008-0_5.jpg?thum=166&resize=600:*",
+      "https://tshop.r10s.jp/roomy/cabinet/zakka/ymz/ymz5505-00008-0_6.jpg?thum=166&resize=600:*",
+      "https://tshop.r10s.jp/roomy/cabinet/zakka/ymz/ymz5505-00008-0_7.jpg?thum=166&resize=600:*"
+    ]
+  },
+  "records": []
+}
