@@ -13,7 +13,7 @@
     "captionSha256": "5d489413db35b9d8e34ad415842f631cc48aa061f3e2c84bfc80bc58c2fb1f18",
     "captionUtf16Units": 197,
     "createdAt": "2026-11-11T23:09:19.498545+00:00",
-    "status": "reserved",
+    "status": "unknown",
     "mode": "room-standard",
     "sourceImageMode": "ROOM automatic unchanged",
     "uploadPerformed": false,
@@ -23,7 +23,9 @@
       "https://tshop.r10s.jp/roomy/cabinet/500cart_all/500cart_info4/cart-kome-info.jpg?thum=166&resize=600:*",
       "https://tshop.r10s.jp/roomy/cabinet/500cart_all/naka/02/ymz5506-07121-0_s01.jpg?thum=166&resize=600:*",
       "https://tshop.r10s.jp/roomy/cabinet/500cart_all/naka/02/ymz5506-07121-0_s02.jpg?thum=166&resize=600:*"
-    ]
+    ],
+    "attemptId": "attempt-9de64a06-41c9-4ced-9702-3834748131fe",
+    "attemptStartedAt": "2026-11-11T23:45:46.567120+00:00"
   },
   "records": [
     {
