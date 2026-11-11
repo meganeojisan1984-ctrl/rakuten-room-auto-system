@@ -1,32 +1,7 @@
 {
   "version": 2,
   "mode": "room-standard",
-  "active": {
-    "requestId": "room-standard-b645f473-de7c-4143-8350-49bf541a13b9",
-    "scheduleSlotKey": "room-standard:2026-11-12T08:00:Asia/Tokyo",
-    "scheduledFor": "2026-11-11T23:00:00+00:00",
-    "scheduleTimezone": "Asia/Tokyo",
-    "itemCode": "roomy:10015901",
-    "itemUrl": "https://item.rakuten.co.jp/roomy/y50607121/",
-    "collectUrl": "https://room.rakuten.co.jp/mix/collect?itemcode=1100066088816120&scid=we_room_upc60",
-    "expectedProfileUrl": "https://room.rakuten.co.jp/room_sho_qoltime/items",
-    "captionSha256": "5d489413db35b9d8e34ad415842f631cc48aa061f3e2c84bfc80bc58c2fb1f18",
-    "captionUtf16Units": 197,
-    "createdAt": "2026-11-11T23:09:19.498545+00:00",
-    "status": "unknown",
-    "mode": "room-standard",
-    "sourceImageMode": "ROOM automatic unchanged",
-    "uploadPerformed": false,
-    "standardImageUrls": [
-      "https://tshop.r10s.jp/roomy/cabinet/500cart_all/500cart_11g/p5-1/ymz7121-1g.jpg?thum=166&resize=600:*",
-      "https://tshop.r10s.jp/roomy/cabinet/500cart_all/500cart_ca2/157079_ca2.jpg?thum=166&resize=600:*",
-      "https://tshop.r10s.jp/roomy/cabinet/500cart_all/500cart_info4/cart-kome-info.jpg?thum=166&resize=600:*",
-      "https://tshop.r10s.jp/roomy/cabinet/500cart_all/naka/02/ymz5506-07121-0_s01.jpg?thum=166&resize=600:*",
-      "https://tshop.r10s.jp/roomy/cabinet/500cart_all/naka/02/ymz5506-07121-0_s02.jpg?thum=166&resize=600:*"
-    ],
-    "attemptId": "attempt-9de64a06-41c9-4ced-9702-3834748131fe",
-    "attemptStartedAt": "2026-11-11T23:45:46.567120+00:00"
-  },
+  "active": null,
   "records": [
     {
       "requestId": "room-standard-00618fee-2954-4521-8efb-68b500c986e4",
@@ -116,6 +91,48 @@
         "standardImagePublicationHost": "shop.r10s.jp",
         "allPublishedImagesDecoded": true,
         "publishClickCount": 1
+      }
+    },
+    {
+      "requestId": "room-standard-b645f473-de7c-4143-8350-49bf541a13b9",
+      "scheduleSlotKey": "room-standard:2026-11-12T08:00:Asia/Tokyo",
+      "scheduledFor": "2026-11-11T23:00:00+00:00",
+      "scheduleTimezone": "Asia/Tokyo",
+      "itemCode": "roomy:10015901",
+      "itemUrl": "https://item.rakuten.co.jp/roomy/y50607121/",
+      "collectUrl": "https://room.rakuten.co.jp/mix/collect?itemcode=1100066088816120&scid=we_room_upc60",
+      "expectedProfileUrl": "https://room.rakuten.co.jp/room_sho_qoltime/items",
+      "captionSha256": "5d489413db35b9d8e34ad415842f631cc48aa061f3e2c84bfc80bc58c2fb1f18",
+      "captionUtf16Units": 197,
+      "createdAt": "2026-11-11T23:09:19.498545+00:00",
+      "status": "published",
+      "mode": "room-standard",
+      "sourceImageMode": "ROOM automatic unchanged",
+      "uploadPerformed": false,
+      "standardImageUrls": [
+        "https://tshop.r10s.jp/roomy/cabinet/500cart_all/500cart_11g/p5-1/ymz7121-1g.jpg?thum=166&resize=600:*",
+        "https://tshop.r10s.jp/roomy/cabinet/500cart_all/500cart_ca2/157079_ca2.jpg?thum=166&resize=600:*",
+        "https://tshop.r10s.jp/roomy/cabinet/500cart_all/500cart_info4/cart-kome-info.jpg?thum=166&resize=600:*",
+        "https://tshop.r10s.jp/roomy/cabinet/500cart_all/naka/02/ymz5506-07121-0_s01.jpg?thum=166&resize=600:*",
+        "https://tshop.r10s.jp/roomy/cabinet/500cart_all/naka/02/ymz5506-07121-0_s02.jpg?thum=166&resize=600:*"
+      ],
+      "attemptId": "attempt-9de64a06-41c9-4ced-9702-3834748131fe",
+      "attemptStartedAt": "2026-11-11T23:45:46.567120+00:00",
+      "permalink": "https://room.rakuten.co.jp/room_sho_qoltime/1700400763478130",
+      "publishedAt": "2026-11-11T23:49:46.215529+00:00",
+      "publishedAtBasis": "Publication verified by browser at this time; exact server timestamp not retrieved",
+      "verification": {
+        "exactCaption": true,
+        "captionUtf16Units": 197,
+        "authorProfile": "/room_sho_qoltime/items",
+        "productDestination": "https://item.rakuten.co.jp/roomy/y50607121/?scid=room_pc_id_reg",
+        "standardImageVisuallyUnchanged": true,
+        "standardImageCount": 5,
+        "standardImagePathsAndOrderMatch": true,
+        "standardImagePublicationHost": "shop.r10s.jp",
+        "allPublishedImagesDecoded": true,
+        "publishClickCount": 1,
+        "recommendationsExcluded": true
       }
     }
   ]
