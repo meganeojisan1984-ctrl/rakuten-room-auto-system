@@ -1,5 +1,22 @@
 # Existing-browser ROOM posting protocol
 
+## Operational pause: platform rules checked 2026-11-11
+
+**Do not activate or execute mechanical ROOM posting/commenting.** ROOM terms Article 11(1)(4) explicitly prohibit mechanical posting/commenting by scripts or other programs. The protocol below is retained as unactivated engineering/test documentation, not permission to run it on ROOM. Moving the same automation to CUA, changing timing, or keeping only a final human click is not a workaround.
+
+Official sources:
+- https://room.rakuten.co.jp/info/agreement.html
+- https://room.rakuten.co.jp/info/help/guideline/01.html
+- https://room.rakuten.co.jp/info/help/guideline/03.html
+
+The general posting guideline prohibits uploading an image without the copyright holder's permission, and expressly gives saved or edited Rakuten product images as an example. This is a rule about re-uploading, not a finding that private downloading alone is forbidden. We have not established a license for the proposed AI editing and re-upload; the normal ROOM product-sharing flow does not establish that broader scope. No blanket official AI-image ban was found, but no blanket permission for AI-generated uploads was established either. An AI image is not a photo taken by the account owner and must not be presented as their original ownership/use photo.
+
+The public rules reviewed do not name automated likes/follows specifically. Their treatment under the broader language is uncertain, so do not activate recurring likes/follows without official clarification. Existing posting/like/follow workflows were stopped; no replacement schedule or new posting state was created by this image integration.
+
+Current permitted preparation scope: prepare candidate product URLs and grounded caption drafts outside ROOM, then let the user personally review and use ROOM's documented normal posting flow. Use the product image automatically supplied by that flow unchanged, or separately verify the rights for any additional image. This preparation proposal is not a claim that ROOM specially endorses AI preparation. Do not proceed with the unactivated live protocol below unless the platform's permission and the user's scope are both established.
+
+Normal user-operated flow: https://room.rakuten.co.jp/info/guide/utilization/02how_room/02.html . Standard product images: https://room.rakuten.co.jp/info/guide/utilization/02how_room/03.html .
+
 ## Status and boundaries
 
 This is an implementation and operator protocol, not proof of a live post. CUA is the supported assistant browser runtime; it is not a library that npm can attach to. `src/main.ts` and the local `auto_post` action fail closed with `BROWSER_CUA_WORKER_REQUIRED`, even when a valid bundle or ROOM_COOKIE is present. They never fall back to an AI API, a new Playwright session, random product selection, or SNS cross-posting. A scheduled assistant worker must perform the protocol below using the connected Mac and the GitHub connector. Schedule creation and live operation are separate acceptance steps.

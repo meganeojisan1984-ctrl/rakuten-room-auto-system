@@ -29,3 +29,6 @@ npm run --silent image:prompt -- /absolute/product.json x context
 - Transaction entry: room:transaction -> pure GitHub connector CAS plans for reserve/begin/finish and readback verification.
 - main and local auto_post fail closed: no AI API, random product, Cookie session or implicit SNS fallback. The existing Mac CUA worker runs the supported protocol; npm does not attach to CUA.
 - See [browser posting operations](browser-post-operations.md) for exact state, identity, single-attempt and confirmation gates. The deployed schedule, real image generation and live post must each be verified separately. Implementation/tests alone do not prove production completion.
+
+## ROOM platform-rule boundary (2026-11-11)
+ROOM mechanical posting/commenting is explicitly prohibited by Article 11(1)(4) of https://room.rakuten.co.jp/info/agreement.html . Do not activate the automatic posting protocol. Keep preparation outside ROOM and follow the operational pause in [browser posting operations](browser-post-operations.md). Re-uploading saved or edited product images without the copyright holder's permission is prohibited under https://room.rakuten.co.jp/info/help/guideline/01.html . Do not infer AI-upload permission or call generated images the user's original photos. Other destinations need their own rights and platform checks.
