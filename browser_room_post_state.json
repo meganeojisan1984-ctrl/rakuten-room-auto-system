@@ -12,7 +12,7 @@
     "captionSha256": "0ddd800608ef0e5b34cea91118924843775fc31488ef423c80c276e41fee667c",
     "captionUtf16Units": 179,
     "createdAt": "2026-11-11T12:17:07.795Z",
-    "status": "reserved",
+    "status": "unknown",
     "mode": "room-standard",
     "sourceImageMode": "ROOM automatic unchanged",
     "uploadPerformed": false,
@@ -36,7 +36,9 @@
       "https://tshop.r10s.jp/livingut/cabinet/maker_yamajitsu21/340314_16.jpg?thum=166&resize=600:*",
       "https://tshop.r10s.jp/livingut/cabinet/maker_yamajitsu21/340314_17.jpg?thum=166&resize=600:*",
       "https://tshop.r10s.jp/livingut/cabinet/maker_yamajitsu21/340314_18.jpg?thum=166&resize=600:*"
-    ]
+    ],
+    "attemptId": "attempt-ba12-20261111121746503",
+    "attemptStartedAt": "2026-11-11T12:17:46.503Z"
   },
   "records": [
     {
