@@ -1,6 +1,9 @@
 import type { BrowserContext } from "playwright";
 
 const ROOM_ORIGIN = "https://room.rakuten.co.jp";
+// ROOM's CSS user icon contributes U+E96A to the accessible name.
+// Accept only the observed icon or the plain label, never arbitrary prefixes.
+export const ROOM_MY_LINK_NAME = /^(?:\uE96A\s*)?my ROOM$/u;
 
 /** Only an explicit ROOM profile is an account identity. /my is a public user. */
 export function canonicalRoomProfileUrl(value: string): string {
@@ -33,11 +36,13 @@ export async function assertRoomAccount(context: Pick<BrowserContext, "newPage">
     if (response && !response.ok()) throw new Error("ROOM_ACCOUNT_PAGE_FAILED");
     stage = "profile_location";
     if (canonicalRoomProfileUrl(probe.url()) !== expected) throw new Error("ROOM_ACCOUNT_PAGE_MISMATCH");
-    const mine = probe.getByRole("link", { name: "my ROOM", exact: true });
+    const mine = probe.getByRole("link", { name: ROOM_MY_LINK_NAME });
     stage = "account_header_visibility";
     await mine.waitFor({ state: "visible", timeout: 15000 });
     stage = "account_header_uniqueness";
     if (await mine.count() !== 1 || !await mine.isVisible()) throw new Error("ROOM_ACCOUNT_LINK_AMBIGUOUS");
+    stage = "account_header_label";
+    if ((await mine.textContent())?.trim() !== "my ROOM") throw new Error("ROOM_ACCOUNT_LABEL_MISMATCH");
     stage = "account_header_identity";
     const href = await mine.getAttribute("href");
     if (!href || canonicalRoomProfileUrl(new URL(href, probe.url()).href) !== expected) {

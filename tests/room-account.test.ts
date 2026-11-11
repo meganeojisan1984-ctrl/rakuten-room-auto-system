@@ -1,21 +1,22 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { assertRoomAccount, canonicalRoomProfileUrl, configuredRoomProfileUrl, roomAccountFailureCode } from "../src/room-account";
+import { assertRoomAccount, canonicalRoomProfileUrl, configuredRoomProfileUrl, roomAccountFailureCode, ROOM_MY_LINK_NAME } from "../src/room-account";
 import { validateSession } from "../src/core/browser";
 
 const expected = "https://room.rakuten.co.jp/room_test/items";
-function fixture(options: { href?: string; url?: string; count?: number; visible?: boolean; status?: number; missing?: boolean; navigationError?: boolean; readError?: boolean } = {}) {
+function fixture(options: { href?: string; url?: string; label?: string | null; accessibleName?: string; count?: number; visible?: boolean; status?: number; missing?: boolean; navigationError?: boolean; readError?: boolean } = {}) {
   let closed = false, visited = "";
   const context = { newPage: async () => ({
     goto: async (url: string) => { visited = url; if (options.navigationError) throw new Error("network"); return { ok: () => (options.status ?? 200) < 400 }; },
     url: () => options.url ?? expected,
-    getByRole: (role: string, config: {name: string; exact: boolean}) => {
-      assert.deepEqual([role, config], ["link", { name: "my ROOM", exact: true }]);
+    getByRole: (role: string, config: {name: RegExp}) => {
+      assert.deepEqual([role, config], ["link", { name: ROOM_MY_LINK_NAME }]);
       return {
-        waitFor: async () => { if (options.missing) throw new Error("timeout"); },
+        waitFor: async () => { if (options.missing || !config.name.test(options.accessibleName ?? "my ROOM")) throw new Error("timeout"); },
         count: async () => options.count ?? 1,
         isVisible: async () => options.visible ?? true,
+        textContent: async () => options.label === undefined ? "my ROOM" : options.label,
         getAttribute: async (name: string) => { assert.equal(name, "href"); if (options.readError) throw new Error("detached"); return options.href ?? "/room_test/items"; },
       };
     },
@@ -44,6 +45,19 @@ test("a unique visible my ROOM identifies the exact signed-in account", async ()
     assert.equal(f.visited(), expected);
     assert.equal(f.closed(), true);
   }
+});
+
+test("live ROOM header CSS icon is accepted without relaxing the visible label or account", async () => {
+  for (const accessibleName of ["my ROOM", "\uE96A my ROOM"]) {
+    await assertRoomAccount(fixture({ accessibleName }).context, expected);
+  }
+  for (const accessibleName of ["not my ROOM", "my ROOM login", "\uE96B my ROOM", "my ROOM\nother"]) {
+    await assert.rejects(assertRoomAccount(fixture({ accessibleName }).context, expected), /account_header_visibility$/);
+  }
+  for (const label of [null, "", "not my ROOM", "my ROOM login"]) {
+    await assert.rejects(assertRoomAccount(fixture({ label }).context, expected), /account_header_label$/);
+  }
+  await assert.rejects(assertRoomAccount(fixture({ accessibleName: "\uE96A my ROOM", href: "/room_other/items" }).context, expected), /account_header_identity$/);
 });
 
 for (const [name, options] of Object.entries({

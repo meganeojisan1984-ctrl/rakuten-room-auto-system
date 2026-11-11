@@ -65,7 +65,7 @@ test("detail confirmation binds the visible post product and its active photo", 
 test("logged-in my ROOM link, not /my public profile, verifies the account", async () => {
   for (const href of ["/room_test/items", "/room_other/items", ""]) {
     let closed = false;
-    const context = { newPage: async () => ({ goto: async (url: string) => { assert.equal(url, "https://room.rakuten.co.jp/room_test/items"); }, getByRole: (role: string, options: any) => { assert.equal(role, "link"); assert.equal(options.name, "my ROOM"); return { waitFor: async () => undefined, count: async () => 1, isVisible: async () => true, getAttribute: async () => href }; }, url: () => "https://room.rakuten.co.jp/room_test/items", close: async () => { closed = true; } }) };
+    const context = { newPage: async () => ({ goto: async (url: string) => { assert.equal(url, "https://room.rakuten.co.jp/room_test/items"); }, getByRole: (role: string, options: any) => { assert.equal(role, "link"); assert.equal(options.name.test("my ROOM"), true); assert.equal(options.name.test("other my ROOM"), false); return { waitFor: async () => undefined, count: async () => 1, isVisible: async () => true, textContent: async () => "my ROOM", getAttribute: async () => href }; }, url: () => "https://room.rakuten.co.jp/room_test/items", close: async () => { closed = true; } }) };
     if (href.includes("room_test")) await assertRoomAccount(context as any, "https://room.rakuten.co.jp/room_test");
     else await assert.rejects(assertRoomAccount(context as any, "https://room.rakuten.co.jp/room_test"), /NOT_VERIFIED/);
     assert.equal(closed, true);
