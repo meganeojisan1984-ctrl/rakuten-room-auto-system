@@ -4,6 +4,8 @@ import type { Locator } from "playwright";
 import { createAuthenticatedContext, validateSession } from "./session";
 import { notifyCookieExpired, notifyCaptchaDetected, notifyDomError, notifySuccess, notifyError } from "./notifiers";
 import type { RakutenItem } from "./fetcher";
+import type { BrowserPostImage } from "./browser-post-bundle";
+import { attachRoomImage, assertRoomImageAttached, readyRoomButton, ROOM_IMAGE_UI, confirmBrowserRoomPost, assertRoomAccount, assertBrowserPostForm } from "./browser-room-upload";
 dotenv.config();
 
 
@@ -21,6 +23,11 @@ export function prepareRoomCaption(caption: string): string {
   const result = trimmed.slice(0, end).trimEnd();
   assertRoomCaption(result);
   return result;
+}
+
+export function exactReviewedRoomCaption(caption: string): string {
+  assertRoomCaption(caption);
+  return caption;
 }
 
 export function assertRoomCaption(caption: string): void {
@@ -104,6 +111,8 @@ export type PostResult = {
   error?: string;
   /** True when the submit result is unknown; callers must not retry automatically. */
   unknown?: boolean;
+  /** Verified detail permalink, required for browser-image posting. */
+  roomPostUrl?: string;
 };
 
 /**
@@ -112,22 +121,30 @@ export type PostResult = {
 async function postSingleItem(
   item: RakutenItem,
   caption: string,
-  headless: boolean
+  headless: boolean,
+  image?: BrowserPostImage,
+  expectedProfileUrl?: string,
+  expectedCollectUrl?: string
 ): Promise<PostResult> {
   const { browser, context } = await createAuthenticatedContext(headless);
   let submitAttempted = false;
 
   try {
-    const roomCaption = prepareRoomCaption(caption);
+    const roomCaption = image ? exactReviewedRoomCaption(caption) : prepareRoomCaption(caption);
     if (roomCaption.length !== caption.length) {
       console.log(`[poster] ROOM紹介文を調整しました (${caption.length} → ${roomCaption.length}文字)`);
     }
 
     // Cookieの有効性チェック
-    const isValid = await validateSession(context);
+    const isValid = image ? true : await validateSession(context);
     if (!isValid) {
       await notifyCookieExpired();
       throw new Error("Cookie期限切れ: セッションが無効です");
+    }
+
+    if (image) {
+      if (!expectedProfileUrl || !expectedCollectUrl) throw new Error("ROOM_PROFILE_AND_PRODUCT_DESTINATION_REQUIRED");
+      await assertRoomAccount(context, expectedProfileUrl);
     }
 
     const page = await context.newPage();
@@ -136,6 +153,10 @@ async function postSingleItem(
     const productPageUrl = getProductPageUrl(item.itemUrl);
     console.log(`[poster] 商品URLへアクセス: ${productPageUrl}`);
     await page.goto(productPageUrl, getProductNavigationOptions());
+    if (image) {
+      const actual = new URL(page.url()), expected = new URL(productPageUrl);
+      if (actual.origin !== expected.origin || actual.pathname !== expected.pathname) throw new Error("ROOM_SOURCE_PRODUCT_REDIRECTED");
+    }
     await page.waitForTimeout(2000);
 
     // CAPTCHA検知
@@ -245,7 +266,7 @@ async function postSingleItem(
     console.log("[poster] フォーム確認スクリーンショット保存");
 
     // テキストエリアを取得
-    const captionLocator = postPage.locator("textarea").first();
+    const captionLocator = postPage.locator(image ? ROOM_IMAGE_UI.caption : "textarea").first();
     await captionLocator.waitFor({ state: "visible", timeout: 15000 }).catch(async () => {
       await notifyDomError("投稿フォームのテキストエリアが見つかりません");
       throw new Error("投稿フォームが見つかりません");
@@ -296,9 +317,13 @@ async function postSingleItem(
     console.log(`[poster] 紹介文を入力しました (${finalText.length}文字)`);
 
     assertRoomCaption(finalText);
+    if (finalText !== roomCaption) throw new Error("ROOM_CAPTION_MISMATCH");
+    if (image && !expectedProfileUrl) throw new Error("ROOM_PROFILE_REQUIRED_FOR_IMAGE_POST");
+    if (image) await assertBrowserPostForm(postPage, roomCaption, expectedCollectUrl!);
+    const imageSource = image ? await attachRoomImage(postPage, image, item.itemCode) : undefined;
 
     // 投稿ボタン（完了）: 無効なフォームを強制送信しない
-    const postBtnLocator = postPage.locator('button:has-text("完了"), a:has-text("完了")').first();
+    const postBtnLocator = image ? await readyRoomButton(postPage, ROOM_IMAGE_UI.publish) : postPage.locator('button:has-text("完了"), a:has-text("完了")').first();
     const postBtnVisible = await postBtnLocator.isVisible({ timeout: 10000 }).catch(() => false);
     if (!postBtnVisible) {
       await postPage.screenshot({ path: SCREENSHOT_PATH, fullPage: true }).catch(() => {});
@@ -307,6 +332,10 @@ async function postSingleItem(
     }
 
     await assertRoomFormReady(captionLocator, postBtnLocator);
+    if (imageSource) {
+      await assertRoomImageAttached(postPage, imageSource);
+      await assertBrowserPostForm(postPage, roomCaption, expectedCollectUrl!);
+    }
 
     // 送信操作は1回だけ。以後は観測のみ（未送信と証明できない再クリックは禁止）。
     submitAttempted = true;
@@ -322,7 +351,10 @@ async function postSingleItem(
     console.log("[poster] 投稿後URL:", postPage.url());
 
     // 投稿完了を待機。確認できない場合は成功扱いせず、再送禁止の結果不明で停止する。
-    const confirmed = await waitForPostCompletion(postPage);
+    const roomPostUrl = imageSource && expectedProfileUrl
+      ? await confirmBrowserRoomPost(postPage, productPageUrl, imageSource, expectedProfileUrl).catch(() => undefined)
+      : undefined;
+    const confirmed = image ? Boolean(roomPostUrl) : await waitForPostCompletion(postPage);
     if (!confirmed) {
       const error = "投稿完了確認タイムアウト（投稿結果不明。再送禁止）";
       console.error(`[poster] ⚠️ ${error}: ${item.itemName}`);
@@ -333,7 +365,7 @@ async function postSingleItem(
     await notifySuccess(item.itemName, item.itemUrl);
     console.log(`[poster] ✅ 投稿成功: ${item.itemName}`);
 
-    return { success: true, itemName: item.itemName, itemUrl: item.itemUrl };
+    return { success: true, itemName: item.itemName, itemUrl: item.itemUrl, ...(roomPostUrl ? { roomPostUrl } : {}) };
   } catch (err) {
     const errorMsg = String(err);
     console.error(`[poster] 投稿失敗: ${errorMsg}`);
@@ -383,14 +415,14 @@ export async function waitForPostCompletion(
  * 複数商品を順次投稿する
  */
 export async function postItems(
-  items: Array<{ item: RakutenItem; caption: string }>,
+  items: Array<{ item: RakutenItem; caption: string; image?: BrowserPostImage; expectedProfileUrl?: string; expectedCollectUrl?: string }>,
   headless: boolean = true
 ): Promise<PostResult[]> {
   const results: PostResult[] = [];
 
-  for (const { item, caption } of items) {
+  for (const { item, caption, image, expectedProfileUrl, expectedCollectUrl } of items) {
     console.log(`\n[poster] === 投稿開始: ${item.itemName.slice(0, 40)} ===`);
-    const result = await postSingleItem(item, caption, headless);
+    const result = await postSingleItem(item, caption, headless, image, expectedProfileUrl, expectedCollectUrl);
     results.push(result);
 
     // 投稿間隔（サーバー負荷・BAN対策）

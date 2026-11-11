@@ -96,12 +96,10 @@ test("別requestIdのremote intentは消去しない", async () => {
   }
 });
 
-test("ROOM intentは履歴保存後にだけ消去しunknown一覧を切り捨てない", () => {
+test("browser-only main does not clear or overwrite legacy uncertain intent", () => {
   const source = fs.readFileSync(path.join(process.cwd(), "src/main.ts"), "utf-8");
-  const saved = source.indexOf("saveState(postedCodes");
-  const cleared = source.indexOf("clearRoomPostIntent(roomIntent.requestId)");
-  assert.ok(saved >= 0 && cleared > saved);
-  assert.doesNotMatch(source, /uncertainItemCodes: \[\.\.\.uncertainCodes\]\.slice/);
+  assert.match(source, /runBrowserPostFromEnvironment/);
+  assert.doesNotMatch(source, /clearRoomPostIntent|generateCaptions|crossPostToSns/);
 });
 
 test("古いcheckoutはactive branchの最新posted履歴を先に取り込む", async () => {
