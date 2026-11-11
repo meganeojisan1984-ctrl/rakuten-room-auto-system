@@ -3,7 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as dotenv from "dotenv";
 import { notifyCookieExpired } from "./notifiers";
-import { assertRoomAccount, configuredRoomProfileUrl } from "./room-account";
+import { assertRoomAccount, configuredRoomProfileUrl, roomAccountFailureCode } from "./room-account";
 dotenv.config();
 
 
@@ -52,8 +52,8 @@ export async function validateSession(context: BrowserContext): Promise<boolean>
     await assertRoomAccount(context, configuredRoomProfileUrl());
     console.log("[session] 指定アカウントの my ROOM を確認しました");
     return true;
-  } catch {
-    console.warn("[session] 指定アカウントを確認できません。操作を停止します");
+  } catch (error) {
+    console.warn("[session] 指定アカウントを確認できません。操作を停止します", roomAccountFailureCode(error));
     await notifyCookieExpired();
     return false;
   }

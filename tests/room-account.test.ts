@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { assertRoomAccount, canonicalRoomProfileUrl, configuredRoomProfileUrl } from "../src/room-account";
+import { assertRoomAccount, canonicalRoomProfileUrl, configuredRoomProfileUrl, roomAccountFailureCode } from "../src/room-account";
 import { validateSession } from "../src/core/browser";
 
 const expected = "https://room.rakuten.co.jp/room_test/items";
@@ -83,5 +83,15 @@ test("both session entrypoints share positive identity checks and never visit /m
     const code = fs.readFileSync(file, "utf8");
     assert.match(code, /await assertRoomAccount\(context, configuredRoomProfileUrl\(\)\)/);
     assert.doesNotMatch(code, /goto\([^\n]*\/my/);
+  }
+});
+
+test("diagnostic codes distinguish safe stages without exposing page errors", async () => {
+  await assert.rejects(assertRoomAccount(fixture({ navigationError: true }).context, expected), /ROOM_ACCOUNT_NOT_VERIFIED:profile_navigation$/);
+  await assert.rejects(assertRoomAccount(fixture({ missing: true }).context, expected), /ROOM_ACCOUNT_NOT_VERIFIED:account_header_visibility$/);
+  await assert.rejects(assertRoomAccount(fixture({ href: "/room_other/items" }).context, expected), /ROOM_ACCOUNT_NOT_VERIFIED:account_header_identity$/);
+  assert.equal(roomAccountFailureCode(new Error("ROOM_ACCOUNT_NOT_VERIFIED:profile_location")), "ROOM_ACCOUNT_NOT_VERIFIED:profile_location");
+  for (const value of [new Error("secret page content"), new Error("ROOM_ACCOUNT_NOT_VERIFIED:https://secret.test"), null]) {
+    assert.equal(roomAccountFailureCode(value), "ROOM_ACCOUNT_NOT_VERIFIED:configuration_or_context");
   }
 });

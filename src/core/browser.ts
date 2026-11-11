@@ -6,7 +6,7 @@ import { chromium, type BrowserContext, type Browser } from "playwright";
 import * as fs from "fs";
 import * as path from "path";
 import * as dotenv from "dotenv";
-import { assertRoomAccount, configuredRoomProfileUrl } from "../room-account";
+import { assertRoomAccount, configuredRoomProfileUrl, roomAccountFailureCode } from "../room-account";
 dotenv.config();
 
 const SESSION_FILE = path.join(process.cwd(), "data", "session.json");
@@ -109,8 +109,8 @@ export async function validateSession(context: BrowserContext): Promise<boolean>
     await assertRoomAccount(context, configuredRoomProfileUrl());
     console.log("[browser] セッション検証: 指定アカウントの my ROOM を確認しました");
     return true;
-  } catch {
-    console.warn("[browser] セッション検証: 指定アカウントを確認できません");
+  } catch (error) {
+    console.warn("[browser] セッション検証: 指定アカウントを確認できません", roomAccountFailureCode(error));
     return false;
   }
 }
