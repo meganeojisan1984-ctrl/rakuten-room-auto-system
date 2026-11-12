@@ -32,7 +32,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: data/sales.sqlite
-          key: sales-db-v2-${{ github.run_id }}
+          key: sales-db-v2-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
             sales-db-v2-
 

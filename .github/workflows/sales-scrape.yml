@@ -37,7 +37,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: data/sales.sqlite
-          key: sales-db-v2-${{ github.run_id }}
+          key: sales-db-v2-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
             sales-db-v2-
 
@@ -65,12 +65,12 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: data/sales.sqlite
-          key: sales-db-v2-${{ github.run_id }}
+          key: sales-db-v2-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Create read-only handoff summary
         run: npx tsx src/run_verified_sales_report.ts
       - uses: actions/upload-artifact@v4
         with:
-          name: verified-sales-summary-${{ github.run_id }}
+          name: verified-sales-summary-${{ github.run_id }}-${{ github.run_attempt }}
           path: data/verified-sales-report.json
           retention-days: 30
           if-no-files-found: error
@@ -79,7 +79,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: affiliate-debug-${{ github.run_id }}
+          name: affiliate-debug-${{ github.run_id }}-${{ github.run_attempt }}
           path: data/affiliate-debug/
           retention-days: 7
           if-no-files-found: ignore
