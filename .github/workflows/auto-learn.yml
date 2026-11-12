@@ -1,68 +1,36 @@
-name: 自己学習ループ (司令官)
+name: 検証済み売上サマリー (読取のみ)
 
 on:
   schedule:
-    # JST 23:45 → UTC 14:45 (最終投稿23:00の後に1日分を学習)
+    # JST 23:45 → UTC 14:45: verified sales summary only
     - cron: "45 14 * * *"
   workflow_dispatch:
 
-concurrency:
-  group: main-writer
-  cancel-in-progress: false
-
+# Legacy Groq learning intentionally NOT resumed. No strategy writes or posting.
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  learn:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-
+  report:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
-      - name: リポジトリをチェックアウト
-        uses: actions/checkout@v4
-
-      - name: Node.js のセットアップ
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
-
-      - name: 依存関係をインストール
-        run: npm ci
-
-      - name: Playwright Chromium をインストール
-        run: npx playwright install chromium --with-deps
-
-      - name: 学習ループを実行 (計測→分析→司令官)
-        env:
-          CI: "true"
-          ROOM_COOKIE: ${{ secrets.ROOM_COOKIE }}
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          GROQ_MODEL: ${{ vars.GROQ_MODEL || 'openai/gpt-oss-120b' }}
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          ROOM_PROFILE_URL: ${{ secrets.ROOM_PROFILE_URL || vars.ROOM_PROFILE_URL || '' }}
-        run: npx tsx src/run_learn.ts
-
-      - name: 学習結果をコミット
-        if: always()
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add strategy.json post_history.json agent_reports.json dialogue.json sales_reports.json
-          if git diff --staged --quiet; then
-            echo "no staged changes, skip commit"
-            exit 0
-          fi
-          git commit -m "chore: 学習ループ実行 - 戦略を更新 [skip ci]"
-          bash tools/safe-push.sh
-
-      - name: 失敗時 Discord 通知
-        if: failure()
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          GITHUB_SERVER_URL: ${{ github.server_url }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_RUN_ID: ${{ github.run_id }}
-        run: |
-          npx tsx -e "require('./src/notifiers.ts').notifyWorkflowFailure('auto-learn', '学習ループが失敗しました');"
+          cache: npm
+      - uses: actions/cache/restore@v4
+        with:
+          path: data/sales.sqlite
+          key: sales-db-v2-${{ github.run_id }}
+          restore-keys: sales-db-v2-
+      - run: npm ci
+      - name: Read verified sales only (no AI, cookies, posting or strategy changes)
+        run: npx tsx src/run_verified_sales_report.ts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: verified-sales-summary-${{ github.run_id }}
+          path: data/verified-sales-report.json
+          retention-days: 30
+          if-no-files-found: error

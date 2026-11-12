@@ -3,11 +3,15 @@ dotenv.config();
 import { loadPersona, savePersona } from "./persona/persona";
 import { evaluatePersona } from "./persona/evaluator";
 import { loadHistory } from "./agents/store";
-import { initDb, getSalesByDateRange } from "./affiliate/sales-db";
+import { initDb, getSalesByDateRange, getVerifiedSalesWindow, completedJstWindow } from "./affiliate/sales-db";
 import { notifyReport, notifyError } from "./notifiers";
 
 async function main(): Promise<void> {
   console.log("=== evaluator: ペルソナ勝者判定 開始 ===");
+  if (process.env.ENABLE_VERIFIED_PERSONA_DECISIONS !== '1') {
+    console.log('[evaluator] legacy decisions remain disabled pending validated product attribution');
+    return;
+  }
   const persona = loadPersona();
   const now = new Date();
 
@@ -15,7 +19,14 @@ async function main(): Promise<void> {
   const from = new Date(now.getTime() - persona.evaluationWindow * 24 * 60 * 60 * 1000);
   const fmt = (d: Date): string => d.toISOString().slice(0, 10);
   const db = initDb();
-  const sales = getSalesByDateRange(db, fmt(from), fmt(to));
+  const window = completedJstWindow(now, persona.evaluationWindow);
+  const verified = getVerifiedSalesWindow(db, window.from, window.to);
+  if (verified.status !== 'complete') {
+    db.close();
+    console.log('[evaluator] unavailable sales coverage; no stop-loss/winner decision');
+    return;
+  }
+  const sales = verified.rows;
   db.close();
 
   const history = loadHistory();

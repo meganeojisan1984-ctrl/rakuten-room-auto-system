@@ -1,11 +1,13 @@
 import { chromium, type Cookie, type APIRequestContext } from "playwright";
 import * as fs from "fs";
+import { createHash } from "crypto";
 import * as path from "path";
 import * as dotenv from "dotenv";
 import { parseOrderCsv } from "./report-parser";
 import {
   initDb,
-  upsertSalesRow,
+  replaceSalesDay,
+  validDate,
   getScrapeSummary,
   type SalesRow,
 } from "./sales-db";
@@ -21,9 +23,9 @@ export interface ScrapeResult {
   ok: boolean;
   date: string;         // 対象日 (YYYY-MM-DD)
   monthFetched: string; // 取得対象月 (YYYY-MM)
-  rowsInserted: number;
-  totalReward: number;
-  totalOrders: number;
+  rowsInserted: number | null;
+  totalReward: number | null;
+  totalOrders: number | null;
   error?: string;
   debugArtifact?: string;
 }
@@ -71,6 +73,7 @@ export async function scrapeAffiliateReport(
   opts: { date?: string; dbPath?: string } = {},
 ): Promise<ScrapeResult> {
   const date = opts.date ?? yesterdayJst();
+  if (!validDate(date) || date > yesterdayJst()) throw new Error("invalid or incomplete target date");
   const month = monthOf(date);
   fs.mkdirSync(DEBUG_DIR, { recursive: true });
 
@@ -113,12 +116,12 @@ export async function scrapeAffiliateReport(
     const ct = resp.headers()["content-type"] ?? "";
     console.log(`[sales-scraper] status=${status} content-type=${ct}`);
 
-    if (status === 401 || status === 403 || status >= 500) {
+    if (status !== 200) {
       const body = await resp.body();
       const artifact = await dumpDebug("api-status-fail", { body });
       await notifyDomError(`楽天アフィリ API ${status} 応答（Cookie 失効の可能性）\ndebug: ${artifact}`);
       return {
-        ok: false, date, monthFetched: month, rowsInserted: 0, totalReward: 0, totalOrders: 0,
+        ok: false, date, monthFetched: month, rowsInserted: null, totalReward: null, totalOrders: null,
         error: `api-status-${status}`, debugArtifact: artifact,
       };
     }
@@ -130,7 +133,7 @@ export async function scrapeAffiliateReport(
       const artifact = await dumpDebug("non-csv-response", { body });
       await notifyDomError(`API が CSV を返さない (ct=${ct}, prefix="${preview}")\ndebug: ${artifact}`);
       return {
-        ok: false, date, monthFetched: month, rowsInserted: 0, totalReward: 0, totalOrders: 0,
+        ok: false, date, monthFetched: month, rowsInserted: null, totalReward: null, totalOrders: null,
         error: "non-csv-response", debugArtifact: artifact,
       };
     }
@@ -139,20 +142,23 @@ export async function scrapeAffiliateReport(
 
     let parsed: SalesRow[];
     try {
-      parsed = parseOrderCsv(csv, { targetDate: date });
+      parsed = parseOrderCsv(csv, { targetDate: date, strict: true });
     } catch (e) {
       const artifact = await dumpDebug("csv-parse-failed", { body: csv });
       await notifyDomError(`CSVパース失敗: ${(e as Error).message}\ndebug: ${artifact}`);
       return {
-        ok: false, date, monthFetched: month, rowsInserted: 0, totalReward: 0, totalOrders: 0,
+        ok: false, date, monthFetched: month, rowsInserted: null, totalReward: null, totalOrders: null,
         error: `parse-failed: ${(e as Error).message}`, debugArtifact: artifact,
       };
     }
 
     const db = initDb(opts.dbPath);
-    for (const row of parsed) upsertSalesRow(db, row);
-    const summary = getScrapeSummary(db, date, date);
-    db.close();
+    let summary;
+    try {
+      replaceSalesDay(db, date, parsed, { fetchedAt: new Date().toISOString(), sourceMonth: month, sha256: createHash('sha256').update(csv).digest('hex') });
+      summary = getScrapeSummary(db, date, date);
+      db.pragma('wal_checkpoint(TRUNCATE)');
+    } finally { db.close(); }
 
     await notifyReport(
       "📊 楽天アフィリ実売取り込み",
