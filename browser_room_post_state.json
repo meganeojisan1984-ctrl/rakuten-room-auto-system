@@ -35,10 +35,12 @@
     "captionSha256": "23521a521b8cedb17b9771356150d8b23a2f76b6f6e2a60a45435c0fba553309",
     "captionUtf16Units": 178,
     "createdAt": "2026-11-12T23:08:09.602858+00:00",
-    "status": "reserved",
+    "status": "unknown",
     "mode": "room-standard",
     "sourceImageMode": "ROOM automatic unchanged",
-    "uploadPerformed": false
+    "uploadPerformed": false,
+    "attemptId": "attempt-85b67c12-1018-4727-928c-c14a46100801",
+    "attemptStartedAt": "2026-11-12T23:09:10.812108+00:00"
   },
   "records": [
     {
