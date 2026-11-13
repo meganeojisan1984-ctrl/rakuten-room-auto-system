@@ -33,9 +33,17 @@ export function initDatabase(): Database.Database {
   db.exec(`
     CREATE TABLE IF NOT EXISTS followed_users (
       user_id    TEXT PRIMARY KEY,
-      followed_at INTEGER NOT NULL
+      followed_at INTEGER NOT NULL,
+      verified INTEGER NOT NULL DEFAULT 0
     );
   `);
+
+  // Legacy rows include users whose follow control was missing. Preserve them,
+  // but re-check their live state before treating them as confirmed follows.
+  const followedColumns = db.prepare("PRAGMA table_info(followed_users)").all() as Array<{ name: string }>;
+  if (!followedColumns.some((column) => column.name === "verified")) {
+    db.exec("ALTER TABLE followed_users ADD COLUMN verified INTEGER NOT NULL DEFAULT 0");
+  }
 
   // ログテーブル
   db.exec(`
@@ -112,19 +120,19 @@ export function getAllSettings(): Record<string, string> {
 // ──────────────────────────────────────────────
 export function isFollowedUser(userId: string): boolean {
   return !!getDb()
-    .prepare("SELECT 1 FROM followed_users WHERE user_id = ?")
+    .prepare("SELECT 1 FROM followed_users WHERE user_id = ? AND verified = 1")
     .get(userId);
 }
 
 export function recordFollowedUser(userId: string): void {
   getDb()
-    .prepare("INSERT OR IGNORE INTO followed_users (user_id, followed_at) VALUES (?, ?)")
+    .prepare("INSERT INTO followed_users (user_id, followed_at, verified) VALUES (?, ?, 1) ON CONFLICT(user_id) DO UPDATE SET verified = 1")
     .run(userId, Date.now());
 }
 
 export function getFollowedCount(): number {
   const row = getDb()
-    .prepare("SELECT COUNT(*) as cnt FROM followed_users")
+    .prepare("SELECT COUNT(*) as cnt FROM followed_users WHERE verified = 1")
     .get() as { cnt: number };
   return row.cnt;
 }
@@ -209,3 +217,4 @@ export function createApp(
 
   return app;
 }
+

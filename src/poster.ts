@@ -1,9 +1,55 @@
 import * as path from "path";
 import * as dotenv from "dotenv";
+import type { Locator } from "playwright";
 import { createAuthenticatedContext, validateSession } from "./session";
 import { notifyCookieExpired, notifyCaptchaDetected, notifyDomError, notifySuccess, notifyError } from "./notifiers";
 import type { RakutenItem } from "./fetcher";
 dotenv.config();
+
+
+export const ROOM_CAPTION_MAX_LENGTH = 500;
+
+/** ROOM's counter uses UTF-16 units. Never cut between an emoji's surrogate pair. */
+export function prepareRoomCaption(caption: string): string {
+  const trimmed = caption.trim();
+  let end = Math.min(trimmed.length, ROOM_CAPTION_MAX_LENGTH);
+  if (end < trimmed.length &&
+      /[\uD800-\uDBFF]/.test(trimmed.charAt(end - 1)) &&
+      /[\uDC00-\uDFFF]/.test(trimmed.charAt(end))) {
+    end--;
+  }
+  const result = trimmed.slice(0, end).trimEnd();
+  assertRoomCaption(result);
+  return result;
+}
+
+export function assertRoomCaption(caption: string): void {
+  if (!caption.trim() || caption.length > ROOM_CAPTION_MAX_LENGTH) {
+    throw new Error("ROOM紹介文が空欄または500文字超過のため送信を中止します");
+  }
+}
+
+/** Recheck actual DOM/model validation immediately before the one allowed submit. */
+export async function assertRoomFormReady(
+  captionInput: Pick<Locator, "inputValue" | "evaluate">,
+  postButton: Pick<Locator, "isEnabled" | "evaluate">
+): Promise<void> {
+  assertRoomCaption(await captionInput.inputValue());
+  const invalid = await captionInput.evaluate((element) => {
+    const textarea = element as HTMLTextAreaElement;
+    const form = textarea.closest("form");
+    return !textarea.validity.valid ||
+      textarea.matches('.ng-invalid, [aria-invalid="true"]') ||
+      !!form?.matches(".ng-invalid") ||
+      !!form?.querySelector(":invalid");
+  });
+  const disabled = !await postButton.isEnabled() ||
+    await postButton.evaluate((element) =>
+      element.matches('[disabled], [aria-disabled="true"], .disabled'));
+  if (invalid || disabled) {
+    throw new Error("ROOM投稿フォームが無効または投稿ボタンが無効のため送信を中止します");
+  }
+}
 
 const ROOM_URL = "https://room.rakuten.co.jp";
 const SCREENSHOT_PATH = path.join(process.cwd(), "error.png");
@@ -72,6 +118,11 @@ async function postSingleItem(
   let submitAttempted = false;
 
   try {
+    const roomCaption = prepareRoomCaption(caption);
+    if (roomCaption.length !== caption.length) {
+      console.log(`[poster] ROOM紹介文を調整しました (${caption.length} → ${roomCaption.length}文字)`);
+    }
+
     // Cookieの有効性チェック
     const isValid = await validateSession(context);
     if (!isValid) {
@@ -229,7 +280,7 @@ async function postSingleItem(
       setter?.call(textarea, text);
       textarea.dispatchEvent(new Event("input", { bubbles: true }));
       textarea.dispatchEvent(new Event("change", { bubbles: true }));
-    }, caption);
+    }, roomCaption);
     await postPage.waitForTimeout(500);
 
     // 0文字の場合はキーボードで入力（フォールバック）
@@ -238,13 +289,15 @@ async function postSingleItem(
       console.log("[poster] Angular入力失敗、キーボード入力で再試行...");
       await captionLocator.click({ force: true });
       await postPage.keyboard.press("Control+a");
-      await postPage.keyboard.type(caption, { delay: 10 });
+      await postPage.keyboard.type(roomCaption, { delay: 10 });
       await postPage.waitForTimeout(500);
     }
     const finalText = await captionLocator.inputValue().catch(() => "");
     console.log(`[poster] 紹介文を入力しました (${finalText.length}文字)`);
 
-    // 投稿ボタン（完了）: Locatorを使ってforce:trueでオーバーレイを回避
+    assertRoomCaption(finalText);
+
+    // 投稿ボタン（完了）: 無効なフォームを強制送信しない
     const postBtnLocator = postPage.locator('button:has-text("完了"), a:has-text("完了")').first();
     const postBtnVisible = await postBtnLocator.isVisible({ timeout: 10000 }).catch(() => false);
     if (!postBtnVisible) {
@@ -253,10 +306,12 @@ async function postSingleItem(
       throw new Error("投稿ボタンが見つかりません");
     }
 
+    await assertRoomFormReady(captionLocator, postBtnLocator);
+
     // 送信操作は1回だけ。以後は観測のみ（未送信と証明できない再クリックは禁止）。
     submitAttempted = true;
-    await postBtnLocator.click({ force: true, timeout: 5000 });
-    console.log("[poster] 投稿ボタンをクリックしました (Locator force:true, single-submit)");
+    await postBtnLocator.click({ timeout: 5000 });
+    console.log("[poster] 投稿ボタンをクリックしました (validated, single-submit)");
 
     // 投稿直後のスクリーンショット（デバッグ用）
     await postPage.waitForTimeout(3000);
