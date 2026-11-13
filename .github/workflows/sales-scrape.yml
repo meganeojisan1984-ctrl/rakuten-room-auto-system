@@ -2,25 +2,25 @@ name: 楽天アフィリエイト 実売取り込み
 
 on:
   schedule:
-    # JST 02:00 → UTC 17:00 (前日) — 楽天アフィリのレポート確定が遅めなので早朝
+    # JST 02:00 unchanged. Before noon JST, ingest day-before-yesterday only.
     - cron: "0 17 * * *"
   workflow_dispatch:
     inputs:
       date:
-        description: "取得対象日 (YYYY-MM-DD, 空欄=昨日)"
+        description: "取得対象日 (YYYY-MM-DD, 空欄=公式反映期限経過済みの最新日)"
         required: false
         default: ""
 
 concurrency:
   group: room-scrape
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   scrape:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
 
     steps:
@@ -34,15 +34,12 @@ jobs:
           cache: "npm"
 
       - name: sales.sqlite をキャッシュから復元
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
-          path: |
-            data/sales.sqlite
-            data/sales.sqlite-shm
-            data/sales.sqlite-wal
-          key: sales-db-${{ github.run_id }}
+          path: data/sales.sqlite
+          key: sales-db-v2-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
-            sales-db-
+            sales-db-v2-
 
       - name: 依存関係をインストール
         run: npm ci
@@ -64,11 +61,25 @@ jobs:
             npm run scrape-sales
           fi
 
+      - name: Persist checkpointed verified DB only after successful import
+        uses: actions/cache/save@v4
+        with:
+          path: data/sales.sqlite
+          key: sales-db-v2-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Create read-only handoff summary
+        run: npx tsx src/run_verified_sales_report.ts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: verified-sales-summary-${{ github.run_id }}-${{ github.run_attempt }}
+          path: data/verified-sales-report.json
+          retention-days: 30
+          if-no-files-found: error
+
       - name: 診断アーティファクトをアップロード（失敗時）
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: affiliate-debug-${{ github.run_id }}
+          name: affiliate-debug-${{ github.run_id }}-${{ github.run_attempt }}
           path: data/affiliate-debug/
           retention-days: 7
           if-no-files-found: ignore

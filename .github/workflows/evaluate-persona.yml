@@ -29,15 +29,12 @@ jobs:
           cache: "npm"
 
       - name: sales.sqlite をキャッシュから復元
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
-          path: |
-            data/sales.sqlite
-            data/sales.sqlite-shm
-            data/sales.sqlite-wal
-          key: sales-db-${{ github.run_id }}
+          path: data/sales.sqlite
+          key: sales-db-v2-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
-            sales-db-
+            sales-db-v2-
 
       - name: 依存関係をインストール
         run: npm ci

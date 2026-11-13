@@ -21,13 +21,16 @@ import type { SalesRow } from "./sales-db";
  */
 export function parseOrderCsv(
   csv: string,
-  opts: { defaultTrackingId?: string; targetDate?: string } = {},
+  opts: { defaultTrackingId?: string; targetDate?: string; strict?: boolean } = {},
 ): SalesRow[] {
+  if (opts.strict && (!opts.targetDate || !/^\d{4}-\d{2}-\d{2}$/.test(opts.targetDate))) throw new Error('strict target date required');
   const lines = csv.replace(/^﻿/, "").split(/\r?\n/);
   const headerIdx = lines.findIndex((l) => /^\s*date,rewards,rate,amount/.test(l));
   if (headerIdx < 0) {
     throw new Error("英語ヘッダ行 (date,rewards,...) が見つかりません");
   }
+  if (opts.strict && lines[headerIdx].trim() !== 'date,rewards,rate,amount,genre_name,shop_name,item_name,status,link_type,device_type,measurement_id') throw new Error('unexpected CSV header');
+  if (opts.strict && !lines.some(l => l.replace(/^"|"$/g,'').trim() === '注文別成果: ' + opts.targetDate!.slice(0,7).replace('-','.'))) throw new Error('CSV report month not verified');
   const dataLines = lines.slice(headerIdx + 1).filter((l) => l.trim().length > 0);
   const defaultTid = opts.defaultTrackingId ?? "";
 
@@ -36,10 +39,18 @@ export function parseOrderCsv(
 
   for (const line of dataLines) {
     const cols = splitCsvLine(line);
+    if (opts.strict && (cols.length !== 11 || (line.match(/"/g) ?? []).length % 2)) throw new Error('malformed CSV row');
     if (cols.length < 11) continue;
     const timestamp = stripQuotes(cols[0]).trim();
-    if (!timestamp) continue;
+    if (!timestamp) { if (opts.strict) throw new Error("empty CSV date"); continue; }
     const date = timestamp.slice(0, 10); // "YYYY-MM-DD"
+    if (opts.strict) {
+      if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(timestamp) || !Number.isFinite(Date.parse(date)) ||
+          new Date(date).toISOString().slice(0, 10) !== date || date.slice(0,7) !== opts.targetDate!.slice(0,7)) throw new Error('invalid CSV date');
+      if (Number(timestamp.slice(11,13))>23 || Number(timestamp.slice(14,16))>59 || Number(timestamp.slice(17,19))>59) throw new Error('invalid CSV time');
+      const rewardText = cols[1].replace(/[¥,\s"]/g, '');
+      if (!/^\d+$/.test(rewardText) || !Number.isSafeInteger(Number(rewardText)) || !cols[5].trim() || !cols[6].trim()) throw new Error('invalid CSV sales values');
+    }
     if (opts.targetDate && date !== opts.targetDate) continue;
 
     const reward = toIntStrict(cols[1]);
