@@ -1,95 +1,15 @@
-/**
- * auto_post.ts - 自動コレ（投稿）機能
- */
-import { fetchItems, getLastSelectedGenre, PRODUCT_CATEGORIES } from "../fetcher";
-import { generateCaptions, type PostType } from "../generator";
-import { postItems } from "../poster";
+/** Scheduled ROOM posting consumes the same reviewed browser bundle as main. */
+import { runBrowserPostFromEnvironment } from "../browser-post-runner";
 import { addLog } from "../api/server";
-import { loadPersona, getSlot } from "../persona/persona";
-import { resolveSlot } from "../persona/slot-rotator";
-import { generateStrategyBriefMap } from "../sales-strategy";
-import * as fs from "fs";
-import * as path from "path";
 
-const POSTED_ITEMS_FILE = path.join(process.cwd(), "data", "posted_items.json");
-const MAX_HISTORY = 500;
-
-interface PostedState {
-  postedItemCodes: string[];
-  postTypeIndex: number;
-}
-
-function loadState(): { codes: Set<string>; postTypeIndex: number } {
+export async function runAutoPost(postCount = 1, headless = true): Promise<void> {
+  if (postCount !== 1) throw new Error("BROWSER_ROUTE_REQUIRES_ONE_BOUND_PRODUCT");
+  addLog("auto_post", "info", "ブラウザ生成bundleの確認と画像付きROOM投稿を開始");
   try {
-    const data = JSON.parse(fs.readFileSync(POSTED_ITEMS_FILE, "utf-8")) as PostedState;
-    return { codes: new Set(data.postedItemCodes ?? []), postTypeIndex: data.postTypeIndex ?? 0 };
-  } catch {
-    return { codes: new Set(), postTypeIndex: 0 };
-  }
-}
-
-function saveState(codes: Set<string>, postTypeIndex: number): void {
-  const dir = path.dirname(POSTED_ITEMS_FILE);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  const arr = [...codes].slice(-MAX_HISTORY);
-  fs.writeFileSync(POSTED_ITEMS_FILE, JSON.stringify({ postedItemCodes: arr, postTypeIndex }, null, 2));
-}
-
-function getPostType(index: number): PostType {
-  return ([1, 2, 3] as PostType[])[index % 3]!;
-}
-
-/**
- * 自動投稿を実行する
- * @param postCount 投稿件数
- * @param headless ヘッドレス実行フラグ
- */
-export async function runAutoPost(postCount: number = 1, headless: boolean = true): Promise<void> {
-  console.log(`[auto_post] 自動投稿開始 (${postCount}件)`);
-  addLog("auto_post", "info", `自動投稿開始 (${postCount}件)`);
-
-  const { codes: postedCodes, postTypeIndex } = loadState();
-  const postType = getPostType(postTypeIndex);
-
-  try {
-    // 商品取得
-    const items = await fetchItems(postCount, postedCodes);
-    if (items.length === 0) {
-      addLog("auto_post", "warn", "取得できる新商品がありません");
-      return;
-    }
-
-    // 紹介文生成
-    const persona = loadPersona();
-    const slot = getSlot(persona, resolveSlot(persona, new Date()));
-    const category = PRODUCT_CATEGORIES.find((value) => value.name === getLastSelectedGenre())
-      ?? PRODUCT_CATEGORIES.find((value) => slot.genres.includes(value.name));
-    const briefs = category ? await generateStrategyBriefMap(items, slot, category) : undefined;
-    const captionedItems = await generateCaptions(items, postType, briefs);
-    if (captionedItems.length === 0) {
-      addLog("auto_post", "error", "紹介文の生成に失敗しました");
-      return;
-    }
-
-    // 楽天ROOM投稿
-    const results = await postItems(captionedItems, headless);
-
-    const succeeded = results.filter((r) => r.success).length;
-    const failed = results.filter((r) => !r.success).length;
-    addLog("auto_post", "info", `ROOM投稿完了 成功:${succeeded}件 失敗:${failed}件`);
-
-    // 投稿済みリスト更新
-    const successCodes = captionedItems
-      .filter((_, i) => results[i]?.success)
-      .map((c) => c.item.itemCode);
-    for (const code of successCodes) postedCodes.add(code);
-    saveState(postedCodes, (postTypeIndex + 1) % 3);
-
-    console.log(`[auto_post] 完了 ROOM成功:${succeeded} 失敗:${failed}`);
-  } catch (err) {
-    const msg = String(err);
-    console.error("[auto_post] エラー:", msg);
-    addLog("auto_post", "error", msg);
-    throw err;
+    const result = await runBrowserPostFromEnvironment(headless);
+    addLog("auto_post", "info", "ROOM投稿確認: " + result.roomPostUrl);
+  } catch (error) {
+    addLog("auto_post", "error", error instanceof Error ? error.message : "投稿停止");
+    throw error;
   }
 }

@@ -5,10 +5,12 @@
  */
 import { createBrowserContext, validateSession } from "../core/browser";
 import { randomSleep } from "../utils/helpers";
+import { confirmFollow } from "./follow-control";
 import { addLog, isFollowedUser, recordFollowedUser, getFollowedCount } from "../api/server";
 
 const ROOM_URL = "https://room.rakuten.co.jp";
-const PARALLEL_PAGES = 4;
+// Serialize follow actions so the cap cannot be exceeded by in-flight workers.
+const PARALLEL_PAGES = 1;
 
 /** 1時間あたりの最大フォロー数 (アカウント停止防止の絶対上限) */
 const MAX_FOLLOWS_PER_HOUR = 100;
@@ -23,13 +25,13 @@ const QUEUE_SATURATION = 80;
 const OWN_ROOM_ID = process.env.OWN_ROOM_ID || "room_sho_qoltime";
 
 const SELECTORS = {
-  followButton: 'button:has-text("フォローする")',
   // 相対URL(/room_xxx)と絶対URL(https://room.rakuten.co.jp/room_xxx)の両方に対応
   userLinks: 'a[href*="/room_"]',
 };
 
 type State = {
   followCount: number;
+  stopped: boolean;
   scanDone: boolean;
   followTimestamps: number[];
   /** フォローに成功したユーザーID (次の連鎖スキャン候補) */
@@ -100,7 +102,7 @@ async function scanOneFollowerList(
   let noNewCount = 0;
   let scrollNum = 0;
 
-  while (state.followCount < maxFollows) {
+  while (!state.stopped && state.followCount < maxFollows) {
     const links = await page.locator(SELECTORS.userLinks).all();
     let added = 0;
     for (const link of links) {
@@ -150,7 +152,7 @@ async function runScanner(
 ): Promise<void> {
   // Phase 1: シードのフォロワーリストをスキャン
   for (const id of seedIds) {
-    if (state.followCount >= maxFollows) break;
+    if (state.stopped || state.followCount >= maxFollows) break;
     await scanOneFollowerList(page, id, queue, seen, state, maxFollows);
   }
 
@@ -159,7 +161,7 @@ async function runScanner(
   const seenSeeds = new Set<string>(seedPool);
   let seedPos = 0;
 
-  while (state.followCount < maxFollows) {
+  while (!state.stopped && state.followCount < maxFollows) {
     for (const s of state.followedSeeds) {
       if (!seenSeeds.has(s)) {
         seenSeeds.add(s);
@@ -201,7 +203,7 @@ async function followWorker(
   maxFollows: number,
   pageId: number
 ): Promise<void> {
-  while (state.followCount < maxFollows) {
+  while (!state.stopped && state.followCount < maxFollows) {
     if (queue.length === 0) {
       if (state.scanDone) break;
       await randomSleep(1000, 2000);
@@ -215,55 +217,34 @@ async function followWorker(
         waitUntil: "domcontentloaded",
         timeout: 20000,
       });
+    } catch (err) {
+      // Navigation failed before any follow click. Skip without recording it.
+      console.warn(`[auto_follow][p${pageId}] ページ取得失敗: ${userUrl} - ${String(err)}`);
+      continue;
+    }
 
-      // Angularが「フォローする」または「フォロー中」ボタンを描画するまで最大10秒待つ
-      await page.waitForSelector(
-        'button:has-text("フォローする"), button:has-text("フォロー中")',
-        { timeout: 10000 }
-      ).catch(() => {});
-
-      const followBtn = page.locator(SELECTORS.followButton).first();
-      if (!(await followBtn.isVisible().catch(() => false))) {
-        // フォロー済みまたはボタン未描画 → DBに記録してスキップ
-        const currentUrl = page.url();
-        console.log(`[auto_follow][p${pageId}] スキップ(フォロー済み or ボタンなし): ${userUrl} → ${currentUrl}`);
-        recordFollowedUser(userUrl);
+    try {
+      const result = await confirmFollow(page, async () => {
+        if (state.stopped) throw new Error("フォロー処理を停止しました");
+        await enforceRateLimit(state.followTimestamps);
+      });
+      recordFollowedUser(userUrl);
+      if (result === "already-following") {
+        console.log(`[auto_follow][p${pageId}] フォロー中を確認: ${userUrl}`);
         continue;
-      }
-
-      await enforceRateLimit(state.followTimestamps);
-
-      await followBtn.scrollIntoViewIfNeeded();
-      await randomSleep(200, 400);
-
-      await page.evaluate(() => {
-        const btn = Array.from(document.querySelectorAll<HTMLElement>("button")).find(
-          (el) => el.textContent?.trim() === "フォローする"
-        );
-        if (btn) btn.click();
-      }).catch(() => {});
-      await randomSleep(500, 800);
-
-      if (await followBtn.isVisible().catch(() => false)) {
-        await followBtn.click({ force: true }).catch(() => {});
-        await randomSleep(500, 700);
       }
 
       state.followTimestamps.push(Date.now());
       state.followCount++;
       state.followedSeeds.push(userUrl);
-      // DBにフォロー済みとして記録
-      recordFollowedUser(userUrl);
 
       console.log(`[auto_follow][p${pageId}] フォロー! ${userUrl} (${state.followCount}/${maxFollows})`);
       addLog("auto_follow", "info", `フォロー: ${state.followCount}/${maxFollows}`);
 
       await randomSleep(700, 1000);
     } catch (err) {
-      console.warn(`[auto_follow][p${pageId}] スキップ: ${userUrl} - ${err}`);
-      // リダイレクト等の残留ナビゲーションが終わるのを待ってからリセット
-      await page.waitForLoadState("domcontentloaded", { timeout: 4000 }).catch(() => {});
-      await page.goto("about:blank", { timeout: 3000 }).catch(() => {});
+      state.stopped = true;
+      throw new Error(`フォロー処理を停止: ${userUrl} - ${String(err)}`);
     }
   }
 }
@@ -285,13 +266,14 @@ export async function runAutoFollow(
   try {
     if (!(await validateSession(context))) {
       addLog("auto_follow", "error", "セッション無効: Cookie更新が必要です");
-      return;
+      throw new Error("ROOM セッション無効: Cookie更新が必要です");
     }
 
     const queue: string[] = [];
     const seen = new Set<string>();
     const state: State = {
       followCount: 0,
+      stopped: false,
       scanDone: false,
       followTimestamps: [],
       followedSeeds: [],
@@ -335,3 +317,4 @@ export async function runAutoFollow(
     await browser.close();
   }
 }
+

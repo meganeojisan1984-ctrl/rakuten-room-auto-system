@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npx tsx src/index.ts",
-    "start:post-only": "npx tsx src/main.ts",
+    "start": "node --import tsx src/index.ts",
+    "start:post-only": "node --import tsx src/main.ts",
     "learn": "npx tsx src/run_learn.ts",
     "app": "npx tsx src/maintenance/server.ts",
     "export-cookie": "npx tsx tools/cookie-exporter.ts",
@@ -22,7 +22,10 @@
     "streamdeck:profile": "node tools/streamdeck/scripts/make-profile.mjs",
     "streamdeck:icons": "node tools/streamdeck/scripts/make-icons.mjs",
     "test": "node --test --import tsx tests/*.test.ts",
-    "build": "npx tsc"
+    "build": "npx tsc",
+    "image:prompt": "node --import tsx tools/create-showcase-prompt.ts",
+    "room:bundle": "node --import tsx tools/package-browser-post-bundle.ts",
+    "room:transaction": "node --import tsx tools/browser-post-transaction.ts"
   },
   "keywords": [],
   "author": "",
