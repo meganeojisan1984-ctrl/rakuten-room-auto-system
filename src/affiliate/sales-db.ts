@@ -104,6 +104,7 @@ export function replaceSalesDay(db: Database.Database, date: string, rows: Sales
   if (!validDate(date) || evidence.sourceMonth !== date.slice(0, 7) ||
       !/^\d{4}-\d{2}-\d{2}T.*Z$/.test(evidence.fetchedAt) || !Number.isFinite(Date.parse(evidence.fetchedAt)) ||
       !/^[a-f0-9]{64}$/.test(evidence.sha256)) throw new Error('invalid sales evidence');
+  if (date > latestAvailableSalesDay(new Date(evidence.fetchedAt))) throw new Error('report publication window incomplete');
   const keys = new Set<string>();
   for (const row of rows) {
     const key = JSON.stringify([row.itemCode, row.trackingId]);
@@ -120,10 +121,16 @@ export function replaceSalesDay(db: Database.Database, date: string, rows: Sales
       .run(date, evidence.fetchedAt, evidence.sourceMonth, evidence.sha256, rows.length, rowsDigest(rows));
   })();
 }
+/** Official report: yesterday is fully reflected by noon JST, not overnight. */
+export function latestAvailableSalesDay(now: Date): string {
+  if (!Number.isFinite(now.getTime())) throw new Error('invalid report clock');
+  const end = new Date(now.getTime() + 9 * 3600000);
+  end.setUTCDate(end.getUTCDate() - (end.getUTCHours() < 12 ? 2 : 1));
+  return end.toISOString().slice(0,10);
+}
 export function completedJstWindow(now: Date, days: number): { from: string; to: string } {
   if (!Number.isFinite(now.getTime()) || !Number.isSafeInteger(days) || days < 1 || days > 366) throw new Error('invalid window');
-  const end = new Date(now.getTime() + 9 * 3600000);
-  end.setUTCDate(end.getUTCDate() - 1);
+  const end = new Date(latestAvailableSalesDay(now));
   const start = new Date(end); start.setUTCDate(start.getUTCDate() - days + 1);
   return { from: start.toISOString().slice(0,10), to: end.toISOString().slice(0,10) };
 }
@@ -138,7 +145,7 @@ export function getVerifiedSalesWindow(db: Database.Database, from: string, to: 
     const date = new Date(t).toISOString().slice(0,10);
     const c = coverage.get(date, 'complete') as {row_count: number;rows_sha256:string;fetched_at:string} | undefined;
     const actual = count.get(date) as {n: number};
-    if (!c || c.row_count !== actual.n || c.rows_sha256 !== rowsDigest(getSalesByDateRange(db,date,date))) missingDates.push(date);
+    if (!c || !Number.isFinite(Date.parse(c.fetched_at)) || date > latestAvailableSalesDay(new Date(c.fetched_at)) || c.row_count !== actual.n || c.rows_sha256 !== rowsDigest(getSalesByDateRange(db,date,date))) missingDates.push(date);
     else fetchedAt.push(c.fetched_at);
   }
   return missingDates.length ? {status: 'missing' as const, missingDates, rows: null} :

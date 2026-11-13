@@ -2,12 +2,12 @@ name: 楽天アフィリエイト 実売取り込み
 
 on:
   schedule:
-    # JST 02:00 → UTC 17:00 (前日) — 楽天アフィリのレポート確定が遅めなので早朝
+    # JST 02:00 unchanged. Before noon JST, ingest day-before-yesterday only.
     - cron: "0 17 * * *"
   workflow_dispatch:
     inputs:
       date:
-        description: "取得対象日 (YYYY-MM-DD, 空欄=昨日)"
+        description: "取得対象日 (YYYY-MM-DD, 空欄=公式反映期限経過済みの最新日)"
         required: false
         default: ""
 

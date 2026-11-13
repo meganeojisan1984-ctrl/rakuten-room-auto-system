@@ -8,6 +8,7 @@ import {
   initDb,
   replaceSalesDay,
   validDate,
+  latestAvailableSalesDay,
   getScrapeSummary,
   type SalesRow,
 } from "./sales-db";
@@ -48,14 +49,6 @@ function parseCookiesFromEnv(): Cookie[] {
   throw new Error("RAKUTEN_AFFILIATE_COOKIE 未設定（環境変数・cookies-affiliate.json ともに無い）");
 }
 
-/** YYYY-MM-DD の JST 昨日 */
-function yesterdayJst(): string {
-  const now = new Date();
-  const jstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-  jstNow.setUTCDate(jstNow.getUTCDate() - 1);
-  return jstNow.toISOString().slice(0, 10);
-}
-
 function tsStamp(): string {
   return new Date().toISOString().replace(/[-:.T]/g, "").slice(0, 15);
 }
@@ -72,8 +65,8 @@ function monthOf(date: string): string {
 export async function scrapeAffiliateReport(
   opts: { date?: string; dbPath?: string } = {},
 ): Promise<ScrapeResult> {
-  const date = opts.date ?? yesterdayJst();
-  if (!validDate(date) || date > yesterdayJst()) throw new Error("invalid or incomplete target date");
+  const date = opts.date ?? latestAvailableSalesDay(new Date());
+  if (!validDate(date) || date > latestAvailableSalesDay(new Date())) throw new Error("invalid or incomplete target date");
   const month = monthOf(date);
   fs.mkdirSync(DEBUG_DIR, { recursive: true });
 
