@@ -16,7 +16,7 @@ jobs:
   generate:
     # タイトルが「案件:」で始まる、または affiliate ラベルが付いた Issue のみ実行
     if: startsWith(github.event.issue.title, '案件:') || startsWith(github.event.issue.title, '案件：') || contains(github.event.issue.labels.*.name, 'affiliate')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
 
     steps:
