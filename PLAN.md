@@ -62,7 +62,7 @@ rakuten-room-auto-system/
 │   └── cookie-exporter.ts # ローカル用：ブラウザを開きCookieを取得・エクスポートするツール
 ├── .github/
 │   └── workflows/
-│       └── auto-post.yml # 定期実行ワークフロー
+│       └── room-auto-post.yml # 定期実行ワークフロー
 ├── package.json
 ├── tsconfig.json
 └── .env.example

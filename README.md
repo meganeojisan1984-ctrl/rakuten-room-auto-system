@@ -69,9 +69,9 @@ GitHubのリポジトリページ → **Settings → Secrets and variables → A
 
 | 機能 | 日本時間 | GitHub Actions cron (UTC) |
 |---|---|---|
-| **自動コレ投稿** | 毎日 8・13・21時 | `.github/workflows/auto-post.yml` |
-| **自動いいね** | 毎日 10:30・19:30 | `.github/workflows/auto-like.yml` |
-| **自動フォロー** | 毎日 11:00 | `.github/workflows/auto-follow.yml` |
+| **自動コレ投稿** | 毎日 8・13・21時 | `.github/workflows/room-auto-post.yml` |
+| **自動いいね** | 毎日 10:30・19:30 | `.github/workflows/room-auto-like.yml` |
+| **自動フォロー** | 毎日 11:00 | `.github/workflows/room-auto-follow.yml` |
 | **自動削除** | 毎週日曜 3:00 | `.github/workflows/auto-delete.yml` |
 
 > GitHub Actionsのcronは**最大で数分遅延**することがあります
@@ -107,9 +107,9 @@ npm start
 ```
 rakuten-room-auto-system/
 ├── .github/workflows/
-│   ├── auto-post.yml       # 自動投稿
-│   ├── auto-like.yml       # 自動いいね
-│   ├── auto-follow.yml     # 自動フォロー
+│   ├── room-auto-post.yml       # 自動投稿
+│   ├── room-auto-like.yml       # 自動いいね
+│   ├── room-auto-follow.yml     # 自動フォロー
 │   └── auto-delete.yml     # 自動削除
 ├── src/
 │   ├── index.ts            # ローカルWebサーバー起動
