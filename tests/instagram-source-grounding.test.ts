@@ -50,6 +50,9 @@ test("automatic Instagram carousel keeps source-grounded copy when AI background
   let rendererCalled = false;
   await createInstagramCarouselAssets(officeItem, { id: "slot1" } as PersonaSlot, {
     env: { AI_IMAGE_ENABLED: "1", OPENAI_API_KEY: "test-key" },
+    generateCopy: async () => {
+      throw new Error("copy generation unavailable in this test");
+    },
     generateAiImages: async () => {
       aiCalled = true;
       throw new Error("AI image generation unavailable in this test");

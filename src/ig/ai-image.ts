@@ -28,6 +28,8 @@ export interface GenerateAiLifestyleImagesOptions {
   creativePlan?: ImageCreativePlan;
   referenceImageDir?: string;
   useAiText?: boolean;
+  /** 参考画像を送る最大枚数（入力トークン節約）。既定は AI_IMAGE_REFERENCE_LIMIT または 2 */
+  referenceImageLimit?: number;
   requestTimeoutMs?: number;
   client?: (body: FormData, apiKey: string) => Promise<OpenAiImageResponse>;
 }
@@ -37,12 +39,16 @@ export interface AiLifestyleImagePromptOptions {
   brief?: ProductContentBrief | SalesStrategyBrief;
   creativePlan?: ImageCreativePlan;
   useAiText?: boolean;
+  /** 商品画像の後ろに添付する参考画像の枚数 */
+  referenceCount?: number;
 }
 
 const DEFAULT_OUTPUT_DIR = path.join(process.cwd(), "public", "generated", "instagram");
-const DEFAULT_MODEL = "gpt-image-2";
-const DEFAULT_QUALITY: NonNullable<GenerateAiLifestyleImagesOptions["quality"]> = "high";
+// 低コストモデルを既定にする。上位モデルへ戻す場合は AI_IMAGE_MODEL / AI_IMAGE_QUALITY で上書きする。
+const DEFAULT_MODEL = "gpt-image-1-mini";
+const DEFAULT_QUALITY: NonNullable<GenerateAiLifestyleImagesOptions["quality"]> = "medium";
 const DEFAULT_REFERENCE_IMAGE_DIR = path.join(process.cwd(), "docs", "creative", "references");
+const DEFAULT_REFERENCE_IMAGE_LIMIT = 2;
 
 export function isOpenAiQuotaError(error: unknown): boolean {
   const text = String(error).toLowerCase();
@@ -126,6 +132,32 @@ function sceneHints(item: RakutenItem): string[] {
   ];
 }
 
+/**
+ * 文字入り完成スライド用のプロンプト。
+ * ECの商品ページ風インフォグラフィック（表紙→機能→利用シーン→評価・価格→楽天ROOM導線）を
+ * 1枚ずつ生成する。描画する文字は creativePlan の確定テキストだけに限定する。
+ */
+function buildFinishedSlidePrompts(
+  item: RakutenItem,
+  plan: ImageCreativePlan,
+  options: AiLifestyleImagePromptOptions,
+): string[] {
+  const name = productTitle(item);
+  const total = plan.slides.length;
+  const referenceCount = options.referenceCount ?? 0;
+  const imageScene = (options.brief as Partial<SalesStrategyBrief> | undefined)?.imageScene ?? options.brief?.useCase;
+  return plan.slides.map((slide) => [
+    `日本のInstagram向け商品紹介カルーセル（全${total}枚）の${slide.index}枚目として、完成済みの正方形スライド画像を1枚作る。ECの商品ページのように情報が整理された、プロのデザイナーが組んだインフォグラフィック広告の仕上がりにする。`,
+    `【デザインテーマ（全${total}枚で統一）】${plan.themeStyle} 写真はフォトリアルで、文字・カード・アイコンは整列させ、余白を保つ。`,
+    `【商品】添付1枚目の画像が紹介する商品。形・色・質感・比率を保ち、同じ商品として自然な光で描く。別の商品に置き換えない。商品名（参考情報。確定テキストにある場合だけ描画）: ${name}。カテゴリ: ${plan.analysis.category}。${imageScene ? `背景の生活シーンの参考: ${cleanText(imageScene, 60)}。` : ""}`,
+    referenceCount > 0
+      ? `【参考画像】添付2枚目以降は、情報量・余白・装飾の密度だけの参考。写っている別商品・文字・数値は写さず、配色は上のデザインテーマを優先する。`
+      : "",
+    slide.prompt,
+    "【共通ルール】確定テキスト以外の文字・数字・ロゴ・QRコード・URL・アカウント名・フォロワー数を描かない。架空の口コミ、体験談、ランキング、割引、受賞表記を描かない。日本語は太めで大きく、つぶれない字形で描く。文字同士や文字と商品を重ねない。",
+  ].filter(Boolean).join("\n"));
+}
+
 export function buildAiLifestyleImagePrompts(
   item: RakutenItem,
   persona: PersonaSlot,
@@ -143,6 +175,7 @@ export function buildAiLifestyleImagePrompts(
   );
   const timeContext = hourInJapan < 16 ? "soft morning daylight" : "soft evening indoor light";
   const useAiText = options.useAiText ?? Boolean(options.creativePlan);
+  if (useAiText && options.creativePlan) return buildFinishedSlidePrompts(item, options.creativePlan, options);
   const base =
     `Create a polished, photorealistic square background image only for a Japanese Instagram product carousel. ` +
     `${useAiText ? "This is a finished SNS product-introduction slide." : "This is a photographic backdrop, not a finished advertisement or product card."} Use natural light, realistic materials, ` +
@@ -174,15 +207,28 @@ function referenceMimeType(filePath: string): string | undefined {
   return undefined;
 }
 
-function loadReferenceImages(referenceDir: string): Array<{ bytes: Uint8Array; mimeType: string; fileName: string }> {
-  if (!fs.existsSync(referenceDir)) return [];
+function resolveReferenceLimit(value: number | string | undefined): number {
+  const parsed = typeof value === "number" ? value : Number.parseInt(value ?? "", 10);
+  return Number.isFinite(parsed) && parsed >= 0 ? Math.min(Math.floor(parsed), 15) : DEFAULT_REFERENCE_IMAGE_LIMIT;
+}
+
+function loadReferenceImages(referenceDir: string, limit: number): Array<{ bytes: Uint8Array; mimeType: string; fileName: string }> {
+  if (limit <= 0 || !fs.existsSync(referenceDir)) return [];
   const references: Array<{ bytes: Uint8Array; mimeType: string; fileName: string }> = [];
-  for (const entry of fs.readdirSync(referenceDir, { withFileTypes: true })) {
+  const seen = new Set<string>();
+  const entries = fs.readdirSync(referenceDir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name));
+  for (const entry of entries) {
+    if (references.length >= limit) break;
     if (!entry.isFile()) continue;
     const filePath = path.join(referenceDir, entry.name);
     const mimeType = referenceMimeType(filePath);
     if (!mimeType) continue;
-    references.push({ bytes: new Uint8Array(fs.readFileSync(filePath)), mimeType, fileName: entry.name });
+    const bytes = new Uint8Array(fs.readFileSync(filePath));
+    // 同じ画像の重複コピーは1枚として扱う
+    const digest = crypto.createHash("sha1").update(bytes).digest("hex");
+    if (seen.has(digest)) continue;
+    seen.add(digest);
+    references.push({ bytes, mimeType, fileName: entry.name });
   }
   return references;
 }
@@ -291,7 +337,10 @@ export async function generateAiLifestyleImages(
   const loadProductImage = options.loadProductImage ?? downloadProductImage;
   const productImage = await loadProductImage(item.imageUrl).then((image) => normalizeImageForUpload(image.bytes, image.mimeType));
   const referenceImageDir = options.referenceImageDir ?? process.env.AI_IMAGE_REFERENCE_DIR ?? DEFAULT_REFERENCE_IMAGE_DIR;
-  const referenceImages = loadReferenceImages(referenceImageDir);
+  const referenceImages = loadReferenceImages(
+    referenceImageDir,
+    resolveReferenceLimit(options.referenceImageLimit ?? process.env.AI_IMAGE_REFERENCE_LIMIT),
+  );
   const useAiText = options.useAiText ?? Boolean(options.creativePlan);
   const day = now.toISOString().slice(0, 10);
   const stamp = timestamp(now);
@@ -299,7 +348,7 @@ export async function generateAiLifestyleImages(
 
   fs.mkdirSync(outputDir, { recursive: true });
 
-  const prompts = buildAiLifestyleImagePrompts(item, persona, { now, brief: options.brief, creativePlan: options.creativePlan, useAiText });
+  const prompts = buildAiLifestyleImagePrompts(item, persona, { now, brief: options.brief, creativePlan: options.creativePlan, useAiText, referenceCount: referenceImages.length });
   const assets: CarouselAsset[] = [];
   for (let i = 0; i < prompts.length; i++) {
     const body = buildEditForm(prompts[i]!, model, size, quality, productImage, referenceImages);

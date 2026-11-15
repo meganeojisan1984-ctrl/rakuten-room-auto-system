@@ -205,7 +205,7 @@ test("image edit requests use the Rakuten product image only as a category refer
       const refs = call.getAll("image[]") as Array<Blob & { name: string }>;
       assert.ok(refs.length >= 1);
       assert.equal(refs[0]!.name, "rakuten-product.jpg");
-      assert.equal(call.get("quality"), "high");
+      assert.equal(call.get("quality"), "medium");
       assert.match(String(call.get("prompt")), /background image only/);
       assert.match(String(call.get("prompt")), /Do not recreate the product/);
       assert.match(String(call.get("prompt")), /片手で使える収納ボックス/);
@@ -273,7 +273,7 @@ test("buildAiLifestyleImagePrompts rotates visual structure by day and time whil
   assert.match(nightPrompts.slice(0, 3).join("\n"), /収納|片付け|washstand|storage|tidy/);
 });
 
-test("generateAiLifestyleImages writes five jpeg assets using high quality", async () => {
+test("generateAiLifestyleImages writes five jpeg assets using the low-cost default model", async () => {
   const dir = fs.mkdtempSync(path.join(process.cwd(), "tmp-ai-images-"));
   try {
     const calls: FormData[] = [];
@@ -295,8 +295,8 @@ test("generateAiLifestyleImages writes five jpeg assets using high quality", asy
 
     assert.equal(assets.length, 5);
     assert.equal(calls.length, 5);
-    assert.equal(calls.every((call) => call.get("model") === "gpt-image-2"), true);
-    assert.equal(calls.every((call) => call.get("quality") === "high"), true);
+    assert.equal(calls.every((call) => call.get("model") === "gpt-image-1-mini"), true);
+    assert.equal(calls.every((call) => call.get("quality") === "medium"), true);
     assert.equal(calls.every((call) => call.get("output_format") === "jpeg"), true);
     assert.equal(assets.every((asset) => asset.filePath.endsWith(".jpg")), true);
     assert.equal(assets.every((asset) => fs.existsSync(asset.filePath)), true);
@@ -397,6 +397,9 @@ test("AI画像完成モードは生成画像を文字付きカルーセル素材
       OPENAI_API_KEY: "test-key",
       AI_IMAGE_TEXT_MODE: "1",
     } as NodeJS.ProcessEnv,
+    generateCopy: async () => {
+      throw new Error("copy generation unavailable in this test");
+    },
     generateAiImages: async (_item, _persona, options) => {
       assert.equal(options?.useAiText, true);
       assert.ok(options?.creativePlan);

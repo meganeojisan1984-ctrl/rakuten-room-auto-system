@@ -18,6 +18,7 @@ import {
 import { isXDraftMailEnabled, sendXDraftMail } from "./x-draft-mailer";
 import { generateThreadsCopy, isThreadsCopyEnabled } from "./threads-copy";
 import { buildImageCreativePlan } from "./image-creative";
+import { generateCreativeCopy, isCreativeCopyEnabled, type CreativeCopy } from "./creative-copy";
 import { DEFAULT_ROOM_PROFILE_URL, toRoomItemsUrl } from "../room-profile-url";
 
 // sns.ts と揃える (Instagram Graph API 独自エンドポイント)
@@ -112,6 +113,7 @@ interface CreateInstagramCarouselAssetsOptions {
   brief?: SalesStrategyBrief;
   env?: NodeJS.ProcessEnv;
   generateAiImages?: typeof generateAiLifestyleImages;
+  generateCopy?: typeof generateCreativeCopy;
   renderCarouselImages?: typeof writeCarouselImages;
 }
 
@@ -127,9 +129,18 @@ export async function createInstagramCarouselAssets(
   const personaGenres = Array.isArray(persona.genres) ? persona.genres : [];
   const category = PRODUCT_CATEGORIES.find((value) => personaGenres.includes(value.name)) ?? PRODUCT_CATEGORIES[0]!;
   const brief = options.brief ?? buildProductContentBrief(item, persona, category);
-  const creativePlan = buildImageCreativePlan(item, brief);
+  const aiImagesEnabled = isAiLifestyleImagesEnabled(envVars);
+  let copy: CreativeCopy | undefined;
+  if (aiImagesEnabled && envVars.AI_IMAGE_TEXT_MODE !== "0" && isCreativeCopyEnabled(envVars)) {
+    try {
+      copy = await (options.generateCopy ?? generateCreativeCopy)(item, { brief, apiKey: envVars.OPENAI_API_KEY, env: envVars });
+    } catch (error) {
+      console.warn(`[ig-post-engine] スライド用コピーのAI生成に失敗。商品データ由来の定型コピーを使用: ${String(error).slice(0, 200)}`);
+    }
+  }
+  const creativePlan = buildImageCreativePlan(item, brief, copy);
   const slides = buildCarouselSlides(item, { brief, creativePlan });
-  if (isAiLifestyleImagesEnabled(envVars)) {
+  if (aiImagesEnabled) {
     const generateAiImages = options.generateAiImages ?? generateAiLifestyleImages;
     console.log(`[ig-post-engine] slot=${persona.id} generating product-matched background images...`);
     try {
