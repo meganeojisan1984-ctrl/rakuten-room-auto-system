@@ -407,11 +407,11 @@ app.post("/api/cookie", async (req, res) => {
 });
 
 const ALLOWED_WORKFLOWS: Record<string, string> = {
-  post: "auto-post.yml",
+  post: "room-auto-post.yml",
   learn: "auto-learn.yml",
   refresh: "auto-refresh.yml",
-  like: "auto-like.yml",
-  follow: "auto-follow.yml",
+  like: "room-auto-like.yml",
+  follow: "room-auto-follow.yml",
 };
 
 app.post("/api/workflow", async (req, res) => {

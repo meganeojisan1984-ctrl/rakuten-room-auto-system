@@ -52,7 +52,7 @@
 
 ## 学習サイクル（毎日）
 
-1. **8〜23時**: 投稿ワークフロー(auto-post.yml)が5回実行。各エージェントが実行報告を `agent_reports.json` に、投稿内容を `post_history.json` に記録
+1. **8〜23時**: 投稿ワークフロー(room-auto-post.yml)が5回実行。各エージェントが実行報告を `agent_reports.json` に、投稿内容を `post_history.json` に記録
 2. **23:45**: 学習ワークフロー(auto-learn.yml)が起動
    - 計測: 自ROOMプロフィールからいいね数を収集→履歴に反映
    - 分析: ジャンル・投稿タイプ・時間帯・**価格帯**別の平均いいねを集計
