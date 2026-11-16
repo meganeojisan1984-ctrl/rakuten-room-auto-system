@@ -190,7 +190,9 @@ async function main(): Promise<void> {
       const headless = process.env.CI === "true" || process.env.HEADLESS !== "false";
       results = await postItems(captionedItems, headless);
       if (!(results.length === captionedItems.length && results.every((result) => result.success))) {
-        console.warn("[main] ROOM投稿が全件確認できないためintentを保持します。再送禁止。");
+        console.warn(results.some((result) => result.unknown)
+          ? "[main] ROOM投稿の結果不明があるためintentを保持します。再送禁止。"
+          : "[main] ROOM投稿は送信前に失敗しました（未送信）。intentは後段で消去します。");
       }
     } catch (err) {
       const msg = String(err);
@@ -278,7 +280,9 @@ async function main(): Promise<void> {
   if (roomIntent && successCodes.length > 0) {
     await persistPostedItemsAndVerify(successCodes);
   }
-  if (roomIntent && results.length === captionedItems.length && results.every((result) => result.success)) {
+  // 送信ボタンを押す前に失敗した商品（Cookie失効・フォーム未表示など）は未送信と確定しているため、
+  // 結果不明（unknown）が1件もなければintentを消去して次回実行を止めない。
+  if (roomIntent && !results.some((result) => result.unknown)) {
     await clearRoomPostIntent(roomIntent.requestId);
   }
 

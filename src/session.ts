@@ -47,6 +47,11 @@ export async function injectCookies(context: BrowserContext, cookies: Cookie[]):
  * Cookieが有効（ログイン状態）かどうかを検証する
  * 楽天ROOMにアクセスし、ログインページにリダイレクトされないか確認する
  */
+/** 楽天会員ログイン画面（旧・新ID基盤）のURLかどうか */
+export function isRakutenLoginUrl(url: string): boolean {
+  return /login\.account\.rakuten\.com|grp\d+\.id\.rakuten\.co\.jp|member\.id\.rakuten\.co\.jp|\/login|signin|\/authorize/i.test(url);
+}
+
 export async function validateSession(context: BrowserContext): Promise<boolean> {
   const page = await context.newPage();
   try {
@@ -55,9 +60,12 @@ export async function validateSession(context: BrowserContext): Promise<boolean>
       waitUntil: "domcontentloaded",
       timeout: 30000,
     });
+    // ログイン画面への遷移はページ読込後にスクリプトで行われることがあるため、落ち着くまで待ってから判定する
+    await page.waitForLoadState("networkidle", { timeout: 10000 }).catch(() => {});
+    await page.waitForTimeout(2000);
     const currentUrl = page.url();
     // ログインページへリダイレクトされた場合はセッション無効
-    if (currentUrl.includes(LOGIN_URL) || currentUrl.includes("/login") || currentUrl.includes("signin")) {
+    if (currentUrl.includes(LOGIN_URL) || isRakutenLoginUrl(currentUrl)) {
       console.warn("[session] セッション無効: ログインページへリダイレクトされました");
       // Phase 0: Cookie 失効を必ず通知する（Cookie診断・投稿・学習の全経路で発火）
       await notifyCookieExpired();
