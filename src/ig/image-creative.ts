@@ -61,6 +61,22 @@ function itemText(item: RakutenItem): string {
   return `${item.itemName} ${item.itemCaption}`.replace(/<[^>]+>/g, " ");
 }
 
+// 配送・設置・注文条件などは商品の魅力ではないため、画像のコピーに使わない
+const LOGISTICS = /配送|送料|無料|駐車|設置場所|お渡し|軒下|玄関|搬入|地域限定|納期|在庫|お届け|ご注文|注文後|返品|交換|キャンセル|保証書|領収書|代引|メーカー希望小売価格|お問い合わせ|ご了承|予めご|営業日|沖縄|離島/u;
+
+function isLogistics(value: string): boolean {
+  return LOGISTICS.test(value);
+}
+
+/** 「set_2_5_o」「od278」のような管理コードを商品名から除く */
+function stripListingCodes(value: string): string {
+  return value
+    .replace(/(?<![A-Za-z0-9])[A-Za-z]+(?:_[A-Za-z0-9]+)+(?![A-Za-z0-9])/g, " ")
+    .replace(/(?<![A-Za-z0-9-])[a-z]{1,3}\d{2,}(?![A-Za-z0-9-])/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function extractSizeFacts(text: string): string[] {
   const facts = new Set<string>();
   const patterns = [
@@ -83,9 +99,10 @@ function extractUsageEvidence(text: string): string[] {
     // split those before punctuation so the first evidence is not the whole title.
     .replace(/<br\s*\/?>(?=\S)/giu, "\n")
     .split(/[。！？\n・]/u)
-    .map((part) => compact(part, 100))
+    .map((part) => compact(stripListingCodes(part), 100))
     .filter((part) => part.length >= 8)
-    .filter((part) => /使|用途|収納|持ち運|キャンプ|車中泊|洗面|朝晩|夜|食後|保存|充電|設置|乾か|ケア|調理|防災/i.test(part));
+    .filter((part) => /使|用途|収納|持ち運|キャンプ|車中泊|洗面|朝晩|夜|食後|保存|充電|設置|乾か|ケア|調理|防災/i.test(part))
+    .filter((part) => !isLogistics(part));
   return [...new Set(pieces)].slice(0, 4);
 }
 
@@ -100,19 +117,20 @@ function chooseSlide2Type(item: RakutenItem, analysis: Omit<ProductAnalysis, "sl
 }
 
 function categoryLabel(item: RakutenItem, brief?: ProductContentBrief | SalesStrategyBrief): string {
-  return compact(classifyProductCategory(item) || brief?.category || "商品", 30);
+  // 選定時のカテゴリ（brief）を優先する。商品名からの推定は「家電」などで誤判定しやすい
+  return compact(brief?.category || classifyProductCategory(item) || "商品", 30);
 }
 
 function buildAnalysis(item: RakutenItem, brief?: ProductContentBrief | SalesStrategyBrief): ProductAnalysis {
   const text = itemText(item);
   const facts = [...new Set([
-    ...extractProductFacts(item.itemCaption, 4).map((fact) => compact(fact, 110)),
+    ...extractProductFacts(item.itemCaption, 8).filter((fact) => !isLogistics(fact)).slice(0, 4).map((fact) => compact(fact, 110)),
     ...extractUsageEvidence(text),
   ])].slice(0, 5);
   const usageEvidence = extractUsageEvidence(text);
   const sizeFacts = extractSizeFacts(text);
   const base = {
-    displayName: compact(cleanProductDisplayName(item.itemName) || item.itemName, 70),
+    displayName: compact(stripListingCodes(cleanProductDisplayName(item.itemName)) || item.itemName, 70),
     category: categoryLabel(item, brief),
     facts: facts.length > 0 ? facts : [compact(cleanProductDisplayName(item.itemName), 70)],
     usageEvidence,
