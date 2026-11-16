@@ -69,11 +69,6 @@ jobs:
           OPENAI_TEXT_MODEL: ${{ vars.OPENAI_TEXT_MODEL || 'gpt-5-mini' }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           ROOM_COOKIE: ${{ secrets.ROOM_COOKIE }}
-          X_API_KEY: ${{ secrets.X_API_KEY }}
-          X_API_SECRET: ${{ secrets.X_API_SECRET }}
-          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
-          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
-          X_USERNAME: ${{ secrets.X_USERNAME || vars.X_USERNAME || '' }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           GITHUB_TOKEN: ${{ github.token }}
@@ -122,6 +117,13 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add posted_items.json post_history.json agent_reports.json room_post_intent.json
           if [ -f ai_image_usage.json ]; then git add ai_image_usage.json; fi
+          # Instagramは投稿時に画像を取り込むため、7日より前の生成画像はリポジトリから消す
+          cutoff=$(date -u -d '7 days ago' +%Y-%m-%d)
+          for f in public/generated/instagram/*.jpg; do
+            [ -e "$f" ] || continue
+            name=$(basename "$f")
+            if [[ "${name:0:10}" < "$cutoff" ]]; then git rm -q --cached --ignore-unmatch "$f"; fi
+          done
           if git diff --staged --quiet; then
             echo "no staged changes, skip commit"
             exit 0
