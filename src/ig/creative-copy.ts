@@ -39,8 +39,8 @@ const LIMITS = {
   hookQuestion: 26,
   hookHeadline: 16,
   tagline: 24,
-  chip: 11,
-  featureTitle: 13,
+  chip: 13,
+  featureTitle: 16,
   featureDetail: 30,
   scene: 16,
   recommend: 22,
@@ -144,17 +144,28 @@ export async function generateCreativeCopy(
   if (!apiKey) throw new Error("OPENAI_API_KEY is required for creative copy");
   const client = options.client ?? defaultOpenAiTextClient;
   const timeoutMs = options.timeoutMs ?? 45_000;
-  const request = { ...buildOpenAiTextRequest(buildCreativeCopyPrompt(item, options.brief), env), max_output_tokens: 1600 };
-  let timer: ReturnType<typeof setTimeout> | undefined;
+  const basePrompt = buildCreativeCopyPrompt(item, options.brief);
+  const attempt = async (prompt: string): Promise<CreativeCopy> => {
+    const request = { ...buildOpenAiTextRequest(prompt, env), max_output_tokens: 1600 };
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      const response = await Promise.race([
+        client(request, apiKey),
+        new Promise<never>((_, reject) => {
+          timer = setTimeout(() => reject(new Error(`creative copy generation timed out (${timeoutMs}ms)`)), timeoutMs);
+        }),
+      ]);
+      return parseCreativeCopy(extractOpenAiText(response), item);
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
+  };
   try {
-    const response = await Promise.race([
-      client(request, apiKey),
-      new Promise<never>((_, reject) => {
-        timer = setTimeout(() => reject(new Error(`creative copy generation timed out (${timeoutMs}ms)`)), timeoutMs);
-      }),
-    ]);
-    return parseCreativeCopy(extractOpenAiText(response), item);
-  } finally {
-    if (timer) clearTimeout(timer);
+    return await attempt(basePrompt);
+  } catch (error) {
+    const reason = String(error);
+    // 文字数超過などの検証エラーは、理由を伝えて1回だけ作り直す
+    if (!/creative copy "/.test(reason)) throw error;
+    return attempt(`${basePrompt}\n\n前回の出力は次の理由で不採用でした。必ず直して、文字数上限より短めに作り直してください: ${reason.slice(0, 200)}`);
   }
 }

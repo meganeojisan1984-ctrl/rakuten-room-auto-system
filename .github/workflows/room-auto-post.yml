@@ -90,6 +90,8 @@ jobs:
           AI_IMAGE_TEXT_MODE: ${{ vars.AI_IMAGE_TEXT_MODE || '1' }}
           AI_IMAGE_REFERENCE_DIR: ${{ vars.AI_IMAGE_REFERENCE_DIR || 'docs/creative/references' }}
           AI_IMAGE_QUALITY: ${{ vars.AI_IMAGE_QUALITY || 'high' }}
+          # 参考画像に写った別商品が生成画像へ混入したため、既定では添付しない
+          AI_IMAGE_REFERENCE_LIMIT: ${{ vars.AI_IMAGE_REFERENCE_LIMIT || '0' }}
           # AI画像の月額上限ガード（見積もりUSD）。超える場合は文字合成カルーセルで投稿する
           AI_IMAGE_USAGE_FILE: ai_image_usage.json
           AI_IMAGE_MONTHLY_BUDGET_USD: ${{ vars.AI_IMAGE_MONTHLY_BUDGET_USD || '5' }}

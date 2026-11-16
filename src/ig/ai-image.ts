@@ -10,6 +10,7 @@ import type { ProductContentBrief } from "../content-brief";
 import type { SalesStrategyBrief } from "../sales-strategy";
 import { normalizeImageForUpload } from "./image-normalize";
 import type { ImageCreativePlan } from "./image-creative";
+import { verifyAiImages, type AiImageVerifyInput, type AiImageVerifyResult } from "./ai-image-verify";
 
 interface OpenAiImageResponse {
   data?: Array<{ b64_json?: string; url?: string }>;
@@ -31,6 +32,8 @@ export interface GenerateAiLifestyleImagesOptions {
   /** 参考画像を送る最大枚数（入力トークン節約）。既定は AI_IMAGE_REFERENCE_LIMIT または 2 */
   referenceImageLimit?: number;
   requestTimeoutMs?: number;
+  /** 公開前の検品。未指定時、本番（clientを差し替えていない場合）は既定の検品を行う */
+  verifier?: (input: AiImageVerifyInput) => Promise<AiImageVerifyResult>;
   client?: (body: FormData, apiKey: string) => Promise<OpenAiImageResponse>;
 }
 
@@ -149,7 +152,7 @@ function buildFinishedSlidePrompts(
   return plan.slides.map((slide) => [
     `日本のInstagram向け商品紹介カルーセル（全${total}枚）の${slide.index}枚目として、完成済みの正方形スライド画像を1枚作る。ECの商品ページのように情報が整理された、プロのデザイナーが組んだインフォグラフィック広告の仕上がりにする。`,
     `【デザインテーマ（全${total}枚で統一）】${plan.themeStyle} 写真はフォトリアルで、文字・カード・アイコンは整列させ、余白を保つ。`,
-    `【商品】添付1枚目の画像が紹介する商品。形・色・質感・比率を保ち、同じ商品として自然な光で描く。別の商品に置き換えない。商品名（参考情報。確定テキストにある場合だけ描画）: ${name}。カテゴリ: ${plan.analysis.category}。${imageScene ? `背景の生活シーンの参考: ${cleanText(imageScene, 60)}。` : ""}`,
+    `【商品】添付1枚目の画像が紹介する商品。形・色・質感・比率を保ち、同じ商品として自然な光で描く。別の商品に置き換えない。添付1枚目に写っていない種類の製品（別の家電・雑貨・容器など）を主役や脇役として描き足さない。商品名（参考情報。確定テキストにある場合だけ描画）: ${name}。カテゴリ: ${plan.analysis.category}。${imageScene ? `背景の生活シーンの参考: ${cleanText(imageScene, 60)}。` : ""}`,
     referenceCount > 0
       ? `【参考画像】添付2枚目以降は、情報量・余白・装飾の密度だけの参考。写っている別商品・文字・数値は写さず、配色は上のデザインテーマを優先する。`
       : "",
@@ -363,6 +366,23 @@ export async function generateAiLifestyleImages(
       publicUrl: mapAssetToPublicUrl(fileName, publicBaseUrl),
       page: i + 1,
     });
+  }
+  const verifier = options.verifier
+    ?? (options.client || process.env.AI_IMAGE_VERIFY === "0"
+      ? undefined
+      : (input: AiImageVerifyInput) => verifyAiImages(input, { apiKey }));
+  if (useAiText && verifier) {
+    const verdict = await verifier({
+      productName: productTitle(item),
+      productImage,
+      slides: assets.map((asset) => ({ bytes: new Uint8Array(fs.readFileSync(asset.filePath)), mimeType: "image/jpeg" })),
+      expectedPrice: item.itemPrice ? `${item.itemPrice.toLocaleString()}円` : undefined,
+    });
+    if (!verdict.ok) {
+      for (const asset of assets) fs.rmSync(asset.filePath, { force: true });
+      throw new Error(`AI画像の検品で不合格: ${verdict.problems.join(" / ")}`);
+    }
+    console.log("[ai-image] 公開前の検品に合格（商品の一致・価格表記）");
   }
   return assets;
 }
