@@ -500,10 +500,11 @@
     "livingut:10051058",
     "livingut:10078597",
     "livingut:10091121",
-    "comfee-kitchen:10000052"
+    "comfee-kitchen:10000052",
+    "seikou1:10002296"
   ],
   "uncertainItemCodes": [
     "mikirona:10000048"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
