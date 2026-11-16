@@ -2970,5 +2970,18 @@
     "captionHead": "製品スペック ■サイズ W60×D190×H3.5",
     "slot": "slot2",
     "itemCodeHash": "c27e7781c171"
+  },
+  {
+    "ts": "2026-11-16T12:34:14.001Z",
+    "itemCode": "seikou1:10002296",
+    "itemName": "【中古】冷蔵庫 電子レンジ 2点セット 2021~2023年式冷蔵庫 オーブンレンジ 地域限定送料・設置無料 set_2_5_o",
+    "genreName": "家電製品",
+    "price": 33000,
+    "postType": 1,
+    "hour": 21,
+    "hook": "ranking",
+    "captionHead": "楽天でリピーター続出って見た瞬間二度見したレベル！",
+    "slot": "slot2",
+    "itemCodeHash": "c6c48ffb8645"
   }
 ]

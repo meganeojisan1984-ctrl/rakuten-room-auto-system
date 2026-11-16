@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-09-30T10:16:28.072Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ1)"
-  },
-  {
-    "ts": "2026-09-30T10:18:07.185Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-09-30T10:21:16.781Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-09-30T17:42:13.630Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (化粧品)"
-  },
-  {
     "ts": "2026-09-30T17:42:30.646Z",
     "agent": "copywriter",
     "ok": true,
@@ -1198,5 +1174,29 @@
     "agent": "poster",
     "ok": false,
     "summary": "成功0件/失敗1件 (投稿完了確認タイムアウト（投稿結果不明。再送禁止）)"
+  },
+  {
+    "ts": "2026-11-16T12:28:14.574Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (家電製品)"
+  },
+  {
+    "ts": "2026-11-16T12:28:28.044Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ1)"
+  },
+  {
+    "ts": "2026-11-16T12:30:47.844Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-11-16T12:34:14.000Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
   }
 ]
