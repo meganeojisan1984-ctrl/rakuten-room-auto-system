@@ -1,6 +1,6 @@
 import * as path from "path";
 import * as dotenv from "dotenv";
-import { createAuthenticatedContext, validateSession } from "./session";
+import { createAuthenticatedContext, validateSession, isRakutenLoginUrl } from "./session";
 import { notifyCookieExpired, notifyCaptchaDetected, notifyDomError, notifySuccess, notifyError } from "./notifiers";
 import type { RakutenItem } from "./fetcher";
 dotenv.config();
@@ -192,6 +192,11 @@ async function postSingleItem(
     // フォーム読み込み確認スクリーンショット
     await postPage.screenshot({ path: SCREENSHOT_PATH }).catch(() => {});
     console.log("[poster] フォーム確認スクリーンショット保存");
+
+    // 投稿画面の代わりに楽天会員ログインへ飛ばされた場合はCookie失効（この時点では何も送信していない）
+    if (isRakutenLoginUrl(postPage.url()) || await postPage.$(SELECTORS.loginForm).catch(() => null)) {
+      throw new Error("Cookie期限切れ: ROOM投稿画面でログインを要求されました（未送信）");
+    }
 
     // テキストエリアを取得
     const captionLocator = postPage.locator("textarea").first();
