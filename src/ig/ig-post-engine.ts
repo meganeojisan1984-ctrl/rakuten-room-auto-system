@@ -19,6 +19,7 @@ import { isXDraftMailEnabled, sendXDraftMail } from "./x-draft-mailer";
 import { generateThreadsCopy, isThreadsCopyEnabled } from "./threads-copy";
 import { buildImageCreativePlan } from "./image-creative";
 import { generateCreativeCopy, isCreativeCopyEnabled, type CreativeCopy } from "./creative-copy";
+import { refundAiImageBudget, reserveAiImageBudget } from "./ai-image-budget";
 import { DEFAULT_ROOM_PROFILE_URL, toRoomItemsUrl } from "../room-profile-url";
 
 // sns.ts と揃える (Instagram Graph API 独自エンドポイント)
@@ -129,7 +130,22 @@ export async function createInstagramCarouselAssets(
   const personaGenres = Array.isArray(persona.genres) ? persona.genres : [];
   const category = PRODUCT_CATEGORIES.find((value) => personaGenres.includes(value.name)) ?? PRODUCT_CATEGORIES[0]!;
   const brief = options.brief ?? buildProductContentBrief(item, persona, category);
-  const aiImagesEnabled = isAiLifestyleImagesEnabled(envVars);
+  let aiImagesEnabled = isAiLifestyleImagesEnabled(envVars);
+  if (aiImagesEnabled) {
+    // 月額上限・1日あたり回数を超える場合はAI画像を使わず、文字合成カルーセルで投稿する
+    try {
+      const budget = reserveAiImageBudget(envVars, 5);
+      if (budget && !budget.allowed) {
+        console.warn(`[ig-post-engine] AI画像をスキップ: ${budget.reason}`);
+        aiImagesEnabled = false;
+      } else if (budget) {
+        console.log(`[ig-post-engine] AI画像予算: 今回 $${budget.costUsd.toFixed(3)} / 今月累計 $${budget.usage.estimatedUsd.toFixed(2)}（${budget.usage.images}枚）`);
+      }
+    } catch (error) {
+      console.warn(`[ig-post-engine] AI画像の予算確認に失敗したため生成しません: ${String(error).slice(0, 200)}`);
+      aiImagesEnabled = false;
+    }
+  }
   let copy: CreativeCopy | undefined;
   if (aiImagesEnabled && envVars.AI_IMAGE_TEXT_MODE !== "0" && isCreativeCopyEnabled(envVars)) {
     try {
@@ -167,6 +183,10 @@ export async function createInstagramCarouselAssets(
       writeOptions.backgroundImagePaths = backgrounds.map((asset) => asset.filePath);
     } catch (error) {
       const reason = isOpenAiQuotaError(error) ? "OpenAI画像生成の残高不足" : "AI画像生成エラー";
+      // 残高不足は1枚も課金されていないので、予算の計上を取り消す
+      if (isOpenAiQuotaError(error)) {
+        try { refundAiImageBudget(envVars, 5); } catch { /* 取り消せなくても過大計上なので安全側 */ }
+      }
       console.warn(`[ig-post-engine] ${reason}。文字入り決定論的カルーセルへフォールバック: ${String(error).slice(0, 220)}`);
       delete writeOptions.backgroundImagePaths;
     }
