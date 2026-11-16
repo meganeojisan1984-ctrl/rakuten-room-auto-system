@@ -1,8 +1,5 @@
 {
   "postedItemCodes": [
-    "tronlinestore:10010639",
-    "noda-webshop:10000003",
-    "nissen-rhg:10014552",
     "auc-st-mart:10009058",
     "irisplaza-r:10156163",
     "pottepotte:10000309",
@@ -501,10 +498,11 @@
     "livingut:10078597",
     "livingut:10091121",
     "comfee-kitchen:10000052",
-    "seikou1:10002296"
+    "seikou1:10002296",
+    "alice-zk:10002186"
   ],
   "uncertainItemCodes": [
     "mikirona:10000048"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
