@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-09-30T19:38:40.746Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴201件(計測済130) 実売0件(¥0) mode=likes"
-  },
-  {
-    "ts": "2026-09-30T19:38:43.971Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第83世代へ更新 (ルールベース)、警告0件"
-  },
-  {
-    "ts": "2026-10-01T01:48:56.519Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (ダイエット器具)"
-  },
-  {
     "ts": "2026-10-01T01:48:59.246Z",
     "agent": "copywriter",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-11-16T21:19:34.906Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (ダイエット商品)"
+  },
+  {
+    "ts": "2026-11-16T21:19:54.423Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ2)"
+  },
+  {
+    "ts": "2026-11-16T21:24:33.239Z",
+    "agent": "poster",
+    "ok": false,
+    "summary": "成功0件/失敗1件 (投稿完了確認タイムアウト（投稿結果不明。再送禁止）)"
   }
 ]
