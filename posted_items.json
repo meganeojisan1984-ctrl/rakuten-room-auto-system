@@ -503,7 +503,8 @@
   ],
   "uncertainItemCodes": [
     "mikirona:10000048",
-    "selectshopcrea:10000069"
+    "selectshopcrea:10000069",
+    "comfee-kitchen:10000052"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
