@@ -499,12 +499,11 @@
     "roomy:10015901",
     "livingut:10051058",
     "livingut:10078597",
-    "livingut:10091121"
+    "livingut:10091121",
+    "comfee-kitchen:10000052"
   ],
   "uncertainItemCodes": [
-    "mikirona:10000048",
-    "selectshopcrea:10000069",
-    "comfee-kitchen:10000052"
+    "mikirona:10000048"
   ],
   "postTypeIndex": 1
 }

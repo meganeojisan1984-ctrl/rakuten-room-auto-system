@@ -1,4 +1,5 @@
 import * as dotenv from "dotenv";
+import { resolveGroqModel } from "./groq-model";
 import type { RakutenItem } from "./fetcher";
 import type { ProductContentBrief } from "./content-brief";
 import type { SalesStrategyBrief } from "./sales-strategy";
@@ -105,8 +106,40 @@ async function generateWithRetry(
       await sleep(delay);
       return generateWithRetry(client, prompt, temperature, attempt + 1);
     }
+    // OpenAIが残高不足・障害のときは、定型文に落とす前にGroqで同じプロンプトを試す
+    const groqKey = process.env.GROQ_API_KEY ?? "";
+    if (groqKey) {
+      try {
+        const text = await generateWithGroq(prompt, groqKey);
+        console.warn(`[generator] OpenAI生成に失敗したためGroqで生成しました: ${errorMsg.slice(0, 120)}`);
+        return text;
+      } catch (groqErr) {
+        console.warn(`[generator] Groqでの代替生成も失敗: ${String(groqErr).slice(0, 200)}`);
+      }
+    }
     throw err;
   }
+}
+
+async function generateWithGroq(prompt: string, apiKey: string): Promise<string> {
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: resolveGroqModel(),
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.9,
+      max_tokens: 1024,
+    }),
+    signal: AbortSignal.timeout(60_000),
+  });
+  if (!response.ok) {
+    throw new Error(`Groq text generation failed: ${response.status} ${(await response.text()).slice(0, 200)}`);
+  }
+  const data = (await response.json()) as { choices?: Array<{ message?: { content?: string } }> };
+  const text = data.choices?.[0]?.message?.content?.trim() ?? "";
+  if (!text) throw new Error("Groq APIからの応答が空です");
+  return text;
 }
 
 function getPostTypeLabel(postType: PostType): string {

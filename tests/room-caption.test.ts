@@ -78,3 +78,12 @@ test("上限超過時は末尾のハッシュタグ行を残して本文を文�
   const short = `短い紹介文です。\n\n${tags}`;
   assert.equal(prepareRoomCaption(short), short);
 });
+
+test("商品一覧のテキストから今回の紹介文の掲載を判定する", async () => {
+  const { captionAppearsInProfileText } = await import("../src/poster");
+  const caption = "メーカー希望小売価格はメーカーサイトに基づいて掲載しています 32L冷凍庫 【前開き式】家庭用冷蔵庫と同じように扉を前に開くタイプで、冷凍庫内を一目で確認できます\n\n#楽天ROOM";
+  const profile = "商品\n595\nメーカー希望小売価格はメ\nーカーサイトに基づいて掲\n載しています 32L冷凍庫 【前開き式】家庭用冷蔵庫と同じように扉を前に開くタイプで…\n￥19,800〜";
+  assert.equal(captionAppearsInProfileText(profile, caption), true);
+  assert.equal(captionAppearsInProfileText("商品\n595\n別の商品の紹介文です。\n￥1,980", caption), false);
+  assert.equal(captionAppearsInProfileText(profile, "短い"), false);
+});
