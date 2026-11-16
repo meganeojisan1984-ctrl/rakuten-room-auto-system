@@ -89,7 +89,11 @@ jobs:
           AI_IMAGE_MODEL: ${{ vars.AI_IMAGE_MODEL || 'gpt-image-1-mini' }}
           AI_IMAGE_TEXT_MODE: ${{ vars.AI_IMAGE_TEXT_MODE || '1' }}
           AI_IMAGE_REFERENCE_DIR: ${{ vars.AI_IMAGE_REFERENCE_DIR || 'docs/creative/references' }}
-          AI_IMAGE_QUALITY: ${{ vars.AI_IMAGE_QUALITY || 'medium' }}
+          AI_IMAGE_QUALITY: ${{ vars.AI_IMAGE_QUALITY || 'high' }}
+          # AI画像の月額上限ガード（見積もりUSD）。超える場合は文字合成カルーセルで投稿する
+          AI_IMAGE_USAGE_FILE: ai_image_usage.json
+          AI_IMAGE_MONTHLY_BUDGET_USD: ${{ vars.AI_IMAGE_MONTHLY_BUDGET_USD || '5' }}
+          AI_IMAGE_DAILY_POSTS: ${{ vars.AI_IMAGE_DAILY_POSTS || '1' }}
           AI_IMAGE_SIZE: ${{ vars.AI_IMAGE_SIZE || '1024x1024' }}
           X_DRAFT_EMAIL_TO: ${{ vars.X_DRAFT_EMAIL_TO || 'meganeojisan1984@gmail.com' }}
           SMTP_HOST: ${{ vars.SMTP_HOST || 'smtp.gmail.com' }}
@@ -121,6 +125,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add posted_items.json post_history.json agent_reports.json room_post_intent.json
+          if [ -f ai_image_usage.json ]; then git add ai_image_usage.json; fi
           if git diff --staged --quiet; then
             echo "no staged changes, skip commit"
             exit 0
