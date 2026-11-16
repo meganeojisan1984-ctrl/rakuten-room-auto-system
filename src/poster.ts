@@ -1,6 +1,7 @@
 import * as path from "path";
 import * as dotenv from "dotenv";
-import type { Locator } from "playwright";
+import type { BrowserContext, Locator } from "playwright";
+import { DEFAULT_ROOM_PROFILE_URL, toRoomItemsUrl } from "./room-profile-url";
 import { createAuthenticatedContext, validateSession, isRakutenLoginUrl } from "./session";
 import { notifyCookieExpired, notifyCaptchaDetected, notifyDomError, notifySuccess, notifyError } from "./notifiers";
 import type { RakutenItem } from "./fetcher";
@@ -69,6 +70,53 @@ export async function assertRoomFormReady(
       element.matches('[disabled], [aria-disabled="true"], .disabled'));
   if (invalid || disabled) {
     throw new Error("ROOM投稿フォームが無効または投稿ボタンが無効のため送信を中止します");
+  }
+}
+
+function normalizeForMatch(value: string): string {
+  return value.normalize("NFKC").replace(/[\s\u3000\u2026…]+/g, "");
+}
+
+/** 自分のROOM商品一覧のテキストに、今回の紹介文の冒頭が載っているかを判定する。 */
+export function captionAppearsInProfileText(profileText: string, caption: string, prefixLength = 50): boolean {
+  const needle = normalizeForMatch(caption).slice(0, prefixLength);
+  if (needle.length < 12) return false;
+  return normalizeForMatch(profileText).includes(needle);
+}
+
+/**
+ * 投稿後の完了表示を検知できなかった場合の最終確認。
+ * 自分のROOM商品一覧を開き、今回の紹介文が実際に掲載されたかを読み取る（閲覧のみ・再送はしない）。
+ */
+async function confirmPostOnProfile(context: BrowserContext, caption: string): Promise<boolean> {
+  let itemsUrl: string;
+  try {
+    itemsUrl = toRoomItemsUrl(process.env.ROOM_PROFILE_URL || DEFAULT_ROOM_PROFILE_URL);
+  } catch (err) {
+    console.warn(`[poster] ROOM_PROFILE_URL が不正なため掲載確認をスキップ: ${String(err)}`);
+    return false;
+  }
+  const page = await context.newPage();
+  try {
+    for (let attempt = 1; attempt <= 4; attempt++) {
+      await page.goto(itemsUrl, { waitUntil: "domcontentloaded", timeout: 45000 }).catch(() => {});
+      // 一覧はスクリプトで遅れて描画されるため、数回に分けて読む
+      for (let wait = 0; wait < 5; wait++) {
+        await page.waitForTimeout(5000);
+        const text = await page.evaluate(() => document.body.innerText).catch(() => "");
+        if (captionAppearsInProfileText(text, caption)) {
+          console.log(`[poster] 自分のROOM商品一覧で掲載を確認しました (確認${attempt}回目)`);
+          return true;
+        }
+      }
+      console.log(`[poster] 商品一覧にまだ掲載が見当たりません (確認${attempt}/4)`);
+    }
+    return false;
+  } catch (err) {
+    console.warn(`[poster] 掲載確認中にエラー: ${String(err).slice(0, 200)}`);
+    return false;
+  } finally {
+    await page.close().catch(() => {});
   }
 }
 
@@ -348,7 +396,11 @@ async function postSingleItem(
     console.log("[poster] 投稿後URL:", postPage.url());
 
     // 投稿完了を待機。確認できない場合は成功扱いせず、再送禁止の結果不明で停止する。
-    const confirmed = await waitForPostCompletion(postPage);
+    let confirmed = await waitForPostCompletion(postPage);
+    if (!confirmed) {
+      console.log("[poster] 完了表示を検知できないため、自分のROOM商品一覧で掲載を確認します...");
+      confirmed = await confirmPostOnProfile(context, roomCaption);
+    }
     if (!confirmed) {
       const error = "投稿完了確認タイムアウト（投稿結果不明。再送禁止）";
       console.error(`[poster] ⚠️ ${error}: ${item.itemName}`);
