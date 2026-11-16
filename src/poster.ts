@@ -12,6 +12,27 @@ export const ROOM_CAPTION_MAX_LENGTH = 500;
 /** ROOM's counter uses UTF-16 units. Never cut between an emoji's surrogate pair. */
 export function prepareRoomCaption(caption: string): string {
   const trimmed = caption.trim();
+  // 上限超過時は、末尾のハッシュタグ行を残して本文側を詰める（タグが途中で切れるのを防ぐ）
+  const lastBreak = trimmed.lastIndexOf("\n");
+  const tagLine = lastBreak >= 0 ? trimmed.slice(lastBreak + 1).trim() : "";
+  if (trimmed.length > ROOM_CAPTION_MAX_LENGTH && /^[#＃]/.test(tagLine) && tagLine.length <= 150) {
+    const budget = ROOM_CAPTION_MAX_LENGTH - tagLine.length - 2;
+    let body = trimmed.slice(0, lastBreak).trimEnd();
+    if (body.length > budget) {
+      let cut = budget;
+      if (/[\uD800-\uDBFF]/.test(body.charAt(cut - 1))) cut--;
+      body = body.slice(0, cut);
+      // 文の途中で切れないよう、近くに文末・改行があればそこまで戻す
+      const sentenceEnd = Math.max(body.lastIndexOf("。"), body.lastIndexOf("\n"), body.lastIndexOf("！"), body.lastIndexOf("♪"));
+      if (sentenceEnd >= cut - 80) body = body.slice(0, sentenceEnd + 1);
+      body = body.trimEnd();
+    }
+    if (body) {
+      const result = `${body}\n\n${tagLine}`;
+      assertRoomCaption(result);
+      return result;
+    }
+  }
   let end = Math.min(trimmed.length, ROOM_CAPTION_MAX_LENGTH);
   if (end < trimmed.length &&
       /[\uD800-\uDBFF]/.test(trimmed.charAt(end - 1)) &&

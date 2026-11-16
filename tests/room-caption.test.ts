@@ -67,3 +67,14 @@ test("ROOM pre-submit guard fails closed when form inspection fails", async () =
   captionInput.inputValue = async () => { throw new Error("detached"); };
   await assert.rejects(assertRoomFormReady(captionInput, postButton), /detached/);
 });
+
+test("上限超過時は末尾のハッシュタグ行を残して本文を文末で詰める", () => {
+  const tags = "#PCガジェット #家電 #楽天ROOM #買ってよかった";
+  const body = "一文目です。".repeat(110);
+  const result = prepareRoomCaption(`${body}\n\n${tags}`);
+  assert.ok(result.length <= 500);
+  assert.ok(result.endsWith(tags));
+  assert.match(result, /一文目です。\n\n#PCガジェット/);
+  const short = `短い紹介文です。\n\n${tags}`;
+  assert.equal(prepareRoomCaption(short), short);
+});
