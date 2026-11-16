@@ -1,11 +1,5 @@
 {
   "postedItemCodes": [
-    "swarotonya:10002524",
-    "cream-dot:10026699",
-    "rack-kan:10004570",
-    "livingut:10146408",
-    "skhouse:10001879",
-    "smilekankyo1:10000138",
     "tronlinestore:10010639",
     "noda-webshop:10000003",
     "nissen-rhg:10014552",
@@ -510,5 +504,5 @@
   "uncertainItemCodes": [
     "mikirona:10000048"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
