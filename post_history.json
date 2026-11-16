@@ -2214,8 +2214,8 @@
     "captionHead": "これ知らないと年間でしんどさにお金使い続けるかも…",
     "slot": "slot0",
     "itemCodeHash": "188257e85cf9",
-    "likes": 29,
-    "likesUpdatedAt": "2026-09-24T18:41:20.737Z"
+    "likes": 28,
+    "likesUpdatedAt": "2026-11-16T23:31:58.072Z"
   },
   {
     "ts": "2026-09-17T09:16:11.679Z",
@@ -2470,8 +2470,8 @@
     "captionHead": "【楽天1位★クーポンで3,580円！】ドライヤー ",
     "slot": "slot0",
     "itemCodeHash": "06272f36c645",
-    "likes": 20,
-    "likesUpdatedAt": "2026-10-02T19:31:59.410Z"
+    "likes": 19,
+    "likesUpdatedAt": "2026-11-16T23:31:58.072Z"
   },
   {
     "ts": "2026-09-25T09:22:52.344Z",
@@ -2778,8 +2778,8 @@
     "captionHead": "商品紹介 軽いハイキングにもタフなツアーにも対応す",
     "slot": "slot2",
     "itemCodeHash": "4aa01c4277e3",
-    "likes": 14,
-    "likesUpdatedAt": "2026-10-30T19:42:49.181Z"
+    "likes": 16,
+    "likesUpdatedAt": "2026-11-16T23:31:58.072Z"
   },
   {
     "ts": "2026-10-02T17:36:32.480Z",
@@ -2821,8 +2821,8 @@
     "captionHead": "[商品名]ミヨシ USB3.2 Gen2ハブ Aタ",
     "slot": "slot2",
     "itemCodeHash": "7830de721c37",
-    "likes": 18,
-    "likesUpdatedAt": "2026-10-31T18:45:51.824Z"
+    "likes": 19,
+    "likesUpdatedAt": "2026-11-16T23:31:58.072Z"
   },
   {
     "ts": "2026-10-04T02:27:45.682Z",
@@ -2916,8 +2916,8 @@
     "captionHead": "商品紹介 シフトアップしたハイキングを楽しむという",
     "slot": "slot2",
     "itemCodeHash": "cfa9f44eea7d",
-    "likes": 14,
-    "likesUpdatedAt": "2026-10-30T19:42:49.181Z"
+    "likes": 16,
+    "likesUpdatedAt": "2026-11-16T23:31:58.072Z"
   },
   {
     "ts": "2026-10-06T18:03:21.530Z",
@@ -2982,7 +2982,9 @@
     "hook": "ranking",
     "captionHead": "楽天でリピーター続出って見た瞬間二度見したレベル！",
     "slot": "slot2",
-    "itemCodeHash": "c6c48ffb8645"
+    "itemCodeHash": "c6c48ffb8645",
+    "likes": 1,
+    "likesUpdatedAt": "2026-11-16T23:31:58.072Z"
   },
   {
     "ts": "2026-11-16T12:36:44.093Z",
