@@ -6,6 +6,11 @@ on:
     - cron: "0 23 * * *"
     - cron: "0 4 * * *"
     - cron: "0 12 * * *"
+  # .github/run-now/post.txt を更新して main に入れると即時に1回実行する
+  push:
+    branches: [main]
+    paths:
+      - ".github/run-now/post.txt"
   # 手動実行も可能
   workflow_dispatch:
     inputs:
