@@ -502,7 +502,8 @@
     "livingut:10091121"
   ],
   "uncertainItemCodes": [
-    "mikirona:10000048"
+    "mikirona:10000048",
+    "selectshopcrea:10000069"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
