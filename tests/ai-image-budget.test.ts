@@ -4,7 +4,7 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { estimateCostPerImageUsd, readAiImageUsage, refundAiImageBudget, reserveAiImageBudget } from "../src/ig/ai-image-budget";
-import { createInstagramCarouselAssets } from "../src/ig/ig-post-engine";
+import { createInstagramCarouselAssets, InstagramSkippedError } from "../src/ig/ig-post-engine";
 import type { RakutenItem } from "../src/fetcher";
 import type { PersonaSlot } from "../src/persona/persona";
 
@@ -89,7 +89,7 @@ test("残高不足の失敗は計上を取り消す", () => {
   assert.equal(reserveAiImageBudget(env, 5, day)!.allowed, true);
 });
 
-test("予算を超えた投稿はAI画像を呼ばず文字合成カルーセルで続行する", async () => {
+test("1日の上限を超えた回はAI画像を呼ばず、Instagram投稿を見送る", async () => {
   const file = ledger();
   const item = {
     itemName: "収納ボックス", itemCode: "shop:box", itemPrice: 2980, itemUrl: "https://example.com/i",
@@ -102,7 +102,6 @@ test("予算を超えた投稿はAI画像を呼ばず文字合成カルーセル
     AI_IMAGE_ENABLED: "1", OPENAI_API_KEY: "test-key", AI_IMAGE_USAGE_FILE: file, AI_IMAGE_DAILY_POSTS: "1",
   } as NodeJS.ProcessEnv;
   let aiCalls = 0;
-  let rendered = 0;
   const run = () => createInstagramCarouselAssets(item, persona, {
     env,
     generateCopy: async () => { throw new Error("no copy in test"); },
@@ -110,16 +109,10 @@ test("予算を超えた投稿はAI画像を呼ばず文字合成カルーセル
       aiCalls++;
       return [1, 2, 3, 4, 5].map((page) => ({ filePath: `ai-${page}.jpg`, publicUrl: `https://cdn.example.com/ig/ai-${page}.jpg`, page }));
     },
-    renderCarouselImages: async () => {
-      rendered++;
-      return [1, 2, 3, 4, 5].map((page) => ({ filePath: `fb-${page}.jpg`, publicUrl: `https://cdn.example.com/ig/fb-${page}.jpg`, page }));
-    },
   });
 
   const first = await run();
-  const second = await run();
-  assert.equal(aiCalls, 1);
-  assert.equal(rendered, 1);
   assert.equal(first[0]!.filePath, "ai-1.jpg");
-  assert.equal(second[0]!.filePath, "fb-1.jpg");
+  await assert.rejects(run(), (error: unknown) => error instanceof InstagramSkippedError && /本日のAI画像投稿数の上限/.test(String(error)));
+  assert.equal(aiCalls, 1);
 });

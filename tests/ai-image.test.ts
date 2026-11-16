@@ -4,7 +4,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
 import { buildAiLifestyleImagePrompts, generateAiLifestyleImages, isOpenAiQuotaError } from "../src/ig/ai-image";
-import { createInstagramCarouselAssets } from "../src/ig/ig-post-engine";
+import { createInstagramCarouselAssets, InstagramSkippedError } from "../src/ig/ig-post-engine";
 import { buildImageCreativePlan } from "../src/ig/image-creative";
 import type { RakutenItem } from "../src/fetcher";
 import type { PersonaSlot } from "../src/persona/persona";
@@ -37,65 +37,6 @@ const persona: PersonaSlot = {
   ctaLine: "詳細はプロフのリンク",
 };
 
-test("buildAiLifestyleImagePrompts creates five product-grounded background-only prompts", () => {
-  const prompts = buildAiLifestyleImagePrompts(item, persona);
-  assert.equal(prompts.length, 5);
-  assert.equal(prompts[0]!.includes("photorealistic"), true);
-  assert.equal(prompts[0]!.includes("background image only"), true);
-  assert.equal(prompts[0]!.includes("Do not render any readable text"), true);
-  assert.equal(prompts[0]!.includes("Do not recreate the product"), true);
-  assert.equal(prompts[0]!.includes("exact Rakuten product photo"), true);
-  assert.equal(prompts[0]!.includes(item.itemName), true);
-  assert.equal(prompts[0]!.includes("Slide 1 background"), true);
-  assert.equal(prompts[1]!.includes("Slide 2 background"), true);
-  assert.equal(prompts[2]!.includes("Slide 3 background"), true);
-  assert.equal(prompts[3]!.includes("Slide 4 background"), true);
-  assert.equal(prompts[4]!.includes("Slide 5 background"), true);
-  assert.equal(prompts.join("\n").includes("プロフィール"), false);
-  assert.equal(prompts.join("\n").includes("exact quoted copy"), false);
-  assert.equal(prompts.some((prompt) => prompt.includes("organizer")), true);
-  assert.equal(prompts.some((prompt) => prompt.includes("bathroom") || prompt.includes("washstand")), true);
-});
-
-test("AI生成は参考画像を全て参照し、ページ別の確定コピーをプロンプトへ含める", async () => {
-  const referenceDir = fs.mkdtempSync(path.join(os.tmpdir(), "creative-references-"));
-  const outputDir = fs.mkdtempSync(path.join(os.tmpdir(), "creative-output-"));
-  try {
-    fs.writeFileSync(path.join(referenceDir, "style-01.png"), "style-one");
-    fs.writeFileSync(path.join(referenceDir, "style-02.jpg"), "style-two");
-    const creativePlan = buildImageCreativePlan(item);
-    const calls: FormData[] = [];
-    await generateAiLifestyleImages(item, persona, {
-      outputDir,
-      publicBaseUrl: "https://cdn.example.com/ig",
-      apiKey: "test-key",
-      referenceImageDir: referenceDir,
-      creativePlan,
-      loadProductImage: async () => ({ bytes: Buffer.from("product-reference"), mimeType: "image/jpeg" }),
-      client: async (body: FormData) => {
-        calls.push(body);
-        return { data: [{ b64_json: Buffer.from("jpeg").toString("base64") }] };
-      },
-    });
-
-    assert.equal(calls.length, 5);
-    for (const [index, call] of calls.entries()) {
-      const refs = call.getAll("image[]") as Array<Blob & { name: string }>;
-      assert.equal(refs.length, 3);
-      assert.match(String(call.get("prompt")), new RegExp(`スライド${index + 1}`));
-      assert.match(String(call.get("prompt")), new RegExp(creativePlan.slides[index]!.overlayCopy.headline));
-      assert.match(String(call.get("prompt")), new RegExp(creativePlan.slides[index]!.overlayCopy.body));
-      if (creativePlan.slides[index]!.overlayCopy.label) {
-        assert.match(String(call.get("prompt")), new RegExp(creativePlan.slides[index]!.overlayCopy.label!));
-      }
-      assert.match(String(call.get("prompt")), /参考画像|文字を描画|正確な日本語/);
-    }
-  } finally {
-    fs.rmSync(referenceDir, { recursive: true, force: true });
-    fs.rmSync(outputDir, { recursive: true, force: true });
-  }
-});
-
 test("AI prompts carry product-specific copy and visual direction for AI-rendered text", () => {
   const creativePlan = buildImageCreativePlan({
     ...item,
@@ -111,166 +52,6 @@ test("AI prompts carry product-specific copy and visual direction for AI-rendere
   assert.match(prompts[4]!, /気になったら楽天ROOMへ/);
   assert.match(prompts[4]!, /リンク風|矢印|プロフィール/);
   assert.doesNotMatch(prompts.join("\n"), /必ず|絶対|治る|痩せる/);
-});
-
-test("AI backgrounds carry the audience angle and purchase-story context without rendering copy", () => {
-  const prompts = buildAiLifestyleImagePrompts(item, persona, {
-    brief: {
-      itemName: item.itemName,
-      displayName: "収納ボックス",
-      audience: "wife",
-      category: "化粧品",
-      facts: ["乾燥対策に使いやすい美容液"],
-      useCase: "朝晩のケア",
-      angle: "女性目線で続けやすさを見る",
-      problem: "乾燥の悩み",
-      solution: "毎日に取り入れやすい選択肢",
-      imageScene: "朝の洗面台、清潔で落ち着いた雰囲気",
-      seasonalHook: "乾燥",
-      proofLine: "レビュー248件",
-      imageComment: "化粧品｜乾燥対策",
-      purchaseCta: "詳細は楽天ROOMへ",
-      hashtags: ["#化粧品"],
-    },
-  });
-  assert.match(prompts[0]!, /女性目線/);
-  assert.match(prompts[0]!, /乾燥の悩み/);
-  assert.match(prompts[0]!, /毎日に取り入れやすい選択肢/);
-  assert.match(prompts[0]!, /朝の洗面台/);
-  assert.doesNotMatch(prompts[0]!, /画像内コメントをそのまま文字として描画|日本語テキストを描画/);
-  assert.match(prompts[0]!, /Do not render any readable text/);
-});
-
-test("buildAiLifestyleImagePrompts keeps changing product numbers out of generated backgrounds", () => {
-  const itemWithStringReview = {
-    ...item,
-    reviewAverage: "4.71",
-    reviewCount: "11954",
-  } as unknown as RakutenItem;
-
-  const prompts = buildAiLifestyleImagePrompts(itemWithStringReview, persona);
-
-  assert.equal(prompts.length, 5);
-  assert.doesNotMatch(prompts.join("\n"), /4\.71|11,954|レビュー|ポイント\d+倍|2980円/);
-});
-
-test("buildAiLifestyleImagePrompts adapts the first three slides to the product category", () => {
-  const foodItem: RakutenItem = {
-    ...item,
-    itemName: "訳あり濃厚チーズケーキ お取り寄せスイーツ",
-    itemCaption: "冷凍庫にあると週末のおやつや来客時にも便利な人気スイーツです。",
-    itemCode: "sweets:test",
-  };
-
-  const prompts = buildAiLifestyleImagePrompts(foodItem, persona);
-
-  assert.match(prompts[0]!, /dessert|cake|food styling|お菓子|食卓/);
-  assert.match(prompts[1]!, /dessert|cake|food styling|お菓子|食卓/);
-  assert.match(prompts[2]!, /dessert|cake|food styling|お菓子|食卓/);
-  assert.doesNotMatch(prompts.slice(0, 3).join("\n"), /ごちゃつく|選ぶのが面倒|beauty|vanity|cosmetic/i);
-});
-
-test("buildAiLifestyleImagePrompts gives Office a relevant screen-free workspace background", () => {
-  const officeItem: RakutenItem = {
-    ...item,
-    itemName: "【要エントリー！4時間限定】マイクロソフト Office Home 2024",
-    itemCaption: "2台の Windows PC または Mac で使用可能。Word、Excel、PowerPoint、OneNote の永続版。",
-  };
-  const prompts = buildAiLifestyleImagePrompts(officeItem, persona);
-
-  assert.match(prompts.join("\n"), /Category: パソコン用ソフトウェア/);
-  assert.match(prompts[0]!, /home office|work-from-home|desktop workspace/i);
-  assert.match(prompts.join("\n"), /all screens are off|no visible screen content|no logos or readable marks/i);
-  assert.doesNotMatch(prompts.join("\n"), /4時間限定|要エントリー|vanity|dessert|bathroom/i);
-});
-
-test("image edit requests use the Rakuten product image only as a category reference", async () => {
-  const dir = fs.mkdtempSync(path.join(process.cwd(), "tmp-ai-reference-images-"));
-  try {
-    const calls: FormData[] = [];
-    const assets = await generateAiLifestyleImages(item, persona, {
-      outputDir: dir,
-      publicBaseUrl: "https://cdn.example.com/ig",
-      apiKey: "test-key",
-      loadProductImage: async () => ({ bytes: Buffer.from("product-reference"), mimeType: "image/jpeg" }),
-      client: async (body: FormData) => {
-        calls.push(body);
-        return { data: [{ b64_json: Buffer.from(`jpeg-${calls.length}`).toString("base64") }] };
-      },
-    });
-
-    assert.equal(assets.length, 5);
-    assert.equal(calls.length, 5);
-    for (const call of calls) {
-      const refs = call.getAll("image[]") as Array<Blob & { name: string }>;
-      assert.ok(refs.length >= 1);
-      assert.equal(refs[0]!.name, "rakuten-product.jpg");
-      assert.equal(call.get("quality"), "medium");
-      assert.match(String(call.get("prompt")), /background image only/);
-      assert.match(String(call.get("prompt")), /Do not recreate the product/);
-      assert.match(String(call.get("prompt")), /片手で使える収納ボックス/);
-    }
-  } finally {
-    fs.rmSync(dir, { recursive: true, force: true });
-  }
-});
-
-test("buildAiLifestyleImagePrompts keeps beauty carousel slides focused on cosmetics", () => {
-  const beautyItem: RakutenItem = {
-    ...item,
-    itemName: "高保湿 美容液 セラム スキンケア 化粧品",
-    itemCaption: "乾燥が気になる朝晩のケアに使いやすい美容液。メイク前にも肌を整えやすい。",
-    itemCode: "beauty:test",
-  };
-  const beautyPersona: PersonaSlot = {
-    ...persona,
-    name: "時短できれいに整えたい美容好き",
-    genres: ["美容・コスメ・スキンケア"],
-  };
-
-  const prompts = buildAiLifestyleImagePrompts(beautyItem, beautyPersona);
-  const firstFour = prompts.slice(0, 4).join("\n");
-
-  assert.match(firstFour, /化粧品|美容液|スキンケア|cosmetic|vanity|makeup|self-care/);
-  assert.match(prompts[0]!, /product reference|product category|美容液|スキンケア/);
-  assert.match(prompts[1]!, /vanity|washstand|cosmetic/);
-  assert.match(prompts[2]!, /vanity|washstand|cosmetic/);
-  assert.match(prompts[3]!, /vanity|washstand|cosmetic/);
-  assert.doesNotMatch(firstFour, /乾燥対策|肌が変わる/i);
-  assert.doesNotMatch(firstFour, /sweet|dessert|food|dining|kitchen|pantry|breakfast|おやつ|甘いもの|来客|食卓|鍋/);
-});
-
-test("buildAiLifestyleImagePrompts varies the cover mood by product instead of using one fixed top image", () => {
-  const storagePrompts = buildAiLifestyleImagePrompts(item, persona);
-  const foodPrompts = buildAiLifestyleImagePrompts(
-    {
-      ...item,
-      itemName: "訳あり濃厚チーズケーキ お取り寄せスイーツ",
-      itemCaption: "冷凍庫にあると週末のおやつや来客時にも便利な人気スイーツです。",
-      itemCode: "sweets:test",
-    },
-    persona,
-  );
-
-  assert.notEqual(storagePrompts[0], foodPrompts[0]);
-  assert.doesNotMatch(foodPrompts[0]!, /これ、地味に助かる/);
-});
-
-test("buildAiLifestyleImagePrompts rotates visual structure by day and time while matching the product", () => {
-  const morningPrompts = buildAiLifestyleImagePrompts(item, persona, {
-    now: new Date("2026-09-07T07:30:00+09:00"),
-  });
-  const nightPrompts = buildAiLifestyleImagePrompts(item, persona, {
-    now: new Date("2026-09-07T21:30:00+09:00"),
-  });
-
-  assert.notEqual(morningPrompts[0], nightPrompts[0]);
-  assert.match(morningPrompts[0]!, /soft morning daylight/);
-  assert.match(nightPrompts[0]!, /soft evening indoor light/);
-  assert.doesNotMatch(morningPrompts.join("\n"), /sale-alert|limited deal|ranking badge/i);
-  assert.doesNotMatch(nightPrompts.join("\n"), /sale-alert|limited deal|ranking badge/i);
-  assert.match(morningPrompts.slice(0, 3).join("\n"), /収納|片付け|washstand|storage|tidy/);
-  assert.match(nightPrompts.slice(0, 3).join("\n"), /収納|片付け|washstand|storage|tidy/);
 });
 
 test("generateAiLifestyleImages writes five jpeg assets using the low-cost default model", async () => {
@@ -320,98 +101,76 @@ test("AI画像生成が応答しない場合は指定時間でタイムアウト
   );
 });
 
-test("createInstagramCarouselAssets passes generated backgrounds into the accurate carousel renderer", async () => {
-  let aiImageCalled = false;
-  let renderedAssetsCalled = false;
-  const backgroundImagePaths = [1, 2, 3, 4, 5].map((index) => `background-${index}.jpg`);
 
-  const assets = await createInstagramCarouselAssets(item, persona, {
-    env: {
-      IG_CAROUSEL_ENABLED: "1",
-      IG_CAROUSEL_PUBLIC_BASE_URL: "https://cdn.example.com/ig",
-      AI_IMAGE_ENABLED: "1",
-      OPENAI_API_KEY: "test-key",
-      AI_IMAGE_TEXT_MODE: "0",
-    } as NodeJS.ProcessEnv,
-    generateAiImages: async (_item, _persona, options) => {
-      aiImageCalled = true;
-      assert.equal(options?.apiKey, "test-key");
-      assert.ok(options?.creativePlan);
-      return backgroundImagePaths.map((filePath, index) => ({
-        filePath,
-        publicUrl: `https://cdn.example.com/ig/${filePath}`,
-        page: index + 1,
-      }));
-    },
-    renderCarouselImages: async (_item, slides, renderOptions) => {
-      renderedAssetsCalled = true;
-      assert.equal(slides.length, 5);
-      assert.deepEqual(renderOptions?.backgroundImagePaths, backgroundImagePaths);
-      assert.ok(renderOptions?.creativePlan);
-      return [1, 2, 3, 4, 5].map((page) => ({ filePath: `verified-0${page}.jpg`, publicUrl: `https://cdn.example.com/ig/verified-0${page}.jpg`, page }));
-    },
-  });
-
-  assert.equal(aiImageCalled, true);
-  assert.equal(renderedAssetsCalled, true);
-  assert.equal(assets.length, 5);
-  assert.equal(assets[0]!.filePath, "verified-01.jpg");
+test("画像生成には紹介する商品の写真だけを添付し、ページ別の確定コピーを渡す", async () => {
+  const outputDir = fs.mkdtempSync(path.join(os.tmpdir(), "ai-single-image-"));
+  try {
+    const creativePlan = buildImageCreativePlan(item);
+    const calls: FormData[] = [];
+    await generateAiLifestyleImages(item, persona, {
+      outputDir,
+      publicBaseUrl: "https://cdn.example.com/ig",
+      apiKey: "test-key",
+      creativePlan,
+      loadProductImage: async () => ({ bytes: Buffer.from("product-reference"), mimeType: "image/jpeg" }),
+      client: async (body: FormData) => {
+        calls.push(body);
+        return { data: [{ b64_json: Buffer.from("jpeg").toString("base64") }] };
+      },
+    });
+    assert.equal(calls.length, 5);
+    for (const [index, call] of calls.entries()) {
+      const images = call.getAll("image[]") as Array<Blob & { name: string }>;
+      assert.equal(images.length, 1);
+      assert.equal(images[0]!.name, "rakuten-product.jpg");
+      const prompt = String(call.get("prompt"));
+      assert.match(prompt, new RegExp(`スライド${index + 1}`));
+      assert.ok(prompt.includes(creativePlan.slides[index]!.overlayCopy.headline));
+      assert.ok(prompt.includes(creativePlan.slides[index]!.overlayCopy.body));
+      assert.match(prompt, /添付画像に写っていない種類の製品/);
+      assert.doesNotMatch(prompt, /参考画像|background image only/);
+    }
+  } finally {
+    fs.rmSync(outputDir, { recursive: true, force: true });
+  }
 });
 
-test("OpenAI残高不足でも決定論的カルーセルへフォールバックする", async () => {
-  let rendered = false;
-  const assets = await createInstagramCarouselAssets(item, persona, {
-    env: {
-      IG_CAROUSEL_ENABLED: "1",
-      IG_CAROUSEL_PUBLIC_BASE_URL: "https://cdn.example.com/ig",
-      AI_IMAGE_ENABLED: "1",
-      OPENAI_API_KEY: "test-key",
-      AI_IMAGE_TEXT_MODE: "0",
-    } as NodeJS.ProcessEnv,
-    generateAiImages: async () => {
-      throw new Error('OpenAI image generation failed: 429 {"code":"credit_balance_exhausted"}');
-    },
-    renderCarouselImages: async () => {
-      rendered = true;
-      return [1, 2, 3, 4, 5].map((page) => ({ filePath: `fallback-${page}.jpg`, publicUrl: `https://cdn.example.com/ig/fallback-${page}.jpg`, page }));
-    },
-  });
-
-  assert.equal(isOpenAiQuotaError(new Error("credit_balance_exhausted")), true);
-  assert.equal(rendered, true);
-  assert.equal(assets.length, 5);
+test("確定コピーの指定がなくても商品データから5枚分の完成スライド指示を作る", () => {
+  const prompts = buildAiLifestyleImagePrompts(item, persona);
+  assert.equal(prompts.length, 5);
+  assert.match(prompts[0]!, /インフォグラフィック/);
+  assert.match(prompts[3]!, /2,980円/);
+  assert.match(prompts[4]!, /気になったら楽天ROOMへ/);
 });
 
-test("AI画像完成モードは生成画像を文字付きカルーセル素材としてそのまま返す", async () => {
-  let rendered = false;
-  const aiAssets = [1, 2, 3, 4, 5].map((page) => ({
-    filePath: `ai-final-${page}.jpg`,
-    publicUrl: `https://cdn.example.com/ig/ai-final-${page}.jpg`,
-    page,
-  }));
+test("AI画像を用意できない回はInstagram投稿を見送り、旧デザインの画像は作らない", async () => {
+  const env = {
+    IG_CAROUSEL_ENABLED: "1",
+    IG_CAROUSEL_PUBLIC_BASE_URL: "https://cdn.example.com/ig",
+    AI_IMAGE_ENABLED: "1",
+    OPENAI_API_KEY: "test-key",
+  } as NodeJS.ProcessEnv;
+  await assert.rejects(
+    createInstagramCarouselAssets(item, persona, {
+      env,
+      generateCopy: async () => { throw new Error("copy unavailable"); },
+      generateAiImages: async () => { throw new Error("AI画像の検品で不合格: スライド1: 別の商品が描かれています"); },
+    }),
+    (error: unknown) => error instanceof InstagramSkippedError && /検品で不合格/.test(String(error)),
+  );
+  await assert.rejects(
+    createInstagramCarouselAssets(item, persona, { env: { ...env, AI_IMAGE_ENABLED: "0" } as NodeJS.ProcessEnv }),
+    InstagramSkippedError,
+  );
+
+  const aiAssets = [1, 2, 3, 4, 5].map((page) => ({ filePath: `ai-${page}.jpg`, publicUrl: `https://cdn.example.com/ig/ai-${page}.jpg`, page }));
   const assets = await createInstagramCarouselAssets(item, persona, {
-    env: {
-      IG_CAROUSEL_ENABLED: "1",
-      IG_CAROUSEL_PUBLIC_BASE_URL: "https://cdn.example.com/ig",
-      AI_IMAGE_ENABLED: "1",
-      OPENAI_API_KEY: "test-key",
-      AI_IMAGE_TEXT_MODE: "1",
-    } as NodeJS.ProcessEnv,
-    generateCopy: async () => {
-      throw new Error("copy generation unavailable in this test");
-    },
+    env,
+    generateCopy: async () => { throw new Error("copy unavailable"); },
     generateAiImages: async (_item, _persona, options) => {
-      assert.equal(options?.useAiText, true);
       assert.ok(options?.creativePlan);
       return aiAssets;
     },
-    renderCarouselImages: async () => {
-      rendered = true;
-      return [];
-    },
   });
-
-  assert.equal(rendered, false);
   assert.deepEqual(assets, aiAssets);
 });
-
