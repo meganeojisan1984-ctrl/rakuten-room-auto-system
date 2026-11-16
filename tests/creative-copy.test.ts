@@ -87,14 +87,14 @@ test("商品カテゴリでデザインテーマが切り替わる", () => {
 test("完成スライドのプロンプトはLP風5枚構成で確定テキストだけを描画させる", () => {
   const copy = parseCreativeCopy(JSON.stringify(validCopy), item);
   const creativePlan = buildImageCreativePlan(item, undefined, copy);
-  const prompts = buildAiLifestyleImagePrompts(item, persona, { creativePlan, referenceCount: 2 });
+  const prompts = buildAiLifestyleImagePrompts(item, persona, { creativePlan });
 
   assert.equal(prompts.length, 5);
   for (const prompt of prompts) {
     assert.match(prompt, /インフォグラフィック/);
     assert.match(prompt, /シャンパンゴールド/);
-    assert.match(prompt, /添付1枚目の画像が紹介する商品/);
-    assert.match(prompt, /【参考画像】/);
+    assert.match(prompt, /添付画像が紹介する商品/);
+    assert.doesNotMatch(prompt, /【参考画像】/);
     assert.match(prompt, /架空の口コミ、体験談/);
     assert.doesNotMatch(prompt, /background image only|Do not recreate the product|Do not render any readable text/);
   }
@@ -109,42 +109,12 @@ test("完成スライドのプロンプトはLP風5枚構成で確定テキス�
   assert.match(prompts[3]!, /お客様の声の吹き出しは置かず/);
   assert.match(prompts[4]!, /気になったら楽天ROOMへ/);
   assert.match(prompts[4]!, /アカウント名やフォロワー数の創作/);
-  assert.doesNotMatch(buildAiLifestyleImagePrompts(item, persona, { creativePlan })[0]!, /【参考画像】/);
 });
 
 test("レビューがない商品は評価バッジを描かせない", () => {
   const plan = buildImageCreativePlan({ ...item, reviewAverage: 0, reviewCount: 0 });
   assert.match(plan.slides[3]!.prompt, /評価バッジや星は描かない/);
   assert.match(plan.slides[3]!.overlayCopy.body, /レビューは商品ページで確認/);
-});
-
-test("参考画像は重複を除き上限枚数までしか送らない", async () => {
-  const referenceDir = fs.mkdtempSync(path.join(os.tmpdir(), "creative-ref-limit-"));
-  const outputDir = fs.mkdtempSync(path.join(os.tmpdir(), "creative-ref-out-"));
-  try {
-    fs.writeFileSync(path.join(referenceDir, "a.png"), "same");
-    fs.writeFileSync(path.join(referenceDir, "b.png"), "same");
-    fs.writeFileSync(path.join(referenceDir, "c.png"), "other");
-    fs.writeFileSync(path.join(referenceDir, "d.png"), "third");
-    fs.writeFileSync(path.join(referenceDir, "e.png"), "fourth");
-    const counts: number[] = [];
-    await generateAiLifestyleImages(item, persona, {
-      outputDir,
-      publicBaseUrl: "https://cdn.example.com/ig",
-      apiKey: "test-key",
-      referenceImageDir: referenceDir,
-      creativePlan: buildImageCreativePlan(item),
-      loadProductImage: async () => ({ bytes: Buffer.from("product"), mimeType: "image/jpeg" }),
-      client: async (body: FormData) => {
-        counts.push(body.getAll("image[]").length);
-        return { data: [{ b64_json: Buffer.from("jpeg").toString("base64") }] };
-      },
-    });
-    assert.deepEqual(counts, [3, 3, 3, 3, 3]);
-  } finally {
-    fs.rmSync(referenceDir, { recursive: true, force: true });
-    fs.rmSync(outputDir, { recursive: true, force: true });
-  }
 });
 
 test("投稿エンジンは生成コピーを画像プロンプト計画へ渡し、失敗時は定型コピーで続行する", async () => {
@@ -162,7 +132,6 @@ test("投稿エンジンは生成コピーを画像プロンプト計画へ渡�
         headlines.push(options!.creativePlan!.slides[0]!.overlayCopy.headline);
         return aiAssets;
       },
-      renderCarouselImages: async () => [],
     });
   }
   assert.equal(headlines[0], validCopy.hookQuestion);

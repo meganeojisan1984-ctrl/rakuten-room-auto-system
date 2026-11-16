@@ -88,15 +88,16 @@ export function captionAppearsInProfileText(profileText: string, caption: string
  * 投稿後の完了表示を検知できなかった場合の最終確認。
  * 自分のROOM商品一覧を開き、今回の紹介文が実際に掲載されたかを読み取る（閲覧のみ・再送はしない）。
  */
-async function confirmPostOnProfile(context: BrowserContext, caption: string): Promise<boolean> {
+async function confirmPostOnProfile(context: BrowserContext, caption: string): Promise<"found" | "absent" | "unavailable"> {
   let itemsUrl: string;
   try {
     itemsUrl = toRoomItemsUrl(process.env.ROOM_PROFILE_URL || DEFAULT_ROOM_PROFILE_URL);
   } catch (err) {
     console.warn(`[poster] ROOM_PROFILE_URL が不正なため掲載確認をスキップ: ${String(err)}`);
-    return false;
+    return "unavailable";
   }
   const page = await context.newPage();
+  let listLoaded = false;
   try {
     for (let attempt = 1; attempt <= 4; attempt++) {
       await page.goto(itemsUrl, { waitUntil: "domcontentloaded", timeout: 45000 }).catch(() => {});
@@ -106,15 +107,17 @@ async function confirmPostOnProfile(context: BrowserContext, caption: string): P
         const text = await page.evaluate(() => document.body.innerText).catch(() => "");
         if (captionAppearsInProfileText(text, caption)) {
           console.log(`[poster] 自分のROOM商品一覧で掲載を確認しました (確認${attempt}回目)`);
-          return true;
+          return "found";
         }
+        // 価格つきの商品カードが複数描画されていれば、一覧は正常に読めている
+        if ((text.match(/[￥¥]\s?[\d,]{3,}/g) ?? []).length >= 3) listLoaded = true;
       }
       console.log(`[poster] 商品一覧にまだ掲載が見当たりません (確認${attempt}/4)`);
     }
-    return false;
+    return listLoaded ? "absent" : "unavailable";
   } catch (err) {
     console.warn(`[poster] 掲載確認中にエラー: ${String(err).slice(0, 200)}`);
-    return false;
+    return "unavailable";
   } finally {
     await page.close().catch(() => {});
   }
@@ -173,6 +176,8 @@ export type PostResult = {
   error?: string;
   /** True when the submit result is unknown; callers must not retry automatically. */
   unknown?: boolean;
+  /** 送信後、自分のROOM商品一覧を正常に読めたうえで未掲載と確認できた（投稿は反映されていない）。 */
+  profileAbsent?: boolean;
 };
 
 /**
@@ -399,7 +404,15 @@ async function postSingleItem(
     let confirmed = await waitForPostCompletion(postPage);
     if (!confirmed) {
       console.log("[poster] 完了表示を検知できないため、自分のROOM商品一覧で掲載を確認します...");
-      confirmed = await confirmPostOnProfile(context, roomCaption);
+      const onProfile = await confirmPostOnProfile(context, roomCaption);
+      confirmed = onProfile === "found";
+      if (onProfile === "absent") {
+        // 送信はしたが、約3分待っても自分の一覧に載っていない。ROOM側で受け付けられなかったと判断する。
+        const error = "投稿がROOMに反映されませんでした（商品一覧で未掲載を確認。この商品は再投稿しません）";
+        console.error(`[poster] ⚠️ ${error}: ${item.itemName}`);
+        await notifyError("楽天ROOM投稿が反映されず", error);
+        return { success: false, itemName: item.itemName, itemUrl: item.itemUrl, error, unknown: true, profileAbsent: true };
+      }
     }
     if (!confirmed) {
       const error = "投稿完了確認タイムアウト（投稿結果不明。再送禁止）";
@@ -478,8 +491,8 @@ export async function postItems(
       await new Promise((resolve) => setTimeout(resolve, waitMs));
     }
 
-    // 投稿結果不明は二重投稿防止のため即時中断
-    if (result.unknown) {
+    // 投稿結果不明は二重投稿防止のため即時中断（未掲載を確認済みの場合は続行してよい）
+    if (result.unknown && !result.profileAbsent) {
       console.error("[poster] 投稿結果不明のため、後続商品の投稿を中断します");
       break;
     }

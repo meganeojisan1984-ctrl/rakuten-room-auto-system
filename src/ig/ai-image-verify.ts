@@ -4,7 +4,7 @@ import { defaultOpenAiTextClient, extractOpenAiText, resolveOpenAiTextModel, typ
  * AI生成スライドの公開前チェック。
  * 楽天の商品画像と生成スライドを低コストの画像対応モデルに見せ、
  * 「別の商品が描かれている」「指定した価格と違う」スライドが1枚でもあれば不合格にする。
- * 不合格・判定不能のときは呼び出し側で文字合成カルーセルへ切り替える。
+ * 不合格・判定不能のときは呼び出し側でInstagram投稿を見送る。
  */
 export interface AiImageVerifyInput {
   productName: string;

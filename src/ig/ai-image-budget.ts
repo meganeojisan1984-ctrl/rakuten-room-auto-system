@@ -3,7 +3,7 @@ import * as fs from "fs";
 /**
  * AI画像生成の月額上限ガード。
  * 生成前に「今月の見積もり額＋今回分」が上限を超えないか確認し、超える場合は生成せず
- * 文字合成カルーセルへフォールバックさせる。見積もりは実費より高めに倒す。
+ * Instagram投稿を見送らせる。見積もりは実費より高めに倒す。
  */
 export interface AiImageUsage {
   month: string;

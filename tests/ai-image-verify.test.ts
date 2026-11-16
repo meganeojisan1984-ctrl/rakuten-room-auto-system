@@ -67,7 +67,6 @@ test("検品で不合格の生成画像は破棄してエラーにする", async
         outputDir,
         publicBaseUrl: "https://cdn.example.com/ig",
         apiKey: "test-key",
-        referenceImageLimit: 0,
         creativePlan: buildImageCreativePlan(item),
         loadProductImage: async () => ({ bytes: Buffer.from("product"), mimeType: "image/jpeg" }),
         client: async () => ({ data: [{ b64_json: Buffer.from("jpeg").toString("base64") }] }),

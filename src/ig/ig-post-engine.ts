@@ -7,12 +7,10 @@ import { buildProductContentBrief } from "../content-brief";
 import type { SalesStrategyBrief } from "../sales-strategy";
 import { generateAiLifestyleImages, isAiLifestyleImagesEnabled, isOpenAiQuotaError } from "./ai-image";
 import {
-  buildCarouselSlides,
   getCarouselWriteOptions,
   isCarouselEnabled,
   publishCarouselAssetsToGitHub,
   publishInstagramCarousel,
-  writeCarouselImages,
   type CarouselAsset,
 } from "./carousel";
 import { isXDraftMailEnabled, sendXDraftMail } from "./x-draft-mailer";
@@ -115,7 +113,14 @@ interface CreateInstagramCarouselAssetsOptions {
   env?: NodeJS.ProcessEnv;
   generateAiImages?: typeof generateAiLifestyleImages;
   generateCopy?: typeof generateCreativeCopy;
-  renderCarouselImages?: typeof writeCarouselImages;
+}
+
+/** AI画像を用意できない回はInstagramへ投稿しない（旧デザインの画像には切り替えない）。 */
+export class InstagramSkippedError extends Error {
+  constructor(reason: string) {
+    super(reason);
+    this.name = "InstagramSkippedError";
+  }
 }
 
 export async function createInstagramCarouselAssets(
@@ -125,29 +130,28 @@ export async function createInstagramCarouselAssets(
 ): Promise<CarouselAsset[]> {
   const envVars = options.env ?? process.env;
   const writeOptions = getCarouselWriteOptions(envVars);
-  const renderCarouselImages = options.renderCarouselImages ?? writeCarouselImages;
-  console.log(`[ig-post-engine] slot=${persona.id} building source-grounded carousel assets...`);
+  console.log(`[ig-post-engine] slot=${persona.id} building AI carousel assets...`);
   const personaGenres = Array.isArray(persona.genres) ? persona.genres : [];
   const category = PRODUCT_CATEGORIES.find((value) => personaGenres.includes(value.name)) ?? PRODUCT_CATEGORIES[0]!;
   const brief = options.brief ?? buildProductContentBrief(item, persona, category);
-  let aiImagesEnabled = isAiLifestyleImagesEnabled(envVars);
-  if (aiImagesEnabled) {
-    // 月額上限・1日あたり回数を超える場合はAI画像を使わず、文字合成カルーセルで投稿する
-    try {
-      const budget = reserveAiImageBudget(envVars, 5);
-      if (budget && !budget.allowed) {
-        console.warn(`[ig-post-engine] AI画像をスキップ: ${budget.reason}`);
-        aiImagesEnabled = false;
-      } else if (budget) {
-        console.log(`[ig-post-engine] AI画像予算: 今回 $${budget.costUsd.toFixed(3)} / 今月累計 $${budget.usage.estimatedUsd.toFixed(2)}（${budget.usage.images}枚）`);
-      }
-    } catch (error) {
-      console.warn(`[ig-post-engine] AI画像の予算確認に失敗したため生成しません: ${String(error).slice(0, 200)}`);
-      aiImagesEnabled = false;
-    }
+
+  if (!isAiLifestyleImagesEnabled(envVars)) {
+    throw new InstagramSkippedError("AI画像生成が無効です（AI_IMAGE_ENABLED=0 または OPENAI_API_KEY 未設定）");
   }
+  // 月額上限・1日あたり回数を超える回は投稿しない
+  let budget: ReturnType<typeof reserveAiImageBudget>;
+  try {
+    budget = reserveAiImageBudget(envVars, 5);
+  } catch (error) {
+    throw new InstagramSkippedError(`AI画像の予算確認に失敗しました: ${String(error).slice(0, 200)}`);
+  }
+  if (budget && !budget.allowed) throw new InstagramSkippedError(budget.reason ?? "AI画像の予算上限に達しています");
+  if (budget) {
+    console.log(`[ig-post-engine] AI画像予算: 今回 $${budget.costUsd.toFixed(3)} / 今月累計 $${budget.usage.estimatedUsd.toFixed(2)}（${budget.usage.images}枚）`);
+  }
+
   let copy: CreativeCopy | undefined;
-  if (aiImagesEnabled && envVars.AI_IMAGE_TEXT_MODE !== "0" && isCreativeCopyEnabled(envVars)) {
+  if (isCreativeCopyEnabled(envVars)) {
     try {
       copy = await (options.generateCopy ?? generateCreativeCopy)(item, { brief, apiKey: envVars.OPENAI_API_KEY, env: envVars });
     } catch (error) {
@@ -155,46 +159,29 @@ export async function createInstagramCarouselAssets(
     }
   }
   const creativePlan = buildImageCreativePlan(item, brief, copy);
-  const slides = buildCarouselSlides(item, { brief, creativePlan });
-  if (aiImagesEnabled) {
-    const generateAiImages = options.generateAiImages ?? generateAiLifestyleImages;
-    console.log(`[ig-post-engine] slot=${persona.id} generating product-matched background images...`);
-    try {
-      const aiTextMode = envVars.AI_IMAGE_TEXT_MODE !== "0";
-      const backgrounds = await generateAiImages(item, persona, {
-        apiKey: envVars.OPENAI_API_KEY,
-        outputDir: writeOptions.outputDir,
-        publicBaseUrl: writeOptions.publicBaseUrl,
-        model: envVars.AI_IMAGE_MODEL || undefined,
-        quality: envVars.AI_IMAGE_QUALITY as "low" | "medium" | "high" | "auto" | undefined,
-        size: envVars.AI_IMAGE_SIZE || undefined,
-        brief,
-        creativePlan,
-        referenceImageDir: envVars.AI_IMAGE_REFERENCE_DIR || undefined,
-        useAiText: aiTextMode,
-      });
-      if (backgrounds.length !== 5) {
-        throw new Error(`AI background generation returned ${backgrounds.length} images; expected 5`);
-      }
-      if (aiTextMode) {
-        console.log("[ig-post-engine] AI完成画像モード: 生成画像をそのままカルーセル素材へ使用");
-        return backgrounds;
-      }
-      writeOptions.backgroundImagePaths = backgrounds.map((asset) => asset.filePath);
-    } catch (error) {
-      const reason = isOpenAiQuotaError(error) ? "OpenAI画像生成の残高不足" : "AI画像生成エラー";
-      // 残高不足は1枚も課金されていないので、予算の計上を取り消す
-      if (isOpenAiQuotaError(error)) {
-        try { refundAiImageBudget(envVars, 5); } catch { /* 取り消せなくても過大計上なので安全側 */ }
-      }
-      console.warn(`[ig-post-engine] ${reason}。文字入り決定論的カルーセルへフォールバック: ${String(error).slice(0, 220)}`);
-      delete writeOptions.backgroundImagePaths;
+  const generateAiImages = options.generateAiImages ?? generateAiLifestyleImages;
+  console.log(`[ig-post-engine] slot=${persona.id} generating AI carousel slides...`);
+  try {
+    const assets = await generateAiImages(item, persona, {
+      apiKey: envVars.OPENAI_API_KEY,
+      outputDir: writeOptions.outputDir,
+      publicBaseUrl: writeOptions.publicBaseUrl,
+      model: envVars.AI_IMAGE_MODEL || undefined,
+      quality: envVars.AI_IMAGE_QUALITY as "low" | "medium" | "high" | "auto" | undefined,
+      size: envVars.AI_IMAGE_SIZE || undefined,
+      brief,
+      creativePlan,
+    });
+    if (assets.length !== 5) throw new Error(`AI image generation returned ${assets.length} images; expected 5`);
+    return assets;
+  } catch (error) {
+    // 残高不足は1枚も課金されていないので、予算の計上を取り消す
+    if (isOpenAiQuotaError(error)) {
+      try { refundAiImageBudget(envVars, 5); } catch { /* 取り消せなくても過大計上なので安全側 */ }
     }
+    const reason = isOpenAiQuotaError(error) ? "OpenAIの残高不足" : "AI画像を用意できませんでした";
+    throw new InstagramSkippedError(`${reason}: ${String(error).slice(0, 220)}`);
   }
-  writeOptions.creativePlan = creativePlan;
-  const assets = await renderCarouselImages(item, slides, writeOptions);
-  if (assets.length !== 5) throw new Error(`Carousel renderer returned ${assets.length} images; expected 5`);
-  return assets;
 }
 async function sendXDraftIfEnabled(
   item: RakutenItem,
@@ -278,6 +265,11 @@ export async function postToInstagramWithPersona(
     await sendXDraft(item, finalCaption, assets, persona);
     return true;
   } catch (err) {
+    if (err instanceof InstagramSkippedError) {
+      // 予算上限・検品不合格などで今回は投稿しない。障害ではないのでエラー通知は出さない。
+      console.warn(`[ig-post-engine] slot=${persona.id} Instagram投稿を見送り: ${err.message}`);
+      return false;
+    }
     const msg = axios.isAxiosError(err)
       ? JSON.stringify(err.response?.data ?? err.message).slice(0, 500)
       : String(err).slice(0, 500);
