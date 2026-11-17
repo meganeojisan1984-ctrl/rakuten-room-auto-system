@@ -17,6 +17,8 @@ export interface AiImageVerifyInput {
 export interface AiImageVerifyResult {
   ok: boolean;
   problems: string[];
+  /** 不合格になったスライド番号（1始まり） */
+  failedSlides: number[];
 }
 
 export interface AiImageVerifyOptions {
@@ -64,6 +66,7 @@ export function parseAiImageVerifyResponse(raw: string, slideCount: number): AiI
     throw new Error("AI image verification returned an unexpected number of slides");
   }
   const problems: string[] = [];
+  const failedSlides: number[] = [];
   parsed.slides.forEach((value, index) => {
     const slide = (value ?? {}) as Record<string, unknown>;
     if (typeof slide.wrongProduct !== "boolean" || typeof slide.wrongPrice !== "boolean") {
@@ -71,8 +74,9 @@ export function parseAiImageVerifyResponse(raw: string, slideCount: number): AiI
     }
     if (slide.wrongProduct) problems.push(`スライド${index + 1}: 別の商品が描かれています`);
     if (slide.wrongPrice) problems.push(`スライド${index + 1}: 価格表記が商品データと異なります`);
+    if (slide.wrongProduct || slide.wrongPrice) failedSlides.push(index + 1);
   });
-  return { ok: problems.length === 0, problems };
+  return { ok: problems.length === 0, problems, failedSlides };
 }
 
 export async function verifyAiImages(input: AiImageVerifyInput, options: AiImageVerifyOptions): Promise<AiImageVerifyResult> {

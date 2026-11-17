@@ -20,3 +20,4 @@ data/affiliate-debug/*
 !data/affiliate-debug/.gitkeep
 public/generated/instagram-demo/
 tools/streamdeck/dist/
+ai-rejected/

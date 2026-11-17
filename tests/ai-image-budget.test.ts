@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { estimateCostPerImageUsd, readAiImageUsage, refundAiImageBudget, reserveAiImageBudget } from "../src/ig/ai-image-budget";
+import { estimateCostPerImageUsd, readAiImageUsage, recordExtraAiImages, refundAiImageBudget, releaseAiImageDaySlot, reserveAiImageBudget } from "../src/ig/ai-image-budget";
 import { createInstagramCarouselAssets, InstagramSkippedError } from "../src/ig/ig-post-engine";
 import type { RakutenItem } from "../src/fetcher";
 import type { PersonaSlot } from "../src/persona/persona";
@@ -115,4 +115,18 @@ test("1日の上限を超えた回はAI画像を呼ばず、Instagram投稿を�
   assert.equal(first[0]!.filePath, "ai-1.jpg");
   await assert.rejects(run(), (error: unknown) => error instanceof InstagramSkippedError && /本日のAI画像投稿数の上限/.test(String(error)));
   assert.equal(aiCalls, 1);
+});
+
+test("投稿に至らなかった回は回数枠だけ戻し、費用と作り直し分は計上したままにする", () => {
+  const file = ledger();
+  const env = { ...baseEnv, AI_IMAGE_USAGE_FILE: file, AI_IMAGE_DAILY_POSTS: "1" };
+  const day = new Date("2026-11-20T08:00:00+09:00");
+  reserveAiImageBudget(env, 5, day);
+  recordExtraAiImages(env, 2, day);
+  releaseAiImageDaySlot(env, day);
+  const usage = readAiImageUsage(file, day);
+  assert.equal(usage.images, 7);
+  assert.equal(usage.estimatedUsd, 0.28);
+  assert.deepEqual(usage.days, {});
+  assert.equal(reserveAiImageBudget(env, 5, new Date("2026-11-20T13:00:00+09:00"))!.allowed, true);
 });
