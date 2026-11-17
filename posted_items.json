@@ -1,7 +1,5 @@
 {
   "postedItemCodes": [
-    "auc-st-mart:10009058",
-    "irisplaza-r:10156163",
     "pottepotte:10000309",
     "kohnan-eshop:10138396",
     "kohnan-eshop:10230659",
@@ -505,7 +503,8 @@
   ],
   "uncertainItemCodes": [
     "mikirona:10000048",
-    "nat-gar:10007107"
+    "nat-gar:10007107",
+    "mellife-store:10000021"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
