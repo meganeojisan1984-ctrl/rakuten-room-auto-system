@@ -499,11 +499,12 @@
     "livingut:10091121",
     "comfee-kitchen:10000052",
     "seikou1:10002296",
-    "alice-zk:10002186"
+    "alice-zk:10002186",
+    "sports-merach:10000046"
   ],
   "uncertainItemCodes": [
     "mikirona:10000048",
     "nat-gar:10007107"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
