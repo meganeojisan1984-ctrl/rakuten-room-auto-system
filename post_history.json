@@ -3037,5 +3037,18 @@
     "captionHead": "先月までの私: 車のトランクが道具の山で探すのに時",
     "slot": "slot2",
     "itemCodeHash": "c599a77ca9da"
+  },
+  {
+    "ts": "2026-11-17T20:13:52.116Z",
+    "itemCode": "realstyle4u:10002388",
+    "itemName": "総合1位【LINE登録で最大1000円OFF】プロテイン ビーレジェンド ホエイプロテイン 女性 男性 WPC チョコ ベリー バナナ メロン 抹茶 鬼レモン パッションフルーツ ヨーグルト マンゴー 900g WPC ゲリラ",
+    "genreName": "ダイエット商品",
+    "price": 6999,
+    "postType": 3,
+    "hour": 5,
+    "hook": "question",
+    "captionHead": "まだ味で続けられないで損してない？🎯 楽天でこれ",
+    "slot": "slot0",
+    "itemCodeHash": "cf57daf7cc10"
   }
 ]
