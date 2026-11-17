@@ -130,3 +130,31 @@ export function refundAiImageBudget(env: EnvLike, imageCount: number, now: Date 
   };
   fs.writeFileSync(filePath, JSON.stringify(next, null, 2) + "\n");
 }
+
+/** 作り直しで追加生成した枚数を計上する（回数枠は消費しない）。 */
+export function recordExtraAiImages(env: EnvLike, imageCount: number, now: Date = new Date()): void {
+  const filePath = env.AI_IMAGE_USAGE_FILE?.trim();
+  if (!filePath || imageCount <= 0) return;
+  const usage = readAiImageUsage(filePath, now);
+  const next: AiImageUsage = {
+    ...usage,
+    images: usage.images + imageCount,
+    estimatedUsd: Math.round((usage.estimatedUsd + estimateCostPerImageUsd(env) * imageCount) * 10000) / 10000,
+  };
+  fs.writeFileSync(filePath, JSON.stringify(next, null, 2) + "\n");
+}
+
+/**
+ * 生成はしたが投稿に至らなかった回（検品不合格など）の「1日の回数枠」だけを戻す。
+ * 費用は発生しているので金額の計上は残す。同じ日の次の回でもう一度試せるようにするため。
+ */
+export function releaseAiImageDaySlot(env: EnvLike, now: Date = new Date()): void {
+  const filePath = env.AI_IMAGE_USAGE_FILE?.trim();
+  if (!filePath) return;
+  const usage = readAiImageUsage(filePath, now);
+  const { day } = jstParts(now);
+  const days = { ...usage.days };
+  const remaining = (days[day] ?? 0) - 1;
+  if (remaining > 0) days[day] = remaining; else delete days[day];
+  fs.writeFileSync(filePath, JSON.stringify({ ...usage, days }, null, 2) + "\n");
+}

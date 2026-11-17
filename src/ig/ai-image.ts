@@ -34,6 +34,10 @@ export interface GenerateAiLifestyleImagesOptions {
   requestTimeoutMs?: number;
   /** 公開前の検品。未指定時、本番（clientを差し替えていない場合）は既定の検品を行う */
   verifier?: (input: AiImageVerifyInput) => Promise<AiImageVerifyResult>;
+  /** 検品で不合格になったスライドを作り直したときに、追加で生成した枚数を通知する（予算計上用） */
+  onExtraImages?: (count: number) => void;
+  /** 不合格になった画像の保存先（原因調査用）。未指定なら AI_IMAGE_REJECTED_DIR、それも無ければ保存しない */
+  rejectedDir?: string;
   client?: (body: FormData, apiKey: string) => Promise<OpenAiImageResponse>;
 }
 
@@ -188,34 +192,59 @@ export async function generateAiLifestyleImages(
   fs.mkdirSync(outputDir, { recursive: true });
 
   const prompts = buildAiLifestyleImagePrompts(item, persona, { brief: options.brief, creativePlan: options.creativePlan });
-  const assets: CarouselAsset[] = [];
-  for (let i = 0; i < prompts.length; i++) {
-    const body = buildEditForm(prompts[i]!, model, size, quality, productImage);
+  const generateSlide = async (index: number, extraInstruction = ""): Promise<CarouselAsset> => {
+    const body = buildEditForm(`${prompts[index]!}${extraInstruction}`, model, size, quality, productImage);
     const response = await callImageClient(client, body, apiKey, requestTimeoutMs);
     const encoded = response.data?.[0]?.b64_json;
     if (!encoded) throw new Error("OpenAI image response did not include b64_json");
-    const fileName = `${day}-${stamp}-${hash}-ai-${String(i + 1).padStart(2, "0")}.jpg`;
+    const fileName = `${day}-${stamp}-${hash}-ai-${String(index + 1).padStart(2, "0")}.jpg`;
     const filePath = path.join(outputDir, fileName);
     fs.writeFileSync(filePath, Buffer.from(encoded, "base64"));
-    assets.push({
-      filePath,
-      publicUrl: mapAssetToPublicUrl(fileName, publicBaseUrl),
-      page: i + 1,
-    });
-  }
+    return { filePath, publicUrl: mapAssetToPublicUrl(fileName, publicBaseUrl), page: index + 1 };
+  };
+
+  const assets: CarouselAsset[] = [];
+  for (let i = 0; i < prompts.length; i++) assets.push(await generateSlide(i));
 
   const verifier = options.verifier
     ?? (options.client || process.env.AI_IMAGE_VERIFY === "0"
       ? undefined
       : (input: AiImageVerifyInput) => verifyAiImages(input, { apiKey }));
   if (verifier) {
-    const verdict = await verifier({
+    const inspect = () => verifier({
       productName: productTitle(item),
       productImage,
       slides: assets.map((asset) => ({ bytes: new Uint8Array(fs.readFileSync(asset.filePath)), mimeType: "image/jpeg" })),
       expectedPrice: item.itemPrice ? `${item.itemPrice.toLocaleString()}円` : undefined,
     });
+    const rejectedDir = options.rejectedDir ?? process.env.AI_IMAGE_REJECTED_DIR ?? "";
+    const keepRejected = (slideNumbers: number[], label: string): void => {
+      if (!rejectedDir) return;
+      fs.mkdirSync(rejectedDir, { recursive: true });
+      for (const number of slideNumbers) {
+        const asset = assets[number - 1];
+        if (asset && fs.existsSync(asset.filePath)) {
+          fs.copyFileSync(asset.filePath, path.join(rejectedDir, `${label}-${path.basename(asset.filePath)}`));
+        }
+      }
+    };
+
+    let verdict = await inspect();
+    // 不合格が2枚までなら、その枚数だけ1回作り直してから全体を再検品する
+    if (!verdict.ok && verdict.failedSlides.length > 0 && verdict.failedSlides.length <= 2) {
+      console.warn(`[ai-image] 検品で不合格（${verdict.problems.join(" / ")}）。該当スライドを1回だけ作り直します`);
+      keepRejected(verdict.failedSlides, "attempt1");
+      for (const number of verdict.failedSlides) {
+        assets[number - 1] = await generateSlide(
+          number - 1,
+          "\n【作り直しの指示】前回は添付画像と違う製品が描かれた、または価格の数字が違ったため不採用。添付画像の商品だけを描き、価格は確定テキストの数字を一字一句そのまま使う。",
+        );
+      }
+      options.onExtraImages?.(verdict.failedSlides.length);
+      verdict = await inspect();
+    }
     if (!verdict.ok) {
+      keepRejected(assets.map((asset) => asset.page), "rejected");
       for (const asset of assets) fs.rmSync(asset.filePath, { force: true });
       throw new Error(`AI画像の検品で不合格: ${verdict.problems.join(" / ")}`);
     }

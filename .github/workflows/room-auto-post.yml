@@ -83,6 +83,7 @@ jobs:
           AI_IMAGE_QUALITY: ${{ vars.AI_IMAGE_QUALITY || 'high' }}
           # AI画像の月額上限ガード（見積もりUSD）。上限に達した回はInstagram投稿を見送る
           AI_IMAGE_USAGE_FILE: ai_image_usage.json
+          AI_IMAGE_REJECTED_DIR: ai-rejected
           AI_IMAGE_MONTHLY_BUDGET_USD: ${{ vars.AI_IMAGE_MONTHLY_BUDGET_USD || '5' }}
           AI_IMAGE_DAILY_POSTS: ${{ vars.AI_IMAGE_DAILY_POSTS || '1' }}
           AI_IMAGE_SIZE: ${{ vars.AI_IMAGE_SIZE || '1024x1024' }}
@@ -137,6 +138,15 @@ jobs:
         with:
           name: error-screenshot-${{ github.run_id }}
           path: error.png
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: 検品で不合格になったAI画像をアップロード
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-rejected-${{ github.run_id }}
+          path: ai-rejected/
           retention-days: 7
           if-no-files-found: ignore
 

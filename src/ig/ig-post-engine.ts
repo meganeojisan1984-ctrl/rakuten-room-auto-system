@@ -17,7 +17,7 @@ import { isXDraftMailEnabled, sendXDraftMail } from "./x-draft-mailer";
 import { generateThreadsCopy, isThreadsCopyEnabled } from "./threads-copy";
 import { buildImageCreativePlan } from "./image-creative";
 import { generateCreativeCopy, isCreativeCopyEnabled, type CreativeCopy } from "./creative-copy";
-import { refundAiImageBudget, reserveAiImageBudget } from "./ai-image-budget";
+import { recordExtraAiImages, refundAiImageBudget, releaseAiImageDaySlot, reserveAiImageBudget } from "./ai-image-budget";
 import { DEFAULT_ROOM_PROFILE_URL, toRoomItemsUrl } from "../room-profile-url";
 
 // sns.ts と揃える (Instagram Graph API 独自エンドポイント)
@@ -171,6 +171,9 @@ export async function createInstagramCarouselAssets(
       size: envVars.AI_IMAGE_SIZE || undefined,
       brief,
       creativePlan,
+      onExtraImages: (count) => {
+        try { recordExtraAiImages(envVars, count); } catch { /* 計上できなくても投稿は続ける */ }
+      },
     });
     if (assets.length !== 5) throw new Error(`AI image generation returned ${assets.length} images; expected 5`);
     return assets;
@@ -178,6 +181,9 @@ export async function createInstagramCarouselAssets(
     // 残高不足は1枚も課金されていないので、予算の計上を取り消す
     if (isOpenAiQuotaError(error)) {
       try { refundAiImageBudget(envVars, 5); } catch { /* 取り消せなくても過大計上なので安全側 */ }
+    } else {
+      // 生成費用は発生しているので金額は残し、1日の回数枠だけ戻して次の回で再挑戦できるようにする
+      try { releaseAiImageDaySlot(envVars); } catch { /* 戻せなくても投稿が減るだけ */ }
     }
     const reason = isOpenAiQuotaError(error) ? "OpenAIの残高不足" : "AI画像を用意できませんでした";
     throw new InstagramSkippedError(`${reason}: ${String(error).slice(0, 220)}`);

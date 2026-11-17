@@ -45,6 +45,7 @@ test("別商品や価格違いが1枚でもあれば不合格にする", () => {
   const fail = parseAiImageVerifyResponse('```json\n{"slides":[{"wrongProduct":true,"wrongPrice":false},{"wrongProduct":false,"wrongPrice":true}]}\n```', 2);
   assert.equal(fail.ok, false);
   assert.deepEqual(fail.problems, ["スライド1: 別の商品が描かれています", "スライド2: 価格表記が商品データと異なります"]);
+  assert.deepEqual(fail.failedSlides, [1, 2]);
   assert.throws(() => parseAiImageVerifyResponse('{"slides":[{"wrongProduct":false,"wrongPrice":false}]}', 2), /unexpected number/);
   assert.throws(() => parseAiImageVerifyResponse('{"slides":[{"wrongProduct":"no"}]}', 1), /invalid slide verdict/);
 });
@@ -59,9 +60,79 @@ test("検品は低コストのテキストモデルを1回だけ呼ぶ", async (
   assert.equal(result.ok, true);
 });
 
-test("検品で不合格の生成画像は破棄してエラーにする", async () => {
-  const outputDir = fs.mkdtempSync(path.join(os.tmpdir(), "ai-verify-"));
+test("不合格のスライドだけ1回作り直し、再検品に通れば採用する", async () => {
+  const outputDir = fs.mkdtempSync(path.join(os.tmpdir(), "ai-verify-retry-"));
+  const rejectedDir = fs.mkdtempSync(path.join(os.tmpdir(), "ai-verify-rejected-"));
   try {
+    const prompts: string[] = [];
+    let inspections = 0;
+    let extra = 0;
+    const assets = await generateAiLifestyleImages(item, persona, {
+      outputDir,
+      rejectedDir,
+      publicBaseUrl: "https://cdn.example.com/ig",
+      apiKey: "test-key",
+      creativePlan: buildImageCreativePlan(item),
+      loadProductImage: async () => ({ bytes: Buffer.from("product"), mimeType: "image/jpeg" }),
+      client: async (body: FormData) => {
+        prompts.push(String(body.get("prompt")));
+        return { data: [{ b64_json: Buffer.from(`jpeg-${prompts.length}`).toString("base64") }] };
+      },
+      onExtraImages: (count) => { extra += count; },
+      verifier: async (input) => {
+        inspections++;
+        assert.equal(input.slides.length, 5);
+        assert.equal(input.expectedPrice, "33,000円");
+        return inspections === 1
+          ? { ok: false, problems: ["スライド2: 別の商品が描かれています"], failedSlides: [2] }
+          : { ok: true, problems: [], failedSlides: [] };
+      },
+    });
+    assert.equal(assets.length, 5);
+    assert.equal(prompts.length, 6);
+    assert.match(prompts[5]!, /スライド2/);
+    assert.match(prompts[5]!, /作り直しの指示/);
+    assert.equal(inspections, 2);
+    assert.equal(extra, 1);
+    assert.equal(fs.readFileSync(assets[1]!.filePath, "utf-8"), "jpeg-6");
+    assert.equal(fs.readdirSync(rejectedDir).length, 1);
+  } finally {
+    fs.rmSync(outputDir, { recursive: true, force: true });
+    fs.rmSync(rejectedDir, { recursive: true, force: true });
+  }
+});
+
+test("作り直しても不合格なら破棄してエラーにし、調査用に画像を残す", async () => {
+  const outputDir = fs.mkdtempSync(path.join(os.tmpdir(), "ai-verify-"));
+  const rejectedDir = fs.mkdtempSync(path.join(os.tmpdir(), "ai-verify-rejected-"));
+  try {
+    let calls = 0;
+    await assert.rejects(
+      generateAiLifestyleImages(item, persona, {
+        outputDir,
+        rejectedDir,
+        publicBaseUrl: "https://cdn.example.com/ig",
+        apiKey: "test-key",
+        creativePlan: buildImageCreativePlan(item),
+        loadProductImage: async () => ({ bytes: Buffer.from("product"), mimeType: "image/jpeg" }),
+        client: async () => { calls++; return { data: [{ b64_json: Buffer.from("jpeg").toString("base64") }] }; },
+        verifier: async () => ({ ok: false, problems: ["スライド1: 別の商品が描かれています"], failedSlides: [1] }),
+      }),
+      /AI画像の検品で不合格: スライド1/,
+    );
+    assert.equal(calls, 6);
+    assert.deepEqual(fs.readdirSync(outputDir), []);
+    assert.equal(fs.readdirSync(rejectedDir).length, 6);
+  } finally {
+    fs.rmSync(outputDir, { recursive: true, force: true });
+    fs.rmSync(rejectedDir, { recursive: true, force: true });
+  }
+});
+
+test("3枚以上が不合格なら作り直さずに見送る", async () => {
+  const outputDir = fs.mkdtempSync(path.join(os.tmpdir(), "ai-verify-many-"));
+  try {
+    let calls = 0;
     await assert.rejects(
       generateAiLifestyleImages(item, persona, {
         outputDir,
@@ -69,16 +140,12 @@ test("検品で不合格の生成画像は破棄してエラーにする", async
         apiKey: "test-key",
         creativePlan: buildImageCreativePlan(item),
         loadProductImage: async () => ({ bytes: Buffer.from("product"), mimeType: "image/jpeg" }),
-        client: async () => ({ data: [{ b64_json: Buffer.from("jpeg").toString("base64") }] }),
-        verifier: async (input) => {
-          assert.equal(input.slides.length, 5);
-          assert.equal(input.expectedPrice, "33,000円");
-          return { ok: false, problems: ["スライド1: 別の商品が描かれています"] };
-        },
+        client: async () => { calls++; return { data: [{ b64_json: Buffer.from("jpeg").toString("base64") }] }; },
+        verifier: async () => ({ ok: false, problems: ["多数"], failedSlides: [1, 2, 3] }),
       }),
-      /AI画像の検品で不合格: スライド1/,
+      /AI画像の検品で不合格/,
     );
-    assert.deepEqual(fs.readdirSync(outputDir), []);
+    assert.equal(calls, 5);
   } finally {
     fs.rmSync(outputDir, { recursive: true, force: true });
   }
