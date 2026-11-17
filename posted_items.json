@@ -499,12 +499,13 @@
     "alice-zk:10002186",
     "sports-merach:10000046",
     "apm24:10002135",
-    "phoebehou:10084680"
+    "phoebehou:10084680",
+    "realstyle4u:10002388"
   ],
   "uncertainItemCodes": [
     "mikirona:10000048",
     "nat-gar:10007107",
     "mellife-store:10000021"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
