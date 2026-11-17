@@ -3010,7 +3010,9 @@
     "hook": "story",
     "captionHead": "深夜2時、テレビ見ながら「これで明日こそ続けられる",
     "slot": "slot0",
-    "itemCodeHash": "06d3f6b9d369"
+    "itemCodeHash": "06d3f6b9d369",
+    "likes": 2,
+    "likesUpdatedAt": "2026-11-17T22:43:58.162Z"
   },
   {
     "ts": "2026-11-17T00:44:58.191Z",
@@ -3023,7 +3025,9 @@
     "hook": "empathy",
     "captionHead": "乾燥で目元パリパリする人、手ぇ挙げて🙋‍♀️ 忙",
     "slot": "slot0",
-    "itemCodeHash": "49c30b80a4f6"
+    "itemCodeHash": "49c30b80a4f6",
+    "likes": 4,
+    "likesUpdatedAt": "2026-11-17T22:43:58.162Z"
   },
   {
     "ts": "2026-11-17T12:59:37.551Z",
@@ -3049,6 +3053,8 @@
     "hook": "question",
     "captionHead": "まだ味で続けられないで損してない？🎯 楽天でこれ",
     "slot": "slot0",
-    "itemCodeHash": "cf57daf7cc10"
+    "itemCodeHash": "cf57daf7cc10",
+    "likes": 6,
+    "likesUpdatedAt": "2026-11-17T22:43:58.162Z"
   }
 ]
