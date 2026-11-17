@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "pottepotte:10000309",
     "kohnan-eshop:10138396",
     "kohnan-eshop:10230659",
     "assistone:10007485",
@@ -499,12 +498,13 @@
     "seikou1:10002296",
     "alice-zk:10002186",
     "sports-merach:10000046",
-    "apm24:10002135"
+    "apm24:10002135",
+    "phoebehou:10084680"
   ],
   "uncertainItemCodes": [
     "mikirona:10000048",
     "nat-gar:10007107",
     "mellife-store:10000021"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
