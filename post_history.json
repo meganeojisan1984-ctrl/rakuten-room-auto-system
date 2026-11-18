@@ -2750,8 +2750,8 @@
     "captionHead": "乾燥の悩みを抱えたまま、続けやすい選び方に迷う人へ",
     "slot": "slot0",
     "itemCodeHash": "25e8ecea35db",
-    "likes": 14,
-    "likesUpdatedAt": "2026-10-20T18:44:44.843Z"
+    "likes": 2,
+    "likesUpdatedAt": "2026-11-18T22:27:21.436Z"
   },
   {
     "ts": "2026-10-02T02:03:48.230Z",
@@ -3068,7 +3068,9 @@
     "hook": "ranking",
     "captionHead": "楽天の美容家電ランキング常連アイテム見つけた！🎖",
     "slot": "slot1",
-    "itemCodeHash": "2c187103a1a4"
+    "itemCodeHash": "2c187103a1a4",
+    "likes": 2,
+    "likesUpdatedAt": "2026-11-18T22:27:21.436Z"
   },
   {
     "ts": "2026-11-18T12:56:10.608Z",
@@ -3094,6 +3096,8 @@
     "hook": "story",
     "captionHead": "深夜2時、タオルで頭ぐるぐるにしてヒーター前で格闘",
     "slot": "slot0",
-    "itemCodeHash": "df8ccbca6949"
+    "itemCodeHash": "df8ccbca6949",
+    "likes": 5,
+    "likesUpdatedAt": "2026-11-18T22:27:21.436Z"
   }
 ]
