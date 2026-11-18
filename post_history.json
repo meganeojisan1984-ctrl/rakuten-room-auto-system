@@ -3069,5 +3069,18 @@
     "captionHead": "楽天の美容家電ランキング常連アイテム見つけた！🎖",
     "slot": "slot1",
     "itemCodeHash": "2c187103a1a4"
+  },
+  {
+    "ts": "2026-11-18T12:56:10.608Z",
+    "itemCode": "hobbyman:10007800",
+    "itemName": "【楽天1位】最大全額3,800円引 車マット シートフラットクッション 段差解消 車中泊 マット 車中泊 グッズ 防災 エアーマット ベッド キャンピングマット キャンプマット 【日本製】Lot No.01",
+    "genreName": "アウトドア",
+    "price": 9900,
+    "postType": 1,
+    "hour": 21,
+    "hook": "surprise",
+    "captionHead": "え、待って。車のシートの段差で毎回寝づらかった人、",
+    "slot": "slot2",
+    "itemCodeHash": "c232ade46c3e"
   }
 ]

@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-10-03T01:43:56.160Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (ダイエット商品)"
-  },
-  {
-    "ts": "2026-10-03T01:44:03.421Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ3)"
-  },
-  {
-    "ts": "2026-10-03T01:45:29.275Z",
-    "agent": "poster",
-    "ok": false,
-    "summary": "成功0件/失敗1件 (TimeoutError: page.screenshot: Timeout 30000ms exceeded.\nCall log:\n  - taking pa)"
-  },
-  {
-    "ts": "2026-10-03T09:38:32.909Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (アウトドア)"
-  },
-  {
     "ts": "2026-10-03T09:38:35.883Z",
     "agent": "copywriter",
     "ok": true,
@@ -1195,6 +1171,30 @@
   },
   {
     "ts": "2026-11-18T04:00:38.390Z",
+    "agent": "promoter",
+    "ok": false,
+    "summary": "IG=失敗/未設定, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-11-18T12:55:55.120Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (アウトドア)"
+  },
+  {
+    "ts": "2026-11-18T12:56:10.554Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ1)"
+  },
+  {
+    "ts": "2026-11-18T12:56:10.555Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "skipped (SKIP_ROOM=1)"
+  },
+  {
+    "ts": "2026-11-18T12:56:10.607Z",
     "agent": "promoter",
     "ok": false,
     "summary": "IG=失敗/未設定, Threads=失敗/未設定"

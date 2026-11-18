@@ -1,8 +1,5 @@
 {
   "postedItemCodes": [
-    "kohnan-eshop:10138396",
-    "kohnan-eshop:10230659",
-    "assistone:10007485",
     "enetroom:10186341",
     "nihoninterior:10031946",
     "siba-98:10000150",
@@ -501,12 +498,13 @@
     "apm24:10002135",
     "phoebehou:10084680",
     "realstyle4u:10002388",
-    "hiragana1:10000046"
+    "hiragana1:10000046",
+    "hobbyman:10007800"
   ],
   "uncertainItemCodes": [
     "mikirona:10000048",
     "nat-gar:10007107",
     "mellife-store:10000021"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
