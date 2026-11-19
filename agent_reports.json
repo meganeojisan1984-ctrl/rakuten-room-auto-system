@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-10-04T02:25:11.406Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ3)"
-  },
-  {
-    "ts": "2026-10-04T02:26:56.068Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-10-04T02:27:45.681Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-10-04T10:23:26.201Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (家電製品)"
-  },
-  {
     "ts": "2026-10-04T10:23:28.655Z",
     "agent": "copywriter",
     "ok": true,
@@ -1195,6 +1171,30 @@
   },
   {
     "ts": "2026-11-19T04:04:04.607Z",
+    "agent": "promoter",
+    "ok": false,
+    "summary": "IG=失敗/未設定, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-11-19T12:43:35.477Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (家電製品)"
+  },
+  {
+    "ts": "2026-11-19T12:43:56.152Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ3)"
+  },
+  {
+    "ts": "2026-11-19T12:43:56.153Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "skipped (SKIP_ROOM=1)"
+  },
+  {
+    "ts": "2026-11-19T12:43:56.205Z",
     "agent": "promoter",
     "ok": false,
     "summary": "IG=失敗/未設定, Threads=失敗/未設定"

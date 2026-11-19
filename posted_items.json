@@ -1,8 +1,5 @@
 {
   "postedItemCodes": [
-    "enetroom:10186341",
-    "nihoninterior:10031946",
-    "siba-98:10000150",
     "abc-tuhan:10019851",
     "hypnos:10019636",
     "mujirushi-ryohin:10004540",
@@ -501,12 +498,13 @@
     "hiragana1:10000046",
     "hobbyman:10007800",
     "yoshedirect:10000046",
-    "clever2016:10000147"
+    "clever2016:10000147",
+    "airrobo:10000001"
   ],
   "uncertainItemCodes": [
     "mikirona:10000048",
     "nat-gar:10007107",
     "mellife-store:10000021"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }

@@ -3112,5 +3112,18 @@
     "captionHead": "これ知らないと年単位で損してるかも…！3,480円",
     "slot": "slot1",
     "itemCodeHash": "287a9d05117f"
+  },
+  {
+    "ts": "2026-11-19T12:43:56.206Z",
+    "itemCode": "airrobo:10000001",
+    "itemName": "【クーポンで1400円OFF / P2倍】ロボット掃除機 薄型 お掃除ロボット AIRROBO P20 小型 強力吸引 掃除機 自動ゴミ収集 音量調節 静音 120分間 WiFi アプリ リモコン 自動充電 乾拭き 落下防止 自動掃除機 クリーナー 掃除ロボット Alexa Google Home対応",
+    "genreName": "家電製品",
+    "price": 13990,
+    "postType": 3,
+    "hour": 21,
+    "hook": "number",
+    "captionHead": "レビュー4,000件超えで★4.59ってまず信頼で",
+    "slot": "slot2",
+    "itemCodeHash": "8217cfda6ba1"
   }
 ]
