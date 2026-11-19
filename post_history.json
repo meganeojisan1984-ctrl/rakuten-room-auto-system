@@ -2750,8 +2750,8 @@
     "captionHead": "乾燥の悩みを抱えたまま、続けやすい選び方に迷う人へ",
     "slot": "slot0",
     "itemCodeHash": "25e8ecea35db",
-    "likes": 2,
-    "likesUpdatedAt": "2026-11-18T22:27:21.436Z"
+    "likes": 14,
+    "likesUpdatedAt": "2026-11-19T22:33:22.814Z"
   },
   {
     "ts": "2026-10-02T02:03:48.230Z",
@@ -3054,8 +3054,8 @@
     "captionHead": "まだ味で続けられないで損してない？🎯 楽天でこれ",
     "slot": "slot0",
     "itemCodeHash": "cf57daf7cc10",
-    "likes": 6,
-    "likesUpdatedAt": "2026-11-17T22:43:58.162Z"
+    "likes": 7,
+    "likesUpdatedAt": "2026-11-19T22:33:22.814Z"
   },
   {
     "ts": "2026-11-18T04:00:38.390Z",
@@ -3069,8 +3069,8 @@
     "captionHead": "楽天の美容家電ランキング常連アイテム見つけた！🎖",
     "slot": "slot1",
     "itemCodeHash": "2c187103a1a4",
-    "likes": 2,
-    "likesUpdatedAt": "2026-11-18T22:27:21.436Z"
+    "likes": 14,
+    "likesUpdatedAt": "2026-11-19T22:33:22.814Z"
   },
   {
     "ts": "2026-11-18T12:56:10.608Z",
@@ -3097,8 +3097,8 @@
     "captionHead": "深夜2時、タオルで頭ぐるぐるにしてヒーター前で格闘",
     "slot": "slot0",
     "itemCodeHash": "df8ccbca6949",
-    "likes": 5,
-    "likesUpdatedAt": "2026-11-18T22:27:21.436Z"
+    "likes": 8,
+    "likesUpdatedAt": "2026-11-19T22:33:22.814Z"
   },
   {
     "ts": "2026-11-19T04:04:04.609Z",
@@ -3111,7 +3111,9 @@
     "hook": "loss",
     "captionHead": "これ知らないと年単位で損してるかも…！3,480円",
     "slot": "slot1",
-    "itemCodeHash": "287a9d05117f"
+    "itemCodeHash": "287a9d05117f",
+    "likes": 1,
+    "likesUpdatedAt": "2026-11-19T22:33:22.814Z"
   },
   {
     "ts": "2026-11-19T12:43:56.206Z",
@@ -3137,6 +3139,8 @@
     "hook": "beforeafter",
     "captionHead": "先月までの私: 顔も体もケアが続かない… / 今の",
     "slot": "slot0",
-    "itemCodeHash": "32a5cde24ff2"
+    "itemCodeHash": "32a5cde24ff2",
+    "likes": 6,
+    "likesUpdatedAt": "2026-11-19T22:33:22.814Z"
   }
 ]
