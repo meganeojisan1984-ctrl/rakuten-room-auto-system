@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-10-05T11:11:13.934Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-10-05T21:38:58.465Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "19件抽出、履歴2件のいいね数を更新"
-  },
-  {
-    "ts": "2026-10-05T21:38:58.475Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴214件(計測済135) 実売0件(¥0) mode=likes"
-  },
-  {
     "ts": "2026-10-05T21:39:02.657Z",
     "agent": "commander",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "poster",
     "ok": false,
     "summary": "成功0件/失敗1件 (投稿がROOMに反映されませんでした（商品一覧で未掲載を確認。この商品は再投稿しません）)"
+  },
+  {
+    "ts": "2026-11-20T21:59:24.755Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "18件抽出、履歴5件のいいね数を更新"
+  },
+  {
+    "ts": "2026-11-20T21:59:24.764Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴233件(計測済145) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-11-20T21:59:28.254Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第121世代へ更新 (ルールベース)、警告1件"
   }
 ]
