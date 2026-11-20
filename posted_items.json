@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "hypnos:10019636",
     "mujirushi-ryohin:10004540",
     "kurashinibankan:10005032",
     "shabon:10000000",
@@ -499,12 +498,13 @@
     "yoshedirect:10000046",
     "clever2016:10000147",
     "airrobo:10000001",
-    "electronshop:10000038"
+    "electronshop:10000038",
+    "selectshopcrea:10000069"
   ],
   "uncertainItemCodes": [
     "mikirona:10000048",
     "nat-gar:10007107",
     "mellife-store:10000021"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
