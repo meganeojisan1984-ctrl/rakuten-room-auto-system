@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-10-04T18:22:41.259Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "19件抽出、履歴4件のいいね数を更新"
-  },
-  {
-    "ts": "2026-10-04T18:22:41.271Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴212件(計測済134) 実売0件(¥0) mode=likes"
-  },
-  {
-    "ts": "2026-10-04T18:22:44.410Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第87世代へ更新 (ルールベース)、警告0件"
-  },
-  {
     "ts": "2026-10-05T01:36:55.609Z",
     "agent": "scout",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "commander",
     "ok": true,
     "summary": "第120世代へ更新 (ルールベース)、警告1件"
+  },
+  {
+    "ts": "2026-11-20T03:47:10.876Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (ダイエット器具)"
+  },
+  {
+    "ts": "2026-11-20T03:47:23.705Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ1)"
+  },
+  {
+    "ts": "2026-11-20T03:48:58.286Z",
+    "agent": "poster",
+    "ok": false,
+    "summary": "成功0件/失敗1件 (Error: 「ROOMに追加」ボタンが見つかりません)"
   }
 ]

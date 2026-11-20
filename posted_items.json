@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "abc-tuhan:10019851",
     "hypnos:10019636",
     "mujirushi-ryohin:10004540",
     "kurashinibankan:10005032",
@@ -507,5 +506,5 @@
     "nat-gar:10007107",
     "mellife-store:10000021"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
