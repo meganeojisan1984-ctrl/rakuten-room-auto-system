@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "mujirushi-ryohin:10004540",
     "kurashinibankan:10005032",
     "shabon:10000000",
     "mujirushi-ryohin:10003514",
@@ -499,7 +498,8 @@
     "clever2016:10000147",
     "airrobo:10000001",
     "electronshop:10000038",
-    "selectshopcrea:10000069"
+    "selectshopcrea:10000069",
+    "hermanherman:10001097"
   ],
   "uncertainItemCodes": [
     "mikirona:10000048",
@@ -508,5 +508,5 @@
     "baselab:10000361",
     "nealsyard:10001512"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
