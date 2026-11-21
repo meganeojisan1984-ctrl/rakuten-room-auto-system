@@ -3168,5 +3168,18 @@
     "captionHead": "これ知らないとキャンプで地味に損してるかも…！って",
     "slot": "slot2",
     "itemCodeHash": "3e6a7623748e"
+  },
+  {
+    "ts": "2026-11-21T18:27:02.932Z",
+    "itemCode": "aibeaute:10000087",
+    "itemName": "【11/25 1:59まで限定｜4000円OFFクーポン】美顔器 LINKA マルチフェイシャルトリートメント 初心者おすすめ イオン導入 EMS 保湿 毛穴ケア LED 温熱 ハリ 弾力 乾燥肌 ギフト プレゼント リンカ",
+    "genreName": "美容機器",
+    "price": 12500,
+    "postType": 3,
+    "hour": 3,
+    "hook": "beforeafter",
+    "captionHead": "先月までの私: 乾燥と毛穴が気になってスキンケアが",
+    "slot": "slot0",
+    "itemCodeHash": "9d2d5b4ac86d"
   }
 ]
