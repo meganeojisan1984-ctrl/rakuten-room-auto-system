@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-10-06T18:02:27.144Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "成功1件/失敗0件"
-  },
-  {
-    "ts": "2026-10-06T18:03:21.529Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
-    "ts": "2026-10-06T19:50:20.275Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "18件抽出、履歴3件のいいね数を更新"
-  },
-  {
     "ts": "2026-10-06T19:50:20.287Z",
     "agent": "analyst",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-11-21T20:41:11.722Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "19件抽出、履歴4件のいいね数を更新"
+  },
+  {
+    "ts": "2026-11-21T20:41:11.734Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴235件(計測済147) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-11-21T20:41:17.496Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第122世代へ更新 (ルールベース)、警告0件"
   }
 ]

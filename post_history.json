@@ -805,8 +805,8 @@
     "hour": 8,
     "hook": "question",
     "captionHead": "まだ高くてお米買い替えしてないの？🤔 そんなあな",
-    "likes": 30,
-    "likesUpdatedAt": "2026-09-21T19:45:12.589Z"
+    "likes": 0,
+    "likesUpdatedAt": "2026-11-21T20:41:11.696Z"
   },
   {
     "ts": "2026-07-24T05:45:34.853Z",
@@ -1984,8 +1984,8 @@
     "captionHead": "乾燥や毛穴の悩みで困ってる人、正直手を挙げて🙋 ",
     "slot": "slot1",
     "itemCodeHash": "6ba4709a57a0",
-    "likes": 30,
-    "likesUpdatedAt": "2026-09-21T19:45:12.589Z"
+    "likes": 0,
+    "likesUpdatedAt": "2026-11-21T20:41:11.696Z"
   },
   {
     "ts": "2026-09-09T16:08:02.986Z",
@@ -3167,7 +3167,9 @@
     "hook": "loss",
     "captionHead": "これ知らないとキャンプで地味に損してるかも…！って",
     "slot": "slot2",
-    "itemCodeHash": "3e6a7623748e"
+    "itemCodeHash": "3e6a7623748e",
+    "likes": 7,
+    "likesUpdatedAt": "2026-11-21T20:41:11.696Z"
   },
   {
     "ts": "2026-11-21T18:27:02.932Z",
@@ -3180,6 +3182,8 @@
     "hook": "beforeafter",
     "captionHead": "先月までの私: 乾燥と毛穴が気になってスキンケアが",
     "slot": "slot0",
-    "itemCodeHash": "9d2d5b4ac86d"
+    "itemCodeHash": "9d2d5b4ac86d",
+    "likes": 0,
+    "likesUpdatedAt": "2026-11-21T20:41:11.696Z"
   }
 ]
