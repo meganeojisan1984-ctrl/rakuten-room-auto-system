@@ -805,8 +805,8 @@
     "hour": 8,
     "hook": "question",
     "captionHead": "まだ高くてお米買い替えしてないの？🤔 そんなあな",
-    "likes": 0,
-    "likesUpdatedAt": "2026-11-21T20:41:11.696Z"
+    "likes": 2,
+    "likesUpdatedAt": "2026-11-22T20:51:46.358Z"
   },
   {
     "ts": "2026-07-24T05:45:34.853Z",
@@ -1984,8 +1984,8 @@
     "captionHead": "乾燥や毛穴の悩みで困ってる人、正直手を挙げて🙋 ",
     "slot": "slot1",
     "itemCodeHash": "6ba4709a57a0",
-    "likes": 0,
-    "likesUpdatedAt": "2026-11-21T20:41:11.696Z"
+    "likes": 2,
+    "likesUpdatedAt": "2026-11-22T20:51:46.358Z"
   },
   {
     "ts": "2026-09-09T16:08:02.986Z",
@@ -3183,8 +3183,8 @@
     "captionHead": "先月までの私: 乾燥と毛穴が気になってスキンケアが",
     "slot": "slot0",
     "itemCodeHash": "9d2d5b4ac86d",
-    "likes": 0,
-    "likesUpdatedAt": "2026-11-21T20:41:11.696Z"
+    "likes": 2,
+    "likesUpdatedAt": "2026-11-22T20:51:46.358Z"
   },
   {
     "ts": "2026-11-22T02:46:35.579Z",
@@ -3197,7 +3197,9 @@
     "hook": "story",
     "captionHead": "深夜2時、また台所で「夜食どうしよう…」と冷蔵庫と",
     "slot": "slot0",
-    "itemCodeHash": "56f5b074ba37"
+    "itemCodeHash": "56f5b074ba37",
+    "likes": 6,
+    "likesUpdatedAt": "2026-11-22T20:51:46.358Z"
   },
   {
     "ts": "2026-11-22T12:26:06.984Z",
@@ -3223,6 +3225,8 @@
     "hook": "fallback",
     "captionHead": "季節の乾燥で肌がカサつき、目元や口元の小ジワや化粧",
     "slot": "slot0",
-    "itemCodeHash": "2967f3fec2ed"
+    "itemCodeHash": "2967f3fec2ed",
+    "likes": 5,
+    "likesUpdatedAt": "2026-11-22T20:51:46.358Z"
   }
 ]

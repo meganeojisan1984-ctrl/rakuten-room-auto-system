@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-10-07T20:10:13.876Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第90世代へ更新 (ルールベース)、警告0件"
-  },
-  {
-    "ts": "2026-10-08T20:08:28.250Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "18件抽出、履歴2件のいいね数を更新"
-  },
-  {
-    "ts": "2026-10-08T20:08:28.261Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴219件(計測済137) 実売0件(¥0) mode=likes"
-  },
-  {
     "ts": "2026-10-08T20:08:31.512Z",
     "agent": "commander",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-11-22T20:51:46.387Z",
+    "agent": "metrics",
+    "ok": true,
+    "summary": "19件抽出、履歴5件のいいね数を更新"
+  },
+  {
+    "ts": "2026-11-22T20:51:46.400Z",
+    "agent": "analyst",
+    "ok": true,
+    "summary": "履歴238件(計測済149) 実売0件(¥0) mode=likes"
+  },
+  {
+    "ts": "2026-11-22T20:51:50.041Z",
+    "agent": "commander",
+    "ok": true,
+    "summary": "第123世代へ更新 (ルールベース)、警告1件"
   }
 ]
