@@ -3211,5 +3211,18 @@
     "captionHead": "磯で滑ってヒヤッとしたことある人、正直手を挙げて\ud83d",
     "slot": "slot2",
     "itemCodeHash": "0a0112a25d85"
+  },
+  {
+    "ts": "2026-11-22T18:51:14.273Z",
+    "itemCode": "aibeaute:10001019",
+    "itemName": "【11/25 1:59まで限定｜クーポン対象】LINKA クリスタルミスト 美顔器 フェイスミスト ナノミスト 保湿 乾燥対策 タッチレススキンケア 時短美容 森香澄さん愛用 ギフト プレゼント リンカ",
+    "genreName": "美容機器",
+    "price": 9900,
+    "postType": 2,
+    "hour": 3,
+    "hook": "fallback",
+    "captionHead": "季節の乾燥で肌がカサつき、目元や口元の小ジワや化粧",
+    "slot": "slot0",
+    "itemCodeHash": "2967f3fec2ed"
   }
 ]
