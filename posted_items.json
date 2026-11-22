@@ -1,8 +1,5 @@
 {
   "postedItemCodes": [
-    "kurashinibankan:10005032",
-    "shabon:10000000",
-    "mujirushi-ryohin:10003514",
     "trinity-cosme:10000431",
     "narushop:10000097",
     "keyuca:10021123",
@@ -501,7 +498,8 @@
     "selectshopcrea:10000069",
     "hermanherman:10001097",
     "aibeaute:10000087",
-    "realstyle4u:10000903"
+    "realstyle4u:10000903",
+    "ruddercraft:10000449"
   ],
   "uncertainItemCodes": [
     "mikirona:10000048",
@@ -510,5 +508,5 @@
     "baselab:10000361",
     "nealsyard:10001512"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
