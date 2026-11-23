@@ -500,7 +500,8 @@
     "aibeaute:10000087",
     "realstyle4u:10000903",
     "ruddercraft:10000449",
-    "aibeaute:10001019"
+    "aibeaute:10001019",
+    "midorinomori:10000005"
   ],
   "uncertainItemCodes": [
     "mikirona:10000048",
@@ -509,5 +510,5 @@
     "baselab:10000361",
     "nealsyard:10001512"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
