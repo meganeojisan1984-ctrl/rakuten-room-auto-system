@@ -3228,5 +3228,18 @@
     "itemCodeHash": "2967f3fec2ed",
     "likes": 5,
     "likesUpdatedAt": "2026-11-22T20:51:46.358Z"
+  },
+  {
+    "ts": "2026-11-23T03:21:52.617Z",
+    "itemCode": "midorinomori:10000005",
+    "itemName": "緑の森ニューコンセプトゲル・ソリューション モイスト（保湿ゲル）普通〜乾燥肌/80g【オールインワンジェル オールインワンゲル 敏感肌　低刺激　乾燥肌　ニキビ　化粧水　美容液　クリーム　ビタミンC誘導体　セラミド　ポンプタイプ】",
+    "genreName": "化粧品",
+    "price": 4180,
+    "postType": 2,
+    "hour": 12,
+    "hook": "fallback",
+    "captionHead": "乾燥の悩みを抱えたまま、続けやすい選び方に迷う人へ",
+    "slot": "slot1",
+    "itemCodeHash": "9bf7e48338d6"
   }
 ]
