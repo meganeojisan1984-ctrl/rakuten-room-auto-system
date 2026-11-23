@@ -3254,5 +3254,18 @@
     "captionHead": "磁石付き、3+1ポートレイアウトのバスパワーUSB",
     "slot": "slot2",
     "itemCodeHash": "0b05add5f6b3"
+  },
+  {
+    "ts": "2026-11-23T23:07:02.487Z",
+    "itemCode": "brightage-regain:10000021",
+    "itemName": "＼P10倍+ご新規様限定49%OFFクーポン！11/19 20:00〜11/25 01:59／＜ECモール限定＞ 【化粧水・乳液状美容液スペシャルセット】 薬用 保湿 洗顔料 メイク落とし ［ 乾燥 小じわ 敏感肌 トラネキサム酸 グリチルリチン酸2K スキンケア ］ BRIGHTAGE ブライトエイジ 公式",
+    "genreName": "化粧品",
+    "price": 14300,
+    "postType": 2,
+    "hour": 8,
+    "hook": "fallback",
+    "captionHead": "季節の乾燥で肌のつっぱりや小じわが目立ち、敏感にな",
+    "slot": "slot0",
+    "itemCodeHash": "738e0e25cd41"
   }
 ]
