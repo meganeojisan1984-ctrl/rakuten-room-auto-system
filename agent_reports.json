@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-10-10T10:17:16.851Z",
-    "agent": "scout",
-    "ok": true,
-    "summary": "1件選定 (アウトドア)"
-  },
-  {
-    "ts": "2026-10-10T10:17:19.105Z",
-    "agent": "copywriter",
-    "ok": true,
-    "summary": "1件生成 (タイプ1)"
-  },
-  {
-    "ts": "2026-10-10T10:17:19.106Z",
-    "agent": "poster",
-    "ok": true,
-    "summary": "skipped (SKIP_ROOM=1)"
-  },
-  {
-    "ts": "2026-10-10T10:18:09.263Z",
-    "agent": "promoter",
-    "ok": true,
-    "summary": "IG=成功, Threads=失敗/未設定"
-  },
-  {
     "ts": "2026-10-10T16:51:30.084Z",
     "agent": "scout",
     "ok": true,
@@ -1195,6 +1171,30 @@
   },
   {
     "ts": "2026-11-23T03:21:52.616Z",
+    "agent": "promoter",
+    "ok": false,
+    "summary": "IG=失敗/未設定, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-11-23T14:18:29.205Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (PCガジェット)"
+  },
+  {
+    "ts": "2026-11-23T14:18:45.828Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ2)"
+  },
+  {
+    "ts": "2026-11-23T14:18:45.829Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "skipped (SKIP_ROOM=1)"
+  },
+  {
+    "ts": "2026-11-23T14:18:45.897Z",
     "agent": "promoter",
     "ok": false,
     "summary": "IG=失敗/未設定, Threads=失敗/未設定"
