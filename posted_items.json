@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "rakuten24:11304298",
     "rack-kan:10006945",
     "kohnan-eshop:10230660",
     "zakkakobo:10000004",
@@ -499,7 +498,8 @@
     "aibeaute:10001019",
     "midorinomori:10000005",
     "ssk-1:18863054",
-    "brightage-regain:10000021"
+    "brightage-regain:10000021",
+    "rosy-cats:10005786"
   ],
   "uncertainItemCodes": [
     "mikirona:10000048",
@@ -509,5 +509,5 @@
     "nealsyard:10001512",
     "kiseki-shop:10009636"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
