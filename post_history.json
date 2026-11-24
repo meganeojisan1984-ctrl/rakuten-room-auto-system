@@ -273,7 +273,9 @@
     "postType": 1,
     "hour": 8,
     "hook": "empathy",
-    "captionHead": "わかる人にはわかるやつ、夏にうなぎが食べたくなるの"
+    "captionHead": "わかる人にはわかるやつ、夏にうなぎが食べたくなるの",
+    "likes": 5,
+    "likesUpdatedAt": "2026-11-24T01:54:45.503Z"
   },
   {
     "ts": "2026-07-14T05:24:38.000Z",
@@ -542,8 +544,8 @@
     "hour": 18,
     "hook": "beforeafter",
     "captionHead": "先月までの私: 布団を収納するのに苦労してた🤯 ",
-    "likes": 20,
-    "likesUpdatedAt": "2026-08-03T17:00:54.815Z"
+    "likes": 5,
+    "likesUpdatedAt": "2026-11-24T01:54:45.503Z"
   },
   {
     "ts": "2026-07-19T13:20:50.600Z",
@@ -855,8 +857,8 @@
     "hour": 0,
     "hook": "number",
     "captionHead": "120件のレビューで★4.41！🤩 そんな高評価",
-    "likes": 20,
-    "likesUpdatedAt": "2026-08-24T15:22:12.596Z"
+    "likes": 5,
+    "likesUpdatedAt": "2026-11-24T01:54:45.503Z"
   },
   {
     "ts": "2026-07-24T23:10:41.183Z",
@@ -935,8 +937,8 @@
     "captionHead": "818件のレビューで★4.46！🤯 私、クローゼ",
     "slot": "slot1",
     "itemCodeHash": "bf25fa56522c",
-    "likes": 20,
-    "likesUpdatedAt": "2026-08-03T17:00:54.815Z"
+    "likes": 5,
+    "likesUpdatedAt": "2026-11-24T01:54:45.503Z"
   },
   {
     "ts": "2026-07-26T13:24:42.288Z",
@@ -950,8 +952,8 @@
     "captionHead": "これ知らないと年間何度も布団の収納に苦労して損して",
     "slot": "slot2",
     "itemCodeHash": "77d2f22a20bb",
-    "likes": 20,
-    "likesUpdatedAt": "2026-08-03T17:00:54.815Z"
+    "likes": 5,
+    "likesUpdatedAt": "2026-11-24T01:54:45.503Z"
   },
   {
     "ts": "2026-07-27T00:16:13.554Z",
@@ -2184,8 +2186,8 @@
     "captionHead": "え、待って。こんなにスッキリする水切りラック、楽天",
     "slot": "slot0",
     "itemCodeHash": "c24c7d78a508",
-    "likes": 24,
-    "likesUpdatedAt": "2026-09-29T19:39:21.251Z"
+    "likes": 5,
+    "likesUpdatedAt": "2026-11-24T01:54:45.503Z"
   },
   {
     "ts": "2026-09-15T09:16:58.637Z",
@@ -2793,8 +2795,8 @@
     "captionHead": "乾燥の悩みを抱えたまま、続けやすい選び方に迷う人へ",
     "slot": "slot0",
     "itemCodeHash": "132706f7a69f",
-    "likes": 14,
-    "likesUpdatedAt": "2026-10-20T18:44:44.843Z"
+    "likes": 3,
+    "likesUpdatedAt": "2026-11-24T01:54:45.503Z"
   },
   {
     "ts": "2026-10-03T09:41:08.662Z",
@@ -3140,8 +3142,8 @@
     "captionHead": "先月までの私: 顔も体もケアが続かない… / 今の",
     "slot": "slot0",
     "itemCodeHash": "32a5cde24ff2",
-    "likes": 7,
-    "likesUpdatedAt": "2026-11-20T21:59:24.734Z"
+    "likes": 8,
+    "likesUpdatedAt": "2026-11-24T01:54:45.503Z"
   },
   {
     "ts": "2026-11-20T12:42:22.476Z",
@@ -3168,8 +3170,8 @@
     "captionHead": "これ知らないとキャンプで地味に損してるかも…！って",
     "slot": "slot2",
     "itemCodeHash": "3e6a7623748e",
-    "likes": 7,
-    "likesUpdatedAt": "2026-11-21T20:41:11.696Z"
+    "likes": 8,
+    "likesUpdatedAt": "2026-11-24T01:54:45.503Z"
   },
   {
     "ts": "2026-11-21T18:27:02.932Z",
@@ -3226,8 +3228,8 @@
     "captionHead": "季節の乾燥で肌がカサつき、目元や口元の小ジワや化粧",
     "slot": "slot0",
     "itemCodeHash": "2967f3fec2ed",
-    "likes": 5,
-    "likesUpdatedAt": "2026-11-22T20:51:46.358Z"
+    "likes": 6,
+    "likesUpdatedAt": "2026-11-24T01:54:45.503Z"
   },
   {
     "ts": "2026-11-23T03:21:52.617Z",
@@ -3240,7 +3242,9 @@
     "hook": "fallback",
     "captionHead": "乾燥の悩みを抱えたまま、続けやすい選び方に迷う人へ",
     "slot": "slot1",
-    "itemCodeHash": "9bf7e48338d6"
+    "itemCodeHash": "9bf7e48338d6",
+    "likes": 3,
+    "likesUpdatedAt": "2026-11-24T01:54:45.503Z"
   },
   {
     "ts": "2026-11-23T14:18:45.898Z",
@@ -3266,6 +3270,8 @@
     "hook": "fallback",
     "captionHead": "季節の乾燥で肌のつっぱりや小じわが目立ち、敏感にな",
     "slot": "slot0",
-    "itemCodeHash": "738e0e25cd41"
+    "itemCodeHash": "738e0e25cd41",
+    "likes": 5,
+    "likesUpdatedAt": "2026-11-24T01:54:45.503Z"
   }
 ]
