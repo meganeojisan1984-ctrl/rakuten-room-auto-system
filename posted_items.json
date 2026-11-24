@@ -1,6 +1,5 @@
 {
   "postedItemCodes": [
-    "soumnsshop:10029142",
     "rakuten24:11304298",
     "rack-kan:10006945",
     "kohnan-eshop:10230660",
@@ -507,7 +506,8 @@
     "nat-gar:10007107",
     "mellife-store:10000021",
     "baselab:10000361",
-    "nealsyard:10001512"
+    "nealsyard:10001512",
+    "kiseki-shop:10009636"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
