@@ -3299,5 +3299,18 @@
     "captionHead": "え、待って。これ、置き換えでここまで満足感あるの…",
     "slot": "slot1",
     "itemCodeHash": "4f7417fb8d7a"
+  },
+  {
+    "ts": "2026-11-25T14:05:46.532Z",
+    "itemCode": "plywood:10015637",
+    "itemName": "花粉対策 空気清浄機 バルミューダ ザ・ピュア BALMUDA The Pure A01Aコンパクト 花粉 空気清浄器 おしゃれ PM2.5 タバコ 消臭 36畳 ペット インテリア◇犬 猫 人気 病院 おすすめ 結婚祝い 新築祝い 赤ちゃん P10倍 送料無料",
+    "genreName": "家電製品",
+    "price": 64900,
+    "postType": 2,
+    "hour": 23,
+    "hook": "beforeafter",
+    "captionHead": "先月までの私: 帰宅すると部屋がなんとなくザラつく",
+    "slot": "slot2",
+    "itemCodeHash": "43990df2f6e1"
   }
 ]

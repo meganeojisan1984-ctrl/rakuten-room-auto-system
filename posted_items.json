@@ -1,7 +1,5 @@
 {
   "postedItemCodes": [
-    "rack-kan:10006945",
-    "kohnan-eshop:10230660",
     "zakkakobo:10000004",
     "cocoterior:10009018",
     "kaguzaku:10005807",
@@ -500,7 +498,8 @@
     "ssk-1:18863054",
     "brightage-regain:10000021",
     "rosy-cats:10005786",
-    "healthybank:10000075"
+    "healthybank:10000075",
+    "plywood:10015637"
   ],
   "uncertainItemCodes": [
     "mikirona:10000048",
@@ -511,5 +510,5 @@
     "kiseki-shop:10009636",
     "airhopsport:10000005"
   ],
-  "postTypeIndex": 1
+  "postTypeIndex": 2
 }
