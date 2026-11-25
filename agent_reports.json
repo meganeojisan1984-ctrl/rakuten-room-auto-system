@@ -1,23 +1,5 @@
 [
   {
-    "ts": "2026-10-18T17:34:20.671Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴220件(計測済137) 実売0件(¥0) mode=likes"
-  },
-  {
-    "ts": "2026-10-18T17:34:36.362Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第101世代へ更新 (ルールベース)、警告0件"
-  },
-  {
-    "ts": "2026-10-19T20:12:47.087Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "18件抽出、履歴0件のいいね数を更新"
-  },
-  {
     "ts": "2026-10-19T20:12:47.115Z",
     "agent": "analyst",
     "ok": true,
@@ -1198,5 +1180,23 @@
     "agent": "promoter",
     "ok": false,
     "summary": "IG=失敗/未設定, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-11-25T20:45:37.067Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (化粧品)"
+  },
+  {
+    "ts": "2026-11-25T20:45:55.012Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ2)"
+  },
+  {
+    "ts": "2026-11-25T20:50:39.882Z",
+    "agent": "poster",
+    "ok": false,
+    "summary": "成功0件/失敗1件 (投稿がROOMに反映されませんでした（商品一覧で未掲載を確認。この商品は再投稿しません）)"
   }
 ]
