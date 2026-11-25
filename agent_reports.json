@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-10-15T18:39:24.592Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第98世代へ更新 (ルールベース)、警告0件"
-  },
-  {
-    "ts": "2026-10-16T18:21:52.126Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "18件抽出、履歴5件のいいね数を更新"
-  },
-  {
-    "ts": "2026-10-16T18:21:52.137Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴220件(計測済137) 実売0件(¥0) mode=likes"
-  },
-  {
-    "ts": "2026-10-16T18:21:56.383Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第99世代へ更新 (ルールベース)、警告0件"
-  },
-  {
     "ts": "2026-10-17T17:33:18.990Z",
     "agent": "metrics",
     "ok": true,
@@ -1198,5 +1174,29 @@
     "agent": "commander",
     "ok": true,
     "summary": "第125世代へ更新 (ルールベース)、警告1件"
+  },
+  {
+    "ts": "2026-11-25T05:08:09.544Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (化粧品)"
+  },
+  {
+    "ts": "2026-11-25T05:08:28.376Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ2)"
+  },
+  {
+    "ts": "2026-11-25T05:10:48.361Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "成功1件/失敗0件"
+  },
+  {
+    "ts": "2026-11-25T05:14:24.135Z",
+    "agent": "promoter",
+    "ok": true,
+    "summary": "IG=成功, Threads=失敗/未設定"
   }
 ]
