@@ -499,7 +499,8 @@
     "brightage-regain:10000021",
     "rosy-cats:10005786",
     "healthybank:10000075",
-    "plywood:10015637"
+    "plywood:10015637",
+    "yamagoiida:10000096"
   ],
   "uncertainItemCodes": [
     "mikirona:10000048",
@@ -511,5 +512,5 @@
     "airhopsport:10000005",
     "healthybank:10000051"
   ],
-  "postTypeIndex": 0
+  "postTypeIndex": 1
 }
