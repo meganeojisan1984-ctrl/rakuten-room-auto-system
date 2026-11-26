@@ -3316,5 +3316,18 @@
     "captionHead": "先月までの私: 帰宅すると部屋がなんとなくザラつく",
     "slot": "slot2",
     "itemCodeHash": "43990df2f6e1"
+  },
+  {
+    "ts": "2026-11-26T04:40:06.085Z",
+    "itemCode": "yamagoiida:10000096",
+    "itemName": "〈有塩〉骨取りほっけ 訳あり（2kg）｜骨なし 骨抜き アメリカ産 しまほっけ 冷凍 ストック 業務用 食品 離乳食 お弁当 プロテイン DHA EPA 一部地域除き 送料無料",
+    "genreName": "ダイエット商品",
+    "price": 7590,
+    "postType": 1,
+    "hour": 13,
+    "hook": "empathy",
+    "captionHead": "ダイエット中に「魚食べたいけど小骨が…」って人、正",
+    "slot": "slot1",
+    "itemCodeHash": "37d5b14f4dec"
   }
 ]
