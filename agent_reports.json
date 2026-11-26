@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-10-21T18:55:29.053Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第104世代へ更新 (ルールベース)、警告0件"
-  },
-  {
-    "ts": "2026-10-22T18:54:03.548Z",
-    "agent": "metrics",
-    "ok": true,
-    "summary": "18件抽出、履歴2件のいいね数を更新"
-  },
-  {
-    "ts": "2026-10-22T18:54:03.558Z",
-    "agent": "analyst",
-    "ok": true,
-    "summary": "履歴220件(計測済137) 実売0件(¥0) mode=likes"
-  },
-  {
-    "ts": "2026-10-22T18:54:06.518Z",
-    "agent": "commander",
-    "ok": true,
-    "summary": "第105世代へ更新 (ルールベース)、警告0件"
-  },
-  {
     "ts": "2026-10-23T18:43:44.468Z",
     "agent": "metrics",
     "ok": true,
@@ -1198,5 +1174,29 @@
     "agent": "promoter",
     "ok": true,
     "summary": "IG=成功, Threads=失敗/未設定"
+  },
+  {
+    "ts": "2026-11-26T13:43:19.675Z",
+    "agent": "scout",
+    "ok": true,
+    "summary": "1件選定 (PCガジェット)"
+  },
+  {
+    "ts": "2026-11-26T13:43:33.509Z",
+    "agent": "copywriter",
+    "ok": true,
+    "summary": "1件生成 (タイプ2)"
+  },
+  {
+    "ts": "2026-11-26T13:43:33.510Z",
+    "agent": "poster",
+    "ok": true,
+    "summary": "skipped (SKIP_ROOM=1)"
+  },
+  {
+    "ts": "2026-11-26T13:43:33.561Z",
+    "agent": "promoter",
+    "ok": false,
+    "summary": "IG=失敗/未設定, Threads=失敗/未設定"
   }
 ]
