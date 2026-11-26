@@ -274,8 +274,8 @@
     "hour": 8,
     "hook": "empathy",
     "captionHead": "わかる人にはわかるやつ、夏にうなぎが食べたくなるの",
-    "likes": 7,
-    "likesUpdatedAt": "2026-11-25T23:19:41.797Z"
+    "likes": 8,
+    "likesUpdatedAt": "2026-11-26T23:18:42.021Z"
   },
   {
     "ts": "2026-07-14T05:24:38.000Z",
@@ -544,8 +544,8 @@
     "hour": 18,
     "hook": "beforeafter",
     "captionHead": "先月までの私: 布団を収納するのに苦労してた🤯 ",
-    "likes": 7,
-    "likesUpdatedAt": "2026-11-25T23:19:41.797Z"
+    "likes": 8,
+    "likesUpdatedAt": "2026-11-26T23:18:42.021Z"
   },
   {
     "ts": "2026-07-19T13:20:50.600Z",
@@ -857,8 +857,8 @@
     "hour": 0,
     "hook": "number",
     "captionHead": "120件のレビューで★4.41！🤩 そんな高評価",
-    "likes": 7,
-    "likesUpdatedAt": "2026-11-25T23:19:41.797Z"
+    "likes": 8,
+    "likesUpdatedAt": "2026-11-26T23:18:42.021Z"
   },
   {
     "ts": "2026-07-24T23:10:41.183Z",
@@ -937,8 +937,8 @@
     "captionHead": "818件のレビューで★4.46！🤯 私、クローゼ",
     "slot": "slot1",
     "itemCodeHash": "bf25fa56522c",
-    "likes": 7,
-    "likesUpdatedAt": "2026-11-25T23:19:41.797Z"
+    "likes": 8,
+    "likesUpdatedAt": "2026-11-26T23:18:42.021Z"
   },
   {
     "ts": "2026-07-26T13:24:42.288Z",
@@ -952,8 +952,8 @@
     "captionHead": "これ知らないと年間何度も布団の収納に苦労して損して",
     "slot": "slot2",
     "itemCodeHash": "77d2f22a20bb",
-    "likes": 7,
-    "likesUpdatedAt": "2026-11-25T23:19:41.797Z"
+    "likes": 8,
+    "likesUpdatedAt": "2026-11-26T23:18:42.021Z"
   },
   {
     "ts": "2026-07-27T00:16:13.554Z",
@@ -2186,8 +2186,8 @@
     "captionHead": "え、待って。こんなにスッキリする水切りラック、楽天",
     "slot": "slot0",
     "itemCodeHash": "c24c7d78a508",
-    "likes": 7,
-    "likesUpdatedAt": "2026-11-25T23:19:41.797Z"
+    "likes": 8,
+    "likesUpdatedAt": "2026-11-26T23:18:42.021Z"
   },
   {
     "ts": "2026-09-15T09:16:58.637Z",
@@ -2752,8 +2752,8 @@
     "captionHead": "乾燥の悩みを抱えたまま、続けやすい選び方に迷う人へ",
     "slot": "slot0",
     "itemCodeHash": "25e8ecea35db",
-    "likes": 14,
-    "likesUpdatedAt": "2026-11-25T23:19:41.797Z"
+    "likes": 3,
+    "likesUpdatedAt": "2026-11-26T23:18:42.021Z"
   },
   {
     "ts": "2026-10-02T02:03:48.230Z",
@@ -3071,8 +3071,8 @@
     "captionHead": "楽天の美容家電ランキング常連アイテム見つけた！🎖",
     "slot": "slot1",
     "itemCodeHash": "2c187103a1a4",
-    "likes": 14,
-    "likesUpdatedAt": "2026-11-25T23:19:41.797Z"
+    "likes": 3,
+    "likesUpdatedAt": "2026-11-26T23:18:42.021Z"
   },
   {
     "ts": "2026-11-18T12:56:10.608Z",
@@ -3271,8 +3271,8 @@
     "captionHead": "季節の乾燥で肌のつっぱりや小じわが目立ち、敏感にな",
     "slot": "slot0",
     "itemCodeHash": "738e0e25cd41",
-    "likes": 7,
-    "likesUpdatedAt": "2026-11-25T23:19:41.797Z"
+    "likes": 8,
+    "likesUpdatedAt": "2026-11-26T23:18:42.021Z"
   },
   {
     "ts": "2026-11-24T14:42:26.683Z",
@@ -3301,8 +3301,8 @@
     "captionHead": "え、待って。これ、置き換えでここまで満足感あるの…",
     "slot": "slot1",
     "itemCodeHash": "4f7417fb8d7a",
-    "likes": 4,
-    "likesUpdatedAt": "2026-11-25T23:19:41.797Z"
+    "likes": 5,
+    "likesUpdatedAt": "2026-11-26T23:18:42.021Z"
   },
   {
     "ts": "2026-11-25T14:05:46.532Z",
@@ -3328,7 +3328,9 @@
     "hook": "empathy",
     "captionHead": "ダイエット中に「魚食べたいけど小骨が…」って人、正",
     "slot": "slot1",
-    "itemCodeHash": "37d5b14f4dec"
+    "itemCodeHash": "37d5b14f4dec",
+    "likes": 6,
+    "likesUpdatedAt": "2026-11-26T23:18:42.021Z"
   },
   {
     "ts": "2026-11-26T13:43:33.562Z",
@@ -3341,6 +3343,8 @@
     "hook": "loss",
     "captionHead": "これ知らないと年間ムダにするかも…車内の時間、効率",
     "slot": "slot2",
-    "itemCodeHash": "50662e9cabb9"
+    "itemCodeHash": "50662e9cabb9",
+    "likes": 18,
+    "likesUpdatedAt": "2026-11-26T23:18:42.021Z"
   }
 ]
