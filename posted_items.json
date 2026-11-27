@@ -499,7 +499,8 @@
     "plywood:10015637",
     "yamagoiida:10000096",
     "tosjapan:10000119",
-    "ishidasp:10008473"
+    "ishidasp:10008473",
+    "kiseki-shop:10008063"
   ],
   "uncertainItemCodes": [
     "mikirona:10000048",
@@ -513,5 +514,5 @@
     "hifumi-japan:10000045",
     "tirtir:10000155"
   ],
-  "postTypeIndex": 2
+  "postTypeIndex": 0
 }
